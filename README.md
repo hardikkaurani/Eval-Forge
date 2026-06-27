@@ -1,7 +1,5 @@
 <div align="center">
 
-<br/><br/>
-
 <h1>Eval Forge.</h1>
 
 <p><strong>Production-grade open-source LLM evaluation platform — G-Eval, LLM-as-a-Judge, RAG evaluation,<br/>and fully customisable AI evaluation pipelines. Built in public. Designed for production.</strong></p>
@@ -13,8 +11,6 @@
 <a href="https://github.com/hardikkaurani/Eval-Forge/blob/main/docs/api.md"><img src="https://img.shields.io/badge/API%20Docs-OpenAPI-85EA2D?logo=swagger&logoColor=black" height="28" /></a>
 &nbsp;
 <a href="ROADMAP.md"><img src="https://img.shields.io/badge/Roadmap-12%20Phases-FF6B6B" height="28" /></a>
-
-<br/><br/>
 
 <img src="docs/assets/demo.gif" alt="EvalForge" width="700" style="border-radius: 14px;" />
 
