@@ -67,9 +67,7 @@ async def list_projects(
         None, description="Filter projects by status (active, inactive, archived)"
     ),
     sort_by: str = Query("created_at", description="Field to sort projects by"),
-    sort_order: str = Query(
-        "desc", description="Sort order direction (asc, desc)"
-    ),
+    sort_order: str = Query("desc", description="Sort order direction (asc, desc)"),
     db: AsyncSession = Depends(get_db),
 ):
     """Lists, filters, searches, and sorts projects with pagination."""

@@ -5,7 +5,7 @@ from app.core.exceptions import NotFoundException, ValidationException
 from app.database.repository import ProjectRepository
 from app.models.project import Project
 from app.schemas.project import ProjectCreate, ProjectUpdate
-from app.utils.pagination import PageMetadata, get_limit_offset, create_pagination_meta
+from app.utils.pagination import PageMetadata, create_pagination_meta, get_limit_offset
 from app.utils.validation import validate_uuid
 
 logger = structlog.get_logger()
@@ -55,9 +55,7 @@ class ProjectService:
             )
 
         if sort_order.lower() not in {"asc", "desc"}:
-            raise ValidationException(
-                message="Sort order must be 'asc' or 'desc'."
-            )
+            raise ValidationException(message="Sort order must be 'asc' or 'desc'.")
 
         items, total = await self.repo.list(
             skip=offset,
@@ -68,14 +66,10 @@ class ProjectService:
             sort_order=sort_order,
         )
 
-        meta = create_pagination_meta(
-            page=page, page_size=limit, total_items=total
-        )
+        meta = create_pagination_meta(page=page, page_size=limit, total_items=total)
         return items, meta
 
-    async def update_project(
-        self, project_id: str, schema: ProjectUpdate
-    ) -> Project:
+    async def update_project(self, project_id: str, schema: ProjectUpdate) -> Project:
         """Validates UUID and performs project updates."""
         validate_uuid(project_id, "project_id")
         logger.info("Service: Updating project", project_id=project_id)

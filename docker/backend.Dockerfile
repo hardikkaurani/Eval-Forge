@@ -1,5 +1,5 @@
 # --- Build Stage ---
-FROM python:3.11-slim as builder
+FROM python:3.12-slim as builder
 
 WORKDIR /app
 
@@ -15,7 +15,7 @@ COPY backend/requirements.txt .
 RUN pip install --no-cache-dir --user -r requirements.txt
 
 # --- Runtime Stage ---
-FROM python:3.11-slim as runner
+FROM python:3.12-slim as runner
 
 WORKDIR /app
 

@@ -1,7 +1,8 @@
 from datetime import datetime
-from pydantic import BaseModel, Field, field_validator
 
-from app.utils.constants import PROJECT_STATUSES, PROJECT_STATUS_ACTIVE
+from pydantic import BaseModel, ConfigDict, Field, field_validator
+
+from app.utils.constants import PROJECT_STATUS_ACTIVE, PROJECT_STATUSES
 
 
 class ProjectBase(BaseModel):
@@ -25,9 +26,7 @@ class ProjectBase(BaseModel):
     @classmethod
     def validate_status(cls, v: str) -> str:
         if v not in PROJECT_STATUSES:
-            raise ValueError(
-                f"Status must be one of: {', '.join(PROJECT_STATUSES)}"
-            )
+            raise ValueError(f"Status must be one of: {', '.join(PROJECT_STATUSES)}")
         return v
 
 
@@ -60,14 +59,14 @@ class ProjectUpdate(BaseModel):
     @classmethod
     def validate_status(cls, v: str | None) -> str | None:
         if v is not None and v not in PROJECT_STATUSES:
-            raise ValueError(
-                f"Status must be one of: {', '.join(PROJECT_STATUSES)}"
-            )
+            raise ValueError(f"Status must be one of: {', '.join(PROJECT_STATUSES)}")
         return v
 
 
 class ProjectResponse(BaseModel):
     """Schema representing the serialized project response."""
+
+    model_config = ConfigDict(from_attributes=True)
 
     id: str
     name: str
@@ -76,6 +75,3 @@ class ProjectResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
     deleted_at: datetime | None = None
-
-    class Config:
-        from_attributes = True

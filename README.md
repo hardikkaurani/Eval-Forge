@@ -18,7 +18,7 @@
 
 <br/><br/>
 
-<img src="https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white" />
+<img src="https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white" />
 <img src="https://img.shields.io/badge/FastAPI-Backend-009688?logo=fastapi&logoColor=white" />
 <img src="https://img.shields.io/badge/React-Frontend-61DAFB?logo=react&logoColor=black" />
 <img src="https://img.shields.io/badge/TypeScript-Typed-3178C6?logo=typescript&logoColor=white" />
@@ -27,7 +27,7 @@
 <img src="https://img.shields.io/badge/Celery-Workers-37814A?logo=celery&logoColor=white" />
 <img src="https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white" />
 <img src="https://img.shields.io/badge/License-MIT-blue.svg" />
-<img src="https://img.shields.io/badge/Status-Phase%201%20Active-22c55e" />
+<img src="https://img.shields.io/badge/Status-Phase%202%20Active-22c55e" />
 <img src="https://img.shields.io/github/stars/hardikkaurani/Eval-Forge?style=social" />
 
 <br/><br/>
@@ -122,7 +122,7 @@ graph TB
         SPA --> COMPARE
     end
 
-    subgraph API [Backend API - FastAPI - Python 3.11 - port 8000]
+    subgraph API [Backend API - FastAPI - Python 3.12 - port 8000]
         GW[API Gateway]
         RATE[Rate Limiter]
         AUTH_MW[JWT Middleware]
@@ -783,7 +783,7 @@ gantt
 
 | Technology | Version | Purpose |
 |---|---|---|
-| Python | 3.11+ | Runtime |
+| Python | 3.12 | Runtime |
 | FastAPI | Latest | REST API framework, async-native, auto OpenAPI |
 | SQLAlchemy (Async) | Latest | ORM and query layer, async session management |
 | Alembic | Latest | Database migration management, auto-generation |

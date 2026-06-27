@@ -35,9 +35,7 @@ async def lifespan(app: FastAPI):
             await conn.exec_driver_sql("SELECT 1")
         logger.info("Database connectivity verified successfully.")
     except Exception as e:
-        logger.error(
-            "Database connection check failed during startup.", error=str(e)
-        )
+        logger.error("Database connection check failed during startup.", error=str(e))
 
     # 2. Initialization of Redis connection manager
     try:

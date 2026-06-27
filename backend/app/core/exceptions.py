@@ -1,5 +1,6 @@
 from datetime import datetime, timezone
 from typing import Any
+
 import structlog
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
@@ -12,9 +13,7 @@ logger = structlog.get_logger()
 class EvalForgeException(Exception):
     """Base exception for all EvalForge errors."""
 
-    def __init__(
-        self, message: str, status_code: int = 500, details: Any = None
-    ):
+    def __init__(self, message: str, status_code: int = 500, details: Any = None):
         self.message = message
         self.status_code = status_code
         self.details = details
@@ -80,9 +79,7 @@ def register_exception_handlers(app: FastAPI) -> None:
         )
 
     @app.exception_handler(EvalForgeException)
-    async def eval_forge_exception_handler(
-        request: Request, exc: EvalForgeException
-    ):
+    async def eval_forge_exception_handler(request: Request, exc: EvalForgeException):
         logger.error(
             "Application exception raised",
             path=request.url.path,
@@ -128,9 +125,7 @@ def register_exception_handlers(app: FastAPI) -> None:
         )
 
     @app.exception_handler(StarletteHTTPException)
-    async def http_exception_handler(
-        request: Request, exc: StarletteHTTPException
-    ):
+    async def http_exception_handler(request: Request, exc: StarletteHTTPException):
         logger.warning(
             "HTTP exception occurred",
             path=request.url.path,

@@ -1,6 +1,7 @@
 from typing import AsyncGenerator
-from redis.asyncio import Redis
+
 import structlog
+from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config.config import Settings, settings

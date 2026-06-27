@@ -1,5 +1,6 @@
 from datetime import datetime, timezone
 from typing import Any, Generic, TypeVar
+
 import structlog
 from pydantic import BaseModel
 

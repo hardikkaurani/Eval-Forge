@@ -1,5 +1,5 @@
-from redis.asyncio import ConnectionPool, Redis
 import structlog
+from redis.asyncio import ConnectionPool, Redis
 
 logger = structlog.get_logger()
 

@@ -1,5 +1,7 @@
 from typing import Generic, TypeVar
+
 from pydantic import BaseModel
+
 from app.utils.constants import DEFAULT_PAGE, DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE
 
 T = TypeVar("T")
@@ -43,9 +45,7 @@ def create_pagination_meta(
     total_items: int,
 ) -> PageMetadata:
     """Builds the PageMetadata schema helper."""
-    total_pages = (
-        (total_items + page_size - 1) // page_size if page_size > 0 else 0
-    )
+    total_pages = (total_items + page_size - 1) // page_size if page_size > 0 else 0
     return PageMetadata(
         page=page,
         page_size=page_size,

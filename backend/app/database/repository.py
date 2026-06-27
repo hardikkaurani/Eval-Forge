@@ -34,9 +34,7 @@ class ProjectRepository:
             return project
         except Exception as e:
             await self.db.rollback()
-            logger.error(
-                "Database error during project creation", error=str(e)
-            )
+            logger.error("Database error during project creation", error=str(e))
             raise DatabaseException(
                 message="Failed to create project due to a database error.",
                 details=str(e),
@@ -122,9 +120,7 @@ class ProjectRepository:
 
             return items, total
         except Exception as e:
-            logger.error(
-                "Database error during project listing", error=str(e)
-            )
+            logger.error("Database error during project listing", error=str(e))
             raise DatabaseException(
                 message="Failed to retrieve list of projects.",
                 details=str(e),
@@ -134,9 +130,7 @@ class ProjectRepository:
         """Performs a sparse update of a project's fields."""
         project = await self.get_by_id(project_id)
         if not project:
-            raise NotFoundException(
-                message=f"Project with ID {project_id} not found."
-            )
+            raise NotFoundException(message=f"Project with ID {project_id} not found.")
 
         try:
             update_data = schema.model_dump(exclude_unset=True)
@@ -164,9 +158,7 @@ class ProjectRepository:
         """Marks a project as soft-deleted by setting deleted_at to current UTC time."""
         project = await self.get_by_id(project_id)
         if not project:
-            raise NotFoundException(
-                message=f"Project with ID {project_id} not found."
-            )
+            raise NotFoundException(message=f"Project with ID {project_id} not found.")
 
         try:
             project.deleted_at = get_utc_now()

@@ -16,7 +16,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.12"
           cache: "pip"
 
       - name: Install Dependencies
@@ -26,12 +26,16 @@ jobs:
 
       - name: Lint with Ruff
         run: |
-          # stop the build if there are Python syntax errors or undefined names
           ruff check backend/app
 
       - name: Verify Formatting with Black
         run: |
           black --check backend/app
+
+      - name: Run Tests with Pytest
+        run: |
+          cd backend
+          pytest
 
   frontend-lint-build:
     runs-on: ubuntu-latest

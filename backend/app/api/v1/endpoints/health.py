@@ -57,9 +57,7 @@ async def health_check(db: AsyncSession = Depends(get_db)):
     response_model=ApiResponse[dict],
     summary="Readiness check for load balancers",
 )
-async def readiness_check(
-    response: Response, db: AsyncSession = Depends(get_db)
-):
+async def readiness_check(response: Response, db: AsyncSession = Depends(get_db)):
     """Readiness probe.
 
     Returns HTTP 200 OK only if all key backend dependencies (Postgres & Redis)
