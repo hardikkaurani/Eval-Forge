@@ -19,7 +19,8 @@ class EvaluationService:
     ) -> Evaluation:
         # Check if project exists
         from app.database.repository import ProjectRepository
-        project = await ProjectRepository.get_by_id(db, project_id)
+        project_repo = ProjectRepository(db)
+        project = await project_repo.get_by_id(project_id)
         if not project:
             raise NotFoundException(f"Project with ID '{project_id}' not found.")
             
@@ -68,7 +69,8 @@ class EvaluationService:
     async def run_batch_evaluation(db: AsyncSession, request: BatchEvaluationRequest) -> EvaluationRun:
         # Check if project exists
         from app.database.repository import ProjectRepository
-        project = await ProjectRepository.get_by_id(db, request.project_id)
+        project_repo = ProjectRepository(db)
+        project = await project_repo.get_by_id(request.project_id)
         if not project:
             raise NotFoundException(f"Project with ID '{request.project_id}' not found.")
             
