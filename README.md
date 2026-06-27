@@ -1215,12 +1215,6 @@ MIT License. See [LICENSE](LICENSE) for details.
 
 ---
 
-<div align="center">
-
-<img src="docs/assets/evalforge-banner.png" width="600" style="border-radius: 12px; opacity: 0.85;" />
-
-<br/><br/>
-
 *EvalForge — built for engineers who refuse to ship LLMs they cannot measure.*
 
 <br/>
