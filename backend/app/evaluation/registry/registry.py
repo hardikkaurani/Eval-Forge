@@ -32,3 +32,7 @@ class Registry:
 provider_registry = Registry("Provider")
 judge_registry = Registry("Judge")
 metric_registry = Registry("Metric")
+
+# Eagerly load providers and judges packages to trigger dynamic registration decorators
+import app.evaluation.providers
+import app.evaluation.judges
