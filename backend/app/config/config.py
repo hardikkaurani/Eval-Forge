@@ -52,6 +52,12 @@ class Settings(BaseSettings):
     CORS_ORIGINS: list[str] = ["*"]
     ALLOWED_HOSTS: list[str] = ["*"]
 
+    # LLM Provider API Keys
+    OPENAI_API_KEY: SecretStr | None = None
+    GEMINI_API_KEY: SecretStr | None = None
+    ANTHROPIC_API_KEY: SecretStr | None = None
+    COHERE_API_KEY: SecretStr | None = None
+
     @field_validator("APP_ENV", mode="before")
     @classmethod
     def validate_app_env(cls, v: str) -> str:
