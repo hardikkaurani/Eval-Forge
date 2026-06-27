@@ -99,6 +99,7 @@ DEFAULT_PAIRWISE_PROMPT = (
     "}"
 )
 
+
 class PromptEngine:
     """Prompt template engine utilizing Jinja2 for dynamic compilation."""
 
@@ -122,5 +123,6 @@ class PromptEngine:
             raise KeyError(f"Prompt template '{name}' does not exist.")
         template = Template(template_str)
         return template.render(**context)
+
 
 prompt_engine = PromptEngine()

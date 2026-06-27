@@ -5,6 +5,7 @@ from pydantic import BaseModel, Field
 
 class MetricResult(BaseModel):
     """Structured result of a single metric evaluation."""
+
     score: float
     normalized_score: float  # scaled to 0.0 - 1.0 range
     passed: bool
@@ -12,6 +13,7 @@ class MetricResult(BaseModel):
     reasoning: str | None = None
     explanation: str | None = None
     metadata: Dict[str, Any] = Field(default_factory=dict)
+
 
 class MetricsCalculator:
     """Helper class to calculate metrics normalization and aggregations."""
@@ -67,7 +69,9 @@ class MetricsCalculator:
             f = int(k)
             c = f + 1
             if c < n:
-                return sorted_scores[f] + (sorted_scores[c] - sorted_scores[f]) * (k - f)
+                return sorted_scores[f] + (sorted_scores[c] - sorted_scores[f]) * (
+                    k - f
+                )
             return sorted_scores[f]
 
         p10_val = percentile(0.1)

@@ -15,7 +15,7 @@ class PairwiseJudge(BaseJudge):
         output: str,  # Treat this as response A
         reference: str | None = None,
         rubric: Rubric | None = None,
-        **kwargs
+        **kwargs,
     ) -> JudgeResult:
         # Pairwise requires response_b to compare against
         response_b = kwargs.get("response_b")
@@ -28,13 +28,11 @@ class PairwiseJudge(BaseJudge):
             prompt=prompt,
             response_a=output,
             response_b=response_b,
-            reference=reference
+            reference=reference,
         )
 
         response = await self.provider.generate(
-            prompt=judge_prompt,
-            system_prompt=system_prompt,
-            **kwargs
+            prompt=judge_prompt, system_prompt=system_prompt, **kwargs
         )
 
         try:
@@ -70,6 +68,6 @@ class PairwiseJudge(BaseJudge):
                 "model_name": response.model_name,
                 "prompt_tokens": response.prompt_tokens,
                 "completion_tokens": response.completion_tokens,
-                "latency_ms": response.latency_ms
-            }
+                "latency_ms": response.latency_ms,
+            },
         )

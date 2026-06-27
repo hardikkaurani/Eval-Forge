@@ -14,23 +14,18 @@ class EvaluationService:
 
     @staticmethod
     async def create_evaluation(
-        db: AsyncSession,
-        project_id: str,
-        name: str,
-        description: str | None = None
+        db: AsyncSession, project_id: str, name: str, description: str | None = None
     ) -> Evaluation:
         # Check if project exists
         from app.database.repository import ProjectRepository
+
         project_repo = ProjectRepository(db)
         project = await project_repo.get_by_id(project_id)
         if not project:
             raise NotFoundException(f"Project with ID '{project_id}' not found.")
 
         return await EvaluationRepository.create_evaluation(
-            db=db,
-            project_id=project_id,
-            name=name,
-            description=description
+            db=db, project_id=project_id, name=name, description=description
         )
 
     @staticmethod
@@ -42,17 +37,17 @@ class EvaluationService:
 
     @staticmethod
     async def list_evaluations(
-        db: AsyncSession,
-        project_id: str,
-        page: int = 1,
-        page_size: int = 10
+        db: AsyncSession, project_id: str, page: int = 1, page_size: int = 10
     ) -> Tuple[List[Evaluation], int]:
         skip = (page - 1) * page_size
-        evals = await EvaluationRepository.list_evaluations(db, project_id, skip=skip, limit=page_size)
+        evals = await EvaluationRepository.list_evaluations(
+            db, project_id, skip=skip, limit=page_size
+        )
 
         # Calculate total count (for simplified pagination metadata)
         # Note: Real environment will select count, but for here list length or standard count statement is used
         from sqlalchemy import and_, func, select
+
         stmt = select(func.count(Evaluation.id)).where(
             and_(Evaluation.project_id == project_id, Evaluation.deleted_at.is_(None))
         )
@@ -68,12 +63,17 @@ class EvaluationService:
             raise NotFoundException(f"Evaluation with ID '{id}' not found.")
 
     @staticmethod
-    async def run_batch_evaluation(db: AsyncSession, request: BatchEvaluationRequest) -> EvaluationRun:
+    async def run_batch_evaluation(
+        db: AsyncSession, request: BatchEvaluationRequest
+    ) -> EvaluationRun:
         # Check if project exists
         from app.database.repository import ProjectRepository
+
         project_repo = ProjectRepository(db)
         project = await project_repo.get_by_id(request.project_id)
         if not project:
-            raise NotFoundException(f"Project with ID '{request.project_id}' not found.")
+            raise NotFoundException(
+                f"Project with ID '{request.project_id}' not found."
+            )
 
         return await EvaluationPipeline.run(db, request)

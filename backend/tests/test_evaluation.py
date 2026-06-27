@@ -1,5 +1,6 @@
 from fastapi.testclient import TestClient
 
+
 def test_evaluation_metadata_endpoints(client: TestClient) -> None:
     """Verifies retrieval of registered providers, judges, and built-in rubrics metadata."""
     # 1. Retrieve Providers list
@@ -52,13 +53,13 @@ def test_evaluation_crud_flow(client: TestClient) -> None:
     eval_payload = {
         "name": "LLM Response Correctness Eval",
         "description": "Runs factual checks against gold standard answers.",
-        "project_id": project_id
+        "project_id": project_id,
     }
     create_response = client.post("/api/v1/evaluations", json=eval_payload)
     assert create_response.status_code == 201
     create_res = create_response.json()
     assert create_res["success"] is True
-    
+
     evaluation = create_res["data"]
     evaluation_id = evaluation["id"]
     assert evaluation["name"] == eval_payload["name"]
@@ -66,7 +67,9 @@ def test_evaluation_crud_flow(client: TestClient) -> None:
     assert evaluation["project_id"] == project_id
 
     # 3. List Evaluations for the Project
-    list_response = client.get(f"/api/v1/evaluations?project_id={project_id}&page=1&page_size=10")
+    list_response = client.get(
+        f"/api/v1/evaluations?project_id={project_id}&page=1&page_size=10"
+    )
     assert list_response.status_code == 200
     list_res = list_response.json()
     assert list_res["success"] is True
@@ -113,26 +116,22 @@ def test_batch_evaluation_execution(client: TestClient) -> None:
             {
                 "input_prompt": "What is the capital of France?",
                 "model_output": "The capital is Paris.",
-                "reference": "Paris"
+                "reference": "Paris",
             },
             {
                 "input_prompt": "Who wrote Romeo and Juliet?",
                 "model_output": "It was written by William Shakespeare.",
-                "reference": "William Shakespeare"
-            }
+                "reference": "William Shakespeare",
+            },
         ],
-        "configuration": {
-            "temperature": 0.0,
-            "threshold": 0.8,
-            "timeout": 15.0
-        }
+        "configuration": {"temperature": 0.0, "threshold": 0.8, "timeout": 15.0},
     }
 
     response = client.post("/api/v1/evaluations/batch", json=batch_payload)
     assert response.status_code == 201
     res_data = response.json()
     assert res_data["success"] is True
-    
+
     run = res_data["data"]
     assert run["status"] == "COMPLETED"
     assert run["judge"] == "rubric"
@@ -161,7 +160,7 @@ def test_batch_evaluation_validation_errors(client: TestClient) -> None:
         "evaluation_name": "Invalid Provider Run",
         "judge": "rubric",
         "provider": "unsupported-fake-provider",
-        "test_cases": [{"input_prompt": "A", "model_output": "B"}]
+        "test_cases": [{"input_prompt": "A", "model_output": "B"}],
     }
     response = client.post("/api/v1/evaluations/batch", json=payload)
     assert response.status_code == 400
@@ -173,7 +172,7 @@ def test_batch_evaluation_validation_errors(client: TestClient) -> None:
         "evaluation_name": "Invalid Judge Run",
         "judge": "unsupported-fake-judge",
         "provider": "openai",
-        "test_cases": [{"input_prompt": "A", "model_output": "B"}]
+        "test_cases": [{"input_prompt": "A", "model_output": "B"}],
     }
     response = client.post("/api/v1/evaluations/batch", json=payload)
     assert response.status_code == 400
@@ -186,9 +185,7 @@ def test_batch_evaluation_validation_errors(client: TestClient) -> None:
         "judge": "rubric",
         "provider": "openai",
         "test_cases": [{"input_prompt": "A", "model_output": "B"}],
-        "configuration": {
-            "temperature": 3.0  # Invalid range (> 2.0)
-        }
+        "configuration": {"temperature": 3.0},  # Invalid range (> 2.0)
     }
     response = client.post("/api/v1/evaluations/batch", json=payload)
     assert response.status_code == 400

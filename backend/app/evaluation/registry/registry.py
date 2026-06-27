@@ -10,9 +10,11 @@ class Registry:
 
     def register(self, key: str) -> Callable[[Type[Any]], Type[Any]]:
         """Decorator to register a class under a given key."""
+
         def decorator(cls: Type[Any]) -> Type[Any]:
             self._registry[key.lower()] = cls
             return cls
+
         return decorator
 
     def get(self, key: str) -> Type[Any]:
@@ -29,6 +31,7 @@ class Registry:
     def clear(self) -> None:
         """Clear all registered items (useful for testing)."""
         self._registry.clear()
+
 
 provider_registry = Registry("Provider")
 judge_registry = Registry("Judge")

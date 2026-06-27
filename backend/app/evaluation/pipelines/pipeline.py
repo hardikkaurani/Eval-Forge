@@ -14,6 +14,7 @@ from app.utils.time import get_utc_now
 
 logger = logging.getLogger(__name__)
 
+
 class EvaluationPipeline:
     """Orchestrates validation, LLM execution, metrics calculations, and DB persistence for batch runs."""
 
@@ -31,7 +32,7 @@ class EvaluationPipeline:
                 description=request.rubric.description,
                 weight=request.rubric.weight,
                 scoring_scale=request.rubric.scoring_scale,
-                prompt_template=request.rubric.prompt_template
+                prompt_template=request.rubric.prompt_template,
             )
         else:
             # Default to Correctness rubric
@@ -54,7 +55,7 @@ class EvaluationPipeline:
             db=db,
             project_id=request.project_id,
             name=request.evaluation_name,
-            description=request.evaluation_description
+            description=request.evaluation_description,
         )
 
         run = await EvaluationRepository.create_run(
@@ -63,7 +64,7 @@ class EvaluationPipeline:
             judge=request.judge,
             provider=request.provider,
             configuration=request.configuration,
-            total_cases=len(request.test_cases)
+            total_cases=len(request.test_cases),
         )
 
         await db.commit()
@@ -84,7 +85,7 @@ class EvaluationPipeline:
                     prompt=case.input_prompt,
                     output=case.model_output,
                     reference=case.reference,
-                    judge=request.judge
+                    judge=request.judge,
                 )
 
                 # Execute LLM Judge
@@ -96,12 +97,16 @@ class EvaluationPipeline:
                     temperature=request.configuration.get("temperature", 0.0),
                     max_tokens=request.configuration.get("max_tokens"),
                     timeout=request.configuration.get("timeout", 30.0),
-                    response_b=case.response_b
+                    response_b=case.response_b,
                 )
 
                 # Metrics calculation
-                normalized = MetricsCalculator.normalize(judge_result.score, rubric.scoring_scale)
-                passed = MetricsCalculator.calculate_passed(judge_result.score, rubric.scoring_scale, threshold)
+                normalized = MetricsCalculator.normalize(
+                    judge_result.score, rubric.scoring_scale
+                )
+                passed = MetricsCalculator.calculate_passed(
+                    judge_result.score, rubric.scoring_scale, threshold
+                )
 
                 # Persist result
                 result_record = await EvaluationRepository.create_result(
@@ -113,38 +118,47 @@ class EvaluationPipeline:
                     score=judge_result.score,
                     passed=passed,
                     confidence=judge_result.confidence,
-                    reasoning=judge_result.reasoning
+                    reasoning=judge_result.reasoning,
                 )
 
                 # Persist Rubric/Criterion sub-scores if G-Eval
-                if request.judge == "geval" and "step_scores" in judge_result.criterion_scores:
+                if (
+                    request.judge == "geval"
+                    and "step_scores" in judge_result.criterion_scores
+                ):
                     for step_score in judge_result.criterion_scores["step_scores"]:
                         await EvaluationRepository.create_rubric_score(
                             db=db,
                             result_id=result_record.id,
                             criterion_name=step_score.get("step", "Step"),
-                            score=float(step_score.get("score", 0.0))
+                            score=float(step_score.get("score", 0.0)),
                         )
 
                 # Persist Provider Metadata
                 await EvaluationRepository.create_provider_metadata(
                     db=db,
                     result_id=result_record.id,
-                    model_name=judge_result.metadata.get("model_name", request.provider),
+                    model_name=judge_result.metadata.get(
+                        "model_name", request.provider
+                    ),
                     prompt_tokens=judge_result.metadata.get("prompt_tokens"),
                     completion_tokens=judge_result.metadata.get("completion_tokens"),
-                    latency_ms=judge_result.metadata.get("latency_ms")
+                    latency_ms=judge_result.metadata.get("latency_ms"),
                 )
 
                 scores.append(normalized)
                 completed_count += 1
 
                 # Update run progress incrementally
-                await EvaluationRepository.update_run(db, run.id, completed_cases=completed_count)
+                await EvaluationRepository.update_run(
+                    db, run.id, completed_cases=completed_count
+                )
                 await db.commit()
 
             except Exception as e:
-                logger.error(f"Failed to evaluate test case: {case.input_prompt[:50]}... Error: {str(e)}")
+                logger.error(
+                    f"Failed to evaluate test case: {case.input_prompt[:50]}... Error: {str(e)}"
+                )
                 # Isolation: we continue execution of other cases to ensure partial completion
                 continue
 
@@ -158,7 +172,7 @@ class EvaluationPipeline:
             status=status,
             completed_cases=completed_count,
             completed_at=get_utc_now(),
-            aggregate_score=agg_score
+            aggregate_score=agg_score,
         )
         await db.commit()
 

@@ -21,6 +21,7 @@ from app.utils.responses import ApiResponse, create_response
 
 router = APIRouter()
 
+
 @router.post(
     "",
     response_model=ApiResponse[EvaluationResponse],
@@ -36,7 +37,7 @@ async def create_evaluation(
         db=db,
         project_id=payload.project_id,
         name=payload.name,
-        description=payload.description
+        description=payload.description,
     )
     await db.commit()
     return create_response(
@@ -44,6 +45,7 @@ async def create_evaluation(
         message="Evaluation created successfully.",
         data=EvaluationResponse.model_validate(evaluation),
     )
+
 
 @router.get(
     "",
@@ -58,17 +60,10 @@ async def list_evaluations(
 ):
     """Lists evaluations with pagination for a project."""
     items, total = await EvaluationService.list_evaluations(
-        db=db,
-        project_id=project_id,
-        page=page,
-        page_size=page_size
+        db=db, project_id=project_id, page=page, page_size=page_size
     )
 
-    meta = create_pagination_meta(
-        page=page,
-        page_size=page_size,
-        total_items=total
-    )
+    meta = create_pagination_meta(page=page, page_size=page_size, total_items=total)
 
     paginated_data = PaginatedResponse(
         items=[EvaluationResponse.model_validate(item) for item in items],
@@ -80,6 +75,7 @@ async def list_evaluations(
         message="Evaluations listed successfully.",
         data=paginated_data,
     )
+
 
 @router.get(
     "/{id}",
@@ -98,6 +94,7 @@ async def get_evaluation(
         data=EvaluationResponse.model_validate(evaluation),
     )
 
+
 @router.delete(
     "/{id}",
     response_model=ApiResponse[None],
@@ -114,6 +111,7 @@ async def delete_evaluation(
         success=True,
         message="Evaluation deleted successfully.",
     )
+
 
 @router.post(
     "/batch",
@@ -133,6 +131,7 @@ async def run_batch_evaluation(
         data=EvaluationRunResponse.model_validate(run),
     )
 
+
 @router.get(
     "/metadata/providers",
     response_model=ApiResponse[List[ProviderInfo]],
@@ -147,6 +146,7 @@ async def list_providers():
         message="Providers retrieved successfully.",
         data=providers,
     )
+
 
 @router.get(
     "/metadata/judges",
@@ -163,6 +163,7 @@ async def list_judges():
         data=judges,
     )
 
+
 @router.get(
     "/metadata/rubrics",
     response_model=ApiResponse[List[RubricInfo]],
@@ -172,10 +173,7 @@ async def list_rubrics():
     """Lists all built-in criteria dimensions/rubrics."""
     rubrics = [
         RubricInfo(
-            key=k,
-            name=v.name,
-            description=v.description,
-            scoring_scale=v.scoring_scale
+            key=k, name=v.name, description=v.description, scoring_scale=v.scoring_scale
         )
         for k, v in BUILT_IN_RUBRICS.items()
     ]

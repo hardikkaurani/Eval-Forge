@@ -25,7 +25,7 @@ def parse_json_from_text(text: str) -> any:
     end_brace = cleaned.rfind("}")
     if start_brace != -1 and end_brace != -1:
         try:
-            return json.loads(cleaned[start_brace:end_brace+1])
+            return json.loads(cleaned[start_brace : end_brace + 1])
         except json.JSONDecodeError:
             pass
 
@@ -34,7 +34,7 @@ def parse_json_from_text(text: str) -> any:
     end_bracket = cleaned.rfind("]")
     if start_bracket != -1 and end_bracket != -1:
         try:
-            return json.loads(cleaned[start_bracket:end_bracket+1])
+            return json.loads(cleaned[start_bracket : end_bracket + 1])
         except json.JSONDecodeError:
             pass
 

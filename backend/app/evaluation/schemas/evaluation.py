@@ -11,10 +11,12 @@ class RubricConfigSchema(BaseModel):
     scoring_scale: int = 5
     prompt_template: Optional[str] = None
 
+
 class EvaluationCreate(BaseModel):
     name: str = Field(..., min_length=1, max_length=255)
     description: Optional[str] = None
     project_id: str
+
 
 class EvaluationResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -25,11 +27,13 @@ class EvaluationResponse(BaseModel):
     description: Optional[str] = None
     created_at: datetime
 
+
 class EvaluationRunCreate(BaseModel):
     judge: str
     provider: str
     configuration: Dict[str, Any] = Field(default_factory=dict)
     total_cases: int = 0
+
 
 class EvaluationRunResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -46,6 +50,7 @@ class EvaluationRunResponse(BaseModel):
     completed_at: Optional[datetime] = None
     aggregate_score: Optional[float] = None
 
+
 class RubricScoreResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -53,6 +58,7 @@ class RubricScoreResponse(BaseModel):
     criterion_name: str
     score: float
     reasoning: Optional[str] = None
+
 
 class ProviderMetadataResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -62,6 +68,7 @@ class ProviderMetadataResponse(BaseModel):
     prompt_tokens: Optional[int] = None
     completion_tokens: Optional[int] = None
     latency_ms: Optional[int] = None
+
 
 class EvaluationResultResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -79,11 +86,13 @@ class EvaluationResultResponse(BaseModel):
     rubric_scores: List[RubricScoreResponse] = Field(default_factory=list)
     provider_metadata: List[ProviderMetadataResponse] = Field(default_factory=list)
 
+
 class TestCaseInput(BaseModel):
     input_prompt: str
     model_output: str
     reference: Optional[str] = None
     response_b: Optional[str] = None  # Specific to pairwise
+
 
 class BatchEvaluationRequest(BaseModel):
     project_id: str
@@ -98,17 +107,20 @@ class BatchEvaluationRequest(BaseModel):
             "temperature": 0.0,
             "max_tokens": None,
             "threshold": 0.7,
-            "timeout": 30.0
+            "timeout": 30.0,
         }
     )
+
 
 class ProviderInfo(BaseModel):
     key: str
     name: str
 
+
 class JudgeInfo(BaseModel):
     key: str
     name: str
+
 
 class RubricInfo(BaseModel):
     key: str

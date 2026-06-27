@@ -26,7 +26,7 @@ class OllamaProvider(BaseProvider):
         temperature: float = 0.0,
         max_tokens: int | None = None,
         timeout: float = 30.0,
-        **kwargs
+        **kwargs,
     ) -> ProviderResponse:
         # Fallback if we are in testing settings and want to avoid local dependency
         if settings.POSTGRES_DB == "test" or kwargs.get("mock_fallback", True):
@@ -35,7 +35,7 @@ class OllamaProvider(BaseProvider):
                 prompt_tokens=15,
                 completion_tokens=20,
                 latency_ms=80,
-                model_name=self.model
+                model_name=self.model,
             )
 
         url = f"{self.base_url}/api/chat"
@@ -48,11 +48,8 @@ class OllamaProvider(BaseProvider):
         data = {
             "model": self.model,
             "messages": messages,
-            "options": {
-                "temperature": temperature,
-                **kwargs
-            },
-            "stream": False
+            "options": {"temperature": temperature, **kwargs},
+            "stream": False,
         }
         if max_tokens:
             data["options"]["num_predict"] = max_tokens
@@ -63,7 +60,9 @@ class OllamaProvider(BaseProvider):
                 response = await client.post(url, json=data, timeout=timeout)
 
                 if response.status_code != 200:
-                    raise ProviderUnavailableException("ollama", f"HTTP Status {response.status_code}: {response.text}")
+                    raise ProviderUnavailableException(
+                        "ollama", f"HTTP Status {response.status_code}: {response.text}"
+                    )
 
                 result = response.json()
                 latency = int((time.perf_counter() - start_time) * 1000)
@@ -75,7 +74,7 @@ class OllamaProvider(BaseProvider):
                     prompt_tokens=result.get("prompt_eval_count"),
                     completion_tokens=result.get("eval_count"),
                     latency_ms=latency,
-                    model_name=self.model
+                    model_name=self.model,
                 )
         except httpx.TimeoutException as e:
             raise TimeoutException("ollama", timeout) from e

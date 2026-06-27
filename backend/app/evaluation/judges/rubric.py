@@ -15,7 +15,7 @@ class RubricJudge(BaseJudge):
         output: str,
         reference: str | None = None,
         rubric: Rubric | None = None,
-        **kwargs
+        **kwargs,
     ) -> JudgeResult:
         if not rubric:
             raise ValueError("Rubric must be provided for RubricJudge.")
@@ -26,13 +26,11 @@ class RubricJudge(BaseJudge):
             prompt=prompt,
             output=output,
             reference=reference,
-            rubric=rubric
+            rubric=rubric,
         )
 
         response = await self.provider.generate(
-            prompt=judge_prompt,
-            system_prompt=system_prompt,
-            **kwargs
+            prompt=judge_prompt, system_prompt=system_prompt, **kwargs
         )
 
         try:
@@ -53,6 +51,6 @@ class RubricJudge(BaseJudge):
                 "model_name": response.model_name,
                 "prompt_tokens": response.prompt_tokens,
                 "completion_tokens": response.completion_tokens,
-                "latency_ms": response.latency_ms
-            }
+                "latency_ms": response.latency_ms,
+            },
         )

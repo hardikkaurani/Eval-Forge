@@ -15,22 +15,17 @@ class GEvalJudge(BaseJudge):
         output: str,
         reference: str | None = None,
         rubric: Rubric | None = None,
-        **kwargs
+        **kwargs,
     ) -> JudgeResult:
         if not rubric:
             raise ValueError("Rubric must be provided for GEvalJudge.")
 
         # Step 1: Generate evaluation steps
         system_prompt = prompt_engine.render("system")
-        step_gen_prompt = prompt_engine.render(
-            "geval_step_gen",
-            rubric=rubric
-        )
+        step_gen_prompt = prompt_engine.render("geval_step_gen", rubric=rubric)
 
         step_response = await self.provider.generate(
-            prompt=step_gen_prompt,
-            system_prompt=system_prompt,
-            **kwargs
+            prompt=step_gen_prompt, system_prompt=system_prompt, **kwargs
         )
 
         try:
@@ -39,7 +34,9 @@ class GEvalJudge(BaseJudge):
                 raise ValueError("Steps output must be a list.")
         except Exception:
             # If step generation fails, fall back to default rubric prompt
-            steps = [f"Directly evaluate output based on description: {rubric.description}"]
+            steps = [
+                f"Directly evaluate output based on description: {rubric.description}"
+            ]
 
         # Step 2: Score output using steps
         scoring_prompt = prompt_engine.render(
@@ -48,13 +45,11 @@ class GEvalJudge(BaseJudge):
             steps=steps,
             prompt=prompt,
             output=output,
-            reference=reference
+            reference=reference,
         )
 
         score_response = await self.provider.generate(
-            prompt=scoring_prompt,
-            system_prompt=system_prompt,
-            **kwargs
+            prompt=scoring_prompt, system_prompt=system_prompt, **kwargs
         )
 
         try:
@@ -70,8 +65,12 @@ class GEvalJudge(BaseJudge):
             criterion_scores = {}
 
         # Add total execution tokens and latency metrics
-        prompt_tokens = (step_response.prompt_tokens or 0) + (score_response.prompt_tokens or 0)
-        completion_tokens = (step_response.completion_tokens or 0) + (score_response.completion_tokens or 0)
+        prompt_tokens = (step_response.prompt_tokens or 0) + (
+            score_response.prompt_tokens or 0
+        )
+        completion_tokens = (step_response.completion_tokens or 0) + (
+            score_response.completion_tokens or 0
+        )
         latency_ms = (step_response.latency_ms or 0) + (score_response.latency_ms or 0)
 
         return JudgeResult(
@@ -84,6 +83,6 @@ class GEvalJudge(BaseJudge):
                 "model_name": score_response.model_name,
                 "prompt_tokens": prompt_tokens,
                 "completion_tokens": completion_tokens,
-                "latency_ms": latency_ms
-            }
+                "latency_ms": latency_ms,
+            },
         )

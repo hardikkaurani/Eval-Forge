@@ -18,15 +18,10 @@ class EvaluationRepository:
 
     @staticmethod
     async def create_evaluation(
-        db: AsyncSession,
-        project_id: str,
-        name: str,
-        description: str | None = None
+        db: AsyncSession, project_id: str, name: str, description: str | None = None
     ) -> Evaluation:
         evaluation = Evaluation(
-            project_id=project_id,
-            name=name,
-            description=description
+            project_id=project_id, name=name, description=description
         )
         db.add(evaluation)
         await db.flush()
@@ -42,14 +37,15 @@ class EvaluationRepository:
 
     @staticmethod
     async def list_evaluations(
-        db: AsyncSession,
-        project_id: str,
-        skip: int = 0,
-        limit: int = 100
+        db: AsyncSession, project_id: str, skip: int = 0, limit: int = 100
     ) -> List[Evaluation]:
         stmt = (
             select(Evaluation)
-            .where(and_(Evaluation.project_id == project_id, Evaluation.deleted_at.is_(None)))
+            .where(
+                and_(
+                    Evaluation.project_id == project_id, Evaluation.deleted_at.is_(None)
+                )
+            )
             .offset(skip)
             .limit(limit)
             .order_by(Evaluation.created_at.desc())
@@ -79,7 +75,7 @@ class EvaluationRepository:
         judge: str,
         provider: str,
         configuration: Dict[str, Any],
-        total_cases: int
+        total_cases: int,
     ) -> EvaluationRun:
         run = EvaluationRun(
             evaluation_id=evaluation_id,
@@ -88,7 +84,7 @@ class EvaluationRepository:
             provider=provider,
             configuration=configuration,
             total_cases=total_cases,
-            started_at=get_utc_now()
+            started_at=get_utc_now(),
         )
         db.add(run)
         await db.flush()
@@ -102,9 +98,7 @@ class EvaluationRepository:
 
     @staticmethod
     async def update_run(
-        db: AsyncSession,
-        run_id: str,
-        **updates
+        db: AsyncSession, run_id: str, **updates
     ) -> Optional[EvaluationRun]:
         stmt = select(EvaluationRun).where(EvaluationRun.id == run_id)
         result = await db.execute(stmt)
@@ -130,7 +124,7 @@ class EvaluationRepository:
         passed: bool,
         reference: str | None = None,
         confidence: float | None = None,
-        reasoning: str | None = None
+        reasoning: str | None = None,
     ) -> EvaluationResult:
         result = EvaluationResult(
             run_id=run_id,
@@ -140,7 +134,7 @@ class EvaluationRepository:
             score=score,
             passed=passed,
             confidence=confidence,
-            reasoning=reasoning
+            reasoning=reasoning,
         )
         db.add(result)
         await db.flush()
@@ -152,13 +146,13 @@ class EvaluationRepository:
         result_id: str,
         criterion_name: str,
         score: float,
-        reasoning: str | None = None
+        reasoning: str | None = None,
     ) -> RubricScore:
         rubric_score = RubricScore(
             result_id=result_id,
             criterion_name=criterion_name,
             score=score,
-            reasoning=reasoning
+            reasoning=reasoning,
         )
         db.add(rubric_score)
         await db.flush()
@@ -171,14 +165,14 @@ class EvaluationRepository:
         model_name: str,
         prompt_tokens: int | None = None,
         completion_tokens: int | None = None,
-        latency_ms: int | None = None
+        latency_ms: int | None = None,
     ) -> ProviderMetadata:
         metadata = ProviderMetadata(
             result_id=result_id,
             model_name=model_name,
             prompt_tokens=prompt_tokens,
             completion_tokens=completion_tokens,
-            latency_ms=latency_ms
+            latency_ms=latency_ms,
         )
         db.add(metadata)
         await db.flush()
