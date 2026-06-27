@@ -10,11 +10,11 @@
 
 <br/>
 
-<a href="#getting-started"><img src="https://img.shields.io/badge/Quick%20Start-Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white" /></a>
+<a href="#getting-started"><img src="https://img.shields.io/badge/Quick%20Start-Docker-2496ED?logo=docker&logoColor=white" /></a>
 &nbsp;
-<a href="https://github.com/hardikkaurani/Eval-Forge/blob/main/docs/api.md"><img src="https://img.shields.io/badge/API%20Docs-OpenAPI-85EA2D?style=for-the-badge&logo=swagger&logoColor=black" /></a>
+<a href="https://github.com/hardikkaurani/Eval-Forge/blob/main/docs/api.md"><img src="https://img.shields.io/badge/API%20Docs-OpenAPI-85EA2D?logo=swagger&logoColor=black" /></a>
 &nbsp;
-<a href="ROADMAP.md"><img src="https://img.shields.io/badge/Roadmap-12%20Phases-FF6B6B?style=for-the-badge" /></a>
+<a href="ROADMAP.md"><img src="https://img.shields.io/badge/Roadmap-12%20Phases-FF6B6B" /></a>
 
 <br/><br/>
 
