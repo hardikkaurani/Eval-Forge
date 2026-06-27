@@ -1,12 +1,12 @@
 from app.database.session import Base
-from app.models.project import Project
 from app.models.evaluation import (
     Evaluation,
-    EvaluationRun,
     EvaluationResult,
-    RubricScore,
+    EvaluationRun,
     ProviderMetadata,
+    RubricScore,
 )
+from app.models.project import Project
 
 __all__ = [
     "Base",

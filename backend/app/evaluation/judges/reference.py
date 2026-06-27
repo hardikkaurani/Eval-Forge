@@ -1,8 +1,9 @@
 from app.evaluation.judges.base import BaseJudge, JudgeResult
+from app.evaluation.prompts.engine import prompt_engine
 from app.evaluation.registry.registry import judge_registry
 from app.evaluation.rubrics.rubrics import Rubric
-from app.evaluation.prompts.engine import prompt_engine
 from app.evaluation.utils.helpers import parse_json_from_text
+
 
 @judge_registry.register("reference")
 class ReferenceJudge(BaseJudge):

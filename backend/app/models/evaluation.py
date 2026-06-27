@@ -1,9 +1,16 @@
 from datetime import datetime
-from sqlalchemy import DateTime, String, Text, ForeignKey, Float, Boolean, Integer, JSON
+from typing import TYPE_CHECKING
+
+from sqlalchemy import JSON, Boolean, DateTime, Float, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from app.database.session import Base
 from app.utils.time import get_utc_now
 from app.utils.uuid import generate_uuid
+
+if TYPE_CHECKING:
+    from app.models.project import Project
+
 
 class Evaluation(Base):
     __tablename__ = "evaluations"

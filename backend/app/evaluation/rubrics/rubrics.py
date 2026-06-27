@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field
 
+
 class Rubric(BaseModel):
     """Configuration structure representing a single evaluation rubric/dimension."""
     name: str

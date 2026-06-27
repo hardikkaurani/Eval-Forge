@@ -1,5 +1,7 @@
-from typing import List, Dict, Any
+from typing import Any, Dict, List
+
 from pydantic import BaseModel, Field
+
 
 class MetricResult(BaseModel):
     """Structured result of a single metric evaluation."""
@@ -13,7 +15,7 @@ class MetricResult(BaseModel):
 
 class MetricsCalculator:
     """Helper class to calculate metrics normalization and aggregations."""
-    
+
     @staticmethod
     def normalize(score: float, max_scale: float) -> float:
         """Normalizes a raw score on a scale of [0, max_scale] or [1, max_scale] to a [0.0, 1.0] range."""
@@ -46,19 +48,19 @@ class MetricsCalculator:
                 "p10": None,
                 "p90": None,
             }
-        
+
         sorted_scores = sorted(scores)
         n = len(sorted_scores)
-        
+
         # Mean
         mean_val = sum(sorted_scores) / n
-        
+
         # Median
         if n % 2 == 1:
             median_val = sorted_scores[n // 2]
         else:
             median_val = (sorted_scores[n // 2 - 1] + sorted_scores[n // 2]) / 2.0
-            
+
         # Percentiles (interpolated)
         def percentile(p: float) -> float:
             k = (n - 1) * p
@@ -67,10 +69,10 @@ class MetricsCalculator:
             if c < n:
                 return sorted_scores[f] + (sorted_scores[c] - sorted_scores[f]) * (k - f)
             return sorted_scores[f]
-            
+
         p10_val = percentile(0.1)
         p90_val = percentile(0.9)
-        
+
         return {
             "mean": round(mean_val, 4),
             "median": round(median_val, 4),

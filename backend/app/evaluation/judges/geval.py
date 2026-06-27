@@ -1,8 +1,9 @@
 from app.evaluation.judges.base import BaseJudge, JudgeResult
+from app.evaluation.prompts.engine import prompt_engine
 from app.evaluation.registry.registry import judge_registry
 from app.evaluation.rubrics.rubrics import Rubric
-from app.evaluation.prompts.engine import prompt_engine
 from app.evaluation.utils.helpers import parse_json_from_text
+
 
 @judge_registry.register("geval")
 class GEvalJudge(BaseJudge):
@@ -36,7 +37,7 @@ class GEvalJudge(BaseJudge):
             steps = parse_json_from_text(step_response.text)
             if not isinstance(steps, list):
                 raise ValueError("Steps output must be a list.")
-        except Exception as e:
+        except Exception:
             # If step generation fails, fall back to default rubric prompt
             steps = [f"Directly evaluate output based on description: {rubric.description}"]
 

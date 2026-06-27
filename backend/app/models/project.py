@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import DateTime, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -7,6 +8,9 @@ from app.database.session import Base
 from app.utils.constants import PROJECT_STATUS_ACTIVE
 from app.utils.time import get_utc_now
 from app.utils.uuid import generate_uuid
+
+if TYPE_CHECKING:
+    from app.models.evaluation import Evaluation
 
 
 class Project(Base):

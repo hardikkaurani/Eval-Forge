@@ -1,5 +1,6 @@
 from app.core.exceptions import EvalForgeException
 
+
 class EvaluationException(EvalForgeException):
     """Base exception for all evaluation-related errors."""
     pass

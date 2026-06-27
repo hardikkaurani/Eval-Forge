@@ -1,8 +1,11 @@
 from abc import ABC, abstractmethod
-from typing import Dict, Any
+from typing import Any, Dict
+
 from pydantic import BaseModel, Field
+
 from app.evaluation.providers.base import BaseProvider
 from app.evaluation.rubrics.rubrics import Rubric
+
 
 class JudgeResult(BaseModel):
     """Structured result returned by any Judge algorithm."""

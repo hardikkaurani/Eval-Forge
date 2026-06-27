@@ -1,14 +1,21 @@
 import time
+
 import httpx
+
+from app.config.config import settings
+from app.evaluation.exceptions.exceptions import (
+    ProviderUnavailableException,
+    RateLimitException,
+    TimeoutException,
+)
 from app.evaluation.providers.base import BaseProvider, ProviderResponse
 from app.evaluation.registry.registry import provider_registry
-from app.evaluation.exceptions.exceptions import ProviderUnavailableException, RateLimitException, TimeoutException
-from app.config.config import settings
+
 
 @provider_registry.register("openrouter")
 class OpenRouterProvider(BaseProvider):
     """OpenRouter API client provider (OpenAI compatible)."""
-    
+
     def __init__(self, api_key: str | None = None, model: str = "meta-llama/llama-3-8b-instruct:free"):
         self.api_key = api_key or (settings.OPENROUTER_API_KEY.get_secret_value() if settings.OPENROUTER_API_KEY else None)
         self.model = model
@@ -38,7 +45,7 @@ class OpenRouterProvider(BaseProvider):
             "X-Title": "EvalForge",
             "Content-Type": "application/json"
         }
-        
+
         messages = []
         if system_prompt:
             messages.append({"role": "system", "content": system_prompt})
@@ -57,20 +64,20 @@ class OpenRouterProvider(BaseProvider):
         try:
             async with httpx.AsyncClient() as client:
                 response = await client.post(url, json=data, headers=headers, timeout=timeout)
-                
+
                 if response.status_code == 429:
                     raise RateLimitException("openrouter", response.text)
                 elif response.status_code >= 500:
                     raise ProviderUnavailableException("openrouter", response.text)
                 elif response.status_code != 200:
                     raise ProviderUnavailableException("openrouter", f"HTTP Status {response.status_code}: {response.text}")
-                
+
                 result = response.json()
                 latency = int((time.perf_counter() - start_time) * 1000)
-                
+
                 text = result["choices"][0]["message"]["content"]
                 usage = result.get("usage", {})
-                
+
                 return ProviderResponse(
                     text=text,
                     prompt_tokens=usage.get("prompt_tokens"),

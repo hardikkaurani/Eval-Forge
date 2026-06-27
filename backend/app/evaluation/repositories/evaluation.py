@@ -1,8 +1,17 @@
-from typing import List, Dict, Any, Optional
-from sqlalchemy import select, update, and_
+from typing import Any, Dict, List, Optional
+
+from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.models.evaluation import Evaluation, EvaluationRun, EvaluationResult, RubricScore, ProviderMetadata
+
+from app.models.evaluation import (
+    Evaluation,
+    EvaluationResult,
+    EvaluationRun,
+    ProviderMetadata,
+    RubricScore,
+)
 from app.utils.time import get_utc_now
+
 
 class EvaluationRepository:
     """Repository class managing async database persistence for evaluation engine entities."""
@@ -57,7 +66,7 @@ class EvaluationRepository:
         evaluation = result.scalar_one_or_none()
         if not evaluation:
             return False
-        
+
         evaluation.deleted_at = get_utc_now()
         db.add(evaluation)
         await db.flush()
@@ -102,11 +111,11 @@ class EvaluationRepository:
         run = result.scalar_one_or_none()
         if not run:
             return None
-        
+
         for key, value in updates.items():
             if hasattr(run, key):
                 setattr(run, key, value)
-        
+
         db.add(run)
         await db.flush()
         return run

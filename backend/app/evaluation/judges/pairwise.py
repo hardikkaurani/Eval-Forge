@@ -1,8 +1,9 @@
 from app.evaluation.judges.base import BaseJudge, JudgeResult
+from app.evaluation.prompts.engine import prompt_engine
 from app.evaluation.registry.registry import judge_registry
 from app.evaluation.rubrics.rubrics import Rubric
-from app.evaluation.prompts.engine import prompt_engine
 from app.evaluation.utils.helpers import parse_json_from_text
+
 
 @judge_registry.register("pairwise")
 class PairwiseJudge(BaseJudge):
@@ -42,7 +43,7 @@ class PairwiseJudge(BaseJudge):
             score_diff = float(parsed.get("score_difference", 0.0))
             confidence = float(parsed.get("confidence", 1.0))
             reasoning = parsed.get("reasoning", "")
-            
+
             # Map winner to a score
             # Winner A = 1.0, Tie = 0.5, Winner B = 0.0
             if winner == "A":

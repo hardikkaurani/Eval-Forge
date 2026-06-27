@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
+
 from pydantic import BaseModel
+
 
 class ProviderResponse(BaseModel):
     """Unified response object returned by all LLM Providers."""
@@ -11,7 +13,7 @@ class ProviderResponse(BaseModel):
 
 class BaseProvider(ABC):
     """Abstract Base Class that all evaluation LLM Providers must implement."""
-    
+
     @abstractmethod
     async def generate(
         self,

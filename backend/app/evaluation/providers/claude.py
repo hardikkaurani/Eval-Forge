@@ -1,14 +1,21 @@
 import time
+
 import httpx
+
+from app.config.config import settings
+from app.evaluation.exceptions.exceptions import (
+    ProviderUnavailableException,
+    RateLimitException,
+    TimeoutException,
+)
 from app.evaluation.providers.base import BaseProvider, ProviderResponse
 from app.evaluation.registry.registry import provider_registry
-from app.evaluation.exceptions.exceptions import ProviderUnavailableException, RateLimitException, TimeoutException
-from app.config.config import settings
+
 
 @provider_registry.register("claude")
 class AnthropicProvider(BaseProvider):
     """Anthropic Claude API client provider."""
-    
+
     def __init__(self, api_key: str | None = None, model: str = "claude-3-5-sonnet-latest"):
         self.api_key = api_key or (settings.ANTHROPIC_API_KEY.get_secret_value() if settings.ANTHROPIC_API_KEY else None)
         self.model = model
@@ -37,7 +44,7 @@ class AnthropicProvider(BaseProvider):
             "anthropic-version": "2023-06-01",
             "content-type": "application/json"
         }
-        
+
         data = {
             "model": self.model,
             "messages": [{"role": "user", "content": prompt}],
@@ -52,20 +59,20 @@ class AnthropicProvider(BaseProvider):
         try:
             async with httpx.AsyncClient() as client:
                 response = await client.post(url, json=data, headers=headers, timeout=timeout)
-                
+
                 if response.status_code == 429:
                     raise RateLimitException("claude", response.text)
                 elif response.status_code >= 500:
                     raise ProviderUnavailableException("claude", response.text)
                 elif response.status_code != 200:
                     raise ProviderUnavailableException("claude", f"HTTP Status {response.status_code}: {response.text}")
-                
+
                 result = response.json()
                 latency = int((time.perf_counter() - start_time) * 1000)
-                
+
                 text = result["content"][0]["text"]
                 usage = result.get("usage", {})
-                
+
                 return ProviderResponse(
                     text=text,
                     prompt_tokens=usage.get("input_tokens"),

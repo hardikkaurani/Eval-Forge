@@ -1,20 +1,21 @@
-from fastapi import APIRouter, Depends, Query, status
-from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 
+from fastapi import APIRouter, Depends, Query, status
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.database.session import get_db
-from app.evaluation.services.evaluation import EvaluationService
+from app.evaluation.registry.registry import judge_registry, provider_registry
+from app.evaluation.rubrics.rubrics import BUILT_IN_RUBRICS
 from app.evaluation.schemas.evaluation import (
+    BatchEvaluationRequest,
     EvaluationCreate,
     EvaluationResponse,
     EvaluationRunResponse,
-    BatchEvaluationRequest,
-    ProviderInfo,
     JudgeInfo,
+    ProviderInfo,
     RubricInfo,
 )
-from app.evaluation.registry.registry import provider_registry, judge_registry
-from app.evaluation.rubrics.rubrics import BUILT_IN_RUBRICS
+from app.evaluation.services.evaluation import EvaluationService
 from app.utils.pagination import PaginatedResponse, create_pagination_meta
 from app.utils.responses import ApiResponse, create_response
 
@@ -62,7 +63,7 @@ async def list_evaluations(
         page=page,
         page_size=page_size
     )
-    
+
     meta = create_pagination_meta(
         page=page,
         page_size=page_size,

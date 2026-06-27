@@ -101,7 +101,7 @@ DEFAULT_PAIRWISE_PROMPT = (
 
 class PromptEngine:
     """Prompt template engine utilizing Jinja2 for dynamic compilation."""
-    
+
     def __init__(self):
         self._templates = {
             "system": DEFAULT_SYSTEM_PROMPT,

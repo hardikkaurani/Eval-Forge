@@ -1,6 +1,12 @@
-from typing import Dict, Any
-from app.evaluation.registry.registry import provider_registry, judge_registry
-from app.evaluation.exceptions.exceptions import InvalidConfigException, UnsupportedProviderException, UnsupportedJudgeException
+from typing import Any, Dict
+
+from app.evaluation.exceptions.exceptions import (
+    InvalidConfigException,
+    UnsupportedJudgeException,
+    UnsupportedProviderException,
+)
+from app.evaluation.registry.registry import judge_registry, provider_registry
+
 
 class EvaluationValidator:
     """Validates parameters, configurations, and input elements before run execution."""
@@ -27,7 +33,7 @@ class EvaluationValidator:
         temperature = config.get("temperature", 0.0)
         if not (0.0 <= temperature <= 2.0):
             raise InvalidConfigException(f"Temperature must be between 0.0 and 2.0. Got: {temperature}")
-        
+
         max_tokens = config.get("max_tokens")
         if max_tokens is not None and (not isinstance(max_tokens, int) or max_tokens <= 0):
             raise InvalidConfigException(f"max_tokens must be a positive integer. Got: {max_tokens}")
@@ -47,6 +53,6 @@ class EvaluationValidator:
             raise InvalidConfigException("Prompt cannot be empty.")
         if not output or not output.strip():
             raise InvalidConfigException("Model output response cannot be empty.")
-        
+
         if judge.lower() == "reference" and (not reference or not reference.strip()):
             raise InvalidConfigException("Reference ground truth is required for reference-based evaluation.")

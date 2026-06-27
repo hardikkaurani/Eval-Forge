@@ -1,11 +1,13 @@
-from typing import List, Optional, Tuple
+from typing import List, Tuple
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.evaluation.repositories.evaluation import EvaluationRepository
+from app.core.exceptions import NotFoundException
 from app.evaluation.pipelines.pipeline import EvaluationPipeline
+from app.evaluation.repositories.evaluation import EvaluationRepository
 from app.evaluation.schemas.evaluation import BatchEvaluationRequest
 from app.models.evaluation import Evaluation, EvaluationRun
-from app.core.exceptions import NotFoundException
+
 
 class EvaluationService:
     """Service class encapsulating business validation boundaries for evaluations."""
@@ -23,7 +25,7 @@ class EvaluationService:
         project = await project_repo.get_by_id(project_id)
         if not project:
             raise NotFoundException(f"Project with ID '{project_id}' not found.")
-            
+
         return await EvaluationRepository.create_evaluation(
             db=db,
             project_id=project_id,
@@ -47,16 +49,16 @@ class EvaluationService:
     ) -> Tuple[List[Evaluation], int]:
         skip = (page - 1) * page_size
         evals = await EvaluationRepository.list_evaluations(db, project_id, skip=skip, limit=page_size)
-        
+
         # Calculate total count (for simplified pagination metadata)
         # Note: Real environment will select count, but for here list length or standard count statement is used
-        from sqlalchemy import select, func, and_
+        from sqlalchemy import and_, func, select
         stmt = select(func.count(Evaluation.id)).where(
             and_(Evaluation.project_id == project_id, Evaluation.deleted_at.is_(None))
         )
         total_res = await db.execute(stmt)
         total = total_res.scalar_one()
-        
+
         return evals, total
 
     @staticmethod
@@ -73,5 +75,5 @@ class EvaluationService:
         project = await project_repo.get_by_id(request.project_id)
         if not project:
             raise NotFoundException(f"Project with ID '{request.project_id}' not found.")
-            
+
         return await EvaluationPipeline.run(db, request)

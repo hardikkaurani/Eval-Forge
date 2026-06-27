@@ -1,16 +1,17 @@
 import json
 import re
 
+
 def parse_json_from_text(text: str) -> any:
     """Extracts and parses JSON object or list from a string that might contain markdown fences."""
     cleaned = text.strip()
-    
+
     # Try direct parsing
     try:
         return json.loads(cleaned)
     except json.JSONDecodeError:
         pass
-    
+
     # Try matching within markdown codeblocks
     match = re.search(r"```(?:json)?\s*([\s\S]*?)\s*```", cleaned)
     if match:

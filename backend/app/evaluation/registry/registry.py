@@ -1,8 +1,9 @@
-from typing import Dict, Type, Any, Callable
+from typing import Any, Callable, Dict, Type
+
 
 class Registry:
     """A generic class to handle dynamic registration and lookup of components."""
-    
+
     def __init__(self, name: str):
         self.name = name
         self._registry: Dict[str, Type[Any]] = {}
@@ -34,5 +35,3 @@ judge_registry = Registry("Judge")
 metric_registry = Registry("Metric")
 
 # Eagerly load providers and judges packages to trigger dynamic registration decorators
-import app.evaluation.providers
-import app.evaluation.judges

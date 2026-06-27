@@ -1,6 +1,8 @@
 from datetime import datetime
-from typing import List, Dict, Any, Optional
-from pydantic import BaseModel, Field, ConfigDict
+from typing import Any, Dict, List, Optional
+
+from pydantic import BaseModel, ConfigDict, Field
+
 
 class RubricConfigSchema(BaseModel):
     name: str
@@ -16,7 +18,7 @@ class EvaluationCreate(BaseModel):
 
 class EvaluationResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
-    
+
     id: str
     project_id: str
     name: str
@@ -31,7 +33,7 @@ class EvaluationRunCreate(BaseModel):
 
 class EvaluationRunResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
-    
+
     id: str
     evaluation_id: str
     status: str
@@ -46,7 +48,7 @@ class EvaluationRunResponse(BaseModel):
 
 class RubricScoreResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
-    
+
     id: str
     criterion_name: str
     score: float
@@ -54,7 +56,7 @@ class RubricScoreResponse(BaseModel):
 
 class ProviderMetadataResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
-    
+
     id: str
     model_name: str
     prompt_tokens: Optional[int] = None
@@ -63,7 +65,7 @@ class ProviderMetadataResponse(BaseModel):
 
 class EvaluationResultResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
-    
+
     id: str
     run_id: str
     input_prompt: str

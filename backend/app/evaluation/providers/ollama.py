@@ -1,14 +1,20 @@
 import time
+
 import httpx
+
+from app.config.config import settings
+from app.evaluation.exceptions.exceptions import (
+    ProviderUnavailableException,
+    TimeoutException,
+)
 from app.evaluation.providers.base import BaseProvider, ProviderResponse
 from app.evaluation.registry.registry import provider_registry
-from app.evaluation.exceptions.exceptions import ProviderUnavailableException, TimeoutException
-from app.config.config import settings
+
 
 @provider_registry.register("ollama")
 class OllamaProvider(BaseProvider):
     """Local Ollama client provider."""
-    
+
     def __init__(self, base_url: str | None = None, model: str = "llama3"):
         self.base_url = base_url or "http://localhost:11434"
         self.model = model
@@ -33,7 +39,7 @@ class OllamaProvider(BaseProvider):
             )
 
         url = f"{self.base_url}/api/chat"
-        
+
         messages = []
         if system_prompt:
             messages.append({"role": "system", "content": system_prompt})
@@ -55,15 +61,15 @@ class OllamaProvider(BaseProvider):
         try:
             async with httpx.AsyncClient() as client:
                 response = await client.post(url, json=data, timeout=timeout)
-                
+
                 if response.status_code != 200:
                     raise ProviderUnavailableException("ollama", f"HTTP Status {response.status_code}: {response.text}")
-                
+
                 result = response.json()
                 latency = int((time.perf_counter() - start_time) * 1000)
-                
+
                 text = result["message"]["content"]
-                
+
                 return ProviderResponse(
                     text=text,
                     prompt_tokens=result.get("prompt_eval_count"),

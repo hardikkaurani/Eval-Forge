@@ -1,13 +1,14 @@
 import logging
-from typing import List, Dict, Any
+from typing import List
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.evaluation.schemas.evaluation import BatchEvaluationRequest
-from app.evaluation.registry.registry import provider_registry, judge_registry
-from app.evaluation.validators.validators import EvaluationValidator
-from app.evaluation.rubrics.rubrics import Rubric, BUILT_IN_RUBRICS
 from app.evaluation.metrics.engine import MetricsCalculator
+from app.evaluation.registry.registry import judge_registry, provider_registry
 from app.evaluation.repositories.evaluation import EvaluationRepository
+from app.evaluation.rubrics.rubrics import BUILT_IN_RUBRICS, Rubric
+from app.evaluation.schemas.evaluation import BatchEvaluationRequest
+from app.evaluation.validators.validators import EvaluationValidator
 from app.models.evaluation import EvaluationRun
 from app.utils.time import get_utc_now
 
@@ -64,7 +65,7 @@ class EvaluationPipeline:
             configuration=request.configuration,
             total_cases=len(request.test_cases)
         )
-        
+
         await db.commit()
 
         # Update status to RUNNING
@@ -137,7 +138,7 @@ class EvaluationPipeline:
 
                 scores.append(normalized)
                 completed_count += 1
-                
+
                 # Update run progress incrementally
                 await EvaluationRepository.update_run(db, run.id, completed_cases=completed_count)
                 await db.commit()
@@ -160,7 +161,7 @@ class EvaluationPipeline:
             aggregate_score=agg_score
         )
         await db.commit()
-        
+
         # Reload relation data for response formatting
         await db.refresh(run)
         return run

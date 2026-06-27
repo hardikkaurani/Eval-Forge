@@ -1,14 +1,21 @@
 import time
+
 import httpx
+
+from app.config.config import settings
+from app.evaluation.exceptions.exceptions import (
+    ProviderUnavailableException,
+    RateLimitException,
+    TimeoutException,
+)
 from app.evaluation.providers.base import BaseProvider, ProviderResponse
 from app.evaluation.registry.registry import provider_registry
-from app.evaluation.exceptions.exceptions import ProviderUnavailableException, RateLimitException, TimeoutException
-from app.config.config import settings
+
 
 @provider_registry.register("deepseek")
 class DeepSeekProvider(BaseProvider):
     """DeepSeek API client provider (OpenAI compatible)."""
-    
+
     def __init__(self, api_key: str | None = None, model: str = "deepseek-chat"):
         self.api_key = api_key or (settings.DEEPSEEK_API_KEY.get_secret_value() if settings.DEEPSEEK_API_KEY else None)
         self.model = model
@@ -36,7 +43,7 @@ class DeepSeekProvider(BaseProvider):
             "Authorization": f"Bearer {self.api_key}",
             "Content-Type": "application/json"
         }
-        
+
         messages = []
         if system_prompt:
             messages.append({"role": "system", "content": system_prompt})
@@ -55,20 +62,20 @@ class DeepSeekProvider(BaseProvider):
         try:
             async with httpx.AsyncClient() as client:
                 response = await client.post(url, json=data, headers=headers, timeout=timeout)
-                
+
                 if response.status_code == 429:
                     raise RateLimitException("deepseek", response.text)
                 elif response.status_code >= 500:
                     raise ProviderUnavailableException("deepseek", response.text)
                 elif response.status_code != 200:
                     raise ProviderUnavailableException("deepseek", f"HTTP Status {response.status_code}: {response.text}")
-                
+
                 result = response.json()
                 latency = int((time.perf_counter() - start_time) * 1000)
-                
+
                 text = result["choices"][0]["message"]["content"]
                 usage = result.get("usage", {})
-                
+
                 return ProviderResponse(
                     text=text,
                     prompt_tokens=usage.get("prompt_tokens"),
