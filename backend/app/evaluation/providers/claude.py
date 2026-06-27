@@ -80,9 +80,9 @@ class AnthropicProvider(BaseProvider):
                     latency_ms=latency,
                     model_name=self.model
                 )
-        except httpx.TimeoutException:
-            raise TimeoutException("claude", timeout)
+        except httpx.TimeoutException as e:
+            raise TimeoutException("claude", timeout) from e
         except Exception as e:
             if isinstance(e, (RateLimitException, ProviderUnavailableException, TimeoutException)):
                 raise e
-            raise ProviderUnavailableException("claude", str(e))
+            raise ProviderUnavailableException("claude", str(e)) from e

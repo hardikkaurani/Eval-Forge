@@ -16,16 +16,16 @@ class EvaluationValidator:
         """Validate if the given provider is registered."""
         try:
             provider_registry.get(provider)
-        except KeyError:
-            raise UnsupportedProviderException(provider)
+        except KeyError as e:
+            raise UnsupportedProviderException(provider) from e
 
     @staticmethod
     def validate_judge(judge: str) -> None:
         """Validate if the given judge type is registered."""
         try:
             judge_registry.get(judge)
-        except KeyError:
-            raise UnsupportedJudgeException(judge)
+        except KeyError as e:
+            raise UnsupportedJudgeException(judge) from e
 
     @staticmethod
     def validate_configuration(config: Dict[str, Any]) -> None:

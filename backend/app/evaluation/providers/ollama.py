@@ -77,9 +77,9 @@ class OllamaProvider(BaseProvider):
                     latency_ms=latency,
                     model_name=self.model
                 )
-        except httpx.TimeoutException:
-            raise TimeoutException("ollama", timeout)
+        except httpx.TimeoutException as e:
+            raise TimeoutException("ollama", timeout) from e
         except Exception as e:
             if isinstance(e, (ProviderUnavailableException, TimeoutException)):
                 raise e
-            raise ProviderUnavailableException("ollama", str(e))
+            raise ProviderUnavailableException("ollama", str(e)) from e

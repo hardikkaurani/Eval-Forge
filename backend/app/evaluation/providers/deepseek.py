@@ -83,9 +83,9 @@ class DeepSeekProvider(BaseProvider):
                     latency_ms=latency,
                     model_name=self.model
                 )
-        except httpx.TimeoutException:
-            raise TimeoutException("deepseek", timeout)
+        except httpx.TimeoutException as e:
+            raise TimeoutException("deepseek", timeout) from e
         except Exception as e:
             if isinstance(e, (RateLimitException, ProviderUnavailableException, TimeoutException)):
                 raise e
-            raise ProviderUnavailableException("deepseek", str(e))
+            raise ProviderUnavailableException("deepseek", str(e)) from e

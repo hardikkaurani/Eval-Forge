@@ -84,9 +84,9 @@ class OpenAIProvider(BaseProvider):
                     latency_ms=latency,
                     model_name=self.model
                 )
-        except httpx.TimeoutException:
-            raise TimeoutException("openai", timeout)
+        except httpx.TimeoutException as e:
+            raise TimeoutException("openai", timeout) from e
         except Exception as e:
             if isinstance(e, (RateLimitException, ProviderUnavailableException, TimeoutException)):
                 raise e
-            raise ProviderUnavailableException("openai", str(e))
+            raise ProviderUnavailableException("openai", str(e)) from e

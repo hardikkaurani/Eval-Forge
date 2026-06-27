@@ -85,9 +85,9 @@ class OpenRouterProvider(BaseProvider):
                     latency_ms=latency,
                     model_name=self.model
                 )
-        except httpx.TimeoutException:
-            raise TimeoutException("openrouter", timeout)
+        except httpx.TimeoutException as e:
+            raise TimeoutException("openrouter", timeout) from e
         except Exception as e:
             if isinstance(e, (RateLimitException, ProviderUnavailableException, TimeoutException)):
                 raise e
-            raise ProviderUnavailableException("openrouter", str(e))
+            raise ProviderUnavailableException("openrouter", str(e)) from e

@@ -87,9 +87,9 @@ class GeminiProvider(BaseProvider):
                     latency_ms=latency,
                     model_name=self.model
                 )
-        except httpx.TimeoutException:
-            raise TimeoutException("gemini", timeout)
+        except httpx.TimeoutException as e:
+            raise TimeoutException("gemini", timeout) from e
         except Exception as e:
             if isinstance(e, (RateLimitException, ProviderUnavailableException, TimeoutException)):
                 raise e
-            raise ProviderUnavailableException("gemini", str(e))
+            raise ProviderUnavailableException("gemini", str(e)) from e
