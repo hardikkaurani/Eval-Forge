@@ -1,9 +1,5 @@
 <div align="center">
 
-<img src="docs/assets/evalforge-banner.png" alt="EvalForge" width="800" style="border-radius: 18px;" />
-
-<br/><br/>
-
 <h1>Eval Forge</h1>
 
 <p><strong>Production-grade open-source LLM evaluation platform — G-Eval, LLM-as-a-Judge, RAG evaluation,<br/>and fully customisable AI evaluation pipelines. Built in public. Designed for production.</strong></p>
