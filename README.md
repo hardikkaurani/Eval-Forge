@@ -1,6 +1,10 @@
 <div align="center">
 
-<h1>Eval Forge.</h1>
+<img src="docs/assets/demo.gif" alt="EvalForge" width="800" style="border-radius: 18px;" />
+
+<br/><br/>
+
+<h1>Eval Forge</h1>
 
 <p><strong>Production-grade open-source LLM evaluation platform — G-Eval, LLM-as-a-Judge, RAG evaluation,<br/>and fully customisable AI evaluation pipelines. Built in public. Designed for production.</strong></p>
 
@@ -1211,6 +1215,11 @@ MIT License. See [LICENSE](LICENSE) for details.
 
 ---
 
+<div align="center">
+
+<img src="docs/assets/demo.gif" width="600" style="border-radius: 12px; opacity: 0.85;" />
+
+<br/><br/>
 *EvalForge — built for engineers who refuse to ship LLMs they cannot measure.*
 
 <br/>
