@@ -9,6 +9,7 @@ redis>=5.0.3
 python-dotenv>=1.0.1
 structlog>=24.1.0
 python-multipart>=0.0.9
+alembic>=1.13.1
 
 # Dev & Quality Tools
 black>=24.2.0
