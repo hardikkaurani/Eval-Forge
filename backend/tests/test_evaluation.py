@@ -146,9 +146,18 @@ def test_batch_evaluation_execution(client: TestClient) -> None:
 
 def test_batch_evaluation_validation_errors(client: TestClient) -> None:
     """Verifies that invalid batch evaluation requests are caught by validators and raise proper exceptions."""
+    # Create a valid project first
+    project_payload = {
+        "name": "Validation Errors Project",
+        "description": "Project for checking validation errors.",
+    }
+    project_response = client.post("/api/v1/projects", json=project_payload)
+    assert project_response.status_code == 201
+    project_id = project_response.json()["data"]["id"]
+
     # 1. Invalid provider
     payload = {
-        "project_id": "some-project-id",
+        "project_id": project_id,
         "evaluation_name": "Invalid Provider Run",
         "judge": "rubric",
         "provider": "unsupported-fake-provider",
@@ -160,7 +169,7 @@ def test_batch_evaluation_validation_errors(client: TestClient) -> None:
 
     # 2. Invalid judge
     payload = {
-        "project_id": "some-project-id",
+        "project_id": project_id,
         "evaluation_name": "Invalid Judge Run",
         "judge": "unsupported-fake-judge",
         "provider": "openai",
@@ -172,7 +181,7 @@ def test_batch_evaluation_validation_errors(client: TestClient) -> None:
 
     # 3. Invalid Configuration (temperature too high)
     payload = {
-        "project_id": "some-project-id",
+        "project_id": project_id,
         "evaluation_name": "Invalid Config Run",
         "judge": "rubric",
         "provider": "openai",
