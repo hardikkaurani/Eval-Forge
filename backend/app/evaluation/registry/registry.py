@@ -35,3 +35,5 @@ judge_registry = Registry("Judge")
 metric_registry = Registry("Metric")
 
 # Eagerly load providers and judges packages to trigger dynamic registration decorators
+import app.evaluation.judges  # noqa: F401, E402
+import app.evaluation.providers  # noqa: F401, E402
