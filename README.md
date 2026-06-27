@@ -1,10 +1,8 @@
 <div align="center">
 
-<img src="docs/assets/demo.gif" alt="EvalForge" width="800" style="border-radius: 18px;" />
-
 <br/><br/>
 
-<h1>Eval Forge</h1>
+<h1>Eval Forge.</h1>
 
 <p><strong>Production-grade open-source LLM evaluation platform — G-Eval, LLM-as-a-Judge, RAG evaluation,<br/>and fully customisable AI evaluation pipelines. Built in public. Designed for production.</strong></p>
 
@@ -17,6 +15,10 @@
 <a href="ROADMAP.md"><img src="https://img.shields.io/badge/Roadmap-12%20Phases-FF6B6B" height="28" /></a>
 
 <br/><br/>
+
+<img src="docs/assets/demo.gif" alt="EvalForge" width="700" style="border-radius: 14px;" />
+
+---
 
 <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white" />
 <img src="https://img.shields.io/badge/FastAPI-Backend-009688?logo=fastapi&logoColor=white" />
@@ -1214,10 +1216,6 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for the full guide.
 MIT License. See [LICENSE](LICENSE) for details.
 
 ---
-
-<div align="center">
-
-<img src="docs/assets/demo.gif" width="600" style="border-radius: 12px; opacity: 0.85;" />
 
 <br/><br/>
 *EvalForge — built for engineers who refuse to ship LLMs they cannot measure.*
