@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from sqlalchemy import DateTime, String, Text
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.session import Base
 from app.utils.constants import PROJECT_STATUS_ACTIVE
@@ -49,4 +49,10 @@ class Project(Base):
         DateTime(timezone=True),
         nullable=True,
         default=None,
+    )
+
+    evaluations: Mapped[list["Evaluation"]] = relationship(
+        "Evaluation",
+        back_populates="project",
+        cascade="all, delete-orphan",
     )
