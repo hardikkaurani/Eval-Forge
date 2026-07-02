@@ -41,6 +41,13 @@ class NotFoundException(EvalForgeException):
         super().__init__(message, status_code=404, details=details)
 
 
+class ConflictException(EvalForgeException):
+    """Raised when a requested operation conflicts with the current state."""
+
+    def __init__(self, message: str, details: Any = None):
+        super().__init__(message, status_code=409, details=details)
+
+
 class UnauthorizedException(EvalForgeException):
     """Raised when the user is unauthorized or authentication fails."""
 

@@ -9,6 +9,8 @@ from app.evaluation.utils.helpers import parse_json_from_text
 class RubricJudge(BaseJudge):
     """Judge that scores model output against a single rubric in a single pass."""
 
+    display_name = "Rubric"
+
     async def evaluate(
         self,
         prompt: str,
@@ -52,5 +54,6 @@ class RubricJudge(BaseJudge):
                 "prompt_tokens": response.prompt_tokens,
                 "completion_tokens": response.completion_tokens,
                 "latency_ms": response.latency_ms,
+                "raw_response": response.text,
             },
         )

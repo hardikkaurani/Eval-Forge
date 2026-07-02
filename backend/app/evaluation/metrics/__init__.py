@@ -1,3 +1,4 @@
-from app.evaluation.metrics.engine import MetricResult, MetricsCalculator
+from app.evaluation.metrics.base import BaseMetric, MetricResult
+from app.evaluation.metrics.engine import MetricsCalculator
 
-__all__ = ["MetricResult", "MetricsCalculator"]
+__all__ = ["BaseMetric", "MetricResult", "MetricsCalculator"]

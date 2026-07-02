@@ -1168,6 +1168,28 @@ The Grafana dashboard is auto-provisioned at `http://localhost:3001` when runnin
 
 ---
 
+## Phase 3: Evaluation Engine
+
+EvalForge now includes a modular evaluation engine with:
+
+- provider abstraction for OpenAI, Gemini, Claude, Ollama, OpenRouter, and DeepSeek
+- judge abstraction for G-Eval, pairwise, reference-based, and rubric-based evaluation
+- versioned prompt templates and runtime prompt overrides
+- a rubric catalog with custom rubric support
+- metric plugin registration and aggregate scoring
+- batch execution with retry support and partial failure isolation
+
+### Documentation
+
+- [Evaluation Engine Guide](docs/evaluation-engine-guide.md)
+- [Provider Guide](docs/provider-guide.md)
+- [Rubric Guide](docs/rubric-guide.md)
+- [API Documentation](docs/api-documentation.md)
+- [Architecture Diagram](docs/architecture-diagram.md)
+- [Developer Documentation](docs/developer-documentation.md)
+
+---
+
 ## Contributing
 
 1. Fork the repository and create your branch from `main`:

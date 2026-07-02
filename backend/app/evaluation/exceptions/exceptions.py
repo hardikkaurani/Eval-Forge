@@ -54,3 +54,25 @@ class UnsupportedJudgeException(EvaluationException):
     def __init__(self, judge: str):
         message = f"Judge type '{judge}' is not supported."
         super().__init__(message=message, status_code=400)
+
+
+class UnsupportedMetricException(EvaluationException):
+    """Raised when a metric is not registered."""
+
+    def __init__(self, metric: str):
+        message = f"Metric '{metric}' is not supported."
+        super().__init__(message=message, status_code=400)
+
+
+class InvalidPromptException(EvaluationException):
+    """Raised when a prompt template or rendered prompt is invalid."""
+
+    def __init__(self, message: str):
+        super().__init__(message=message, status_code=400)
+
+
+class EvaluationFailureException(EvaluationException):
+    """Raised when the evaluation pipeline cannot complete successfully."""
+
+    def __init__(self, message: str, details: str | None = None):
+        super().__init__(message=message, status_code=500, details=details)

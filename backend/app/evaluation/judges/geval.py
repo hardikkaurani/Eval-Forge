@@ -9,6 +9,8 @@ from app.evaluation.utils.helpers import parse_json_from_text
 class GEvalJudge(BaseJudge):
     """Judge that implements the two-pass G-Eval evaluation pipeline."""
 
+    display_name = "G-Eval"
+
     async def evaluate(
         self,
         prompt: str,
@@ -84,5 +86,6 @@ class GEvalJudge(BaseJudge):
                 "prompt_tokens": prompt_tokens,
                 "completion_tokens": completion_tokens,
                 "latency_ms": latency_ms,
+                "raw_response": score_response.text,
             },
         )

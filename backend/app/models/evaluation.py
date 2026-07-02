@@ -54,9 +54,12 @@ class EvaluationRun(Base):
     provider: Mapped[str] = mapped_column(
         String(100), nullable=False
     )  # openai, gemini, etc.
+    provider_model: Mapped[str | None] = mapped_column(String(255), nullable=True)
     configuration: Mapped[dict] = mapped_column(JSON, default=dict, nullable=False)
     total_cases: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     completed_cases: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    failed_cases: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    success_rate: Mapped[float | None] = mapped_column(Float, nullable=True)
     started_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
@@ -64,6 +67,7 @@ class EvaluationRun(Base):
         DateTime(timezone=True), nullable=True
     )
     aggregate_score: Mapped[float | None] = mapped_column(Float, nullable=True)
+    status_detail: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     evaluation: Mapped["Evaluation"] = relationship("Evaluation", back_populates="runs")
     results: Mapped[list["EvaluationResult"]] = relationship(
@@ -83,6 +87,12 @@ class EvaluationResult(Base):
     input_prompt: Mapped[str] = mapped_column(Text, nullable=False)
     model_output: Mapped[str] = mapped_column(Text, nullable=False)
     reference: Mapped[str | None] = mapped_column(Text, nullable=True)
+    judge: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    provider: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    prompt_version: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    raw_response: Mapped[str | None] = mapped_column(Text, nullable=True)
+    status: Mapped[str] = mapped_column(String(50), default="COMPLETED", nullable=False)
+    error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
     score: Mapped[float] = mapped_column(Float, default=0.0, nullable=False)
     passed: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     confidence: Mapped[float | None] = mapped_column(Float, nullable=True)
@@ -114,6 +124,7 @@ class RubricScore(Base):
         nullable=False,
     )
     criterion_name: Mapped[str] = mapped_column(String(100), nullable=False)
+    rubric_key: Mapped[str | None] = mapped_column(String(100), nullable=True)
     score: Mapped[float] = mapped_column(Float, nullable=False)
     reasoning: Mapped[str | None] = mapped_column(Text, nullable=True)
 
@@ -133,6 +144,7 @@ class ProviderMetadata(Base):
         ForeignKey("evaluation_results.id", ondelete="CASCADE"),
         nullable=False,
     )
+    provider_name: Mapped[str | None] = mapped_column(String(100), nullable=True)
     model_name: Mapped[str] = mapped_column(String(100), nullable=False)
     prompt_tokens: Mapped[int | None] = mapped_column(Integer, nullable=True)
     completion_tokens: Mapped[int | None] = mapped_column(Integer, nullable=True)

@@ -16,6 +16,8 @@ from app.evaluation.registry.registry import provider_registry
 class OpenRouterProvider(BaseProvider):
     """OpenRouter API client provider (OpenAI compatible)."""
 
+    display_name = "OpenRouter"
+
     def __init__(
         self,
         api_key: str | None = None,

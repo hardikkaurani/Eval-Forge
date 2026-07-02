@@ -14,6 +14,28 @@ class Rubric(BaseModel):
         """Validate if a score falls within the scoring scale range (0 to scoring_scale)."""
         return 0.0 <= score <= float(self.scoring_scale)
 
+    def validate_weight(self) -> bool:
+        return self.weight >= 0.0
+
+
+def get_rubric(key: str) -> Rubric | None:
+    return BUILT_IN_RUBRICS.get(key.lower())
+
+
+def list_rubrics() -> dict[str, Rubric]:
+    return dict(BUILT_IN_RUBRICS)
+
+
+def validate_custom_rubric(rubric: Rubric) -> None:
+    if not rubric.name.strip():
+        raise ValueError("Rubric name cannot be empty.")
+    if not rubric.description.strip():
+        raise ValueError("Rubric description cannot be empty.")
+    if not rubric.validate_weight():
+        raise ValueError("Rubric weight must be non-negative.")
+    if rubric.scoring_scale < 1:
+        raise ValueError("Rubric scoring scale must be at least 1.")
+
 
 # Built-in Rubrics
 BUILT_IN_RUBRICS = {

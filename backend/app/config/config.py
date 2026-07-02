@@ -56,7 +56,20 @@ class Settings(BaseSettings):
     OPENAI_API_KEY: SecretStr | None = None
     GEMINI_API_KEY: SecretStr | None = None
     ANTHROPIC_API_KEY: SecretStr | None = None
+    OPENROUTER_API_KEY: SecretStr | None = None
+    DEEPSEEK_API_KEY: SecretStr | None = None
     COHERE_API_KEY: SecretStr | None = None
+    OLLAMA_BASE_URL: str = "http://localhost:11434"
+
+    # Evaluation Engine Defaults
+    DEFAULT_EVALUATION_PROVIDER: str = "openai"
+    DEFAULT_EVALUATION_JUDGE: str = "rubric"
+    DEFAULT_EVALUATION_PROMPT_VERSION: str = "v1"
+    EVALUATION_RETRY_COUNT: int = Field(2, ge=0, le=10)
+    EVALUATION_TIMEOUT_SECONDS: float = Field(30.0, gt=0.0, le=300.0)
+    EVALUATION_MAX_BATCH_SIZE: int = Field(500, ge=1, le=5000)
+    EVALUATION_SCORE_THRESHOLD: float = Field(0.7, ge=0.0, le=1.0)
+    EVALUATION_MODEL_NAME: str = "gpt-4o-mini"
 
     @field_validator("APP_ENV", mode="before")
     @classmethod

@@ -15,6 +15,8 @@ from app.evaluation.registry.registry import provider_registry
 class OllamaProvider(BaseProvider):
     """Local Ollama client provider."""
 
+    display_name = "Ollama"
+
     def __init__(self, base_url: str | None = None, model: str = "llama3"):
         self.base_url = base_url or "http://localhost:11434"
         self.model = model
@@ -28,8 +30,8 @@ class OllamaProvider(BaseProvider):
         timeout: float = 30.0,
         **kwargs,
     ) -> ProviderResponse:
-        # Fallback if we are in testing settings and want to avoid local dependency
-        if settings.POSTGRES_DB == "test" or kwargs.get("mock_fallback", True):
+        # Fallback in tests or when explicitly requested.
+        if settings.APP_ENV == "testing" or kwargs.get("mock_fallback", False):
             return ProviderResponse(
                 text='{"score": 3.9, "reasoning": "Mocked Ollama response."}',
                 prompt_tokens=15,

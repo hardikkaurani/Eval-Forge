@@ -16,7 +16,6 @@ class EvaluationService:
     async def create_evaluation(
         db: AsyncSession, project_id: str, name: str, description: str | None = None
     ) -> Evaluation:
-        # Check if project exists
         from app.database.repository import ProjectRepository
 
         project_repo = ProjectRepository(db)
@@ -44,8 +43,6 @@ class EvaluationService:
             db, project_id, skip=skip, limit=page_size
         )
 
-        # Calculate total count (for simplified pagination metadata)
-        # Note: Real environment will select count, but for here list length or standard count statement is used
         from sqlalchemy import and_, func, select
 
         stmt = select(func.count(Evaluation.id)).where(
@@ -66,7 +63,6 @@ class EvaluationService:
     async def run_batch_evaluation(
         db: AsyncSession, request: BatchEvaluationRequest
     ) -> EvaluationRun:
-        # Check if project exists
         from app.database.repository import ProjectRepository
 
         project_repo = ProjectRepository(db)
@@ -77,3 +73,47 @@ class EvaluationService:
             )
 
         return await EvaluationPipeline.run(db, request)
+
+
+class EvaluationCatalogService:
+    """Read-only service for registered providers, judges, and rubrics."""
+
+    @staticmethod
+    def list_providers() -> list[dict[str, str | None]]:
+        from app.evaluation.registry.registry import provider_registry
+
+        return [
+            {
+                "key": entry.key,
+                "name": entry.name,
+                "description": entry.description,
+            }
+            for entry in provider_registry.list_entries()
+        ]
+
+    @staticmethod
+    def list_judges() -> list[dict[str, str | None]]:
+        from app.evaluation.registry.registry import judge_registry
+
+        return [
+            {
+                "key": entry.key,
+                "name": entry.name,
+                "description": entry.description,
+            }
+            for entry in judge_registry.list_entries()
+        ]
+
+    @staticmethod
+    def list_rubrics() -> list[dict[str, str | int | None]]:
+        from app.evaluation.rubrics.rubrics import list_rubrics
+
+        return [
+            {
+                "key": key,
+                "name": rubric.name,
+                "description": rubric.description,
+                "scoring_scale": rubric.scoring_scale,
+            }
+            for key, rubric in list_rubrics().items()
+        ]

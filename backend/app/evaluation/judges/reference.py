@@ -9,6 +9,8 @@ from app.evaluation.utils.helpers import parse_json_from_text
 class ReferenceJudge(BaseJudge):
     """Judge that scores model output directly against a ground truth reference context."""
 
+    display_name = "Reference"
+
     async def evaluate(
         self,
         prompt: str,
@@ -60,5 +62,6 @@ class ReferenceJudge(BaseJudge):
                 "prompt_tokens": response.prompt_tokens,
                 "completion_tokens": response.completion_tokens,
                 "latency_ms": response.latency_ms,
+                "raw_response": response.text,
             },
         )

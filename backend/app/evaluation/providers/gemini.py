@@ -16,6 +16,8 @@ from app.evaluation.registry.registry import provider_registry
 class GeminiProvider(BaseProvider):
     """Google Gemini API client provider."""
 
+    display_name = "Gemini"
+
     def __init__(self, api_key: str | None = None, model: str = "gemini-1.5-flash"):
         self.api_key = api_key or (
             settings.GEMINI_API_KEY.get_secret_value()

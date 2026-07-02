@@ -9,6 +9,8 @@ from app.evaluation.utils.helpers import parse_json_from_text
 class PairwiseJudge(BaseJudge):
     """Judge that compares two model outputs side-by-side to select the winner."""
 
+    display_name = "Pairwise"
+
     async def evaluate(
         self,
         prompt: str,
@@ -69,5 +71,6 @@ class PairwiseJudge(BaseJudge):
                 "prompt_tokens": response.prompt_tokens,
                 "completion_tokens": response.completion_tokens,
                 "latency_ms": response.latency_ms,
+                "raw_response": response.text,
             },
         )

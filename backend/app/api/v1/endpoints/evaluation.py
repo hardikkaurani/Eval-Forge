@@ -4,8 +4,7 @@ from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.session import get_db
-from app.evaluation.registry.registry import judge_registry, provider_registry
-from app.evaluation.rubrics.rubrics import BUILT_IN_RUBRICS
+from app.evaluation.services.evaluation import EvaluationCatalogService, EvaluationService
 from app.evaluation.schemas.evaluation import (
     BatchEvaluationRequest,
     EvaluationCreate,
@@ -15,7 +14,6 @@ from app.evaluation.schemas.evaluation import (
     ProviderInfo,
     RubricInfo,
 )
-from app.evaluation.services.evaluation import EvaluationService
 from app.utils.pagination import PaginatedResponse, create_pagination_meta
 from app.utils.responses import ApiResponse, create_response
 
@@ -139,8 +137,7 @@ async def run_batch_evaluation(
 )
 async def list_providers():
     """Lists keys and display names of all registered providers in the system."""
-    keys = provider_registry.list_keys()
-    providers = [ProviderInfo(key=k, name=k.capitalize()) for k in keys]
+    providers = [ProviderInfo(**item) for item in EvaluationCatalogService.list_providers()]
     return create_response(
         success=True,
         message="Providers retrieved successfully.",
@@ -155,8 +152,7 @@ async def list_providers():
 )
 async def list_judges():
     """Lists keys and display names of all registered evaluation judges in the system."""
-    keys = judge_registry.list_keys()
-    judges = [JudgeInfo(key=k, name=f"{k.capitalize()} Judge") for k in keys]
+    judges = [JudgeInfo(**item) for item in EvaluationCatalogService.list_judges()]
     return create_response(
         success=True,
         message="Judges retrieved successfully.",
@@ -171,12 +167,7 @@ async def list_judges():
 )
 async def list_rubrics():
     """Lists all built-in criteria dimensions/rubrics."""
-    rubrics = [
-        RubricInfo(
-            key=k, name=v.name, description=v.description, scoring_scale=v.scoring_scale
-        )
-        for k, v in BUILT_IN_RUBRICS.items()
-    ]
+    rubrics = [RubricInfo(**item) for item in EvaluationCatalogService.list_rubrics()]
     return create_response(
         success=True,
         message="Rubrics retrieved successfully.",

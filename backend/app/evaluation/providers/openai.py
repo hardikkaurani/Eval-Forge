@@ -16,6 +16,8 @@ from app.evaluation.registry.registry import provider_registry
 class OpenAIProvider(BaseProvider):
     """OpenAI API client provider."""
 
+    display_name = "OpenAI"
+
     def __init__(self, api_key: str | None = None, model: str = "gpt-4o-mini"):
         self.api_key = api_key or (
             settings.OPENAI_API_KEY.get_secret_value()

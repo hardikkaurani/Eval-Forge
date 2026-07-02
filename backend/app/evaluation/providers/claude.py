@@ -16,6 +16,8 @@ from app.evaluation.registry.registry import provider_registry
 class AnthropicProvider(BaseProvider):
     """Anthropic Claude API client provider."""
 
+    display_name = "Claude"
+
     def __init__(
         self, api_key: str | None = None, model: str = "claude-3-5-sonnet-latest"
     ):

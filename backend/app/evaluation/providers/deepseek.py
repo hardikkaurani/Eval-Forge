@@ -16,6 +16,8 @@ from app.evaluation.registry.registry import provider_registry
 class DeepSeekProvider(BaseProvider):
     """DeepSeek API client provider (OpenAI compatible)."""
 
+    display_name = "DeepSeek"
+
     def __init__(self, api_key: str | None = None, model: str = "deepseek-chat"):
         self.api_key = api_key or (
             settings.DEEPSEEK_API_KEY.get_secret_value()

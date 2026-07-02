@@ -1,4 +1,15 @@
+from dataclasses import dataclass
+from typing import Any
+
 from jinja2 import Template
+
+
+@dataclass(frozen=True, slots=True)
+class PromptTemplateVersion:
+    name: str
+    version: str
+    template: str
+    description: str | None = None
 
 DEFAULT_SYSTEM_PROMPT = (
     "You are an expert AI evaluator. Your job is to strictly evaluate the quality of LLM outputs "
@@ -104,25 +115,61 @@ class PromptEngine:
     """Prompt template engine utilizing Jinja2 for dynamic compilation."""
 
     def __init__(self):
-        self._templates = {
-            "system": DEFAULT_SYSTEM_PROMPT,
-            "rubric_scoring": DEFAULT_RUBRIC_SCORING_PROMPT,
-            "geval_step_gen": DEFAULT_GEVAL_STEP_GEN_PROMPT,
-            "geval_scoring": DEFAULT_GEVAL_SCORING_PROMPT,
-            "pairwise": DEFAULT_PAIRWISE_PROMPT,
-        }
+        self._templates: dict[str, dict[str, PromptTemplateVersion]] = {}
+        self.register_template("system", DEFAULT_SYSTEM_PROMPT, version="v1")
+        self.register_template(
+            "rubric_scoring", DEFAULT_RUBRIC_SCORING_PROMPT, version="v1"
+        )
+        self.register_template(
+            "geval_step_gen", DEFAULT_GEVAL_STEP_GEN_PROMPT, version="v1"
+        )
+        self.register_template(
+            "geval_scoring", DEFAULT_GEVAL_SCORING_PROMPT, version="v1"
+        )
+        self.register_template("pairwise", DEFAULT_PAIRWISE_PROMPT, version="v1")
 
-    def register_template(self, name: str, template_str: str) -> None:
-        """Register or override a prompt template."""
-        self._templates[name] = template_str
+    def register_template(
+        self,
+        name: str,
+        template_str: str,
+        *,
+        version: str = "v1",
+        description: str | None = None,
+    ) -> None:
+        """Register or override a prompt template version."""
+        self._templates.setdefault(name, {})[version] = PromptTemplateVersion(
+            name=name, version=version, template=template_str, description=description
+        )
 
-    def render(self, name: str, **context) -> str:
-        """Render a template with a given context."""
-        template_str = self._templates.get(name)
-        if not template_str:
+    def get_versions(self, name: str) -> list[str]:
+        return list(self._templates.get(name, {}).keys())
+
+    def render(self, name: str, version: str = "v1", **context: Any) -> str:
+        """Render a template version with a given context."""
+        template_versions = self._templates.get(name)
+        if not template_versions:
             raise KeyError(f"Prompt template '{name}' does not exist.")
-        template = Template(template_str)
+
+        template_info = template_versions.get(version) or next(
+            iter(template_versions.values())
+        )
+        template = Template(template_info.template)
         return template.render(**context)
+
+    def describe(self, name: str) -> dict[str, Any]:
+        versions = self._templates.get(name)
+        if not versions:
+            raise KeyError(f"Prompt template '{name}' does not exist.")
+        return {
+            "name": name,
+            "versions": [
+                {
+                    "version": item.version,
+                    "description": item.description,
+                }
+                for item in versions.values()
+            ],
+        }
 
 
 prompt_engine = PromptEngine()

@@ -21,7 +21,9 @@ class EvaluationRepository:
         db: AsyncSession, project_id: str, name: str, description: str | None = None
     ) -> Evaluation:
         evaluation = Evaluation(
-            project_id=project_id, name=name, description=description
+            project_id=project_id,
+            name=name,
+            description=description,
         )
         db.add(evaluation)
         await db.flush()
@@ -74,6 +76,7 @@ class EvaluationRepository:
         evaluation_id: str,
         judge: str,
         provider: str,
+        provider_model: str | None,
         configuration: Dict[str, Any],
         total_cases: int,
     ) -> EvaluationRun:
@@ -82,6 +85,7 @@ class EvaluationRepository:
             status="PENDING",
             judge=judge,
             provider=provider,
+            provider_model=provider_model,
             configuration=configuration,
             total_cases=total_cases,
             started_at=get_utc_now(),
@@ -123,6 +127,12 @@ class EvaluationRepository:
         score: float,
         passed: bool,
         reference: str | None = None,
+        judge: str | None = None,
+        provider: str | None = None,
+        prompt_version: str | None = None,
+        raw_response: str | None = None,
+        status: str = "COMPLETED",
+        error_message: str | None = None,
         confidence: float | None = None,
         reasoning: str | None = None,
     ) -> EvaluationResult:
@@ -131,6 +141,12 @@ class EvaluationRepository:
             input_prompt=input_prompt,
             model_output=model_output,
             reference=reference,
+            judge=judge,
+            provider=provider,
+            prompt_version=prompt_version,
+            raw_response=raw_response,
+            status=status,
+            error_message=error_message,
             score=score,
             passed=passed,
             confidence=confidence,
@@ -146,11 +162,13 @@ class EvaluationRepository:
         result_id: str,
         criterion_name: str,
         score: float,
+        rubric_key: str | None = None,
         reasoning: str | None = None,
     ) -> RubricScore:
         rubric_score = RubricScore(
             result_id=result_id,
             criterion_name=criterion_name,
+            rubric_key=rubric_key,
             score=score,
             reasoning=reasoning,
         )
@@ -162,6 +180,7 @@ class EvaluationRepository:
     async def create_provider_metadata(
         db: AsyncSession,
         result_id: str,
+        provider_name: str | None,
         model_name: str,
         prompt_tokens: int | None = None,
         completion_tokens: int | None = None,
@@ -169,6 +188,7 @@ class EvaluationRepository:
     ) -> ProviderMetadata:
         metadata = ProviderMetadata(
             result_id=result_id,
+            provider_name=provider_name,
             model_name=model_name,
             prompt_tokens=prompt_tokens,
             completion_tokens=completion_tokens,

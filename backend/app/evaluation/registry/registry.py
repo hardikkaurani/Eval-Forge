@@ -1,4 +1,13 @@
+from dataclasses import dataclass
 from typing import Any, Callable, Dict, Type
+
+
+@dataclass(frozen=True, slots=True)
+class RegistryEntry:
+    key: str
+    component: Type[Any]
+    name: str
+    description: str | None = None
 
 
 class Registry:
@@ -28,6 +37,39 @@ class Registry:
         """Returns list of registered keys."""
         return list(self._registry.keys())
 
+    def list_entries(self) -> list[RegistryEntry]:
+        """Returns rich registry entries for metadata endpoints and plugin discovery."""
+        entries: list[RegistryEntry] = []
+        for key, component in self._registry.items():
+            description = getattr(component, "description", None)
+            if description is None:
+                doc = (component.__doc__ or "").strip()
+                description = doc or None
+            entries.append(
+                RegistryEntry(
+                    key=key,
+                    component=component,
+                    name=getattr(component, "display_name", None)
+                    or key.replace("_", " ").title(),
+                    description=description,
+                )
+            )
+        return entries
+
+    def describe(self, key: str) -> RegistryEntry:
+        component = self.get(key)
+        description = getattr(component, "description", None)
+        if description is None:
+            doc = (component.__doc__ or "").strip()
+            description = doc or None
+        return RegistryEntry(
+            key=key.lower(),
+            component=component,
+            name=getattr(component, "display_name", None)
+            or key.replace("_", " ").title(),
+            description=description,
+        )
+
     def clear(self) -> None:
         """Clear all registered items (useful for testing)."""
         self._registry.clear()
@@ -40,3 +82,4 @@ metric_registry = Registry("Metric")
 # Eagerly load providers and judges packages to trigger dynamic registration decorators
 import app.evaluation.judges  # noqa: F401, E402
 import app.evaluation.providers  # noqa: F401, E402
+import app.evaluation.metrics  # noqa: F401, E402

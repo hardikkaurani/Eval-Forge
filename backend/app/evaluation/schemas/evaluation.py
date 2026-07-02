@@ -10,6 +10,7 @@ class RubricConfigSchema(BaseModel):
     weight: float = 1.0
     scoring_scale: int = 5
     prompt_template: Optional[str] = None
+    prompt_version: str = "v1"
 
 
 class EvaluationCreate(BaseModel):
@@ -31,6 +32,7 @@ class EvaluationResponse(BaseModel):
 class EvaluationRunCreate(BaseModel):
     judge: str
     provider: str
+    provider_model: Optional[str] = None
     configuration: Dict[str, Any] = Field(default_factory=dict)
     total_cases: int = 0
 
@@ -43,12 +45,16 @@ class EvaluationRunResponse(BaseModel):
     status: str
     judge: str
     provider: str
+    provider_model: Optional[str] = None
     configuration: Dict[str, Any]
     total_cases: int
     completed_cases: int
+    failed_cases: int = 0
     started_at: Optional[datetime] = None
     completed_at: Optional[datetime] = None
     aggregate_score: Optional[float] = None
+    success_rate: Optional[float] = None
+    status_detail: Optional[str] = None
 
 
 class RubricScoreResponse(BaseModel):
@@ -78,6 +84,12 @@ class EvaluationResultResponse(BaseModel):
     input_prompt: str
     model_output: str
     reference: Optional[str] = None
+    judge: Optional[str] = None
+    provider: Optional[str] = None
+    prompt_version: Optional[str] = None
+    raw_response: Optional[str] = None
+    status: str
+    error_message: Optional[str] = None
     score: float
     passed: bool
     confidence: Optional[float] = None
@@ -100,6 +112,7 @@ class BatchEvaluationRequest(BaseModel):
     evaluation_description: Optional[str] = None
     judge: str = "rubric"  # rubric, geval, pairwise, reference
     provider: str = "openai"  # openai, gemini, etc.
+    provider_model: Optional[str] = None
     rubric: Optional[RubricConfigSchema] = None
     test_cases: List[TestCaseInput]
     configuration: Dict[str, Any] = Field(
@@ -108,6 +121,7 @@ class BatchEvaluationRequest(BaseModel):
             "max_tokens": None,
             "threshold": 0.7,
             "timeout": 30.0,
+            "retry_count": 2,
         }
     )
 
@@ -115,11 +129,13 @@ class BatchEvaluationRequest(BaseModel):
 class ProviderInfo(BaseModel):
     key: str
     name: str
+    description: Optional[str] = None
 
 
 class JudgeInfo(BaseModel):
     key: str
     name: str
+    description: Optional[str] = None
 
 
 class RubricInfo(BaseModel):
