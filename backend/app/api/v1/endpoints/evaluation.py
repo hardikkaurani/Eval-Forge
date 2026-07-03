@@ -4,7 +4,6 @@ from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.session import get_db
-from app.evaluation.services.evaluation import EvaluationCatalogService, EvaluationService
 from app.evaluation.schemas.evaluation import (
     BatchEvaluationRequest,
     EvaluationCreate,
@@ -13,6 +12,10 @@ from app.evaluation.schemas.evaluation import (
     JudgeInfo,
     ProviderInfo,
     RubricInfo,
+)
+from app.evaluation.services.evaluation import (
+    EvaluationCatalogService,
+    EvaluationService,
 )
 from app.utils.pagination import PaginatedResponse, create_pagination_meta
 from app.utils.responses import ApiResponse, create_response
@@ -137,7 +140,9 @@ async def run_batch_evaluation(
 )
 async def list_providers():
     """Lists keys and display names of all registered providers in the system."""
-    providers = [ProviderInfo(**item) for item in EvaluationCatalogService.list_providers()]
+    providers = [
+        ProviderInfo(**item) for item in EvaluationCatalogService.list_providers()
+    ]
     return create_response(
         success=True,
         message="Providers retrieved successfully.",

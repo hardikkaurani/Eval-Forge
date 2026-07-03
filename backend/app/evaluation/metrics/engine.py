@@ -93,7 +93,9 @@ class MetricsCalculator:
         return normalized >= threshold
 
     @staticmethod
-    def aggregate_weighted_score(scores: Iterable[float], weights: Iterable[float]) -> float | None:
+    def aggregate_weighted_score(
+        scores: Iterable[float], weights: Iterable[float]
+    ) -> float | None:
         score_list = list(scores)
         weight_list = list(weights)
         if not score_list or not weight_list:
@@ -104,7 +106,11 @@ class MetricsCalculator:
         total_weight = sum(weight_list)
         if total_weight <= 0:
             return None
-        return round(sum(s * w for s, w in zip(score_list, weight_list)) / total_weight, 4)
+        return round(
+            sum(s * w for s, w in zip(score_list, weight_list, strict=True))
+            / total_weight,
+            4,
+        )
 
     @staticmethod
     def compute_aggregates(scores: List[float]) -> Dict[str, float | None]:

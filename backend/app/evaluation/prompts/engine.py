@@ -11,6 +11,7 @@ class PromptTemplateVersion:
     template: str
     description: str | None = None
 
+
 DEFAULT_SYSTEM_PROMPT = (
     "You are an expert AI evaluator. Your job is to strictly evaluate the quality of LLM outputs "
     "according to specified rubrics, metrics, and ground truth references.\n"

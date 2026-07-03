@@ -5,8 +5,8 @@ from app.evaluation.exceptions.exceptions import (
     UnsupportedJudgeException,
     UnsupportedProviderException,
 )
-from app.evaluation.rubrics.rubrics import Rubric, validate_custom_rubric
 from app.evaluation.registry.registry import judge_registry, provider_registry
+from app.evaluation.rubrics.rubrics import Rubric, validate_custom_rubric
 
 
 class EvaluationValidator:
@@ -64,7 +64,9 @@ class EvaluationValidator:
             )
 
         batch_size = config.get("batch_size")
-        if batch_size is not None and (not isinstance(batch_size, int) or batch_size <= 0):
+        if batch_size is not None and (
+            not isinstance(batch_size, int) or batch_size <= 0
+        ):
             raise InvalidConfigException(
                 f"batch_size must be a positive integer. Got: {batch_size}"
             )

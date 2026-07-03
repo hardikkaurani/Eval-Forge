@@ -26,4 +26,3 @@ class BaseMetric(ABC):
     @abstractmethod
     def evaluate(self, **kwargs: Any) -> MetricResult:
         """Evaluate a metric from the supplied context."""
-

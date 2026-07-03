@@ -101,7 +101,9 @@ class EvaluationPipeline:
         weights: List[float] = []
         completed_count = 0
         failed_count = 0
-        threshold = request.configuration.get("threshold", settings.EVALUATION_SCORE_THRESHOLD)
+        threshold = request.configuration.get(
+            "threshold", settings.EVALUATION_SCORE_THRESHOLD
+        )
         retry_count = request.configuration.get(
             "retry_count", settings.EVALUATION_RETRY_COUNT
         )
@@ -131,7 +133,9 @@ class EvaluationPipeline:
                         rubric=rubric,
                         temperature=request.configuration.get("temperature", 0.0),
                         max_tokens=request.configuration.get("max_tokens"),
-                        timeout=request.configuration.get("timeout", settings.EVALUATION_TIMEOUT_SECONDS),
+                        timeout=request.configuration.get(
+                            "timeout", settings.EVALUATION_TIMEOUT_SECONDS
+                        ),
                         response_b=case.response_b,
                         prompt_version=prompt_version,
                     )
@@ -160,7 +164,10 @@ class EvaluationPipeline:
                         reasoning=judge_result.reasoning,
                     )
 
-                    if request.judge == "geval" and "step_scores" in judge_result.criterion_scores:
+                    if (
+                        request.judge == "geval"
+                        and "step_scores" in judge_result.criterion_scores
+                    ):
                         for step_score in judge_result.criterion_scores["step_scores"]:
                             await EvaluationRepository.create_rubric_score(
                                 db=db,
@@ -179,7 +186,9 @@ class EvaluationPipeline:
                             "model_name", request.provider
                         ),
                         prompt_tokens=judge_result.metadata.get("prompt_tokens"),
-                        completion_tokens=judge_result.metadata.get("completion_tokens"),
+                        completion_tokens=judge_result.metadata.get(
+                            "completion_tokens"
+                        ),
                         latency_ms=judge_result.metadata.get("latency_ms"),
                     )
 

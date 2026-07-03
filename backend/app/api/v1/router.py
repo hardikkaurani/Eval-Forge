@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from app.api.v1.endpoints import evaluation, health, judges, providers, project, rubrics
+from app.api.v1.endpoints import evaluation, health, judges, project, providers, rubrics
 
 api_router = APIRouter()
 
