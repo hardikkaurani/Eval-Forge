@@ -80,3 +80,31 @@ class DatasetVersion(Base):
     experiments: Mapped[List["Experiment"]] = relationship(
         "Experiment", back_populates="dataset_version", cascade="all, delete-orphan"
     )
+
+
+class DatasetRecord(Base):
+    """SQLAlchemy model representing a single structured record/sample within a dataset version."""
+
+    __tablename__ = "dataset_records"
+
+    id: Mapped[str] = mapped_column(
+        String(36), primary_key=True, default=generate_uuid, index=True
+    )
+    version_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("dataset_versions.id", ondelete="CASCADE"), nullable=False
+    )
+    prompt: Mapped[str] = mapped_column(Text, nullable=False)
+    input: Mapped[str | None] = mapped_column(Text, nullable=True)
+    context: Mapped[str | None] = mapped_column(Text, nullable=True)
+    reference_output: Mapped[str | None] = mapped_column(Text, nullable=True)
+    candidate_output: Mapped[str | None] = mapped_column(Text, nullable=True)
+    ground_truth: Mapped[str | None] = mapped_column(Text, nullable=True)
+    expected_score: Mapped[float | None] = mapped_column(Float, nullable=True)
+    tags: Mapped[List[str]] = mapped_column(JSON, default=list, nullable=False)
+    custom_fields: Mapped[dict] = mapped_column(JSON, default=dict, nullable=False)
+    metadata_json: Mapped[dict] = mapped_column(JSON, default=dict, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=get_utc_now, nullable=False
+    )
+
+    version_ref: Mapped["DatasetVersion"] = relationship("DatasetVersion", back_populates="records")
