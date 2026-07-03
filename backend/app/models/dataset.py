@@ -149,3 +149,37 @@ class BenchmarkSuite(Base):
     datasets: Mapped[List["Dataset"]] = relationship(
         "Dataset", secondary="benchmark_datasets", back_populates="benchmarks"
     )
+
+
+class Experiment(Base):
+    """SQLAlchemy model representing an evaluation experiment tracking a pipeline execution over a dataset version."""
+
+    __tablename__ = "experiments"
+
+    id: Mapped[str] = mapped_column(
+        String(36), primary_key=True, default=generate_uuid, index=True
+    )
+    project_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("projects.id", ondelete="CASCADE"), nullable=False
+    )
+    dataset_version_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("dataset_versions.id", ondelete="CASCADE"), nullable=False
+    )
+    name: Mapped[str] = mapped_column(String(255), nullable=False)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    judge: Mapped[str] = mapped_column(String(100), nullable=False)
+    provider: Mapped[str] = mapped_column(String(100), nullable=False)
+    model: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    configuration: Mapped[dict] = mapped_column(JSON, default=dict, nullable=False)
+    status: Mapped[str] = mapped_column(String(50), default="PENDING", nullable=False)
+    metrics: Mapped[dict] = mapped_column(JSON, default=dict, nullable=False)
+    results: Mapped[List[dict]] = mapped_column(JSON, default=list, nullable=False)
+    started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    duration_seconds: Mapped[float | None] = mapped_column(Float, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=get_utc_now, nullable=False
+    )
+
+    project: Mapped["Project"] = relationship("Project", back_populates="experiments")
+    dataset_version: Mapped["DatasetVersion"] = relationship("DatasetVersion", back_populates="experiments")
