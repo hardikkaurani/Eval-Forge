@@ -108,3 +108,44 @@ class DatasetRecord(Base):
     )
 
     version_ref: Mapped["DatasetVersion"] = relationship("DatasetVersion", back_populates="records")
+
+
+class BenchmarkDataset(Base):
+    """Association table connecting benchmark suites to their associated datasets."""
+
+    __tablename__ = "benchmark_datasets"
+
+    benchmark_suite_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("benchmark_suites.id", ondelete="CASCADE"), primary_key=True
+    )
+    dataset_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("datasets.id", ondelete="CASCADE"), primary_key=True
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=get_utc_now, nullable=False
+    )
+
+
+class BenchmarkSuite(Base):
+    """SQLAlchemy model representing a collection of datasets grouped as a benchmark."""
+
+    __tablename__ = "benchmark_suites"
+
+    id: Mapped[str] = mapped_column(
+        String(36), primary_key=True, default=generate_uuid, index=True
+    )
+    project_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("projects.id", ondelete="CASCADE"), nullable=False
+    )
+    name: Mapped[str] = mapped_column(String(255), nullable=False)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    tags: Mapped[List[str]] = mapped_column(JSON, default=list, nullable=False)
+    metadata_json: Mapped[dict] = mapped_column(JSON, default=dict, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=get_utc_now, nullable=False
+    )
+
+    project: Mapped["Project"] = relationship("Project", back_populates="benchmarks")
+    datasets: Mapped[List["Dataset"]] = relationship(
+        "Dataset", secondary="benchmark_datasets", back_populates="benchmarks"
+    )
