@@ -7,6 +7,16 @@ from app.models.evaluation import (
     RubricScore,
 )
 from app.models.project import Project
+from app.models.dataset import (
+    Dataset,
+    DatasetVersion,
+    DatasetRecord,
+    BenchmarkSuite,
+    BenchmarkDataset,
+    Experiment,
+    ImportJob,
+    ExportJob,
+)
 
 __all__ = [
     "Base",
@@ -16,4 +26,12 @@ __all__ = [
     "EvaluationResult",
     "RubricScore",
     "ProviderMetadata",
+    "Dataset",
+    "DatasetVersion",
+    "DatasetRecord",
+    "BenchmarkSuite",
+    "BenchmarkDataset",
+    "Experiment",
+    "ImportJob",
+    "ExportJob",
 ]
