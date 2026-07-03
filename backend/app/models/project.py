@@ -11,6 +11,7 @@ from app.utils.uuid import generate_uuid
 
 if TYPE_CHECKING:
     from app.models.evaluation import Evaluation
+    from app.models.dataset import Dataset, BenchmarkSuite, Experiment
 
 
 class Project(Base):
@@ -57,6 +58,24 @@ class Project(Base):
 
     evaluations: Mapped[list["Evaluation"]] = relationship(
         "Evaluation",
+        back_populates="project",
+        cascade="all, delete-orphan",
+    )
+
+    datasets: Mapped[list["Dataset"]] = relationship(
+        "Dataset",
+        back_populates="project",
+        cascade="all, delete-orphan",
+    )
+
+    benchmarks: Mapped[list["BenchmarkSuite"]] = relationship(
+        "BenchmarkSuite",
+        back_populates="project",
+        cascade="all, delete-orphan",
+    )
+
+    experiments: Mapped[list["Experiment"]] = relationship(
+        "Experiment",
         back_populates="project",
         cascade="all, delete-orphan",
     )
