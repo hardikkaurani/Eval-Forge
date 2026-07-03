@@ -13,6 +13,7 @@ def test_evaluation_metadata_endpoints(client: TestClient) -> None:
     assert "openai" in provider_keys
     assert "gemini" in provider_keys
     assert "claude" in provider_keys
+    assert "nvidia" in provider_keys
 
     # 2. Retrieve Judges list
     response = client.get("/api/v1/evaluations/metadata/judges")

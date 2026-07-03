@@ -59,6 +59,7 @@ class Settings(BaseSettings):
     OPENROUTER_API_KEY: SecretStr | None = None
     DEEPSEEK_API_KEY: SecretStr | None = None
     COHERE_API_KEY: SecretStr | None = None
+    NVIDIA_API_KEY: SecretStr | None = None
     OLLAMA_BASE_URL: str = "http://localhost:11434"
 
     # Evaluation Engine Defaults
