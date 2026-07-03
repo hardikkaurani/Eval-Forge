@@ -183,3 +183,56 @@ class Experiment(Base):
 
     project: Mapped["Project"] = relationship("Project", back_populates="experiments")
     dataset_version: Mapped["DatasetVersion"] = relationship("DatasetVersion", back_populates="experiments")
+
+
+class ImportJob(Base):
+    """SQLAlchemy model representing a background job for importing a dataset."""
+
+    __tablename__ = "import_jobs"
+
+    id: Mapped[str] = mapped_column(
+        String(36), primary_key=True, default=generate_uuid, index=True
+    )
+    project_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("projects.id", ondelete="CASCADE"), nullable=False
+    )
+    dataset_id: Mapped[str | None] = mapped_column(
+        String(36), ForeignKey("datasets.id", ondelete="SET NULL"), nullable=True
+    )
+    status: Mapped[str] = mapped_column(String(50), default="PENDING", nullable=False)
+    file_format: Mapped[str] = mapped_column(String(50), nullable=False)
+    file_path: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    progress: Mapped[float] = mapped_column(Float, default=0.0, nullable=False)
+    total_records: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    processed_records: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
+    validation_report: Mapped[dict] = mapped_column(JSON, default=dict, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=get_utc_now, nullable=False
+    )
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
+class ExportJob(Base):
+    """SQLAlchemy model representing a background job for exporting a dataset or benchmark."""
+
+    __tablename__ = "export_jobs"
+
+    id: Mapped[str] = mapped_column(
+        String(36), primary_key=True, default=generate_uuid, index=True
+    )
+    project_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("projects.id", ondelete="CASCADE"), nullable=False
+    )
+    dataset_id: Mapped[str | None] = mapped_column(
+        String(36), ForeignKey("datasets.id", ondelete="SET NULL"), nullable=True
+    )
+    status: Mapped[str] = mapped_column(String(50), default="PENDING", nullable=False)
+    file_format: Mapped[str] = mapped_column(String(50), nullable=False)
+    file_path: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    progress: Mapped[float] = mapped_column(Float, default=0.0, nullable=False)
+    error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=get_utc_now, nullable=False
+    )
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
