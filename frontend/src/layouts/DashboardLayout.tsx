@@ -16,7 +16,7 @@ import {
   ChevronRight,
   Sparkles,
   Command,
-  Heart
+  Heart,
 } from 'lucide-react';
 import { api } from '../services/api';
 import type { Project } from '../services/api';
@@ -39,7 +39,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const [notifications, setNotifications] = useState<string[]>([
     'Evaluation pipeline Chatbot Alignment complete (Score: 0.94)',
     'Database connection established with healthy status',
-    'Rate limit alert on OpenAI provider'
+    'Rate limit alert on OpenAI provider',
   ]);
   const [showNotifications, setShowNotifications] = useState(false);
 
@@ -96,9 +96,24 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   const navLinks = [
     { name: 'Dashboard', path: '/', icon: Layers },
-    { name: 'Datasets', path: projectId ? `/projects/${projectId}/datasets` : '#', icon: Database, disabled: !projectId },
-    { name: 'Evaluations', path: projectId ? `/projects/${projectId}/evaluations` : '#', icon: Terminal, disabled: !projectId },
-    { name: 'Benchmarks', path: projectId ? `/projects/${projectId}/benchmarks` : '#', icon: Activity, disabled: !projectId },
+    {
+      name: 'Datasets',
+      path: projectId ? `/projects/${projectId}/datasets` : '#',
+      icon: Database,
+      disabled: !projectId,
+    },
+    {
+      name: 'Evaluations',
+      path: projectId ? `/projects/${projectId}/evaluations` : '#',
+      icon: Terminal,
+      disabled: !projectId,
+    },
+    {
+      name: 'Benchmarks',
+      path: projectId ? `/projects/${projectId}/benchmarks` : '#',
+      icon: Activity,
+      disabled: !projectId,
+    },
     { name: 'Providers', path: '/providers', icon: Cpu },
   ];
 
@@ -120,20 +135,29 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   return (
     <div className="min-h-screen bg-[#050816] text-white flex">
       {/* Sidebar for Desktop */}
-      <aside className={`fixed inset-y-0 left-0 z-40 w-64 bg-[#111827] border-r border-[#2A3352] transform transition-transform md:translate-x-0 md:static md:flex md:flex-col ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+      <aside
+        className={`fixed inset-y-0 left-0 z-40 w-64 bg-[#111827] border-r border-[#2A3352] transform transition-transform md:translate-x-0 md:static md:flex md:flex-col ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
+      >
         <div className="h-16 flex items-center justify-between px-6 border-b border-[#2A3352]">
           <Link to="/" className="flex items-center gap-3">
             <Sparkles className="text-primary w-6 h-6 animate-pulse" />
-            <span className="font-heading font-bold text-xl tracking-tight text-white">EvalForge</span>
+            <span className="font-heading font-bold text-xl tracking-tight text-white">
+              EvalForge
+            </span>
           </Link>
-          <button className="md:hidden text-muted hover:text-white" onClick={() => setSidebarOpen(false)}>
+          <button
+            className="md:hidden text-muted hover:text-white"
+            onClick={() => setSidebarOpen(false)}
+          >
             <X size={20} />
           </button>
         </div>
 
         {/* Project Selector dropdown inside Sidebar */}
         <div className="px-4 py-4 border-b border-[#2A3352]">
-          <label className="text-xs uppercase text-gray-500 font-semibold tracking-wider block mb-1.5">Active Project</label>
+          <label className="text-xs uppercase text-gray-500 font-semibold tracking-wider block mb-1.5">
+            Active Project
+          </label>
           <div className="relative">
             <select
               value={projectId || ''}
@@ -148,7 +172,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             >
               <option value="">-- Select Project --</option>
               {projects.map((p) => (
-                <option key={p.id} value={p.id}>{p.name}</option>
+                <option key={p.id} value={p.id}>
+                  {p.name}
+                </option>
               ))}
             </select>
             <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none text-muted">
@@ -161,8 +187,11 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
           {navLinks.map((link) => {
             const Icon = link.icon;
-            const isActive = location.pathname === link.path || (link.path !== '/' && location.pathname.startsWith(link.path.replace(/\/:projectId.*/, '')));
-            
+            const isActive =
+              location.pathname === link.path ||
+              (link.path !== '/' &&
+                location.pathname.startsWith(link.path.replace(/\/:projectId.*/, '')));
+
             if (link.disabled) {
               return (
                 <div
@@ -193,7 +222,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         {/* Footer in Sidebar */}
         <div className="p-4 border-t border-[#2A3352] text-xs text-gray-500 flex items-center justify-between">
           <span>v0.1.0 (Beta)</span>
-          <span className="flex items-center gap-1">Made with <Heart size={10} className="text-red-500 fill-red-500" /></span>
+          <span className="flex items-center gap-1">
+            Made with <Heart size={10} className="text-red-500 fill-red-500" />
+          </span>
         </div>
       </aside>
 
@@ -202,13 +233,18 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         {/* Top Navbar */}
         <header className="h-16 bg-[#111827] border-b border-[#2A3352] flex items-center justify-between px-6 sticky top-0 z-30">
           <div className="flex items-center gap-4">
-            <button className="md:hidden text-muted hover:text-white" onClick={() => setSidebarOpen(true)}>
+            <button
+              className="md:hidden text-muted hover:text-white"
+              onClick={() => setSidebarOpen(true)}
+            >
               <Menu size={20} />
             </button>
 
             {/* Breadcrumbs */}
             <div className="hidden sm:flex items-center gap-2 text-sm text-gray-400">
-              <Link to="/" className="hover:text-white transition">Home</Link>
+              <Link to="/" className="hover:text-white transition">
+                Home
+              </Link>
               <ChevronRight size={14} className="text-gray-600" />
               {projectId ? (
                 <>
@@ -268,14 +304,22 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 <div className="absolute right-0 mt-2 w-80 bg-[#111827] border border-[#2A3352] rounded-lg shadow-xl py-2 z-50">
                   <div className="px-4 py-2 border-b border-[#2A3352] flex justify-between items-center">
                     <span className="font-semibold text-sm">Notifications</span>
-                    <button className="text-xs text-primary hover:underline" onClick={() => setNotifications([])}>Clear all</button>
+                    <button
+                      className="text-xs text-primary hover:underline"
+                      onClick={() => setNotifications([])}
+                    >
+                      Clear all
+                    </button>
                   </div>
                   <div className="divide-y divide-[#2A3352] max-h-60 overflow-y-auto">
                     {notifications.length === 0 ? (
                       <div className="p-4 text-center text-sm text-gray-500">No new alerts</div>
                     ) : (
                       notifications.map((notif, index) => (
-                        <div key={index} className="p-3 text-xs text-gray-300 hover:bg-[#1f2937] transition-colors">
+                        <div
+                          key={index}
+                          className="p-3 text-xs text-gray-300 hover:bg-[#1f2937] transition-colors"
+                        >
                           {notif}
                         </div>
                       ))
@@ -302,10 +346,18 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                     <p className="text-sm font-semibold text-white">Hardik Kaurani</p>
                     <p className="text-xs text-gray-500 truncate">hardikkaurani1@gmail.com</p>
                   </div>
-                  <Link to="/profile" className="flex items-center gap-2 px-4 py-2 text-sm text-gray-300 hover:bg-[#1f2937] hover:text-white" onClick={() => setShowUserMenu(false)}>
+                  <Link
+                    to="/profile"
+                    className="flex items-center gap-2 px-4 py-2 text-sm text-gray-300 hover:bg-[#1f2937] hover:text-white"
+                    onClick={() => setShowUserMenu(false)}
+                  >
                     <User size={14} /> Profile
                   </Link>
-                  <Link to="/providers" className="flex items-center gap-2 px-4 py-2 text-sm text-gray-300 hover:bg-[#1f2937] hover:text-white" onClick={() => setShowUserMenu(false)}>
+                  <Link
+                    to="/providers"
+                    className="flex items-center gap-2 px-4 py-2 text-sm text-gray-300 hover:bg-[#1f2937] hover:text-white"
+                    onClick={() => setShowUserMenu(false)}
+                  >
                     <Settings size={14} /> Providers Config
                   </Link>
                   <button
@@ -324,15 +376,16 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         </header>
 
         {/* Content Wrapper */}
-        <main className="flex-1 p-6 overflow-y-auto">
-          {children}
-        </main>
+        <main className="flex-1 p-6 overflow-y-auto">{children}</main>
       </div>
 
       {/* Keyboard Command Palette Dialog Modal */}
       {commandPaletteOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-start justify-center pt-24 px-4">
-          <div ref={commandPaletteRef} className="w-full max-w-xl bg-[#111827] border border-[#2A3352] rounded-xl shadow-2xl overflow-hidden">
+          <div
+            ref={commandPaletteRef}
+            className="w-full max-w-xl bg-[#111827] border border-[#2A3352] rounded-xl shadow-2xl overflow-hidden"
+          >
             <div className="p-3 border-b border-[#2A3352] flex items-center gap-2">
               <Search className="text-gray-400 w-5 h-5" />
               <input
@@ -352,7 +405,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             </div>
             <div className="max-h-80 overflow-y-auto p-2">
               {filteredCommands.length === 0 ? (
-                <div className="py-8 text-center text-sm text-gray-500">No results found for &ldquo;{searchQuery}&rdquo;</div>
+                <div className="py-8 text-center text-sm text-gray-500">
+                  No results found for &ldquo;{searchQuery}&rdquo;
+                </div>
               ) : (
                 filteredCommands.map((cmd, idx) => (
                   <button

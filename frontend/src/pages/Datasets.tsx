@@ -1,15 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import {
-  Database,
-  Upload,
-  Clock,
-  History,
-  Tag,
-  CheckCircle,
-  ChevronRight
-} from 'lucide-react';
+import { Database, Upload, Clock, History, Tag, CheckCircle, ChevronRight } from 'lucide-react';
 import { api } from '../services/api';
 import type { Dataset, DatasetVersion, DatasetRecord, ImportReport } from '../services/api';
 
@@ -142,7 +134,9 @@ export default function Datasets() {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="font-heading font-bold text-3xl text-white">Dataset Management</h1>
-          <p className="text-gray-400 text-sm mt-1">Upload validation cases, import formats, check version controls.</p>
+          <p className="text-gray-400 text-sm mt-1">
+            Upload validation cases, import formats, check version controls.
+          </p>
         </div>
         <button
           onClick={() => {
@@ -165,7 +159,9 @@ export default function Datasets() {
           {loading ? (
             <div className="p-6 text-center text-sm text-gray-500">Loading datasets...</div>
           ) : datasets.length === 0 ? (
-            <div className="p-12 text-center text-sm text-gray-500">No datasets found. Import one to start.</div>
+            <div className="p-12 text-center text-sm text-gray-500">
+              No datasets found. Import one to start.
+            </div>
           ) : (
             <div className="divide-y divide-[#2A3352]">
               {datasets.map((dataset) => (
@@ -176,7 +172,9 @@ export default function Datasets() {
                 >
                   <div className="space-y-1">
                     <span className="text-sm font-semibold text-white block">{dataset.name}</span>
-                    <span className="text-xs text-gray-400 block line-clamp-1">{dataset.description}</span>
+                    <span className="text-xs text-gray-400 block line-clamp-1">
+                      {dataset.description}
+                    </span>
                   </div>
                   <ChevronRight size={16} className="text-gray-600" />
                 </button>
@@ -196,16 +194,25 @@ export default function Datasets() {
                   <p className="text-sm text-gray-400 mt-1">{selectedDataset.description}</p>
                   <div className="flex gap-2.5 mt-3">
                     {selectedDataset.tags.map((tag: string) => (
-                      <span key={tag} className="flex items-center gap-1 text-[10px] uppercase font-bold tracking-wider text-cyan-400 bg-cyan-950/30 px-2 py-0.5 rounded border border-cyan-800/30">
+                      <span
+                        key={tag}
+                        className="flex items-center gap-1 text-[10px] uppercase font-bold tracking-wider text-cyan-400 bg-cyan-950/30 px-2 py-0.5 rounded border border-cyan-800/30"
+                      >
                         <Tag size={8} /> {tag}
                       </span>
                     ))}
                   </div>
                 </div>
                 <div className="text-right text-xs text-gray-500 space-y-1 font-mono">
-                  <div>Source: <span className="text-white">{selectedDataset.source}</span></div>
-                  <div>Format: <span className="text-white">{selectedDataset.language}</span></div>
-                  <div>Owner: <span className="text-white">{selectedDataset.owner}</span></div>
+                  <div>
+                    Source: <span className="text-white">{selectedDataset.source}</span>
+                  </div>
+                  <div>
+                    Format: <span className="text-white">{selectedDataset.language}</span>
+                  </div>
+                  <div>
+                    Owner: <span className="text-white">{selectedDataset.owner}</span>
+                  </div>
                 </div>
               </div>
 
@@ -241,11 +248,15 @@ export default function Datasets() {
                           className="bg-[#050816] text-white border border-[#2A3352] rounded px-2.5 py-1 text-xs focus:outline-none focus:border-primary cursor-pointer font-semibold"
                         >
                           {versions.map((v) => (
-                            <option key={v.id} value={v.id}>{v.label} ({v.records_count} records)</option>
+                            <option key={v.id} value={v.id}>
+                              {v.label} ({v.records_count} records)
+                            </option>
                           ))}
                         </select>
                       </div>
-                      <span className="text-xs text-gray-500 font-mono">Total size: {records.length} records</span>
+                      <span className="text-xs text-gray-500 font-mono">
+                        Total size: {records.length} records
+                      </span>
                     </div>
 
                     {/* Records Table */}
@@ -253,20 +264,30 @@ export default function Datasets() {
                       <table className="w-full text-left text-sm">
                         <thead className="bg-[#050816]/50 text-gray-400 border-b border-[#2A3352]">
                           <tr>
-                            <th className="p-3 font-semibold text-xs uppercase tracking-wider">Input Prompt</th>
-                            <th className="p-3 font-semibold text-xs uppercase tracking-wider">Expected Response</th>
+                            <th className="p-3 font-semibold text-xs uppercase tracking-wider">
+                              Input Prompt
+                            </th>
+                            <th className="p-3 font-semibold text-xs uppercase tracking-wider">
+                              Expected Response
+                            </th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-[#2A3352]">
                           {records.length === 0 ? (
                             <tr>
-                              <td colSpan={2} className="p-6 text-center text-gray-500">No records found in this version.</td>
+                              <td colSpan={2} className="p-6 text-center text-gray-500">
+                                No records found in this version.
+                              </td>
                             </tr>
                           ) : (
                             records.map((rec) => (
                               <tr key={rec.id} className="hover:bg-[#1f2937]/20">
-                                <td className="p-3 align-top font-mono text-xs max-w-xs truncate text-gray-300">{rec.input_prompt}</td>
-                                <td className="p-3 align-top text-gray-400 max-w-xs truncate font-mono text-xs">{rec.reference}</td>
+                                <td className="p-3 align-top font-mono text-xs max-w-xs truncate text-gray-300">
+                                  {rec.input_prompt}
+                                </td>
+                                <td className="p-3 align-top text-gray-400 max-w-xs truncate font-mono text-xs">
+                                  {rec.reference}
+                                </td>
                               </tr>
                             ))
                           )}
@@ -286,17 +307,27 @@ export default function Datasets() {
                       {versions.map((ver) => (
                         <div key={ver.id} className="relative">
                           {/* Bullet point indicator */}
-                          <div className={`absolute -left-7 top-1 w-3.5 h-3.5 rounded-full border-2 border-[#111827] ${ver.label === selectedDataset.current_version ? 'bg-accent' : 'bg-[#2A3352]'}`} />
+                          <div
+                            className={`absolute -left-7 top-1 w-3.5 h-3.5 rounded-full border-2 border-[#111827] ${ver.label === selectedDataset.current_version ? 'bg-accent' : 'bg-[#2A3352]'}`}
+                          />
                           <div className="space-y-1">
                             <div className="flex items-center gap-2">
-                              <span className="text-sm font-bold text-white font-mono bg-[#050816] px-1.5 py-0.5 rounded border border-[#2A3352]">{ver.label}</span>
+                              <span className="text-sm font-bold text-white font-mono bg-[#050816] px-1.5 py-0.5 rounded border border-[#2A3352]">
+                                {ver.label}
+                              </span>
                               {ver.label === selectedDataset.current_version && (
-                                <span className="text-[10px] font-bold text-emerald-400 bg-emerald-950/20 px-2 py-0.5 rounded border border-emerald-900/30">Active Production</span>
+                                <span className="text-[10px] font-bold text-emerald-400 bg-emerald-950/20 px-2 py-0.5 rounded border border-emerald-900/30">
+                                  Active Production
+                                </span>
                               )}
-                              <span className="text-xs text-gray-500">{new Date(ver.created_at).toLocaleDateString()}</span>
+                              <span className="text-xs text-gray-500">
+                                {new Date(ver.created_at).toLocaleDateString()}
+                              </span>
                             </div>
                             <p className="text-xs text-gray-400">{ver.description}</p>
-                            <span className="text-[10px] text-gray-500 font-mono block">Count: {ver.records_count} records</span>
+                            <span className="text-[10px] text-gray-500 font-mono block">
+                              Count: {ver.records_count} records
+                            </span>
                           </div>
                         </div>
                       ))}
@@ -307,21 +338,43 @@ export default function Datasets() {
                 {activeTab === 'details' && (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-4">
-                      <h4 className="font-semibold text-sm text-gray-300">File metadata specifications</h4>
+                      <h4 className="font-semibold text-sm text-gray-300">
+                        File metadata specifications
+                      </h4>
                       <div className="bg-[#050816] p-4 rounded-lg border border-[#2A3352] font-mono text-xs text-gray-400 space-y-2">
-                        <div>Visibility: <span className="text-white">{selectedDataset.visibility}</span></div>
-                        <div>Language Code: <span className="text-white">{selectedDataset.language}</span></div>
-                        <div>License Standard: <span className="text-white">{selectedDataset.license}</span></div>
-                        <div>Dataset Repository ID: <span className="text-white">{selectedDataset.id}</span></div>
+                        <div>
+                          Visibility:{' '}
+                          <span className="text-white">{selectedDataset.visibility}</span>
+                        </div>
+                        <div>
+                          Language Code:{' '}
+                          <span className="text-white">{selectedDataset.language}</span>
+                        </div>
+                        <div>
+                          License Standard:{' '}
+                          <span className="text-white">{selectedDataset.license}</span>
+                        </div>
+                        <div>
+                          Dataset Repository ID:{' '}
+                          <span className="text-white">{selectedDataset.id}</span>
+                        </div>
                       </div>
                     </div>
                     <div className="space-y-2 text-xs text-gray-400">
-                      <h4 className="font-semibold text-sm text-gray-300">Schema Validation Policy</h4>
+                      <h4 className="font-semibold text-sm text-gray-300">
+                        Schema Validation Policy
+                      </h4>
                       <p>Every imported record must contain the following minimum fields:</p>
                       <ul className="list-disc pl-4 space-y-1 font-mono">
-                        <li><b className="text-white">input_prompt</b> (string, required)</li>
-                        <li><b className="text-white">reference</b> (string, optional)</li>
-                        <li><b className="text-white">expected_score</b> (float, optional)</li>
+                        <li>
+                          <b className="text-white">input_prompt</b> (string, required)
+                        </li>
+                        <li>
+                          <b className="text-white">reference</b> (string, optional)
+                        </li>
+                        <li>
+                          <b className="text-white">expected_score</b> (float, optional)
+                        </li>
                       </ul>
                     </div>
                   </div>
@@ -350,13 +403,16 @@ export default function Datasets() {
                 <X size={18} />
               </button>
             </div>
-            
+
             {uploadProgress !== null ? (
               <div className="p-8 space-y-4 text-center">
                 <Upload size={32} className="mx-auto text-primary animate-bounce" />
                 <h4 className="text-sm font-semibold">Uploading & parsing file content...</h4>
                 <div className="w-full bg-[#050816] rounded-full h-2 overflow-hidden border border-[#2A3352]">
-                  <div className="bg-primary h-full transition-all duration-300" style={{ width: `${uploadProgress}%` }} />
+                  <div
+                    className="bg-primary h-full transition-all duration-300"
+                    style={{ width: `${uploadProgress}%` }}
+                  />
                 </div>
                 <span className="text-xs text-gray-500 font-mono">{uploadProgress}%</span>
               </div>
@@ -366,13 +422,22 @@ export default function Datasets() {
                   <CheckCircle size={20} className="shrink-0" />
                   <div>
                     <h4 className="font-semibold text-sm">Parse Successful</h4>
-                    <p className="text-xs text-gray-400">File format validated, records imported successfully.</p>
+                    <p className="text-xs text-gray-400">
+                      File format validated, records imported successfully.
+                    </p>
                   </div>
                 </div>
                 <div className="bg-[#050816] p-4 rounded-lg border border-[#2A3352] font-mono text-xs text-gray-400 space-y-1.5">
-                  <div>Job ID: <span className="text-white">{importReport.job_id}</span></div>
-                  <div>Status: <span className="text-white">{importReport.status}</span></div>
-                  <div>Records Loaded: <span className="text-white">{importReport.records_imported}</span></div>
+                  <div>
+                    Job ID: <span className="text-white">{importReport.job_id}</span>
+                  </div>
+                  <div>
+                    Status: <span className="text-white">{importReport.status}</span>
+                  </div>
+                  <div>
+                    Records Loaded:{' '}
+                    <span className="text-white">{importReport.records_imported}</span>
+                  </div>
                 </div>
                 <button
                   onClick={() => setUploadOpen(false)}
@@ -384,7 +449,9 @@ export default function Datasets() {
             ) : (
               <form onSubmit={handleUploadSubmit} className="p-6 space-y-4">
                 <div>
-                  <label className="text-xs uppercase text-gray-500 font-semibold tracking-wider block mb-1.5">Select File (CSV, JSON, JSONL)</label>
+                  <label className="text-xs uppercase text-gray-500 font-semibold tracking-wider block mb-1.5">
+                    Select File (CSV, JSON, JSONL)
+                  </label>
                   <div className="border-2 border-dashed border-[#2A3352] hover:border-gray-500 rounded-lg p-6 text-center cursor-pointer transition relative">
                     <input
                       type="file"
@@ -394,11 +461,15 @@ export default function Datasets() {
                       className="absolute inset-0 opacity-0 cursor-pointer"
                     />
                     <Upload className="mx-auto text-gray-500 mb-2" size={24} />
-                    <span className="text-xs text-gray-400 block">{selectedFile ? selectedFile.name : 'Drag & drop or click to choose file'}</span>
+                    <span className="text-xs text-gray-400 block">
+                      {selectedFile ? selectedFile.name : 'Drag & drop or click to choose file'}
+                    </span>
                   </div>
                 </div>
                 <div>
-                  <label className="text-xs uppercase text-gray-500 font-semibold tracking-wider block mb-1.5">Dataset Name</label>
+                  <label className="text-xs uppercase text-gray-500 font-semibold tracking-wider block mb-1.5">
+                    Dataset Name
+                  </label>
                   <input
                     type="text"
                     required
@@ -410,7 +481,9 @@ export default function Datasets() {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="text-xs uppercase text-gray-500 font-semibold tracking-wider block mb-1.5">Version Label</label>
+                    <label className="text-xs uppercase text-gray-500 font-semibold tracking-wider block mb-1.5">
+                      Version Label
+                    </label>
                     <input
                       type="text"
                       required
@@ -421,7 +494,9 @@ export default function Datasets() {
                     />
                   </div>
                   <div>
-                    <label className="text-xs uppercase text-gray-500 font-semibold tracking-wider block mb-1.5">Format Type</label>
+                    <label className="text-xs uppercase text-gray-500 font-semibold tracking-wider block mb-1.5">
+                      Format Type
+                    </label>
                     <select className="w-full bg-[#050816] text-white border border-[#2A3352] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary cursor-pointer">
                       <option value="csv">CSV File</option>
                       <option value="json">JSON Records</option>
@@ -430,7 +505,9 @@ export default function Datasets() {
                   </div>
                 </div>
                 <div>
-                  <label className="text-xs uppercase text-gray-500 font-semibold tracking-wider block mb-1.5">Description</label>
+                  <label className="text-xs uppercase text-gray-500 font-semibold tracking-wider block mb-1.5">
+                    Description
+                  </label>
                   <textarea
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
@@ -465,8 +542,20 @@ export default function Datasets() {
 
 function X({ size }: { size?: number }) {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" width={size || 24} height={size || 24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-x">
-      <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={size || 24}
+      height={size || 24}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="lucide lucide-x"
+    >
+      <path d="M18 6 6 18" />
+      <path d="m6 6 12 12" />
     </svg>
   );
 }

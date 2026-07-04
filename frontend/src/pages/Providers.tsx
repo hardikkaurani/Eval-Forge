@@ -1,11 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import {
-  RefreshCw,
-  Settings2,
-  Key,
-  ShieldCheck
-} from 'lucide-react';
+import { RefreshCw, Settings2, Key, ShieldCheck } from 'lucide-react';
 import { api } from '../services/api';
 import type { Provider } from '../services/api';
 
@@ -65,7 +60,9 @@ export default function Providers() {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="font-heading font-bold text-3xl text-white">Judge Providers</h1>
-          <p className="text-gray-400 text-sm mt-1">Configure external API keys, check model health parameters, examine rates.</p>
+          <p className="text-gray-400 text-sm mt-1">
+            Configure external API keys, check model health parameters, examine rates.
+          </p>
         </div>
         <button
           onClick={fetchProviders}
@@ -79,7 +76,9 @@ export default function Providers() {
         {/* Providers List */}
         <div className="space-y-4">
           {loading ? (
-            <div className="p-8 text-center text-gray-500 text-sm bg-[#111827] border border-[#2A3352] rounded-xl">Loading Judge Providers...</div>
+            <div className="p-8 text-center text-gray-500 text-sm bg-[#111827] border border-[#2A3352] rounded-xl">
+              Loading Judge Providers...
+            </div>
           ) : (
             providers.map((prov) => (
               <div
@@ -90,11 +89,15 @@ export default function Providers() {
                   <div>
                     <h3 className="font-heading font-bold text-lg text-white flex items-center gap-2">
                       {prov.name}
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded border font-mono ${
-                        prov.status === 'healthy' ? 'text-emerald-400 bg-emerald-950/20 border-emerald-900/30' :
-                        prov.status === 'degraded' ? 'text-yellow-400 bg-yellow-950/20 border-yellow-900/30' :
-                        'text-red-400 bg-red-950/20 border-red-900/30'
-                      }`}>
+                      <span
+                        className={`text-[10px] font-bold px-2 py-0.5 rounded border font-mono ${
+                          prov.status === 'healthy'
+                            ? 'text-emerald-400 bg-emerald-950/20 border-emerald-900/30'
+                            : prov.status === 'degraded'
+                              ? 'text-yellow-400 bg-yellow-950/20 border-yellow-900/30'
+                              : 'text-red-400 bg-red-950/20 border-red-900/30'
+                        }`}
+                      >
                         {prov.status.toUpperCase()}
                       </span>
                     </h3>
@@ -115,21 +118,30 @@ export default function Providers() {
                 <div className="grid grid-cols-3 gap-3 mt-5 pt-4 border-t border-[#2A3352]/40 text-center font-mono">
                   <div className="bg-[#050816]/30 border border-[#2A3352] p-2 rounded">
                     <span className="text-[9px] uppercase text-gray-500 block">Avg Latency</span>
-                    <span className="text-xs font-bold text-white block mt-0.5">{prov.latency}ms</span>
+                    <span className="text-xs font-bold text-white block mt-0.5">
+                      {prov.latency}ms
+                    </span>
                   </div>
                   <div className="bg-[#050816]/30 border border-[#2A3352] p-2 rounded">
                     <span className="text-[9px] uppercase text-gray-500 block">Error Rate</span>
-                    <span className="text-xs font-bold text-red-400 block mt-0.5">{(prov.error_rate * 100).toFixed(0)}%</span>
+                    <span className="text-xs font-bold text-red-400 block mt-0.5">
+                      {(prov.error_rate * 100).toFixed(0)}%
+                    </span>
                   </div>
                   <div className="bg-[#050816]/30 border border-[#2A3352] p-2 rounded">
                     <span className="text-[9px] uppercase text-gray-500 block">Models Loaded</span>
-                    <span className="text-xs font-bold text-cyan-400 block mt-0.5">{prov.active_models.length}</span>
+                    <span className="text-xs font-bold text-cyan-400 block mt-0.5">
+                      {prov.active_models.length}
+                    </span>
                   </div>
                 </div>
 
                 <div className="mt-4 flex flex-wrap gap-1.5">
                   {prov.active_models.map((mod: string) => (
-                    <span key={mod} className="text-[9px] font-mono text-gray-400 bg-[#050816] px-2 py-0.5 rounded border border-[#2A3352]">
+                    <span
+                      key={mod}
+                      className="text-[9px] font-mono text-gray-400 bg-[#050816] px-2 py-0.5 rounded border border-[#2A3352]"
+                    >
                       {mod}
                     </span>
                   ))}
@@ -147,9 +159,13 @@ export default function Providers() {
           </div>
           {editingProvider ? (
             <form onSubmit={handleSaveConfig} className="space-y-4">
-              <h4 className="text-sm font-semibold text-white">Configure: {editingProvider.name}</h4>
+              <h4 className="text-sm font-semibold text-white">
+                Configure: {editingProvider.name}
+              </h4>
               <div>
-                <label className="text-xs uppercase text-gray-500 font-semibold tracking-wider block mb-1.5">API Access Secret Key</label>
+                <label className="text-xs uppercase text-gray-500 font-semibold tracking-wider block mb-1.5">
+                  API Access Secret Key
+                </label>
                 <input
                   type="password"
                   required
@@ -160,14 +176,18 @@ export default function Providers() {
                 />
               </div>
               <div>
-                <label className="text-xs uppercase text-gray-500 font-semibold tracking-wider block mb-1.5">Default Judicial Model</label>
+                <label className="text-xs uppercase text-gray-500 font-semibold tracking-wider block mb-1.5">
+                  Default Judicial Model
+                </label>
                 <select
                   value={modelType}
                   onChange={(e) => setModelType(e.target.value)}
                   className="w-full bg-[#050816] text-white border border-[#2A3352] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary cursor-pointer"
                 >
                   {editingProvider.active_models.map((mod: string) => (
-                    <option key={mod} value={mod}>{mod}</option>
+                    <option key={mod} value={mod}>
+                      {mod}
+                    </option>
                   ))}
                 </select>
               </div>

@@ -10,7 +10,7 @@ import {
   Terminal,
   Activity,
   Trash2,
-  Layers2
+  Layers2,
 } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { api } from '../services/api';
@@ -84,7 +84,9 @@ export default function Dashboard() {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="font-heading font-bold text-3xl text-white">Enterprise Workspace</h1>
-          <p className="text-gray-400 text-sm mt-1">Manage evaluation pipelines, datasets and benchmarks.</p>
+          <p className="text-gray-400 text-sm mt-1">
+            Manage evaluation pipelines, datasets and benchmarks.
+          </p>
         </div>
         <button
           onClick={() => setCreateOpen(true)}
@@ -97,16 +99,36 @@ export default function Dashboard() {
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
         {[
-          { title: 'Active Projects', value: projects.length, icon: Layers2, color: 'text-indigo-400' },
+          {
+            title: 'Active Projects',
+            value: projects.length,
+            icon: Layers2,
+            color: 'text-indigo-400',
+          },
           { title: 'Total Datasets', value: totalDatasets, icon: Database, color: 'text-cyan-400' },
-          { title: 'Benchmark Suites', value: totalBenchmarks, icon: Activity, color: 'text-purple-400' },
-          { title: 'Evaluation Runs', value: totalEvaluations, icon: Terminal, color: 'text-emerald-400' },
+          {
+            title: 'Benchmark Suites',
+            value: totalBenchmarks,
+            icon: Activity,
+            color: 'text-purple-400',
+          },
+          {
+            title: 'Evaluation Runs',
+            value: totalEvaluations,
+            icon: Terminal,
+            color: 'text-emerald-400',
+          },
         ].map((stat, idx) => {
           const Icon = stat.icon;
           return (
-            <div key={idx} className="bg-[#111827] border border-[#2A3352] rounded-xl p-5 hover:border-gray-500 transition-colors flex items-center justify-between">
+            <div
+              key={idx}
+              className="bg-[#111827] border border-[#2A3352] rounded-xl p-5 hover:border-gray-500 transition-colors flex items-center justify-between"
+            >
               <div>
-                <span className="text-xs uppercase text-gray-500 font-semibold tracking-wider">{stat.title}</span>
+                <span className="text-xs uppercase text-gray-500 font-semibold tracking-wider">
+                  {stat.title}
+                </span>
                 <h3 className="text-3xl font-bold font-heading text-white mt-1.5">{stat.value}</h3>
               </div>
               <div className={`p-3 bg-[#050816] rounded-lg border border-[#2A3352] ${stat.color}`}>
@@ -124,7 +146,9 @@ export default function Dashboard() {
           <div className="flex justify-between items-center mb-6">
             <div>
               <h3 className="font-heading font-bold text-lg text-white">Evaluation Activity</h3>
-              <p className="text-xs text-gray-500 mt-0.5">Pipeline execution volume over the past 7 days.</p>
+              <p className="text-xs text-gray-500 mt-0.5">
+                Pipeline execution volume over the past 7 days.
+              </p>
             </div>
             <span className="flex items-center gap-1.5 text-xs text-accent font-semibold bg-accent/10 px-2 py-1 rounded">
               <TrendingUp size={12} /> +18.4% this week
@@ -135,14 +159,33 @@ export default function Dashboard() {
               <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <defs>
                   <linearGradient id="colorExecutions" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#4F46E5" stopOpacity={0.4}/>
-                    <stop offset="95%" stopColor="#4F46E5" stopOpacity={0}/>
+                    <stop offset="5%" stopColor="#4F46E5" stopOpacity={0.4} />
+                    <stop offset="95%" stopColor="#4F46E5" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <XAxis dataKey="name" stroke="#9ca3af" fontSize={11} tickLine={false} axisLine={false} />
+                <XAxis
+                  dataKey="name"
+                  stroke="#9ca3af"
+                  fontSize={11}
+                  tickLine={false}
+                  axisLine={false}
+                />
                 <YAxis stroke="#9ca3af" fontSize={11} tickLine={false} axisLine={false} />
-                <Tooltip contentStyle={{ backgroundColor: '#111827', borderColor: '#2A3352', borderRadius: '8px' }} />
-                <Area type="monotone" dataKey="executions" stroke="#4F46E5" strokeWidth={2} fillOpacity={1} fill="url(#colorExecutions)" />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: '#111827',
+                    borderColor: '#2A3352',
+                    borderRadius: '8px',
+                  }}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="executions"
+                  stroke="#4F46E5"
+                  strokeWidth={2}
+                  fillOpacity={1}
+                  fill="url(#colorExecutions)"
+                />
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -152,7 +195,9 @@ export default function Dashboard() {
         <div className="bg-[#111827] border border-[#2A3352] rounded-xl p-6 flex flex-col justify-between">
           <div>
             <h3 className="font-heading font-bold text-lg text-white">System Performance</h3>
-            <p className="text-xs text-gray-500 mt-0.5">Real-time infrastructure health parameters.</p>
+            <p className="text-xs text-gray-500 mt-0.5">
+              Real-time infrastructure health parameters.
+            </p>
             <div className="space-y-4 mt-6">
               <div className="flex justify-between items-center text-sm border-b border-[#2A3352]/40 pb-2">
                 <span className="text-gray-400">REST API Status</span>
@@ -175,8 +220,12 @@ export default function Dashboard() {
             </div>
           </div>
           <div className="pt-4 border-t border-[#2A3352] mt-6 flex justify-between items-center text-xs text-gray-500">
-            <span>Server Response Time: <b className="text-white">12ms</b></span>
-            <span>CLI Engine: <b className="text-white">1.0.4</b></span>
+            <span>
+              Server Response Time: <b className="text-white">12ms</b>
+            </span>
+            <span>
+              CLI Engine: <b className="text-white">1.0.4</b>
+            </span>
           </div>
         </div>
       </div>
@@ -185,7 +234,9 @@ export default function Dashboard() {
       <div className="bg-[#111827] border border-[#2A3352] rounded-xl overflow-hidden">
         <div className="px-6 py-5 border-b border-[#2A3352]">
           <h3 className="font-heading font-bold text-lg text-white">Projects</h3>
-          <p className="text-xs text-gray-500 mt-0.5">Select a project to manage datasets, evaluations and benchmarks.</p>
+          <p className="text-xs text-gray-500 mt-0.5">
+            Select a project to manage datasets, evaluations and benchmarks.
+          </p>
         </div>
         {loading ? (
           <div className="p-8 text-center text-gray-400">Loading projects...</div>
@@ -211,15 +262,24 @@ export default function Dashboard() {
                 <div className="space-y-1 max-w-xl">
                   <h4 className="font-heading font-bold text-white text-base group-hover:text-primary transition-colors flex items-center gap-2">
                     {proj.name}
-                    <ArrowRight size={14} className="opacity-0 group-hover:opacity-100 transition-opacity text-primary" />
+                    <ArrowRight
+                      size={14}
+                      className="opacity-0 group-hover:opacity-100 transition-opacity text-primary"
+                    />
                   </h4>
                   <p className="text-sm text-gray-400 line-clamp-1">{proj.description}</p>
                 </div>
                 <div className="flex items-center gap-6 mt-4 sm:mt-0 text-sm text-gray-500 self-end sm:self-auto">
                   <div className="flex gap-4">
-                    <span><b>{proj.datasets_count}</b> datasets</span>
-                    <span><b>{proj.benchmarks_count}</b> benchmarks</span>
-                    <span><b>{proj.evaluations_count}</b> runs</span>
+                    <span>
+                      <b>{proj.datasets_count}</b> datasets
+                    </span>
+                    <span>
+                      <b>{proj.benchmarks_count}</b> benchmarks
+                    </span>
+                    <span>
+                      <b>{proj.evaluations_count}</b> runs
+                    </span>
                   </div>
                   <button
                     onClick={(e) => handleDeleteProject(proj.id, e)}
@@ -251,7 +311,9 @@ export default function Dashboard() {
             </div>
             <form onSubmit={handleCreateProject} className="p-6 space-y-4">
               <div>
-                <label className="text-xs uppercase text-gray-500 font-semibold tracking-wider block mb-1.5">Project Name</label>
+                <label className="text-xs uppercase text-gray-500 font-semibold tracking-wider block mb-1.5">
+                  Project Name
+                </label>
                 <input
                   type="text"
                   required
@@ -262,7 +324,9 @@ export default function Dashboard() {
                 />
               </div>
               <div>
-                <label className="text-xs uppercase text-gray-500 font-semibold tracking-wider block mb-1.5">Description</label>
+                <label className="text-xs uppercase text-gray-500 font-semibold tracking-wider block mb-1.5">
+                  Description
+                </label>
                 <textarea
                   value={newProjDesc}
                   onChange={(e) => setNewProjDesc(e.target.value)}
@@ -297,8 +361,20 @@ export default function Dashboard() {
 // Simple Helper X close icon
 function X({ size }: { size?: number }) {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" width={size || 24} height={size || 24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-x">
-      <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={size || 24}
+      height={size || 24}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="lucide lucide-x"
+    >
+      <path d="M18 6 6 18" />
+      <path d="m6 6 12 12" />
     </svg>
   );
 }
