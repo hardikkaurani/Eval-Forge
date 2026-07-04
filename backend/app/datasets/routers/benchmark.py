@@ -10,6 +10,7 @@ from app.datasets.schemas.benchmark import (
     BenchmarkSuiteDetailResponse,
     BenchmarkSuiteResponse,
     BenchmarkSuiteUpdate,
+    BenchmarkSuiteListResponse,
 )
 from app.datasets.services.benchmark import BenchmarkService
 
@@ -35,7 +36,7 @@ async def create_benchmark_suite(
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.get("/", response_model=Dict[str, Any])
+@router.get("/", response_model=BenchmarkSuiteListResponse)
 async def list_benchmark_suites(
     project_id: str = Query(..., description="Project ID"),
     skip: int = Query(0, ge=0),
