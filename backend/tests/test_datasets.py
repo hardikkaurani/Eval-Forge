@@ -222,7 +222,7 @@ def test_experiment_flow(client):
     project_id = create_test_project(client)
 
     # 1. Import a dataset to get a valid version
-    csv_data = "prompt,reference_output\nSolve 5+5,10\n"
+    csv_data = "prompt,candidate_output,reference_output\nSolve 5+5,10,10\n"
     resp = client.post(
         "/api/v1/datasets/import",
         data={"project_id": project_id, "dataset_name": "Experiment Dataset", "version_label": "v1"},
