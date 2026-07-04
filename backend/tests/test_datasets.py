@@ -216,3 +216,51 @@ def test_dataset_diff_rollback_and_benchmarks(client):
     # Delete suite
     resp = client.delete(f"/api/v1/benchmarks/{suite_id}")
     assert resp.status_code == 204
+
+
+def test_experiment_flow(client):
+    project_id = create_test_project(client)
+
+    # 1. Import a dataset to get a valid version
+    csv_data = "prompt,reference_output\nSolve 5+5,10\n"
+    resp = client.post(
+        "/api/v1/datasets/import",
+        data={"project_id": project_id, "dataset_name": "Experiment Dataset", "version_label": "v1"},
+        files={"file": ("dataset.csv", csv_data, "text/csv")}
+    )
+    assert resp.status_code == 202
+    version_id = resp.json()["version_id"]
+
+    # 2. Create Experiment
+    exp_payload = {
+        "name": "Math Evaluation Experiment",
+        "description": "Factual math accuracy checks",
+        "dataset_version_id": version_id,
+        "judge": "rubric",
+        "provider": "openai",
+        "configuration": {"temperature": 0.0, "threshold": 0.8},
+    }
+    resp = client.post(f"/api/v1/experiments/?project_id={project_id}", json=exp_payload)
+    assert resp.status_code == 201
+    exp = resp.json()
+    assert exp["name"] == "Math Evaluation Experiment"
+    assert exp["status"] == "PENDING"
+    experiment_id = exp["id"]
+
+    # 3. List Experiments
+    resp = client.get(f"/api/v1/experiments/?project_id={project_id}")
+    assert resp.status_code == 200
+    assert resp.json()["total"] == 1
+
+    # 4. Execute Experiment (Runs mocked OpenAI evaluation)
+    resp = client.post(f"/api/v1/experiments/{experiment_id}/execute")
+    assert resp.status_code == 200
+    executed = resp.json()
+    assert executed["status"] == "COMPLETED"
+    assert "metrics" in executed
+    assert executed["metrics"]["total_cases"] == 1
+    assert len(executed["results"]) == 1
+
+    # 5. Delete Experiment
+    resp = client.delete(f"/api/v1/experiments/{experiment_id}")
+    assert resp.status_code == 204
