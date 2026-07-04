@@ -43,3 +43,12 @@ class ExperimentResponse(ExperimentBase):
 class ExperimentDetailResponse(ExperimentResponse):
     metrics: Dict[str, Any] = Field(default_factory=dict)
     results: List[Dict[str, Any]] = Field(default_factory=list)
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class ExperimentListResponse(BaseModel):
+    experiments: List[ExperimentResponse]
+    total: int
+    skip: int
+    limit: int
