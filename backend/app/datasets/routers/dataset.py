@@ -20,6 +20,8 @@ from app.datasets.schemas.dataset import (
     DatasetResponse,
     DatasetUpdate,
     DatasetVersionResponse,
+    DatasetListResponse,
+    DatasetRecordsPaginated,
 )
 from app.datasets.schemas.import_export import ExportJobResponse, ImportJobResponse
 from app.datasets.services.dataset import DatasetService
@@ -52,7 +54,7 @@ async def create_dataset(
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.get("/", response_model=Dict[str, Any])
+@router.get("/", response_model=DatasetListResponse)
 async def list_datasets(
     project_id: str = Query(..., description="Project ID"),
     skip: int = Query(0, ge=0),
@@ -209,7 +211,7 @@ async def list_dataset_versions(
         raise HTTPException(status_code=404, detail=str(e))
 
 
-@router.get("/versions/{version_id}/records", response_model=Dict[str, Any])
+@router.get("/versions/{version_id}/records", response_model=DatasetRecordsPaginated)
 async def list_version_records(
     version_id: str,
     skip: int = Query(0, ge=0),
