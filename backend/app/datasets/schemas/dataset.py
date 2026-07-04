@@ -97,3 +97,17 @@ class DatasetDiffItem(BaseModel):
     change_type: str  # 'added', 'removed', 'modified'
     prompt_diff: Optional[str] = None
     field_diffs: Optional[Dict[str, Dict[str, Any]]] = None  # fieldname -> {'old': v, 'new': v}
+
+
+class DatasetListResponse(BaseModel):
+    datasets: List[DatasetResponse]
+    total: int
+    skip: int
+    limit: int
+
+
+class DatasetRecordsPaginated(BaseModel):
+    records: List[DatasetRecordResponse]
+    total: int
+    skip: int
+    limit: int
