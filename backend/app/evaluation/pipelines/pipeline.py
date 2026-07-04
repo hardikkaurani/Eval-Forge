@@ -205,10 +205,10 @@ class EvaluationPipeline:
                 except Exception as exc:  # noqa: BLE001
                     last_error = exc
                     logger.error(
-                        "Failed to evaluate test case",
-                        prompt=case.input_prompt[:120],
-                        attempt=attempt + 1,
-                        error=str(exc),
+                        "Failed to evaluate test case: prompt=%s, attempt=%d, error=%s",
+                        case.input_prompt[:120],
+                        attempt + 1,
+                        str(exc),
                     )
                     if not EvaluationPipeline._retryable(exc) or attempt >= retry_count:
                         break
