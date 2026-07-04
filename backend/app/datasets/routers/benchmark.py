@@ -4,13 +4,15 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.session import get_db
-from app.datasets.exceptions.exceptions import DatasetException, BenchmarkSuiteNotFoundException
+from app.datasets.exceptions.exceptions import (
+    BenchmarkSuiteNotFoundException,
+    DatasetException,
+)
 from app.datasets.schemas.benchmark import (
     BenchmarkSuiteCreate,
     BenchmarkSuiteDetailResponse,
-    BenchmarkSuiteResponse,
-    BenchmarkSuiteUpdate,
     BenchmarkSuiteListResponse,
+    BenchmarkSuiteUpdate,
 )
 from app.datasets.services.benchmark import BenchmarkService
 
@@ -68,7 +70,9 @@ async def get_dashboard_metrics(
     try:
         return await service.get_dashboard_metrics(project_id)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to fetch dashboard metrics: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Failed to fetch dashboard metrics: {str(e)}"
+        )
 
 
 @router.get("/{suite_id}", response_model=BenchmarkSuiteDetailResponse)

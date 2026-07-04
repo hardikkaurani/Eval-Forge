@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Optional, Tuple
 
-from sqlalchemy import select, func, and_
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.datasets.exceptions.exceptions import BenchmarkSuiteNotFoundException
@@ -96,7 +96,9 @@ class BenchmarkService:
 
         # 2. Benchmark suite stats
         bs_count_result = await self.db.execute(
-            select(func.count(BenchmarkSuite.id)).where(BenchmarkSuite.project_id == project_id)
+            select(func.count(BenchmarkSuite.id)).where(
+                BenchmarkSuite.project_id == project_id
+            )
         )
         total_suites = bs_count_result.scalar() or 0
 
@@ -112,7 +114,7 @@ class BenchmarkService:
             .where(Experiment.project_id == project_id)
             .group_by(Experiment.status)
         )
-        status_distribution = {status: count for status, count in exp_status_result.all()}
+        status_distribution = dict(exp_status_result.all())
 
         # 4. Total record count in all dataset versions
         record_count_result = await self.db.execute(

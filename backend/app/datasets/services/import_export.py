@@ -1,18 +1,20 @@
 import csv
 import io
 import json
-from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.datasets.exceptions.exceptions import DatasetValidationException, InvalidDatasetFormatException
+from app.datasets.exceptions.exceptions import (
+    DatasetValidationException,
+    InvalidDatasetFormatException,
+)
 from app.datasets.metadata.engine import DatasetMetadataEngine
 from app.datasets.parsers.parsers import DatasetParser
 from app.datasets.repositories.dataset import DatasetRepository
 from app.datasets.storage.local import LocalStorage
 from app.datasets.validators.validators import DatasetValidator
-from app.models.dataset import ImportJob, ExportJob
+from app.models.dataset import ExportJob, ImportJob
 from app.utils.time import get_utc_now
 
 
@@ -69,7 +71,9 @@ class ImportExportService:
             await self.db.commit()
 
             # 1. Encoding check
-            is_valid_encoding, err = DatasetValidator.validate_file_content(file_content)
+            is_valid_encoding, err = DatasetValidator.validate_file_content(
+                file_content
+            )
             if not is_valid_encoding:
                 raise DatasetValidationException(f"Encoding check failed: {err}")
 
@@ -156,7 +160,9 @@ class ImportExportService:
             await self.db.commit()
             raise e
 
-    async def create_export_job(self, project_id: str, file_format: str, dataset_id: Optional[str] = None) -> ExportJob:
+    async def create_export_job(
+        self, project_id: str, file_format: str, dataset_id: Optional[str] = None
+    ) -> ExportJob:
         job = ExportJob(
             project_id=project_id,
             dataset_id=dataset_id,
@@ -227,7 +233,9 @@ class ImportExportService:
                 lines = [json.dumps(row, default=str) for row in data]
                 buffer.write("\n".join(lines).encode("utf-8"))
             else:
-                raise InvalidDatasetFormatException(job.file_format, "Export format not supported.")
+                raise InvalidDatasetFormatException(
+                    job.file_format, "Export format not supported."
+                )
 
             buffer.seek(0)
 

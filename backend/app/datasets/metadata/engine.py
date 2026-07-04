@@ -54,8 +54,14 @@ class DatasetMetadataEngine:
 
         # Calculations
         unique_prompts = len(prompts)
-        duplicate_rate = (total_records - unique_prompts) / total_records if total_records > 0 else 0.0
-        missing_references_rate = missing_references / total_records if total_records > 0 else 0.0
+        duplicate_rate = (
+            (total_records - unique_prompts) / total_records
+            if total_records > 0
+            else 0.0
+        )
+        missing_references_rate = (
+            missing_references / total_records if total_records > 0 else 0.0
+        )
 
         # Quality scoring (starts at 100, drops on issues)
         quality_score = 100.0
@@ -79,5 +85,7 @@ class DatasetMetadataEngine:
             "missing_references_rate": round(missing_references_rate, 4),
             "unique_prompts_count": unique_prompts,
             "unique_tags": list(tag_set),
-            "token_estimate": int((prompt_chars / 4) * 1.2),  # rough token estimate (1 token ~4 chars)
+            "token_estimate": int(
+                (prompt_chars / 4) * 1.2
+            ),  # rough token estimate (1 token ~4 chars)
         }

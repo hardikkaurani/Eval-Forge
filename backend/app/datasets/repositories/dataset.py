@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Optional, Tuple
 
-from sqlalchemy import select, and_, or_, func
+from sqlalchemy import and_, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -92,7 +92,9 @@ class DatasetRepository:
 
         return datasets, total
 
-    async def update_dataset(self, dataset_id: str, update_data: Dict[str, Any]) -> Optional[Dataset]:
+    async def update_dataset(
+        self, dataset_id: str, update_data: Dict[str, Any]
+    ) -> Optional[Dataset]:
         dataset = await self.get_dataset(dataset_id)
         if not dataset:
             return None
@@ -144,10 +146,17 @@ class DatasetRepository:
         )
         return result.scalar_one_or_none()
 
-    async def get_version_by_label(self, dataset_id: str, version_label: str) -> Optional[DatasetVersion]:
+    async def get_version_by_label(
+        self, dataset_id: str, version_label: str
+    ) -> Optional[DatasetVersion]:
         result = await self.db.execute(
             select(DatasetVersion)
-            .where(and_(DatasetVersion.dataset_id == dataset_id, DatasetVersion.version == version_label))
+            .where(
+                and_(
+                    DatasetVersion.dataset_id == dataset_id,
+                    DatasetVersion.version == version_label,
+                )
+            )
             .options(selectinload(DatasetVersion.records))
         )
         return result.scalar_one_or_none()
@@ -160,7 +169,9 @@ class DatasetRepository:
         )
         return list(result.scalars().all())
 
-    async def bulk_create_records(self, version_id: str, records_data: List[Dict[str, Any]]) -> List[DatasetRecord]:
+    async def bulk_create_records(
+        self, version_id: str, records_data: List[Dict[str, Any]]
+    ) -> List[DatasetRecord]:
         records = []
         for row in records_data:
             rec = DatasetRecord(

@@ -1,14 +1,21 @@
 import json
-import pytest
+
 from app.datasets.parsers.parsers import DatasetParser
 from app.datasets.validators.validators import DatasetValidator
-from app.datasets.exceptions.exceptions import DatasetValidationException, InvalidDatasetFormatException
 
 
 def test_validator_with_valid_records():
     records = [
-        {"prompt": "Translate 'hello'", "reference_output": "bonjour", "expected_score": 1.0},
-        {"prompt": "Write a poem", "ground_truth": "Roses are red", "tags": ["creative"]},
+        {
+            "prompt": "Translate 'hello'",
+            "reference_output": "bonjour",
+            "expected_score": 1.0,
+        },
+        {
+            "prompt": "Write a poem",
+            "ground_truth": "Roses are red",
+            "tags": ["creative"],
+        },
     ]
     report = DatasetValidator.validate_records(records)
     assert report["valid"] is True
@@ -89,7 +96,9 @@ def test_dataset_crud_and_import(client):
         "visibility": "private",
         "tags": ["e2e", "test"],
     }
-    resp = client.post(f"/api/v1/datasets/?project_id={project_id}", json=dataset_payload)
+    resp = client.post(
+        f"/api/v1/datasets/?project_id={project_id}", json=dataset_payload
+    )
     assert resp.status_code == 201
     dataset = resp.json()
     assert dataset["name"] == "E2E Test Dataset"
@@ -154,8 +163,12 @@ def test_dataset_diff_rollback_and_benchmarks(client):
     csv_v1 = "prompt,reference_output\nPrompt A,Ref A\nPrompt B,Ref B\n"
     resp = client.post(
         "/api/v1/datasets/import",
-        data={"project_id": project_id, "dataset_name": "Diff Dataset", "version_label": "v1"},
-        files={"file": ("dataset_v1.csv", csv_v1, "text/csv")}
+        data={
+            "project_id": project_id,
+            "dataset_name": "Diff Dataset",
+            "version_label": "v1",
+        },
+        files={"file": ("dataset_v1.csv", csv_v1, "text/csv")},
     )
     assert resp.status_code == 202
     dataset_id = resp.json()["dataset_id"]
@@ -164,8 +177,13 @@ def test_dataset_diff_rollback_and_benchmarks(client):
     csv_v2 = "prompt,reference_output\nPrompt B,Ref B Modified\nPrompt C,Ref C\n"
     resp = client.post(
         "/api/v1/datasets/import",
-        data={"project_id": project_id, "dataset_name": "Diff Dataset", "existing_dataset_id": dataset_id, "version_label": "v2"},
-        files={"file": ("dataset_v2.csv", csv_v2, "text/csv")}
+        data={
+            "project_id": project_id,
+            "dataset_name": "Diff Dataset",
+            "existing_dataset_id": dataset_id,
+            "version_label": "v2",
+        },
+        files={"file": ("dataset_v2.csv", csv_v2, "text/csv")},
     )
     assert resp.status_code == 202
 
@@ -194,7 +212,9 @@ def test_dataset_diff_rollback_and_benchmarks(client):
         "tags": ["math", "physics"],
         "dataset_ids": [dataset_id],
     }
-    resp = client.post(f"/api/v1/benchmarks/?project_id={project_id}", json=suite_payload)
+    resp = client.post(
+        f"/api/v1/benchmarks/?project_id={project_id}", json=suite_payload
+    )
     assert resp.status_code == 201
     suite = resp.json()
     assert suite["name"] == "E2E Benchmark Suite"
@@ -202,7 +222,9 @@ def test_dataset_diff_rollback_and_benchmarks(client):
     suite_id = suite["id"]
 
     # Update suite
-    resp = client.put(f"/api/v1/benchmarks/{suite_id}", json={"name": "Updated Benchmark Suite"})
+    resp = client.put(
+        f"/api/v1/benchmarks/{suite_id}", json={"name": "Updated Benchmark Suite"}
+    )
     assert resp.status_code == 200
     assert resp.json()["name"] == "Updated Benchmark Suite"
 
@@ -225,8 +247,12 @@ def test_experiment_flow(client):
     csv_data = "prompt,candidate_output,reference_output\nSolve 5+5,10,10\n"
     resp = client.post(
         "/api/v1/datasets/import",
-        data={"project_id": project_id, "dataset_name": "Experiment Dataset", "version_label": "v1"},
-        files={"file": ("dataset.csv", csv_data, "text/csv")}
+        data={
+            "project_id": project_id,
+            "dataset_name": "Experiment Dataset",
+            "version_label": "v1",
+        },
+        files={"file": ("dataset.csv", csv_data, "text/csv")},
     )
     assert resp.status_code == 202
     version_id = resp.json()["version_id"]
@@ -240,7 +266,9 @@ def test_experiment_flow(client):
         "provider": "openai",
         "configuration": {"temperature": 0.0, "threshold": 0.8},
     }
-    resp = client.post(f"/api/v1/experiments/?project_id={project_id}", json=exp_payload)
+    resp = client.post(
+        f"/api/v1/experiments/?project_id={project_id}", json=exp_payload
+    )
     assert resp.status_code == 201
     exp = resp.json()
     assert exp["name"] == "Math Evaluation Experiment"

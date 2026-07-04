@@ -22,7 +22,9 @@ class LocalStorage(BaseStorage):
             with open(full_path, "wb") as f:
                 shutil.copyfileobj(content, f)
         except Exception as e:
-            raise StorageException(f"Failed to save file locally at '{file_path}': {str(e)}")
+            raise StorageException(
+                f"Failed to save file locally at '{file_path}': {str(e)}"
+            )
 
         return full_path
 
@@ -35,7 +37,9 @@ class LocalStorage(BaseStorage):
             with open(full_path, "rb") as f:
                 return BytesIO(f.read())
         except Exception as e:
-            raise StorageException(f"Failed to read file locally at '{file_path}': {str(e)}")
+            raise StorageException(
+                f"Failed to read file locally at '{file_path}': {str(e)}"
+            )
 
     async def delete(self, file_path: str) -> bool:
         full_path = os.path.join(self.base_directory, file_path)
@@ -46,7 +50,9 @@ class LocalStorage(BaseStorage):
             os.remove(full_path)
             return True
         except Exception as e:
-            raise StorageException(f"Failed to delete file locally at '{file_path}': {str(e)}")
+            raise StorageException(
+                f"Failed to delete file locally at '{file_path}': {str(e)}"
+            )
 
     def get_url(self, file_path: str) -> str:
         # Returns a relative path suitable for download endpoints

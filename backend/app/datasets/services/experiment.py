@@ -1,5 +1,4 @@
 import logging
-from datetime import datetime
 from typing import Any, Dict, List, Optional, Tuple
 
 from sqlalchemy import select
@@ -106,7 +105,9 @@ class ExperimentService:
                 experiment.dataset_version_id, limit=1000000
             )
             if not records:
-                raise ValueError("No records found in the associated dataset version to evaluate.")
+                raise ValueError(
+                    "No records found in the associated dataset version to evaluate."
+                )
 
             # 3. Map records to TestCaseInput schemas
             test_cases = []
@@ -161,7 +162,9 @@ class ExperimentService:
                         "score": r.score,
                         "passed": r.passed,
                         "reasoning": r.reasoning,
-                        "evaluated_at": r.evaluated_at.isoformat() if r.evaluated_at else None,
+                        "evaluated_at": r.evaluated_at.isoformat()
+                        if r.evaluated_at
+                        else None,
                     }
                 )
 

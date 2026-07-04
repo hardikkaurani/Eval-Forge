@@ -25,7 +25,9 @@ class DatasetParser:
         elif fmt == "parquet":
             return DatasetParser.parse_parquet(file_content)
         else:
-            raise InvalidDatasetFormatException(file_format, "No parser registered for this format.")
+            raise InvalidDatasetFormatException(
+                file_format, "No parser registered for this format."
+            )
 
     @staticmethod
     def parse_csv(content: bytes) -> List[Dict[str, Any]]:
@@ -36,8 +38,14 @@ class DatasetParser:
             records = []
             for row in reader:
                 # Convert tags string (if present as comma separated) to list
-                if "tags" in row and isinstance(row["tags"], str) and row["tags"].strip():
-                    row["tags"] = [t.strip() for t in row["tags"].split(",") if t.strip()]
+                if (
+                    "tags" in row
+                    and isinstance(row["tags"], str)
+                    and row["tags"].strip()
+                ):
+                    row["tags"] = [
+                        t.strip() for t in row["tags"].split(",") if t.strip()
+                    ]
                 elif "tags" not in row:
                     row["tags"] = []
 
@@ -50,7 +58,11 @@ class DatasetParser:
 
                 # Parse custom_fields and metadata_json if they exist as serialized json
                 for json_field in ["custom_fields", "metadata_json"]:
-                    if json_field in row and isinstance(row[json_field], str) and row[json_field].strip():
+                    if (
+                        json_field in row
+                        and isinstance(row[json_field], str)
+                        and row[json_field].strip()
+                    ):
                         try:
                             row[json_field] = json.loads(row[json_field])
                         except json.JSONDecodeError:
@@ -68,18 +80,28 @@ class DatasetParser:
             data = json.loads(content.decode("utf-8"))
             if isinstance(data, list):
                 records = data
-            elif isinstance(data, dict) and "records" in data and isinstance(data["records"], list):
+            elif (
+                isinstance(data, dict)
+                and "records" in data
+                and isinstance(data["records"], list)
+            ):
                 records = data["records"]
             else:
-                raise ValueError("JSON must be a list of records or an object containing a 'records' key list.")
+                raise ValueError(
+                    "JSON must be a list of records or an object containing a 'records' key list."
+                )
 
             # Validate type of each record
             for r in records:
                 if not isinstance(r, dict):
-                    raise ValueError("Each record in the JSON dataset must be an object.")
+                    raise ValueError(
+                        "Each record in the JSON dataset must be an object."
+                    )
             return records
         except Exception as e:
-            raise InvalidDatasetFormatException("json", f"JSON parsing failed: {str(e)}")
+            raise InvalidDatasetFormatException(
+                "json", f"JSON parsing failed: {str(e)}"
+            )
 
     @staticmethod
     def parse_jsonl(content: bytes) -> List[Dict[str, Any]]:
@@ -94,13 +116,15 @@ class DatasetParser:
                 try:
                     record = json.loads(line_str)
                     if not isinstance(record, dict):
-                        raise ValueError(f"Line {idx+1} is not a valid JSON object.")
+                        raise ValueError(f"Line {idx + 1} is not a valid JSON object.")
                     records.append(record)
                 except json.JSONDecodeError as je:
-                    raise ValueError(f"Line {idx+1} is invalid JSON: {str(je)}")
+                    raise ValueError(f"Line {idx + 1} is invalid JSON: {str(je)}")
             return records
         except Exception as e:
-            raise InvalidDatasetFormatException("jsonl", f"JSONL parsing failed: {str(e)}")
+            raise InvalidDatasetFormatException(
+                "jsonl", f"JSONL parsing failed: {str(e)}"
+            )
 
     @staticmethod
     def parse_excel(content: bytes) -> List[Dict[str, Any]]:
@@ -109,7 +133,8 @@ class DatasetParser:
             import pandas as pd
         except ImportError:
             raise InvalidDatasetFormatException(
-                "excel", "The 'pandas' and 'openpyxl' libraries are required to parse Excel files."
+                "excel",
+                "The 'pandas' and 'openpyxl' libraries are required to parse Excel files.",
             )
 
         try:
@@ -118,7 +143,9 @@ class DatasetParser:
             df = df.where(pd.notnull(df), None)
             return df.to_dict(orient="records")
         except Exception as e:
-            raise InvalidDatasetFormatException("excel", f"Excel parsing failed: {str(e)}")
+            raise InvalidDatasetFormatException(
+                "excel", f"Excel parsing failed: {str(e)}"
+            )
 
     @staticmethod
     def parse_parquet(content: bytes) -> List[Dict[str, Any]]:
@@ -127,7 +154,8 @@ class DatasetParser:
             import pandas as pd
         except ImportError:
             raise InvalidDatasetFormatException(
-                "parquet", "The 'pandas' and 'pyarrow' libraries are required to parse Parquet files."
+                "parquet",
+                "The 'pandas' and 'pyarrow' libraries are required to parse Parquet files.",
             )
 
         try:
@@ -135,7 +163,9 @@ class DatasetParser:
             df = df.where(pd.notnull(df), None)
             return df.to_dict(orient="records")
         except Exception as e:
-            raise InvalidDatasetFormatException("parquet", f"Parquet parsing failed: {str(e)}")
+            raise InvalidDatasetFormatException(
+                "parquet", f"Parquet parsing failed: {str(e)}"
+            )
 
     @staticmethod
     def parse_huggingface(repo_id: str, split: str = "train") -> List[Dict[str, Any]]:
@@ -144,7 +174,8 @@ class DatasetParser:
             from datasets import load_dataset
         except ImportError:
             raise InvalidDatasetFormatException(
-                "huggingface", "The 'datasets' library is required to import from HuggingFace."
+                "huggingface",
+                "The 'datasets' library is required to import from HuggingFace.",
             )
 
         try:
@@ -154,4 +185,6 @@ class DatasetParser:
                 records.append(dict(row))
             return records
         except Exception as e:
-            raise InvalidDatasetFormatException("huggingface", f"HuggingFace download/parsing failed: {str(e)}")
+            raise InvalidDatasetFormatException(
+                "huggingface", f"HuggingFace download/parsing failed: {str(e)}"
+            )

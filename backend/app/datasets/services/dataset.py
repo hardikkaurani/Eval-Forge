@@ -2,7 +2,9 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.datasets.exceptions.exceptions import DatasetNotFoundException, DatasetValidationException
+from app.datasets.exceptions.exceptions import (
+    DatasetNotFoundException,
+)
 from app.datasets.repositories.dataset import DatasetRepository
 from app.datasets.schemas.dataset import DatasetDiffItem
 from app.models.dataset import Dataset, DatasetVersion
@@ -79,7 +81,9 @@ class DatasetService:
             visibility=visibility,
         )
 
-    async def update_dataset(self, dataset_id: str, update_data: Dict[str, Any]) -> Dataset:
+    async def update_dataset(
+        self, dataset_id: str, update_data: Dict[str, Any]
+    ) -> Dataset:
         dataset = await self.dataset_repo.update_dataset(dataset_id, update_data)
         if not dataset:
             raise DatasetNotFoundException(dataset_id)
@@ -92,10 +96,16 @@ class DatasetService:
             raise DatasetNotFoundException(dataset_id)
         await self.db.commit()
 
-    async def get_dataset_version_by_label(self, dataset_id: str, version_label: str) -> DatasetVersion:
-        version = await self.dataset_repo.get_version_by_label(dataset_id, version_label)
+    async def get_dataset_version_by_label(
+        self, dataset_id: str, version_label: str
+    ) -> DatasetVersion:
+        version = await self.dataset_repo.get_version_by_label(
+            dataset_id, version_label
+        )
         if not version:
-            raise DatasetNotFoundException(dataset_id, f"Version '{version_label}' not found.")
+            raise DatasetNotFoundException(
+                dataset_id, f"Version '{version_label}' not found."
+            )
         return version
 
     async def list_versions(self, dataset_id: str) -> List[DatasetVersion]:
@@ -103,7 +113,9 @@ class DatasetService:
         await self.get_dataset(dataset_id)
         return await self.dataset_repo.list_versions(dataset_id)
 
-    async def get_records(self, version_id: str, skip: int = 0, limit: int = 100) -> Tuple[Any, int]:
+    async def get_records(
+        self, version_id: str, skip: int = 0, limit: int = 100
+    ) -> Tuple[Any, int]:
         return await self.dataset_repo.get_records(version_id, skip=skip, limit=limit)
 
     async def generate_diff(
@@ -134,7 +146,14 @@ class DatasetService:
             else:
                 rec_b = map_b[prompt]
                 field_diffs = {}
-                for field in ["input", "context", "reference_output", "candidate_output", "ground_truth", "expected_score"]:
+                for field in [
+                    "input",
+                    "context",
+                    "reference_output",
+                    "candidate_output",
+                    "ground_truth",
+                    "expected_score",
+                ]:
                     val_a = getattr(rec_a, field)
                     val_b = getattr(rec_b, field)
                     if val_a != val_b:
@@ -162,10 +181,16 @@ class DatasetService:
 
         return diffs
 
-    async def rollback_version(self, dataset_id: str, target_version_label: str) -> DatasetVersion:
+    async def rollback_version(
+        self, dataset_id: str, target_version_label: str
+    ) -> DatasetVersion:
         """Promotes an old version by creating a new version cloned from the target version."""
-        target_version = await self.get_dataset_version_by_label(dataset_id, target_version_label)
-        records, _ = await self.dataset_repo.get_records(target_version.id, limit=1000000)
+        target_version = await self.get_dataset_version_by_label(
+            dataset_id, target_version_label
+        )
+        records, _ = await self.dataset_repo.get_records(
+            target_version.id, limit=1000000
+        )
 
         # Find all current versions to compute next label index
         versions = await self.dataset_repo.list_versions(dataset_id)

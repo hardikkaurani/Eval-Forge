@@ -1,16 +1,15 @@
-from typing import Any, Dict, Optional
+from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.session import get_db
-from app.datasets.exceptions.exceptions import DatasetException, ExperimentNotFoundException
+from app.datasets.exceptions.exceptions import ExperimentNotFoundException
 from app.datasets.schemas.experiment import (
     ExperimentCreate,
     ExperimentDetailResponse,
-    ExperimentResponse,
-    ExperimentUpdate,
     ExperimentListResponse,
+    ExperimentResponse,
 )
 from app.datasets.services.experiment import ExperimentService
 

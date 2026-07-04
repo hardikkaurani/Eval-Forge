@@ -1,19 +1,28 @@
 from datetime import datetime
 from typing import Any, Dict, List, Optional
+
 from pydantic import BaseModel, ConfigDict, Field
 
 
 class ExperimentBase(BaseModel):
     name: str = Field(..., description="Descriptive experiment run name.")
-    description: Optional[str] = Field(None, description="Detailed explanation of the experiment scope.")
-    judge: str = Field(..., description="Name of the judge (e.g. rubrics, geval, pairwise).")
+    description: Optional[str] = Field(
+        None, description="Detailed explanation of the experiment scope."
+    )
+    judge: str = Field(
+        ..., description="Name of the judge (e.g. rubrics, geval, pairwise)."
+    )
     provider: str = Field(..., description="LLM provider name (e.g. openai, gemini).")
     model: Optional[str] = Field(None, description="LLM model name.")
-    configuration: Dict[str, Any] = Field(default_factory=dict, description="Pipeline and judge settings.")
+    configuration: Dict[str, Any] = Field(
+        default_factory=dict, description="Pipeline and judge settings."
+    )
 
 
 class ExperimentCreate(ExperimentBase):
-    dataset_version_id: str = Field(..., description="ID of the dataset version to execute over.")
+    dataset_version_id: str = Field(
+        ..., description="ID of the dataset version to execute over."
+    )
 
 
 class ExperimentUpdate(BaseModel):

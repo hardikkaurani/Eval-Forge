@@ -1,10 +1,10 @@
 from typing import Any, Dict, List, Optional, Tuple
 
-from sqlalchemy import delete, func, select, or_
+from sqlalchemy import delete, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.models.dataset import BenchmarkDataset, BenchmarkSuite, Dataset
+from app.models.dataset import BenchmarkDataset, BenchmarkSuite
 
 
 class BenchmarkRepository:
@@ -63,13 +63,17 @@ class BenchmarkRepository:
         total = count_result.scalar() or 0
 
         # Paginated query
-        query = query.order_by(BenchmarkSuite.created_at.desc()).offset(skip).limit(limit)
+        query = (
+            query.order_by(BenchmarkSuite.created_at.desc()).offset(skip).limit(limit)
+        )
         result = await self.db.execute(query)
         suites = list(result.scalars().all())
 
         return suites, total
 
-    async def update_benchmark_suite(self, suite_id: str, update_data: Dict[str, Any]) -> Optional[BenchmarkSuite]:
+    async def update_benchmark_suite(
+        self, suite_id: str, update_data: Dict[str, Any]
+    ) -> Optional[BenchmarkSuite]:
         suite = await self.get_benchmark_suite(suite_id)
         if not suite:
             return None
@@ -93,7 +97,9 @@ class BenchmarkRepository:
     async def set_suite_datasets(self, suite_id: str, dataset_ids: List[str]) -> None:
         # Delete old associations
         await self.db.execute(
-            delete(BenchmarkDataset).where(BenchmarkDataset.benchmark_suite_id == suite_id)
+            delete(BenchmarkDataset).where(
+                BenchmarkDataset.benchmark_suite_id == suite_id
+            )
         )
 
         # Insert new associations

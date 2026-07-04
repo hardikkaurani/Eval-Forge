@@ -1,5 +1,4 @@
 from typing import Any, Dict, List, Tuple
-from app.datasets.exceptions.exceptions import DatasetValidationException
 
 
 class DatasetValidator:
@@ -22,7 +21,9 @@ class DatasetValidator:
 
         if not records:
             report["valid"] = False
-            report["errors"].append({"row": 0, "message": "Dataset contains zero records."})
+            report["errors"].append(
+                {"row": 0, "message": "Dataset contains zero records."}
+            )
             return report
 
         prompts_seen = set()
@@ -34,13 +35,23 @@ class DatasetValidator:
             # 1. Prompt is mandatory
             prompt = row.get("prompt")
             if prompt is None or str(prompt).strip() == "":
-                row_errors.append(f"Row {row_num}: 'prompt' is a required non-empty field.")
+                row_errors.append(
+                    f"Row {row_num}: 'prompt' is a required non-empty field."
+                )
 
             # 2. Check types of common fields
-            for field in ["input", "context", "reference_output", "candidate_output", "ground_truth"]:
+            for field in [
+                "input",
+                "context",
+                "reference_output",
+                "candidate_output",
+                "ground_truth",
+            ]:
                 val = row.get(field)
                 if val is not None and not isinstance(val, str):
-                    row_errors.append(f"Row {row_num}: Field '{field}' must be a string.")
+                    row_errors.append(
+                        f"Row {row_num}: Field '{field}' must be a string."
+                    )
 
             # 3. Check expected_score is float
             expected_score = row.get("expected_score")
@@ -48,14 +59,19 @@ class DatasetValidator:
                 try:
                     float(expected_score)
                 except (ValueError, TypeError):
-                    row_errors.append(f"Row {row_num}: 'expected_score' must be a numeric value.")
+                    row_errors.append(
+                        f"Row {row_num}: 'expected_score' must be a numeric value."
+                    )
 
             # 4. Check for duplicate prompts
             if prompt:
                 p_str = str(prompt).strip()
                 if p_str in prompts_seen:
                     report["warnings"].append(
-                        {"row": row_num, "message": f"Duplicate prompt detected: '{p_str[:50]}...'"}
+                        {
+                            "row": row_num,
+                            "message": f"Duplicate prompt detected: '{p_str[:50]}...'",
+                        }
                     )
                 else:
                     prompts_seen.add(p_str)

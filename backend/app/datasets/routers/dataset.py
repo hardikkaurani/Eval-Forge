@@ -16,17 +16,14 @@ from app.datasets.schemas.dataset import (
     DatasetCreate,
     DatasetDetailResponse,
     DatasetDiffItem,
-    DatasetRecordResponse,
+    DatasetListResponse,
+    DatasetRecordsPaginated,
     DatasetResponse,
     DatasetUpdate,
     DatasetVersionResponse,
-    DatasetListResponse,
-    DatasetRecordsPaginated,
 )
-from app.datasets.schemas.import_export import ExportJobResponse, ImportJobResponse
 from app.datasets.services.dataset import DatasetService
 from app.datasets.services.import_export import ImportExportService
-from app.utils.time import get_utc_now
 
 router = APIRouter(prefix="/datasets", tags=["datasets"])
 
@@ -103,7 +100,9 @@ async def update_dataset(
 ):
     service = DatasetService(db)
     try:
-        return await service.update_dataset(dataset_id, request.model_dump(exclude_unset=True))
+        return await service.update_dataset(
+            dataset_id, request.model_dump(exclude_unset=True)
+        )
     except DatasetNotFoundException as e:
         raise HTTPException(status_code=404, detail=str(e))
 
@@ -237,7 +236,9 @@ async def export_dataset(
     db: AsyncSession = Depends(get_db),
 ):
     import_export_service = ImportExportService(db)
-    job = await import_export_service.create_export_job(project_id, file_format, dataset_id)
+    job = await import_export_service.create_export_job(
+        project_id, file_format, dataset_id
+    )
 
     try:
         file_path = await import_export_service.execute_export(job.id, version_id)
