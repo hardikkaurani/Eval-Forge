@@ -9,11 +9,12 @@ import {
   Clock
 } from 'lucide-react';
 import { api } from '../services/api';
+import type { Experiment, ExperimentResult } from '../services/api';
 
 export default function Evaluations() {
   const { projectId } = useParams<{ projectId: string }>();
-  const [experiments, setExperiments] = useState<any[]>([]);
-  const [selectedExperiment, setSelectedExperiment] = useState<any | null>(null);
+  const [experiments, setExperiments] = useState<Experiment[]>([]);
+  const [selectedExperiment, setSelectedExperiment] = useState<Experiment | null>(null);
   const [loading, setLoading] = useState(true);
   const [runOpen, setRunOpen] = useState(false);
 
@@ -28,7 +29,7 @@ export default function Evaluations() {
   const [executingId, setExecutingId] = useState<string | null>(null);
 
   // Inspector states
-  const [selectedResult, setSelectedResult] = useState<any | null>(null);
+  const [selectedResult, setSelectedResult] = useState<ExperimentResult | null>(null);
   const [inspectorTab, setInspectorTab] = useState<'details' | 'json'>('details');
 
   const fetchExperiments = async () => {
@@ -49,6 +50,7 @@ export default function Evaluations() {
 
   useEffect(() => {
     fetchExperiments();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [projectId]);
 
   const handleStartRun = async (e: React.FormEvent) => {
@@ -91,7 +93,7 @@ export default function Evaluations() {
     }
   };
 
-  const handleRunSelect = (exp: any) => {
+  const handleRunSelect = (exp: Experiment) => {
     setSelectedExperiment(exp);
     if (exp.results && exp.results.length > 0) {
       setSelectedResult(exp.results[0]);
@@ -207,7 +209,7 @@ export default function Evaluations() {
                   <div className="bg-[#111827] border border-[#2A3352] rounded-xl overflow-hidden">
                     <div className="p-4 border-b border-[#2A3352] bg-[#050816]/30 text-sm font-semibold">Test Outcomes</div>
                     <div className="divide-y divide-[#2A3352] max-h-[400px] overflow-y-auto">
-                      {selectedExperiment.results.map((res: any) => (
+                      {selectedExperiment.results.map((res: ExperimentResult) => (
                         <button
                           key={res.id}
                           onClick={() => setSelectedResult(res)}

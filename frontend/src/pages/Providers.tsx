@@ -7,11 +7,12 @@ import {
   ShieldCheck
 } from 'lucide-react';
 import { api } from '../services/api';
+import type { Provider } from '../services/api';
 
 export default function Providers() {
-  const [providers, setProviders] = useState<any[]>([]);
+  const [providers, setProviders] = useState<Provider[]>([]);
   const [loading, setLoading] = useState(true);
-  const [editingProvider, setEditingProvider] = useState<any | null>(null);
+  const [editingProvider, setEditingProvider] = useState<Provider | null>(null);
   const [apiKey, setApiKey] = useState('');
   const [modelType, setModelType] = useState('gpt-4o');
 

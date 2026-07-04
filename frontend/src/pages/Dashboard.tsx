@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { api } from '../services/api';
+import type { Project } from '../services/api';
 
 const chartData = [
   { name: 'Mon', executions: 4 },
@@ -27,7 +28,7 @@ const chartData = [
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const [projects, setProjects] = useState<any[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [createOpen, setCreateOpen] = useState(false);
   const [newProjName, setNewProjName] = useState('');

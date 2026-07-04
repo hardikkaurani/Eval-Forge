@@ -11,15 +11,16 @@ import {
   ChevronRight
 } from 'lucide-react';
 import { api } from '../services/api';
+import type { Dataset, DatasetVersion, DatasetRecord, ImportReport } from '../services/api';
 
 export default function Datasets() {
   const { projectId } = useParams<{ projectId: string }>();
-  const [datasets, setDatasets] = useState<any[]>([]);
-  const [selectedDataset, setSelectedDataset] = useState<any | null>(null);
+  const [datasets, setDatasets] = useState<Dataset[]>([]);
+  const [selectedDataset, setSelectedDataset] = useState<Dataset | null>(null);
   const [loading, setLoading] = useState(true);
   const [uploadOpen, setUploadOpen] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
-  const [importReport, setImportReport] = useState<any | null>(null);
+  const [importReport, setImportReport] = useState<ImportReport | null>(null);
 
   // Form states
   const [datasetName, setDatasetName] = useState('');
@@ -29,8 +30,8 @@ export default function Datasets() {
 
   // Detail views states
   const [activeTab, setActiveTab] = useState<'records' | 'versions' | 'details'>('records');
-  const [versions, setVersions] = useState<any[]>([]);
-  const [records, setRecords] = useState<any[]>([]);
+  const [versions, setVersions] = useState<DatasetVersion[]>([]);
+  const [records, setRecords] = useState<DatasetRecord[]>([]);
   const [selectedVersion, setSelectedVersion] = useState<string>('');
 
   const fetchDatasets = async () => {
@@ -51,6 +52,7 @@ export default function Datasets() {
 
   useEffect(() => {
     fetchDatasets();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [projectId]);
 
   useEffect(() => {
@@ -216,7 +218,7 @@ export default function Datasets() {
                 ].map((tab) => (
                   <button
                     key={tab.id}
-                    onClick={() => setActiveTab(tab.id as any)}
+                    onClick={() => setActiveTab(tab.id as 'records' | 'versions' | 'details')}
                     className={`px-4 py-3 text-sm font-semibold border-b-2 transition-colors ${activeTab === tab.id ? 'border-primary text-white' : 'border-transparent text-gray-400 hover:text-white'}`}
                   >
                     {tab.label}

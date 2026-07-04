@@ -9,6 +9,117 @@ export const apiClient = axios.create({
   },
 });
 
+// Shared domain types
+export interface Project {
+  id: string;
+  name: string;
+  description: string;
+  created_at: string;
+  datasets_count: number;
+  benchmarks_count: number;
+  evaluations_count: number;
+}
+
+export interface Dataset {
+  id: string;
+  project_id: string;
+  name: string;
+  description: string;
+  visibility: string;
+  owner: string;
+  source: string;
+  language: string;
+  license: string;
+  tags: string[];
+  created_at: string;
+  versions_count: number;
+  current_version: string;
+}
+
+export interface DatasetVersion {
+  id: string;
+  label: string;
+  description: string;
+  created_at: string;
+  records_count: number;
+}
+
+export interface DatasetRecord {
+  id: string;
+  input_prompt: string;
+  candidate_output?: string;
+  reference?: string;
+  model_output?: string;
+  score?: number;
+  passed?: boolean;
+  confidence?: number;
+  reasoning?: string;
+  judge?: string;
+  provider?: string;
+}
+
+export interface Benchmark {
+  id: string;
+  project_id: string;
+  name: string;
+  description: string;
+  tags: string[];
+  dataset_ids: string[];
+  created_at: string;
+  datasets_count: number;
+}
+
+export interface ExperimentResult {
+  id: string;
+  input_prompt: string;
+  model_output: string;
+  reference: string;
+  score: number;
+  passed: boolean;
+  confidence: number;
+  reasoning: string;
+  judge: string;
+  provider: string;
+}
+
+export interface Experiment {
+  id: string;
+  project_id: string;
+  dataset_version_id: string;
+  name: string;
+  description: string;
+  status: string;
+  judge: string;
+  provider: string;
+  model: string;
+  configuration: Record<string, unknown>;
+  created_at: string;
+  completed_at: string | null;
+  completed_cases: number;
+  failed_cases: number;
+  aggregate_score: number;
+  success_rate: number;
+  status_detail: string | null;
+  results: ExperimentResult[];
+}
+
+export interface Provider {
+  id: string;
+  name: string;
+  status: string;
+  latency: number;
+  active_models: string[];
+  error_rate: number;
+  version: string;
+}
+
+export interface ImportReport {
+  job_id: string;
+  status: string;
+  version_id: string;
+  records_imported: number;
+}
+
 // Mock Storage keys
 const MOCK_PROJECTS_KEY = 'evalforge_mock_projects';
 const MOCK_DATASETS_KEY = 'evalforge_mock_datasets';
@@ -161,7 +272,7 @@ export const api = {
         return datasets.filter((d) => d.project_id === projectId);
       }
     },
-    create: async (data: any, projectId: string) => {
+    create: async (data: Partial<Dataset>, projectId: string) => {
       try {
         const res = await apiClient.post(`/datasets/?project_id=${projectId}`, data);
         return res.data;
@@ -256,7 +367,7 @@ export const api = {
         return benchmarks.filter((b) => b.project_id === projectId);
       }
     },
-    create: async (data: any, projectId: string) => {
+    create: async (data: Partial<Benchmark>, projectId: string) => {
       try {
         const res = await apiClient.post(`/benchmarks/?project_id=${projectId}`, data);
         return res.data;
@@ -287,7 +398,7 @@ export const api = {
         return experiments.filter((e) => e.project_id === projectId);
       }
     },
-    create: async (data: any, projectId: string) => {
+    create: async (data: Partial<Experiment>, projectId: string) => {
       try {
         const res = await apiClient.post(`/experiments/?project_id=${projectId}`, data);
         return res.data;

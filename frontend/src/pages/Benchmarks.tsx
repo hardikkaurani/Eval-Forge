@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { api } from '../services/api';
+import type { Benchmark, Dataset } from '../services/api';
 
 const benchmarkComparisonData = [
   { name: 'Safety Refusal', 'GPT-4o': 94, 'Claude 3.5 Sonnet': 98, 'Llama 3 8B': 78 },
@@ -17,10 +18,10 @@ const benchmarkComparisonData = [
 
 export default function Benchmarks() {
   const { projectId } = useParams<{ projectId: string }>();
-  const [suites, setSuites] = useState<any[]>([]);
+  const [suites, setSuites] = useState<Benchmark[]>([]);
   const [loading, setLoading] = useState(true);
   const [createOpen, setCreateOpen] = useState(false);
-  const [datasets, setDatasets] = useState<any[]>([]);
+  const [datasets, setDatasets] = useState<Dataset[]>([]);
 
   // Form states
   const [suiteName, setSuiteName] = useState('');
@@ -45,6 +46,7 @@ export default function Benchmarks() {
 
   useEffect(() => {
     fetchBenchmarks();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [projectId]);
 
   const handleCreateSuite = async (e: React.FormEvent) => {

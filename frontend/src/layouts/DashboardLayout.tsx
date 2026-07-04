@@ -19,6 +19,7 @@ import {
   Heart
 } from 'lucide-react';
 import { api } from '../services/api';
+import type { Project } from '../services/api';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -32,7 +33,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [projects, setProjects] = useState<any[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
   const [currentProjectName, setCurrentProjectName] = useState('Select Project');
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [notifications, setNotifications] = useState<string[]>([
@@ -52,7 +53,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       const projs = await api.projects.list();
       setProjects(projs);
       if (projectId) {
-        const current = projs.find((p: any) => p.id === projectId);
+        const current = projs.find((p: Project) => p.id === projectId);
         if (current) setCurrentProjectName(current.name);
       }
     };
@@ -351,7 +352,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             </div>
             <div className="max-h-80 overflow-y-auto p-2">
               {filteredCommands.length === 0 ? (
-                <div className="py-8 text-center text-sm text-gray-500">No results found for "{searchQuery}"</div>
+                <div className="py-8 text-center text-sm text-gray-500">No results found for &ldquo;{searchQuery}&rdquo;</div>
               ) : (
                 filteredCommands.map((cmd, idx) => (
                   <button

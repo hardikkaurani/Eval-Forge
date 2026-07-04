@@ -17,6 +17,15 @@ from app.models.evaluation import (
     RubricScore,
 )
 from app.models.project import Project
+from app.jobs.models.job import (
+    Job,
+    JobLog,
+    Worker,
+    Queue,
+    ExecutionHistory,
+    RetryHistory,
+    Cancellation,
+)
 
 __all__ = [
     "Base",
@@ -34,4 +43,11 @@ __all__ = [
     "Experiment",
     "ImportJob",
     "ExportJob",
+    "Job",
+    "JobLog",
+    "Worker",
+    "Queue",
+    "ExecutionHistory",
+    "RetryHistory",
+    "Cancellation",
 ]
