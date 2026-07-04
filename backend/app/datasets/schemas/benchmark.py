@@ -33,3 +33,12 @@ class BenchmarkSuiteResponse(BenchmarkSuiteBase):
 
 class BenchmarkSuiteDetailResponse(BenchmarkSuiteResponse):
     datasets: List[DatasetResponse] = Field(default_factory=list)
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class BenchmarkSuiteListResponse(BaseModel):
+    benchmark_suites: List[BenchmarkSuiteResponse]
+    total: int
+    skip: int
+    limit: int
