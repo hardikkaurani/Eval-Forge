@@ -1,4 +1,14 @@
 from app.database.session import Base
+from app.models.dataset import (
+    BenchmarkDataset,
+    BenchmarkSuite,
+    Dataset,
+    DatasetRecord,
+    DatasetVersion,
+    Experiment,
+    ExportJob,
+    ImportJob,
+)
 from app.models.evaluation import (
     Evaluation,
     EvaluationResult,
@@ -16,4 +26,12 @@ __all__ = [
     "EvaluationResult",
     "RubricScore",
     "ProviderMetadata",
+    "Dataset",
+    "DatasetVersion",
+    "DatasetRecord",
+    "BenchmarkSuite",
+    "BenchmarkDataset",
+    "Experiment",
+    "ImportJob",
+    "ExportJob",
 ]
