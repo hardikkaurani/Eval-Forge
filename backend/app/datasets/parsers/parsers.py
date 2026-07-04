@@ -71,7 +71,7 @@ class DatasetParser:
                 records.append(dict(row))
             return records
         except Exception as e:
-            raise InvalidDatasetFormatException("csv", f"CSV parsing failed: {str(e)}")
+            raise InvalidDatasetFormatException("csv", f"CSV parsing failed: {str(e)}") from e
 
     @staticmethod
     def parse_json(content: bytes) -> List[Dict[str, Any]]:
@@ -101,7 +101,7 @@ class DatasetParser:
         except Exception as e:
             raise InvalidDatasetFormatException(
                 "json", f"JSON parsing failed: {str(e)}"
-            )
+            ) from e
 
     @staticmethod
     def parse_jsonl(content: bytes) -> List[Dict[str, Any]]:
@@ -119,23 +119,23 @@ class DatasetParser:
                         raise ValueError(f"Line {idx + 1} is not a valid JSON object.")
                     records.append(record)
                 except json.JSONDecodeError as je:
-                    raise ValueError(f"Line {idx + 1} is invalid JSON: {str(je)}")
+                    raise ValueError(f"Line {idx + 1} is invalid JSON: {str(je)}") from je
             return records
         except Exception as e:
             raise InvalidDatasetFormatException(
                 "jsonl", f"JSONL parsing failed: {str(e)}"
-            )
+            ) from e
 
     @staticmethod
     def parse_excel(content: bytes) -> List[Dict[str, Any]]:
         """Parses Excel bytes using Pandas and openpyxl if installed."""
         try:
             import pandas as pd
-        except ImportError:
+        except ImportError as e:
             raise InvalidDatasetFormatException(
                 "excel",
                 "The 'pandas' and 'openpyxl' libraries are required to parse Excel files.",
-            )
+            ) from e
 
         try:
             df = pd.read_excel(io.BytesIO(content))
@@ -145,18 +145,18 @@ class DatasetParser:
         except Exception as e:
             raise InvalidDatasetFormatException(
                 "excel", f"Excel parsing failed: {str(e)}"
-            )
+            ) from e
 
     @staticmethod
     def parse_parquet(content: bytes) -> List[Dict[str, Any]]:
         """Parses Parquet bytes using Pandas and pyarrow if installed."""
         try:
             import pandas as pd
-        except ImportError:
+        except ImportError as e:
             raise InvalidDatasetFormatException(
                 "parquet",
                 "The 'pandas' and 'pyarrow' libraries are required to parse Parquet files.",
-            )
+            ) from e
 
         try:
             df = pd.read_parquet(io.BytesIO(content))
@@ -165,18 +165,18 @@ class DatasetParser:
         except Exception as e:
             raise InvalidDatasetFormatException(
                 "parquet", f"Parquet parsing failed: {str(e)}"
-            )
+            ) from e
 
     @staticmethod
     def parse_huggingface(repo_id: str, split: str = "train") -> List[Dict[str, Any]]:
         """Downloads and parses a dataset from HuggingFace Hub if 'datasets' library is installed."""
         try:
             from datasets import load_dataset
-        except ImportError:
+        except ImportError as e:
             raise InvalidDatasetFormatException(
                 "huggingface",
                 "The 'datasets' library is required to import from HuggingFace.",
-            )
+            ) from e
 
         try:
             dataset = load_dataset(repo_id, split=split)
@@ -187,4 +187,4 @@ class DatasetParser:
         except Exception as e:
             raise InvalidDatasetFormatException(
                 "huggingface", f"HuggingFace download/parsing failed: {str(e)}"
-            )
+            ) from e

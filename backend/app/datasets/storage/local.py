@@ -24,7 +24,7 @@ class LocalStorage(BaseStorage):
         except Exception as e:
             raise StorageException(
                 f"Failed to save file locally at '{file_path}': {str(e)}"
-            )
+            ) from e
 
         return full_path
 
@@ -39,7 +39,7 @@ class LocalStorage(BaseStorage):
         except Exception as e:
             raise StorageException(
                 f"Failed to read file locally at '{file_path}': {str(e)}"
-            )
+            ) from e
 
     async def delete(self, file_path: str) -> bool:
         full_path = os.path.join(self.base_directory, file_path)
@@ -52,7 +52,7 @@ class LocalStorage(BaseStorage):
         except Exception as e:
             raise StorageException(
                 f"Failed to delete file locally at '{file_path}': {str(e)}"
-            )
+            ) from e
 
     def get_url(self, file_path: str) -> str:
         # Returns a relative path suitable for download endpoints

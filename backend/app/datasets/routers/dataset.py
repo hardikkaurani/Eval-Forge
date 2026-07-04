@@ -48,7 +48,7 @@ async def create_dataset(
             tags=request.tags,
         )
     except DatasetException as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e)) from e
 
 
 @router.get("/", response_model=DatasetListResponse)
@@ -89,7 +89,7 @@ async def get_dataset(
     try:
         return await service.get_dataset(dataset_id)
     except DatasetNotFoundException as e:
-        raise HTTPException(status_code=404, detail=str(e))
+        raise HTTPException(status_code=404, detail=str(e)) from e
 
 
 @router.put("/{dataset_id}", response_model=DatasetResponse)
@@ -104,7 +104,7 @@ async def update_dataset(
             dataset_id, request.model_dump(exclude_unset=True)
         )
     except DatasetNotFoundException as e:
-        raise HTTPException(status_code=404, detail=str(e))
+        raise HTTPException(status_code=404, detail=str(e)) from e
 
 
 @router.delete("/{dataset_id}", status_code=204)
@@ -116,7 +116,7 @@ async def delete_dataset(
     try:
         await service.delete_dataset(dataset_id)
     except DatasetNotFoundException as e:
-        raise HTTPException(status_code=404, detail=str(e))
+        raise HTTPException(status_code=404, detail=str(e)) from e
 
 
 @router.post("/import", response_model=Dict[str, Any], status_code=202)
@@ -164,9 +164,9 @@ async def import_dataset(
             **res,
         }
     except (DatasetValidationException, InvalidDatasetFormatException) as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e)) from e
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Import failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Import failed: {str(e)}") from e
 
 
 @router.post("/{dataset_id}/rollback", response_model=DatasetVersionResponse)
@@ -179,9 +179,9 @@ async def rollback_version(
     try:
         return await service.rollback_version(dataset_id, target_version)
     except DatasetNotFoundException as e:
-        raise HTTPException(status_code=404, detail=str(e))
+        raise HTTPException(status_code=404, detail=str(e)) from e
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e)) from e
 
 
 @router.get("/{dataset_id}/diff", response_model=List[DatasetDiffItem])
@@ -195,7 +195,7 @@ async def get_dataset_diff(
     try:
         return await service.generate_diff(dataset_id, version_a, version_b)
     except DatasetNotFoundException as e:
-        raise HTTPException(status_code=404, detail=str(e))
+        raise HTTPException(status_code=404, detail=str(e)) from e
 
 
 @router.get("/{dataset_id}/versions", response_model=List[DatasetVersionResponse])
@@ -207,7 +207,7 @@ async def list_dataset_versions(
     try:
         return await service.list_versions(dataset_id)
     except DatasetNotFoundException as e:
-        raise HTTPException(status_code=404, detail=str(e))
+        raise HTTPException(status_code=404, detail=str(e)) from e
 
 
 @router.get("/versions/{version_id}/records", response_model=DatasetRecordsPaginated)
@@ -248,7 +248,7 @@ async def export_dataset(
             "file_url": f"/api/v1/datasets/download/{os.path.basename(file_path)}",
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Export failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Export failed: {str(e)}") from e
 
 
 @router.get("/download/{filename}")

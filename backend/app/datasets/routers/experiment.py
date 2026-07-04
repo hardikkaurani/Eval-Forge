@@ -35,7 +35,7 @@ async def create_experiment(
             configuration=request.configuration,
         )
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e)) from e
 
 
 @router.get("/", response_model=ExperimentListResponse)
@@ -72,7 +72,7 @@ async def get_experiment(
     try:
         return await service.get_experiment(experiment_id)
     except ExperimentNotFoundException as e:
-        raise HTTPException(status_code=404, detail=str(e))
+        raise HTTPException(status_code=404, detail=str(e)) from e
 
 
 @router.post("/{experiment_id}/execute", response_model=ExperimentDetailResponse)
@@ -84,9 +84,9 @@ async def execute_experiment(
     try:
         return await service.execute_experiment(experiment_id)
     except ExperimentNotFoundException as e:
-        raise HTTPException(status_code=404, detail=str(e))
+        raise HTTPException(status_code=404, detail=str(e)) from e
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Execution failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Execution failed: {str(e)}") from e
 
 
 @router.delete("/{experiment_id}", status_code=204)
@@ -98,4 +98,4 @@ async def delete_experiment(
     try:
         await service.delete_experiment(experiment_id)
     except ExperimentNotFoundException as e:
-        raise HTTPException(status_code=404, detail=str(e))
+        raise HTTPException(status_code=404, detail=str(e)) from e

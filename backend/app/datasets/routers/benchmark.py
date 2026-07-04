@@ -35,7 +35,7 @@ async def create_benchmark_suite(
             dataset_ids=request.dataset_ids,
         )
     except DatasetException as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e)) from e
 
 
 @router.get("/", response_model=BenchmarkSuiteListResponse)
@@ -72,7 +72,7 @@ async def get_dashboard_metrics(
     except Exception as e:
         raise HTTPException(
             status_code=500, detail=f"Failed to fetch dashboard metrics: {str(e)}"
-        )
+        ) from e
 
 
 @router.get("/{suite_id}", response_model=BenchmarkSuiteDetailResponse)
@@ -84,7 +84,7 @@ async def get_benchmark_suite(
     try:
         return await service.get_benchmark_suite(suite_id)
     except BenchmarkSuiteNotFoundException as e:
-        raise HTTPException(status_code=404, detail=str(e))
+        raise HTTPException(status_code=404, detail=str(e)) from e
 
 
 @router.put("/{suite_id}", response_model=BenchmarkSuiteDetailResponse)
@@ -99,7 +99,7 @@ async def update_benchmark_suite(
             suite_id, request.model_dump(exclude_unset=True)
         )
     except BenchmarkSuiteNotFoundException as e:
-        raise HTTPException(status_code=404, detail=str(e))
+        raise HTTPException(status_code=404, detail=str(e)) from e
 
 
 @router.delete("/{suite_id}", status_code=204)
@@ -111,4 +111,4 @@ async def delete_benchmark_suite(
     try:
         await service.delete_benchmark_suite(suite_id)
     except BenchmarkSuiteNotFoundException as e:
-        raise HTTPException(status_code=404, detail=str(e))
+        raise HTTPException(status_code=404, detail=str(e)) from e
