@@ -10,6 +10,7 @@ from app.datasets.schemas.experiment import (
     ExperimentDetailResponse,
     ExperimentResponse,
     ExperimentUpdate,
+    ExperimentListResponse,
 )
 from app.datasets.services.experiment import ExperimentService
 
@@ -38,7 +39,7 @@ async def create_experiment(
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.get("/", response_model=Dict[str, Any])
+@router.get("/", response_model=ExperimentListResponse)
 async def list_experiments(
     project_id: str = Query(..., description="Project ID"),
     skip: int = Query(0, ge=0),
