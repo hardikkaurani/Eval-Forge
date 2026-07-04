@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import TYPE_CHECKING, List
 
-from sqlalchemy import JSON, Boolean, DateTime, Float, ForeignKey, Integer, String, Text
+from sqlalchemy import JSON, DateTime, Float, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.session import Base
@@ -26,7 +26,9 @@ class Dataset(Base):
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     owner: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    visibility: Mapped[str] = mapped_column(String(50), default="private", nullable=False)
+    visibility: Mapped[str] = mapped_column(
+        String(50), default="private", nullable=False
+    )
     source: Mapped[str | None] = mapped_column(String(255), nullable=True)
     language: Mapped[str | None] = mapped_column(String(100), nullable=True)
     license: Mapped[str | None] = mapped_column(String(255), nullable=True)
@@ -65,7 +67,9 @@ class DatasetVersion(Base):
     )
     version: Mapped[str] = mapped_column(String(50), nullable=False)
     record_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
-    schema_version: Mapped[str] = mapped_column(String(50), default="1.0", nullable=False)
+    schema_version: Mapped[str] = mapped_column(
+        String(50), default="1.0", nullable=False
+    )
     hash: Mapped[str | None] = mapped_column(String(64), nullable=True)
     checksum: Mapped[str | None] = mapped_column(String(64), nullable=True)
     metadata_json: Mapped[dict] = mapped_column(JSON, default=dict, nullable=False)
@@ -91,7 +95,9 @@ class DatasetRecord(Base):
         String(36), primary_key=True, default=generate_uuid, index=True
     )
     version_id: Mapped[str] = mapped_column(
-        String(36), ForeignKey("dataset_versions.id", ondelete="CASCADE"), nullable=False
+        String(36),
+        ForeignKey("dataset_versions.id", ondelete="CASCADE"),
+        nullable=False,
     )
     prompt: Mapped[str] = mapped_column(Text, nullable=False)
     input: Mapped[str | None] = mapped_column(Text, nullable=True)
@@ -107,7 +113,9 @@ class DatasetRecord(Base):
         DateTime(timezone=True), default=get_utc_now, nullable=False
     )
 
-    version_ref: Mapped["DatasetVersion"] = relationship("DatasetVersion", back_populates="records")
+    version_ref: Mapped["DatasetVersion"] = relationship(
+        "DatasetVersion", back_populates="records"
+    )
 
 
 class BenchmarkDataset(Base):
@@ -116,7 +124,9 @@ class BenchmarkDataset(Base):
     __tablename__ = "benchmark_datasets"
 
     benchmark_suite_id: Mapped[str] = mapped_column(
-        String(36), ForeignKey("benchmark_suites.id", ondelete="CASCADE"), primary_key=True
+        String(36),
+        ForeignKey("benchmark_suites.id", ondelete="CASCADE"),
+        primary_key=True,
     )
     dataset_id: Mapped[str] = mapped_column(
         String(36), ForeignKey("datasets.id", ondelete="CASCADE"), primary_key=True
@@ -163,7 +173,9 @@ class Experiment(Base):
         String(36), ForeignKey("projects.id", ondelete="CASCADE"), nullable=False
     )
     dataset_version_id: Mapped[str] = mapped_column(
-        String(36), ForeignKey("dataset_versions.id", ondelete="CASCADE"), nullable=False
+        String(36),
+        ForeignKey("dataset_versions.id", ondelete="CASCADE"),
+        nullable=False,
     )
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
@@ -174,15 +186,21 @@ class Experiment(Base):
     status: Mapped[str] = mapped_column(String(50), default="PENDING", nullable=False)
     metrics: Mapped[dict] = mapped_column(JSON, default=dict, nullable=False)
     results: Mapped[List[dict]] = mapped_column(JSON, default=list, nullable=False)
-    started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
-    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    started_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    completed_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
     duration_seconds: Mapped[float | None] = mapped_column(Float, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=get_utc_now, nullable=False
     )
 
     project: Mapped["Project"] = relationship("Project", back_populates="experiments")
-    dataset_version: Mapped["DatasetVersion"] = relationship("DatasetVersion", back_populates="experiments")
+    dataset_version: Mapped["DatasetVersion"] = relationship(
+        "DatasetVersion", back_populates="experiments"
+    )
 
 
 class ImportJob(Base):
@@ -210,7 +228,9 @@ class ImportJob(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=get_utc_now, nullable=False
     )
-    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    completed_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
 
 
 class ExportJob(Base):
@@ -235,4 +255,6 @@ class ExportJob(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=get_utc_now, nullable=False
     )
-    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    completed_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )

@@ -71,7 +71,9 @@ class DatasetParser:
                 records.append(dict(row))
             return records
         except Exception as e:
-            raise InvalidDatasetFormatException("csv", f"CSV parsing failed: {str(e)}") from e
+            raise InvalidDatasetFormatException(
+                "csv", f"CSV parsing failed: {str(e)}"
+            ) from e
 
     @staticmethod
     def parse_json(content: bytes) -> List[Dict[str, Any]]:
@@ -119,7 +121,9 @@ class DatasetParser:
                         raise ValueError(f"Line {idx + 1} is not a valid JSON object.")
                     records.append(record)
                 except json.JSONDecodeError as je:
-                    raise ValueError(f"Line {idx + 1} is invalid JSON: {str(je)}") from je
+                    raise ValueError(
+                        f"Line {idx + 1} is invalid JSON: {str(je)}"
+                    ) from je
             return records
         except Exception as e:
             raise InvalidDatasetFormatException(

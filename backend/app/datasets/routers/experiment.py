@@ -86,7 +86,9 @@ async def execute_experiment(
     except ExperimentNotFoundException as e:
         raise HTTPException(status_code=404, detail=str(e)) from e
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Execution failed: {str(e)}") from e
+        raise HTTPException(
+            status_code=500, detail=f"Execution failed: {str(e)}"
+        ) from e
 
 
 @router.delete("/{experiment_id}", status_code=204)

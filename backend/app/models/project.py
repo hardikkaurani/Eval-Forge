@@ -10,8 +10,8 @@ from app.utils.time import get_utc_now
 from app.utils.uuid import generate_uuid
 
 if TYPE_CHECKING:
+    from app.models.dataset import BenchmarkSuite, Dataset, Experiment
     from app.models.evaluation import Evaluation
-    from app.models.dataset import Dataset, BenchmarkSuite, Experiment
 
 
 class Project(Base):
