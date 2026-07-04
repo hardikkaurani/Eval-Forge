@@ -144,3 +144,75 @@ def test_dataset_crud_and_import(client):
     assert resp.status_code == 204
     resp = client.get(f"/api/v1/datasets/{dataset_id}")
     assert resp.status_code == 404
+
+
+def test_dataset_diff_rollback_and_benchmarks(client):
+    project_id = create_test_project(client)
+
+    # 1. Create dataset and import two versions to diff
+    # Version 1 (v1)
+    csv_v1 = "prompt,reference_output\nPrompt A,Ref A\nPrompt B,Ref B\n"
+    resp = client.post(
+        "/api/v1/datasets/import",
+        data={"project_id": project_id, "dataset_name": "Diff Dataset", "version_label": "v1"},
+        files={"file": ("dataset_v1.csv", csv_v1, "text/csv")}
+    )
+    assert resp.status_code == 202
+    dataset_id = resp.json()["dataset_id"]
+
+    # Version 2 (v2): Prompt A deleted, Prompt B modified, Prompt C added
+    csv_v2 = "prompt,reference_output\nPrompt B,Ref B Modified\nPrompt C,Ref C\n"
+    resp = client.post(
+        "/api/v1/datasets/import",
+        data={"project_id": project_id, "dataset_name": "Diff Dataset", "existing_dataset_id": dataset_id, "version_label": "v2"},
+        files={"file": ("dataset_v2.csv", csv_v2, "text/csv")}
+    )
+    assert resp.status_code == 202
+
+    # 2. Get Diff
+    resp = client.get(f"/api/v1/datasets/{dataset_id}/diff?version_a=v1&version_b=v2")
+    assert resp.status_code == 200
+    diff = resp.json()
+    assert len(diff) == 3
+    # Check that removed, added, modified change types exist
+    change_types = [item["change_type"] for item in diff]
+    assert "removed" in change_types
+    assert "added" in change_types
+    assert "modified" in change_types
+
+    # 3. Rollback (v1 promoted as v3)
+    resp = client.post(f"/api/v1/datasets/{dataset_id}/rollback?target_version=v1")
+    assert resp.status_code == 200
+    rollback_res = resp.json()
+    assert rollback_res["version"] == "v3"
+    assert rollback_res["record_count"] == 2
+
+    # 4. Benchmark Suite CRUD
+    suite_payload = {
+        "name": "E2E Benchmark Suite",
+        "description": "Tests logic",
+        "tags": ["math", "physics"],
+        "dataset_ids": [dataset_id],
+    }
+    resp = client.post(f"/api/v1/benchmarks/?project_id={project_id}", json=suite_payload)
+    assert resp.status_code == 201
+    suite = resp.json()
+    assert suite["name"] == "E2E Benchmark Suite"
+    assert len(suite["datasets"]) == 1
+    suite_id = suite["id"]
+
+    # Update suite
+    resp = client.put(f"/api/v1/benchmarks/{suite_id}", json={"name": "Updated Benchmark Suite"})
+    assert resp.status_code == 200
+    assert resp.json()["name"] == "Updated Benchmark Suite"
+
+    # Dashboard Metrics
+    resp = client.get(f"/api/v1/benchmarks/dashboard/metrics?project_id={project_id}")
+    assert resp.status_code == 200
+    metrics = resp.json()
+    assert metrics["total_datasets"] == 1
+    assert metrics["total_benchmark_suites"] == 1
+
+    # Delete suite
+    resp = client.delete(f"/api/v1/benchmarks/{suite_id}")
+    assert resp.status_code == 204
