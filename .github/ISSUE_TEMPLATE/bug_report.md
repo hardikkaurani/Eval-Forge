@@ -23,10 +23,12 @@ A clear and concise description of what you expected to happen.
 If applicable, add screenshots or console/server logs to help explain your problem.
 
 ## Environment Details
+- **EvalForge Version**: [e.g. 1.0.0]
 - **OS**: [e.g. Ubuntu 22.04, macOS Sonoma, Windows 11]
-- **Python Version**: [e.g. 3.11.2]
+- **Python Version**: [e.g. 3.12.0]
 - **Node/NPM Version**: [e.g. Node 20.x, NPM 10.x]
 - **Docker Compose Version**: [e.g. v2.20.0]
+- **LLM/Judge Model used**: [e.g. gpt-4o-mini, claude-3-5-sonnet]
 
 ## Additional Context
 Add any other context about the problem here.

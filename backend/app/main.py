@@ -15,7 +15,7 @@ from app.core.production_security import IdempotencyMiddleware, RateLimitingMidd
 from app.core.redis import redis_manager
 from app.database.session import engine
 
-# Setup structured logging before importing other modules
+# Initialize structured logging engine prior to router imports
 setup_logging()
 logger = structlog.get_logger()
 
@@ -78,7 +78,7 @@ app = FastAPI(
         "* **Security Headers**: Standard production-grade security and request validation middleware.\n"
         "* **Structured Logging**: Contextvars-based correlation (Request ID) tracking across operations."
     ),
-    version="0.1.0",
+    version="1.0.0",
     docs_url="/docs" if settings.APP_ENV != "production" else None,
     redoc_url="/redoc" if settings.APP_ENV != "production" else None,
     openapi_url="/openapi.json" if settings.APP_ENV != "production" else None,
@@ -126,7 +126,7 @@ async def root():
         "success": True,
         "message": f"Welcome to {settings.APP_NAME}!",
         "data": {
-            "version": "0.1.0",
+            "version": "1.0.0",
             "docs_url": (
                 "/docs"
                 if settings.APP_ENV != "production"

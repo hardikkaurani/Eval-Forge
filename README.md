@@ -25,7 +25,7 @@
 <img src="https://img.shields.io/badge/Celery-Workers-37814A?logo=celery&logoColor=white" />
 <img src="https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white" />
 <img src="https://img.shields.io/badge/License-MIT-blue.svg" />
-<img src="https://img.shields.io/badge/Status-Phase%209%20Completed-22c55e" />
+<img src="https://img.shields.io/badge/Status-v1.0.0%20Released-22c55e" />
 <img src="https://img.shields.io/github/stars/hardikkaurani/Eval-Forge?style=social" />
 
 <br/><br/>
@@ -587,27 +587,27 @@ gantt
     section Foundation
     Phase 1 Foundation           :done,    p1, 2025-01-01, 3d
     section Backend
-    Phase 2 Backend Core         :active,  p2, after p1, 7d
+    Phase 2 Backend Core         :done,    p2, after p1, 7d
     section Evaluation
-    Phase 3 Evaluation Engine    :         p3, after p2, 8d
+    Phase 3 Evaluation Engine    :done,    p3, after p2, 8d
     section Data
-    Phase 4 Dataset Management   :         p4, after p3, 5d
+    Phase 4 Dataset Management   :done,    p4, after p3, 5d
     section Frontend
-    Phase 5 Frontend Dashboard   :         p5, after p4, 10d
+    Phase 5 Frontend Dashboard   :done,    p5, after p4, 10d
     section Jobs
-    Phase 6 Evaluation Jobs      :         p6, after p5, 6d
+    Phase 6 Evaluation Jobs      :done,    p6, after p5, 6d
     section Analytics
-    Phase 7 Analytics Reports    :         p7, after p6, 6d
+    Phase 7 Analytics Reports    :done,    p7, after p6, 6d
     section Advanced
-    Phase 8 Advanced Evals       :         p8, after p7, 8d
+    Phase 8 Advanced Evals       :done,    p8, after p7, 8d
     section Production
-    Phase 9 Production Eng       :         p9, after p8, 6d
+    Phase 9 Production Eng       :done,    p9, after p8, 6d
     section API
-    Phase 10 API Platform        :         p10, after p9, 5d
+    Phase 10 API Platform        :done,    p10, after p9, 5d
     section SaaS
-    Phase 11 SaaS Features       :         p11, after p10, 8d
+    Phase 11 SaaS Features       :done,    p11, after p10, 8d
     section Launch
-    Phase 12 Launch              :         p12, after p11, 7d
+    Phase 12 Launch              :done,    p12, after p11, 7d
 ```
 
 ---

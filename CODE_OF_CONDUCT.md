@@ -26,5 +26,10 @@ Community leaders are responsible for clarifying and enforcing our standards of 
 ## Scope
 This Code of Conduct applies within all community spaces, and also applies when an individual is officially representing the community in public spaces.
 
-## Contact
-To report issues or ask questions regarding this Code of Conduct, please contact the maintainers.
+## Reporting & Enforcement
+Instances of abusive, harassing, or otherwise unacceptable behavior may be reported by contacting the community moderation team at **conduct@evalforge.ai**. All reports will be reviewed and investigated promptly and fairly.
+
+The moderation team is obligated to respect the privacy and security of the reporter of any incident.
+
+## Attribution
+This Code of Conduct is adapted from the [Contributor Covenant](https://www.contributor-covenant.org), version 2.1, available at [https://www.contributor-covenant.org/version/2/1/code_of_conduct.html](https://www.contributor-covenant.org/version/2/1/code_of_conduct.html).
