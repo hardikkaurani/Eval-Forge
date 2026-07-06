@@ -72,3 +72,18 @@ api_router.include_router(mcp_router)
 api_router.include_router(playground_router)
 api_router.include_router(public_router)
 
+# Register Enterprise SaaS routes
+from app.enterprise.routes.organizations import router as ent_org_router
+from app.enterprise.routes.workspaces import router as ent_ws_router
+from app.enterprise.routes.billing import router as ent_billing_router
+from app.enterprise.routes.api_keys import router as ent_keys_router
+from app.enterprise.routes.audit import router as ent_audit_router
+from app.enterprise.routes.admin import router as ent_admin_router
+
+api_router.include_router(ent_org_router)
+api_router.include_router(ent_ws_router)
+api_router.include_router(ent_billing_router)
+api_router.include_router(ent_keys_router)
+api_router.include_router(ent_audit_router)
+api_router.include_router(ent_admin_router)
+

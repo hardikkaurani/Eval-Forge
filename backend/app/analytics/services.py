@@ -444,7 +444,7 @@ class AnalyticsService:
         metrics = await self.repo.get_metrics(project_id, name=metric_name, limit=100)
         
         # Structure trends based on granularity
-        trends: List[TrendItem] = []
+        trends: List[Trend] = []
         
         # Gather metrics by day/week/month
         grouped: Dict[datetime, List[float]] = {}
