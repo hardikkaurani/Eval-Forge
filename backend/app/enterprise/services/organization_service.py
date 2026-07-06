@@ -1,10 +1,11 @@
 import uuid
 from datetime import datetime
+
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
-from app.enterprise.models import Organization, Workspace, Membership, Invitation
 from app.enterprise.exceptions import TenantAccessViolationException
+from app.enterprise.models import Membership, Organization
 
 
 class OrganizationService:
@@ -18,7 +19,7 @@ class OrganizationService:
         custom_domain: str = None,
         logo_url: str = None,
         branding_settings: dict = None,
-        security_policies: dict = None
+        security_policies: dict = None,
     ) -> Organization:
         org = Organization(
             id=uuid.uuid4(),
@@ -28,7 +29,7 @@ class OrganizationService:
             branding_settings=branding_settings,
             security_policies=security_policies,
             created_at=datetime.utcnow(),
-            updated_at=datetime.utcnow()
+            updated_at=datetime.utcnow(),
         )
         db.add(org)
         await db.flush()
@@ -40,19 +41,23 @@ class OrganizationService:
             user_id=uuid.UUID(user_id) if isinstance(user_id, str) else user_id,
             is_active=True,
             created_at=datetime.utcnow(),
-            updated_at=datetime.utcnow()
+            updated_at=datetime.utcnow(),
         )
         db.add(membership)
         await db.commit()
         await db.refresh(org)
         return org
 
-    async def get_organization(self, db: AsyncSession, org_id: uuid.UUID) -> Organization:
+    async def get_organization(
+        self, db: AsyncSession, org_id: uuid.UUID
+    ) -> Organization:
         stmt = select(Organization).where(Organization.id == org_id)
         res = await db.execute(stmt)
         return res.scalar_one_or_none()
 
-    async def update_branding(self, db: AsyncSession, org_id: uuid.UUID, branding: dict) -> Organization:
+    async def update_branding(
+        self, db: AsyncSession, org_id: uuid.UUID, branding: dict
+    ) -> Organization:
         org = await self.get_organization(db, org_id)
         if not org:
             raise TenantAccessViolationException("Organization not found")
@@ -62,7 +67,9 @@ class OrganizationService:
         await db.refresh(org)
         return org
 
-    async def configure_custom_domain(self, db: AsyncSession, org_id: uuid.UUID, domain: str) -> Organization:
+    async def configure_custom_domain(
+        self, db: AsyncSession, org_id: uuid.UUID, domain: str
+    ) -> Organization:
         org = await self.get_organization(db, org_id)
         if not org:
             raise TenantAccessViolationException("Organization not found")

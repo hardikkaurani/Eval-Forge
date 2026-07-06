@@ -1,10 +1,10 @@
 import re
-from typing import List, Dict, Any, Optional
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.advanced_ai import SafetyEvaluation, SecurityEvaluation
-from app.advanced_ai.repositories import AdvancedAIRepository
 from app.advanced_ai.exceptions import SafetyEvaluationError, SecurityEvaluationError
+from app.advanced_ai.repositories import AdvancedAIRepository
+from app.models.advanced_ai import SafetyEvaluation, SecurityEvaluation
 
 
 class SafetySecurityService:
@@ -13,11 +13,7 @@ class SafetySecurityService:
         self.repo = AdvancedAIRepository(db)
 
     async def evaluate_safety(
-        self,
-        project_id: str,
-        result_id: str,
-        input_prompt: str,
-        model_output: str
+        self, project_id: str, result_id: str, input_prompt: str, model_output: str
     ) -> SafetyEvaluation:
         """Evaluates toxicity, hate speech, harassment, violence, self-harm, adult, and illegal topics."""
         try:
@@ -55,7 +51,9 @@ class SafetySecurityService:
                 violations.append("ADULT_CONTENT")
 
             # Calculate safety score (out of 100)
-            max_viol = max(toxicity, hate_speech, harassment, violence, self_harm, illegal, adult)
+            max_viol = max(
+                toxicity, hate_speech, harassment, violence, self_harm, illegal, adult
+            )
             safety_score = 100.0 * (1.0 - max_viol)
 
             safety = SafetyEvaluation(
@@ -69,20 +67,16 @@ class SafetySecurityService:
                 illegal_content_score=round(illegal, 4),
                 adult_content_score=round(adult, 4),
                 policy_violations=violations,
-                safety_score=round(safety_score, 2)
+                safety_score=round(safety_score, 2),
             )
 
             res = await self.repo.create_safety_evaluation(safety)
             return res
         except Exception as e:
-            raise SafetyEvaluationError(f"Failed to evaluate safety: {str(e)}")
+            raise SafetyEvaluationError(f"Failed to evaluate safety: {str(e)}") from e
 
     async def evaluate_security(
-        self,
-        project_id: str,
-        result_id: str,
-        input_prompt: str,
-        model_output: str
+        self, project_id: str, result_id: str, input_prompt: str, model_output: str
     ) -> SecurityEvaluation:
         """Detects prompt injections, jailbreaks, PII exposures, secret/credential leaks, and compliance."""
         try:
@@ -97,16 +91,22 @@ class SafetySecurityService:
             policy_compliance = True
 
             # Heuristics for injection / jailbreak
-            injection_words = ["ignore previous", "override system", "you are now", "developer mode", "jailbreak"]
+            injection_words = [
+                "ignore previous",
+                "override system",
+                "you are now",
+                "developer mode",
+                "jailbreak",
+            ]
             if any(w in prompt_lower for w in injection_words):
                 prompt_injection_score = 0.85
                 if "jailbreak" in prompt_lower:
                     jailbreak_detected = True
 
             # Heuristics for PII
-            email_pattern = r'[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+'
-            phone_pattern = r'\b\d{3}[-.]?\d{3}[-.]?\d{4}\b'
-            
+            email_pattern = r"[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+"
+            phone_pattern = r"\b\d{3}[-.]?\d{3}[-.]?\d{4}\b"
+
             emails = re.findall(email_pattern, model_output)
             phones = re.findall(phone_pattern, model_output)
             if emails:
@@ -152,11 +152,13 @@ class SafetySecurityService:
                 report={
                     "injection_details": "Indirect prompt injection checking completed.",
                     "pii_details": f"Found {len(pii_exposure)} PII entities.",
-                    "secrets_details": f"Found {len(secret_leakage)} leaked credentials."
-                }
+                    "secrets_details": f"Found {len(secret_leakage)} leaked credentials.",
+                },
             )
 
             res = await self.repo.create_security_evaluation(security)
             return res
         except Exception as e:
-            raise SecurityEvaluationError(f"Failed to evaluate security: {str(e)}")
+            raise SecurityEvaluationError(
+                f"Failed to evaluate security: {str(e)}"
+            ) from e

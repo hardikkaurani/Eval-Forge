@@ -1,8 +1,8 @@
 import uuid
 from datetime import datetime
-from sqlalchemy.ext.asyncio import AsyncSession
+
 import structlog
-import httpx
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.enterprise.models import EnterpriseNotification
 
@@ -19,7 +19,7 @@ class NotificationService:
         recipient_id: uuid.UUID,
         channel: str,
         title: str,
-        content: str
+        content: str,
     ) -> EnterpriseNotification:
         notification = EnterpriseNotification(
             id=uuid.uuid4(),
@@ -29,7 +29,7 @@ class NotificationService:
             title=title,
             content=content,
             status="pending",
-            created_at=datetime.utcnow()
+            created_at=datetime.utcnow(),
         )
         db.add(notification)
         await db.flush()
@@ -42,19 +42,21 @@ class NotificationService:
         await db.refresh(notification)
         return notification
 
-    async def _dispatch_to_channel(self, channel: str, title: str, content: str) -> bool:
+    async def _dispatch_to_channel(
+        self, channel: str, title: str, content: str
+    ) -> bool:
         logger.info("Dispatching notification", channel=channel, title=title)
-        
+
         if channel == "email":
             # Mock email sending via SMTP/Mailgun
             return True
-            
+
         elif channel in ("slack", "discord"):
             # Mock slack/discord webhook call
             return True
-            
+
         elif channel == "webhook":
             # Mock external webhook delivery
             return True
-            
+
         return True

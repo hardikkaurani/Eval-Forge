@@ -1,4 +1,12 @@
-from app.jobs.models.job import Job, JobLog, Worker, Queue, ExecutionHistory, RetryHistory, Cancellation
+from app.jobs.models.job import (
+    Cancellation,
+    ExecutionHistory,
+    Job,
+    JobLog,
+    Queue,
+    RetryHistory,
+    Worker,
+)
 
 __all__ = [
     "Job",

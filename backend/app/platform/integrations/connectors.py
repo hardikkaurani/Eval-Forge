@@ -1,5 +1,6 @@
+from typing import Any, Dict
+
 import httpx
-from typing import Dict, Any
 import structlog
 
 logger = structlog.get_logger()
@@ -36,23 +37,27 @@ class ConnectorManager:
             logger.error("Discord alert dispatch failed", error=str(e))
             return False
 
-    async def create_jira_issue(self, summary: str, description: str, jira_url: str, auth_token: str) -> Dict[str, Any]:
+    async def create_jira_issue(
+        self, summary: str, description: str, jira_url: str, auth_token: str
+    ) -> Dict[str, Any]:
         """Creates an issue in Jira on run failure or regression alert."""
         headers = {
             "Authorization": f"Bearer {auth_token}",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
         }
         payload = {
             "fields": {
                 "project": {"key": "EVAL"},
                 "summary": summary,
                 "description": description,
-                "issuetype": {"name": "Bug"}
+                "issuetype": {"name": "Bug"},
             }
         }
         try:
             async with httpx.AsyncClient() as client:
-                res = await client.post(f"{jira_url}/rest/api/2/issue", json=payload, headers=headers)
+                res = await client.post(
+                    f"{jira_url}/rest/api/2/issue", json=payload, headers=headers
+                )
                 if res.status_code == 201:
                     return res.json()
         except Exception as e:

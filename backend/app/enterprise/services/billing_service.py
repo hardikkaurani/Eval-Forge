@@ -1,17 +1,18 @@
 import uuid
 from datetime import datetime, timedelta
-from typing import Dict, Any, List
+from typing import List
+
 import sqlalchemy as sa
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
-from app.enterprise.models import Subscription, Plan, Invoice
 from app.enterprise.exceptions import BillingGatewayException
+from app.enterprise.models import Invoice, Plan, Subscription
 
 
 class BillingProviderConnector:
     """Interface abstraction for Stripe, Paddle, Lemon Squeezy, etc."""
-    
+
     def __init__(self, provider_name: str):
         self.provider_name = provider_name
 
@@ -31,7 +32,7 @@ class BillingService:
         self.connectors = {
             "stripe": BillingProviderConnector("stripe"),
             "paddle": BillingProviderConnector("paddle"),
-            "lemonsqueezy": BillingProviderConnector("lemonsqueezy")
+            "lemonsqueezy": BillingProviderConnector("lemonsqueezy"),
         }
 
     async def get_connector(self, provider: str) -> BillingProviderConnector:
@@ -43,11 +44,47 @@ class BillingService:
     async def seed_plans(self, db: AsyncSession) -> None:
         """Seeds default Starter, Pro, Team, Business, and Enterprise plans."""
         plans_data = [
-            {"name": "Starter", "price": 0.0, "limits": {"api_requests": 1000, "storage_mb": 100, "evaluations": 100}},
-            {"name": "Pro", "price": 49.0, "limits": {"api_requests": 10000, "storage_mb": 1000, "evaluations": 1000}},
-            {"name": "Team", "price": 149.0, "limits": {"api_requests": 50000, "storage_mb": 5000, "evaluations": 5000}},
-            {"name": "Business", "price": 499.0, "limits": {"api_requests": 250000, "storage_mb": 25000, "evaluations": 25000}},
-            {"name": "Enterprise", "price": 1499.0, "limits": {"api_requests": 1000000, "storage_mb": 100000, "evaluations": 100000}}
+            {
+                "name": "Starter",
+                "price": 0.0,
+                "limits": {"api_requests": 1000, "storage_mb": 100, "evaluations": 100},
+            },
+            {
+                "name": "Pro",
+                "price": 49.0,
+                "limits": {
+                    "api_requests": 10000,
+                    "storage_mb": 1000,
+                    "evaluations": 1000,
+                },
+            },
+            {
+                "name": "Team",
+                "price": 149.0,
+                "limits": {
+                    "api_requests": 50000,
+                    "storage_mb": 5000,
+                    "evaluations": 5000,
+                },
+            },
+            {
+                "name": "Business",
+                "price": 499.0,
+                "limits": {
+                    "api_requests": 250000,
+                    "storage_mb": 25000,
+                    "evaluations": 25000,
+                },
+            },
+            {
+                "name": "Enterprise",
+                "price": 1499.0,
+                "limits": {
+                    "api_requests": 1000000,
+                    "storage_mb": 100000,
+                    "evaluations": 100000,
+                },
+            },
         ]
 
         for p in plans_data:
@@ -59,12 +96,14 @@ class BillingService:
                     name=p["name"],
                     price_monthly=p["price"],
                     limits=p["limits"],
-                    created_at=datetime.utcnow()
+                    created_at=datetime.utcnow(),
                 )
                 db.add(plan)
         await db.commit()
 
-    async def create_subscription(self, db: AsyncSession, org_id: uuid.UUID, plan_name: str) -> Subscription:
+    async def create_subscription(
+        self, db: AsyncSession, org_id: uuid.UUID, plan_name: str
+    ) -> Subscription:
         # Fetch the plan
         stmt = select(Plan).where(sa.func.lower(Plan.name) == plan_name.lower())
         res = await db.execute(stmt)
@@ -74,8 +113,7 @@ class BillingService:
 
         # Deactivate previous active subscription if exists
         old_stmt = select(Subscription).where(
-            Subscription.organization_id == org_id,
-            Subscription.status == "active"
+            Subscription.organization_id == org_id, Subscription.status == "active"
         )
         old_res = await db.execute(old_stmt)
         for old_sub in old_res.scalars().all():
@@ -88,7 +126,7 @@ class BillingService:
             status="active",
             current_period_start=datetime.utcnow(),
             current_period_end=datetime.utcnow() + timedelta(days=30),
-            created_at=datetime.utcnow()
+            created_at=datetime.utcnow(),
         )
         db.add(subscription)
 
@@ -99,14 +137,20 @@ class BillingService:
             amount=plan.price_monthly,
             status="paid",
             pdf_url=f"https://api.evalforge.com/invoices/{uuid.uuid4().hex}.pdf",
-            created_at=datetime.utcnow()
+            created_at=datetime.utcnow(),
         )
         db.add(invoice)
         await db.commit()
         await db.refresh(subscription)
         return subscription
 
-    async def get_billing_history(self, db: AsyncSession, org_id: uuid.UUID) -> List[Invoice]:
-        stmt = select(Invoice).where(Invoice.organization_id == org_id).order_by(Invoice.created_at.desc())
+    async def get_billing_history(
+        self, db: AsyncSession, org_id: uuid.UUID
+    ) -> List[Invoice]:
+        stmt = (
+            select(Invoice)
+            .where(Invoice.organization_id == org_id)
+            .order_by(Invoice.created_at.desc())
+        )
         res = await db.execute(stmt)
         return list(res.scalars().all())

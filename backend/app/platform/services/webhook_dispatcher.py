@@ -1,15 +1,16 @@
-import hmac
-import hashlib
-import time
-import json
-import uuid
 import asyncio
-from typing import Dict, Any, Optional
+import hashlib
+import hmac
+import json
+import time
+import uuid
+from typing import Any, Dict
+
 import httpx
 import structlog
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.platform.models import WebhookSubscription, WebhookDelivery
+from app.platform.models import WebhookDelivery, WebhookSubscription
 
 logger = structlog.get_logger()
 
@@ -35,21 +36,23 @@ class WebhookDispatcher:
         db: AsyncSession,
         subscription: WebhookSubscription,
         event_type: str,
-        payload: Dict[str, Any]
+        payload: Dict[str, Any],
     ) -> bool:
-        payload_str = json.dumps({
-            "event": event_type,
-            "subscription_id": str(subscription.id),
-            "timestamp": int(time.time()),
-            "data": payload
-        })
+        payload_str = json.dumps(
+            {
+                "event": event_type,
+                "subscription_id": str(subscription.id),
+                "timestamp": int(time.time()),
+                "data": payload,
+            }
+        )
         signature = self._generate_signature(payload_str, subscription.secret_token)
 
         headers = {
             "Content-Type": "application/json",
             "X-EvalForge-Signature": signature,
             "X-EvalForge-Event": event_type,
-            "User-Agent": "EvalForge-Webhook-Dispatcher/1.0"
+            "User-Agent": "EvalForge-Webhook-Dispatcher/1.0",
         }
 
         success = False
@@ -62,9 +65,7 @@ class WebhookDispatcher:
             try:
                 async with httpx.AsyncClient(timeout=self.timeout_seconds) as client:
                     response = await client.post(
-                        subscription.target_url,
-                        content=payload_str,
-                        headers=headers
+                        subscription.target_url, content=payload_str, headers=headers
                     )
                     status_code = response.status_code
                     response_body = response.text
@@ -77,11 +78,11 @@ class WebhookDispatcher:
                     "Webhook delivery attempt failed",
                     url=subscription.target_url,
                     attempt=attempt + 1,
-                    error=str(e)
+                    error=str(e),
                 )
-            
+
             # Backoff delay
-            await asyncio.sleep(2.0 ** attempt)
+            await asyncio.sleep(2.0**attempt)
 
         latency = int((time.perf_counter() - start_time) * 1000)
 
@@ -92,9 +93,9 @@ class WebhookDispatcher:
             event_type=event_type,
             status_code=status_code,
             request_payload=payload,
-            response_body=response_body[:2000], # Cap response storage
+            response_body=response_body[:2000],  # Cap response storage
             latency_ms=latency,
-            success=success
+            success=success,
         )
         db.add(delivery)
         await db.commit()
@@ -105,7 +106,6 @@ class WebhookDispatcher:
             event=event_type,
             success=success,
             status_code=status_code,
-            latency_ms=latency
+            latency_ms=latency,
         )
         return success
-

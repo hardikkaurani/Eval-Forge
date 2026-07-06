@@ -1,6 +1,5 @@
 import os
-import json
-from typing import Optional, Dict, Any
+from typing import Dict, Optional
 
 
 class SecretManager:

@@ -1,7 +1,8 @@
-import uuid
 import hashlib
+import uuid
 from datetime import datetime, timedelta
 from typing import List, Optional
+
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
@@ -21,12 +22,16 @@ class EnterpriseAPIKeyService:
         org_id: Optional[uuid.UUID] = None,
         workspace_id: Optional[uuid.UUID] = None,
         scopes: List[str] = None,
-        expires_in_days: int = 30
+        expires_in_days: int = 30,
     ) -> tuple[str, EnterpriseAPIKey]:
         raw_key = f"ef_ent_{uuid.uuid4().hex}"
         key_hash = self._hash_key(raw_key)
 
-        expires_at = datetime.utcnow() + timedelta(days=expires_in_days) if expires_in_days else None
+        expires_at = (
+            datetime.utcnow() + timedelta(days=expires_in_days)
+            if expires_in_days
+            else None
+        )
 
         key_record = EnterpriseAPIKey(
             id=uuid.uuid4(),
@@ -37,18 +42,19 @@ class EnterpriseAPIKeyService:
             scopes=scopes or ["read:all"],
             is_active=True,
             expires_at=expires_at,
-            created_at=datetime.utcnow()
+            created_at=datetime.utcnow(),
         )
         db.add(key_record)
         await db.commit()
         await db.refresh(key_record)
         return raw_key, key_record
 
-    async def validate_key(self, db: AsyncSession, raw_key: str) -> Optional[EnterpriseAPIKey]:
+    async def validate_key(
+        self, db: AsyncSession, raw_key: str
+    ) -> Optional[EnterpriseAPIKey]:
         key_hash = self._hash_key(raw_key)
         stmt = select(EnterpriseAPIKey).where(
-            EnterpriseAPIKey.key_hash == key_hash,
-            EnterpriseAPIKey.is_active == True
+            EnterpriseAPIKey.key_hash == key_hash, EnterpriseAPIKey.is_active
         )
         res = await db.execute(stmt)
         key_record = res.scalar_one_or_none()

@@ -1,11 +1,11 @@
 import uuid
 from datetime import datetime, timedelta
+
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-import sqlalchemy as sa
 
-from app.enterprise.models import Quota, UsageRecord, Subscription, Plan
 from app.enterprise.exceptions import PlanQuotaExceededException
+from app.enterprise.models import Quota, UsageRecord
 
 
 class QuotaService:
@@ -17,7 +17,7 @@ class QuotaService:
         org_id: uuid.UUID,
         workspace_id: uuid.UUID,
         metric: str,
-        value: float
+        value: float,
     ) -> UsageRecord:
         # Create usage record
         record = UsageRecord(
@@ -26,7 +26,7 @@ class QuotaService:
             workspace_id=workspace_id,
             metric=metric,
             value=value,
-            timestamp=datetime.utcnow()
+            timestamp=datetime.utcnow(),
         )
         db.add(record)
 
@@ -34,7 +34,7 @@ class QuotaService:
         stmt = select(Quota).where(
             Quota.organization_id == org_id,
             Quota.workspace_id == workspace_id,
-            Quota.metric == metric
+            Quota.metric == metric,
         )
         res = await db.execute(stmt)
         quota = res.scalar_one_or_none()
@@ -50,7 +50,7 @@ class QuotaService:
                 metric=metric,
                 limit_value=5000.0,
                 current_value=value,
-                reset_at=datetime.utcnow() + timedelta(days=30)
+                reset_at=datetime.utcnow() + timedelta(days=30),
             )
             db.add(quota)
 
@@ -64,16 +64,12 @@ class QuotaService:
         return record
 
     async def check_quota_status(
-        self,
-        db: AsyncSession,
-        org_id: uuid.UUID,
-        workspace_id: uuid.UUID,
-        metric: str
+        self, db: AsyncSession, org_id: uuid.UUID, workspace_id: uuid.UUID, metric: str
     ) -> dict:
         stmt = select(Quota).where(
             Quota.organization_id == org_id,
             Quota.workspace_id == workspace_id,
-            Quota.metric == metric
+            Quota.metric == metric,
         )
         res = await db.execute(stmt)
         quota = res.scalar_one_or_none()
@@ -93,5 +89,5 @@ class QuotaService:
             "limit": quota.limit_value,
             "current": quota.current_value,
             "status": status,
-            "reset_at": quota.reset_at
+            "reset_at": quota.reset_at,
         }

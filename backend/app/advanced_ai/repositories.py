@@ -1,18 +1,19 @@
-from typing import List, Optional, Dict, Any
-from sqlalchemy import select, update, delete, and_, desc
+from typing import Any, Dict, List, Optional
+
+from sqlalchemy import delete, desc, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.advanced_ai import (
-    RAGEvaluation,
+    AgentEvaluation,
+    ConversationEvaluation,
     HallucinationReport,
+    Policy,
+    PromptVersion,
+    RAGEvaluation,
+    RegressionRun,
+    RiskAssessment,
     SafetyEvaluation,
     SecurityEvaluation,
-    ConversationEvaluation,
-    AgentEvaluation,
-    Policy,
-    RegressionRun,
-    PromptVersion,
-    RiskAssessment,
 )
 
 
@@ -40,7 +41,9 @@ class AdvancedAIRepository:
         return list(res.scalars().all())
 
     # Hallucination Report
-    async def create_hallucination_report(self, report: HallucinationReport) -> HallucinationReport:
+    async def create_hallucination_report(
+        self, report: HallucinationReport
+    ) -> HallucinationReport:
         self.db.add(report)
         await self.db.flush()
         return report
@@ -59,7 +62,9 @@ class AdvancedAIRepository:
         return list(res.scalars().all())
 
     # Safety Evaluation
-    async def create_safety_evaluation(self, safety: SafetyEvaluation) -> SafetyEvaluation:
+    async def create_safety_evaluation(
+        self, safety: SafetyEvaluation
+    ) -> SafetyEvaluation:
         self.db.add(safety)
         await self.db.flush()
         return safety
@@ -78,7 +83,9 @@ class AdvancedAIRepository:
         return list(res.scalars().all())
 
     # Security Evaluation
-    async def create_security_evaluation(self, security: SecurityEvaluation) -> SecurityEvaluation:
+    async def create_security_evaluation(
+        self, security: SecurityEvaluation
+    ) -> SecurityEvaluation:
         self.db.add(security)
         await self.db.flush()
         return security
@@ -97,7 +104,9 @@ class AdvancedAIRepository:
         return list(res.scalars().all())
 
     # Conversation Evaluation
-    async def create_conversation_evaluation(self, convo: ConversationEvaluation) -> ConversationEvaluation:
+    async def create_conversation_evaluation(
+        self, convo: ConversationEvaluation
+    ) -> ConversationEvaluation:
         self.db.add(convo)
         await self.db.flush()
         return convo
@@ -116,7 +125,9 @@ class AdvancedAIRepository:
         return list(res.scalars().all())
 
     # Agent Evaluation
-    async def create_agent_evaluation(self, agent_eval: AgentEvaluation) -> AgentEvaluation:
+    async def create_agent_evaluation(
+        self, agent_eval: AgentEvaluation
+    ) -> AgentEvaluation:
         self.db.add(agent_eval)
         await self.db.flush()
         return agent_eval
@@ -158,7 +169,9 @@ class AdvancedAIRepository:
         res = await self.db.execute(stmt)
         return list(res.scalars().all())
 
-    async def update_policy(self, policy_id: str, values: Dict[str, Any]) -> Optional[Policy]:
+    async def update_policy(
+        self, policy_id: str, values: Dict[str, Any]
+    ) -> Optional[Policy]:
         stmt = (
             update(Policy)
             .where(Policy.id == policy_id)
@@ -212,7 +225,9 @@ class AdvancedAIRepository:
         return list(res.scalars().all())
 
     # Risk Assessment
-    async def create_risk_assessment(self, assessment: RiskAssessment) -> RiskAssessment:
+    async def create_risk_assessment(
+        self, assessment: RiskAssessment
+    ) -> RiskAssessment:
         self.db.add(assessment)
         await self.db.flush()
         return assessment

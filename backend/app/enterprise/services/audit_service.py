@@ -1,6 +1,7 @@
 import uuid
 from datetime import datetime
-from typing import Dict, Any, Optional
+from typing import Optional
+
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
@@ -18,7 +19,7 @@ class AuditService:
         user_id: uuid.UUID,
         action: str,
         details: dict = None,
-        ip_address: str = None
+        ip_address: str = None,
     ) -> AuditLog:
         log = AuditLog(
             id=uuid.uuid4(),
@@ -28,7 +29,7 @@ class AuditService:
             action=action,
             details=details or {},
             ip_address=ip_address,
-            created_at=datetime.utcnow()
+            created_at=datetime.utcnow(),
         )
         db.add(log)
         await db.commit()
@@ -40,7 +41,7 @@ class AuditService:
         db: AsyncSession,
         org_id: uuid.UUID,
         action: Optional[str] = None,
-        limit: int = 100
+        limit: int = 100,
     ) -> list[AuditLog]:
         stmt = select(AuditLog).where(AuditLog.organization_id == org_id)
         if action:

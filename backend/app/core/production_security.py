@@ -1,11 +1,12 @@
-import time
 import json
-from typing import Dict, Any, Optional
-from fastapi import Request, Response, HTTPException, status
+import time
+from typing import Dict
+
+import structlog
+from fastapi import HTTPException, Request, Response, status
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from app.core.redis import redis_manager
-import structlog
 
 logger = structlog.get_logger()
 
@@ -34,7 +35,9 @@ class RateLimiter:
                     request_count = res[1]
                     return request_count < self.requests_per_minute
         except Exception as e:
-            logger.warning("Redis rate limit check failed, using fallback.", error=str(e))
+            logger.warning(
+                "Redis rate limit check failed, using fallback.", error=str(e)
+            )
 
         # Fallback to local memory dictionary
         timestamps = self._local_storage.setdefault(client_key, [])
@@ -65,7 +68,7 @@ class RateLimitingMiddleware(BaseHTTPMiddleware):
             logger.warning("Rate limit exceeded", client_key=client_key)
             raise HTTPException(
                 status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-                detail="Rate limit exceeded. Please try again later."
+                detail="Rate limit exceeded. Please try again later.",
             )
 
         return await call_next(request)
@@ -89,11 +92,14 @@ class IdempotencyMiddleware(BaseHTTPMiddleware):
                 cached_res = await redis_manager.get(redis_key)
                 if cached_res:
                     data = json.loads(cached_res)
-                    logger.info("Duplicate request prevented by Idempotency Key", key=idempotency_key)
+                    logger.info(
+                        "Duplicate request prevented by Idempotency Key",
+                        key=idempotency_key,
+                    )
                     return Response(
                         content=data.get("body", ""),
                         status_code=data.get("status_code", 200),
-                        headers=data.get("headers", {})
+                        headers=data.get("headers", {}),
                     )
         except Exception as e:
             logger.warning("Redis idempotency validation error.", error=str(e))
@@ -115,11 +121,16 @@ class IdempotencyMiddleware(BaseHTTPMiddleware):
                     payload = {
                         "status_code": response.status_code,
                         "headers": dict(response.headers),
-                        "body": body_bytes.decode("utf-8", errors="ignore")
+                        "body": body_bytes.decode("utf-8", errors="ignore"),
                     }
-                    await redis_manager.set(redis_key, json.dumps(payload), expire=86400) # 24h retention
+                    await redis_manager.set(
+                        redis_key, json.dumps(payload), expire=86400
+                    )  # 24h retention
             except Exception as e:
-                logger.warning("Failed to cache response payload for idempotency key.", error=str(e))
+                logger.warning(
+                    "Failed to cache response payload for idempotency key.",
+                    error=str(e),
+                )
 
         return response
 

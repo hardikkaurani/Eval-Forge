@@ -1,25 +1,26 @@
-from typing import List, Optional, Dict, Any
-from fastapi import APIRouter, Depends, Query, status, HTTPException
+from typing import Any, Dict, List, Optional
+
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from fastapi.responses import FileResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.database.session import get_db
-from app.utils.responses import ApiResponse, create_response
-from app.utils.pagination import PaginatedResponse, create_pagination_meta
+from app.analytics.repositories import AnalyticsRepository
 from app.analytics.schemas import (
     AnalyticsOverview,
-    ReportCreate,
-    ReportResponse,
-    LeaderboardResponse,
-    InsightResponse,
-    TrendResponse,
-    SystemMetrics,
     DashboardSnapshotCreate,
     DashboardSnapshotResponse,
+    InsightResponse,
+    LeaderboardResponse,
+    ReportCreate,
+    ReportResponse,
+    SystemMetrics,
+    TrendResponse,
 )
 from app.analytics.services import AnalyticsService, ObservabilityService
-from app.analytics.repositories import AnalyticsRepository
+from app.database.session import get_db
 from app.models.analytics import DashboardSnapshot
+from app.utils.pagination import PaginatedResponse, create_pagination_meta
+from app.utils.responses import ApiResponse, create_response
 
 # Separate routers for different prefix paths
 analytics_router = APIRouter(prefix="/analytics", tags=["Analytics"])
@@ -31,6 +32,7 @@ system_router = APIRouter(prefix="/system", tags=["System"])
 
 
 # --- Analytics Router ---
+
 
 @analytics_router.get(
     "",
@@ -59,8 +61,12 @@ async def get_project_analytics(
 )
 async def trigger_analytics_snapshot(
     project_id: str = Query(..., description="Project UUID"),
-    scope: str = Query("project", description="Scope: project, dataset, evaluation_run"),
-    scope_id: Optional[str] = Query(None, description="Identifier of the scope element"),
+    scope: str = Query(
+        "project", description="Scope: project, dataset, evaluation_run"
+    ),
+    scope_id: Optional[str] = Query(
+        None, description="Identifier of the scope element"
+    ),
     db: AsyncSession = Depends(get_db),
 ):
     """Triggers background data aggregation and persists a new AnalyticsSnapshot."""
@@ -87,16 +93,14 @@ async def save_dashboard_snapshot(
     """Stores a dashboard layout grid snapshot configuration for a project."""
     repo = AnalyticsRepository(db)
     snap = DashboardSnapshot(
-        project_id=project_id,
-        name=payload.name,
-        layout=payload.layout
+        project_id=project_id, name=payload.name, layout=payload.layout
     )
     saved = await repo.save_dashboard_snapshot(snap)
     await db.commit()
     return create_response(
         success=True,
         message="Dashboard snapshot saved.",
-        data=DashboardSnapshotResponse.model_validate(saved)
+        data=DashboardSnapshotResponse.model_validate(saved),
     )
 
 
@@ -115,11 +119,12 @@ async def list_dashboard_snapshots(
     return create_response(
         success=True,
         message="Dashboard snapshots list retrieved.",
-        data=[DashboardSnapshotResponse.model_validate(i) for i in items]
+        data=[DashboardSnapshotResponse.model_validate(i) for i in items],
     )
 
 
 # --- Reports Router ---
+
 
 @reports_router.get(
     "",
@@ -140,13 +145,10 @@ async def list_reports(
     items, total = await repo.list_reports(project_id, type, status, skip, page_size)
     meta = create_pagination_meta(page, page_size, total)
     paginated = PaginatedResponse(
-        items=[ReportResponse.model_validate(item) for item in items],
-        meta=meta
+        items=[ReportResponse.model_validate(item) for item in items], meta=meta
     )
     return create_response(
-        success=True,
-        message="Reports listed successfully.",
-        data=paginated
+        success=True, message="Reports listed successfully.", data=paginated
     )
 
 
@@ -163,11 +165,13 @@ async def generate_report(
 ):
     """Triggers background generation of a PDF or CSV format executive evaluation report."""
     service = AnalyticsService(db)
-    report = await service.generate_report_file(project_id, payload.name, payload.type, payload.filters)
+    report = await service.generate_report_file(
+        project_id, payload.name, payload.type, payload.filters
+    )
     return create_response(
         success=True,
         message="Report generation triggered.",
-        data=ReportResponse.model_validate(report)
+        data=ReportResponse.model_validate(report),
     )
 
 
@@ -184,16 +188,17 @@ async def download_report(
     report = await repo.get_report(id)
     if not report or not report.file_path:
         raise HTTPException(status_code=404, detail="Compiled report file not found.")
-    
+
     media_type = "application/pdf" if report.type.upper() == "PDF" else "text/csv"
     return FileResponse(
         path=report.file_path,
         media_type=media_type,
-        filename=f"{report.name.replace(' ', '_')}.{report.type.lower()}"
+        filename=f"{report.name.replace(' ', '_')}.{report.type.lower()}",
     )
 
 
 # --- Leaderboards Router ---
+
 
 @leaderboards_router.get(
     "",
@@ -202,7 +207,9 @@ async def download_report(
 )
 async def get_leaderboard(
     project_id: str = Query(..., description="Project UUID"),
-    entity_type: str = Query("model", description="model, provider, dataset, or benchmark"),
+    entity_type: str = Query(
+        "model", description="model, provider, dataset, or benchmark"
+    ),
     db: AsyncSession = Depends(get_db),
 ):
     """Retrieves ranked standings of models or providers based on quality scores."""
@@ -211,11 +218,12 @@ async def get_leaderboard(
     return create_response(
         success=True,
         message="Leaderboard standings fetched.",
-        data={"entity_type": entity_type, "items": items}
+        data={"entity_type": entity_type, "items": items},
     )
 
 
 # --- Insights Router ---
+
 
 @insights_router.get(
     "",
@@ -224,7 +232,9 @@ async def get_leaderboard(
 )
 async def list_insights(
     project_id: str = Query(..., description="Project UUID"),
-    type: Optional[str] = Query(None, description="regression, improvement, latency, hallucination"),
+    type: Optional[str] = Query(
+        None, description="regression, improvement, latency, hallucination"
+    ),
     severity: Optional[str] = Query(None, description="low, medium, high, critical"),
     db: AsyncSession = Depends(get_db),
 ):
@@ -234,11 +244,12 @@ async def list_insights(
     return create_response(
         success=True,
         message="Insights fetched.",
-        data=[InsightResponse.model_validate(i) for i in items]
+        data=[InsightResponse.model_validate(i) for i in items],
     )
 
 
 # --- Trends Router ---
+
 
 @trends_router.get(
     "",
@@ -247,7 +258,10 @@ async def list_insights(
 )
 async def get_trends(
     project_id: str = Query(..., description="Project UUID"),
-    metric_name: str = Query("avg_score", description="avg_score, success_rate, avg_latency_ms, estimated_cost"),
+    metric_name: str = Query(
+        "avg_score",
+        description="avg_score, success_rate, avg_latency_ms, estimated_cost",
+    ),
     granularity: str = Query("daily", description="daily, weekly, monthly"),
     compare: bool = Query(True, description="Compare with previous period"),
     db: AsyncSession = Depends(get_db),
@@ -256,13 +270,12 @@ async def get_trends(
     service = AnalyticsService(db)
     trends = await service.get_trends(project_id, metric_name, granularity, compare)
     return create_response(
-        success=True,
-        message="Trends data compiled successfully.",
-        data=trends
+        success=True, message="Trends data compiled successfully.", data=trends
     )
 
 
 # --- System Observability Router ---
+
 
 @system_router.get(
     "/metrics",
@@ -276,7 +289,5 @@ async def get_system_metrics(
     service = ObservabilityService(db)
     metrics = await service.collect_health_metrics()
     return create_response(
-        success=True,
-        message="System observability metrics retrieved.",
-        data=metrics
+        success=True, message="System observability metrics retrieved.", data=metrics
     )

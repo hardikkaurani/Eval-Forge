@@ -1,23 +1,32 @@
 import uuid
-from typing import List
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.session import get_db
-from app.utils.responses import ApiResponse, create_response
-from app.enterprise.schemas import OrganizationCreate, OrganizationResponse, InvitationBase, InvitationResponse
-from app.enterprise.services.organization_service import OrganizationService
 from app.enterprise.models import Invitation
+from app.enterprise.schemas import (
+    InvitationBase,
+    InvitationResponse,
+    OrganizationCreate,
+    OrganizationResponse,
+)
+from app.enterprise.services.organization_service import OrganizationService
+from app.utils.responses import ApiResponse, create_response
 
 router = APIRouter(prefix="/organizations", tags=["Enterprise SaaS - Organizations"])
 org_service = OrganizationService()
 
 
-@router.post("", response_model=ApiResponse[OrganizationResponse], status_code=status.HTTP_201_CREATED)
+@router.post(
+    "",
+    response_model=ApiResponse[OrganizationResponse],
+    status_code=status.HTTP_201_CREATED,
+)
 async def create_org(
     payload: OrganizationCreate,
     user_id: str,  # In production, this would be injected from authenticated user session
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ):
     """Creates a new enterprise organization and assigns the creator as owner."""
     org = await org_service.create_organization(
@@ -27,12 +36,12 @@ async def create_org(
         custom_domain=payload.custom_domain,
         logo_url=payload.logo_url,
         branding_settings=payload.branding_settings,
-        security_policies=payload.security_policies
+        security_policies=payload.security_policies,
     )
     return create_response(
         success=True,
         message="Organization successfully created.",
-        data=OrganizationResponse.from_orm(org)
+        data=OrganizationResponse.from_orm(org),
     )
 
 
@@ -45,47 +54,56 @@ async def get_org(org_id: uuid.UUID, db: AsyncSession = Depends(get_db)):
     return create_response(
         success=True,
         message="Organization retrieved successfully.",
-        data=OrganizationResponse.from_orm(org)
+        data=OrganizationResponse.from_orm(org),
     )
 
 
 @router.post("/{org_id}/branding", response_model=ApiResponse[OrganizationResponse])
-async def update_branding(org_id: uuid.UUID, branding: dict, db: AsyncSession = Depends(get_db)):
+async def update_branding(
+    org_id: uuid.UUID, branding: dict, db: AsyncSession = Depends(get_db)
+):
     """Updates the custom branding, logo, and theme settings of an organization."""
     try:
         org = await org_service.update_branding(db, org_id, branding)
         return create_response(
             success=True,
             message="Branding updated successfully.",
-            data=OrganizationResponse.from_orm(org)
+            data=OrganizationResponse.from_orm(org),
         )
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e)) from e
 
 
 @router.post("/{org_id}/domain", response_model=ApiResponse[OrganizationResponse])
-async def configure_domain(org_id: uuid.UUID, domain: str, db: AsyncSession = Depends(get_db)):
+async def configure_domain(
+    org_id: uuid.UUID, domain: str, db: AsyncSession = Depends(get_db)
+):
     """Configures a verified custom domain for white-label organization login."""
     try:
         org = await org_service.configure_custom_domain(db, org_id, domain)
         return create_response(
             success=True,
             message="Custom domain configured successfully.",
-            data=OrganizationResponse.from_orm(org)
+            data=OrganizationResponse.from_orm(org),
         )
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e)) from e
 
 
-@router.post("/{org_id}/invitations", response_model=ApiResponse[InvitationResponse], status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/{org_id}/invitations",
+    response_model=ApiResponse[InvitationResponse],
+    status_code=status.HTTP_201_CREATED,
+)
 async def invite_member(
     org_id: uuid.UUID,
     payload: InvitationBase,
     invited_by: str,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ):
     """Invites a new member to join the organization with a specific role."""
     from datetime import datetime, timedelta
+
     token = f"inv_{uuid.uuid4().hex}"
     invite = Invitation(
         id=uuid.uuid4(),
@@ -96,14 +114,14 @@ async def invite_member(
         token=token,
         status="pending",
         created_at=datetime.utcnow(),
-        expires_at=datetime.utcnow() + timedelta(days=7)
+        expires_at=datetime.utcnow() + timedelta(days=7),
     )
     db.add(invite)
     await db.commit()
     await db.refresh(invite)
-    
+
     return create_response(
         success=True,
         message="Invitation sent successfully.",
-        data=InvitationResponse.from_orm(invite)
+        data=InvitationResponse.from_orm(invite),
     )
