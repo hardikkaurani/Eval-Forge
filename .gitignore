@@ -216,3 +216,6 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# EvalForge Test Artifacts
+backend/artifacts/
