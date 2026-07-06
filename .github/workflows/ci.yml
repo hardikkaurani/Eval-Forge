@@ -53,7 +53,7 @@ jobs:
       - name: Install Dependencies
         run: |
           cd frontend
-          npm ci
+          npm install
 
       - name: Check Formatting with Prettier
         run: |
