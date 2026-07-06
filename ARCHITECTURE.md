@@ -1,85 +1,120 @@
-# Architecture Design
+# System Architecture Design
 
-This document details the architectural decisions and system design of EvalForge.
+This document details the architectural decisions, design patterns, and component topologies of the **EvalForge** platform.
 
-## System Overview
+---
 
-EvalForge is structured as a decoupled monorepo containing a stateless web client (React/TS) and a web backend (FastAPI). It employs **Clean Architecture** patterns to separate infrastructure, data routing, and business logic.
+## 1. Architectural Style & Monorepo Layout
+
+EvalForge is structured as a decoupled monorepo, separating a stateless single-page web application (`frontend/`) from a high-throughput, async-native API gateway (`backend/`).
+
+The project adheres strictly to **Clean Architecture** and **Domain-Driven Design (DDD)** concepts, ensuring business rule isolation from transport layers and database dependencies.
 
 ```mermaid
-graph TD
-    Client[Web Browser client] -->|REST API Requests| FastAPI[FastAPI Server]
-    FastAPI -->|Data persistence| PostgreSQL[PostgreSQL Database]
-    FastAPI -->|Queuing & Caching| Redis[Redis Broker]
+graph TB
+    subgraph Client Layer
+        Browser[SPA Browser UI]
+        CLI[EvalForge CLI]
+        SDK[Python/TS SDK Clients]
+    end
+
+    subgraph API Gateway (FastAPI)
+        AuthMW[JWT & RBAC Middleware]
+        TenantMW[Tenant Scoping Context]
+        Router[API Routers]
+    end
+
+    subgraph Evaluation Engine
+        JudgeBase[JudgeBase Interface]
+        ConcreteJudges[G-Eval / DeepEval / Custom]
+    end
+
+    subgraph Async Processing
+        Broker[(Redis Queue)]
+        Workers[Celery Worker Cluster]
+    end
+
+    subgraph Persistence Layer
+        DB[(PostgreSQL Database)]
+        Storage[Local/S3 Dataset Storage]
+    end
+
+    Browser & CLI & SDK -->|REST API| AuthMW
+    AuthMW --> TenantMW --> Router
+    Router -->|Dispatch Tasks| Broker
+    Broker --> Workers
+    Workers --> JudgeBase
+    JudgeBase --> ConcreteJudges
+    Router --> DB
+    Workers --> DB
+    Workers --> Storage
 ```
 
 ---
 
-## Backend Design (FastAPI)
+## 2. Multi-Tenant SaaS Isolation Model
 
-We organize the Python codebase to follow strict separation of concerns:
+EvalForge implements organization-level multitenancy:
+- **Organizations**: The top-level administrative boundary. Subscriptions and usage quotas are tracked at the organization level.
+- **Workspaces / Teams**: Mid-level groupings. Projects, datasets, and runs belong to a workspace.
+- **Role-Based Access Control (RBAC)**: Custom middleware inspects authentication context and permits execution based on role hierarchy:
+  $$\text{Viewer} \subset \text{Member} \subset \text{Team Admin} \subset \text{Org Admin}$$
+- **Data Scoping Middleware**: A tenant filter is injected into the database session lifecycle, automatically appending `org_id` clauses to all select, update, and delete actions.
 
-- **api/**: The HTTP routing layer. Handles parsing HTTP methods, query params, request body validations, and returning unified JSON responses.
-- **config/**: Stores environment configurations using Pydantic Settings.
-- **core/**: Essential utilities that span the application (e.g. exception handling policies, dependency providers, Redis manager, and structured logging definitions).
-- **database/**: Establishes database connections, manages async session lifecycles, and defines the Project repository.
-- **models/**: SQLAlchemy models representing tables and relationships.
-- **schemas/**: Pydantic models for request payload parsing and response serialization.
-- **services/**: Contains pure business logic. API routing handlers call functions defined in this layer, which in turn calls the repository layer.
-- **utils/**: Shared helper utilities (pagination, formatting, etc.).
+---
 
-### Repository-Service Pattern
+## 3. Evaluation Engine Architecture
+
+The core evaluation logic is decoupled using a Provider/Judge abstraction model.
 
 ```mermaid
-sequenceDiagram
-    participant Client
-    participant Router
-    participant Service
-    participant Repository
-    participant Database
-
-    Client->>Router: HTTP Request (e.g., POST /projects)
-    Router->>Service: Call Service Method (ProjectCreate schema)
-    Service->>Service: Validate business rules/sorting
-    Service->>Repository: Call Repository Method
-    Repository->>Database: Async SQLAlchemy Query
-    Database-->>Repository: DB Record
-    Repository-->>Service: Project Model
-    Service-->>Router: Project Model / Page Metadata
-    Router->>Client: ApiResponse JSON (Unified structure)
+classDiagram
+    class JudgeBase {
+        <<abstract>>
+        +evaluate(output, reference, config) EvalResult*
+    }
+    class GEvalJudge {
+        +generate_steps() List
+        +score_steps() Float
+    }
+    class DeepEvalJudge {
+        +faithfulness() Float
+        +relevancy() Float
+    }
+    class CustomRubricJudge {
+        +compile_jinja() Prompt
+    }
+    JudgeBase <|-- GEvalJudge
+    JudgeBase <|-- DeepEvalJudge
+    JudgeBase <|-- CustomRubricJudge
+    class EvaluationPipeline {
+        -JudgeBase judge
+        +run(DatasetVersion) RunResult
+    }
+    EvaluationPipeline --> JudgeBase
 ```
 
----
-
-## Observability & Security Middleware
-
-1. **Request Correlation Tracing**: Every request is assigned a unique `Correlation ID` (UUIDv4) in the `RequestLoggingMiddleware`. This ID is stored in a thread/coroutine-safe contextvar (`structlog.contextvars`) and automatically injected into all logged records and the outgoing response headers (`X-Request-ID`), allowing trace-stitching across services.
-2. **Unified API Response**: All success and error payloads follow a strict envelope:
-   ```json
-   {
-     "success": true,
-     "message": "Projects listed successfully.",
-     "data": { ... },
-     "timestamp": "2026-06-27T20:49:58Z",
-     "request_id": "8b51d04f-0cb7-4a62-b72e-641d61685bc4"
-   }
-   ```
-3. **Security Headers**: The `SecurityHeadersMiddleware` appends security protection headers to every outgoing request (e.g. `X-Frame-Options`, `Content-Security-Policy`, `X-Content-Type-Options`).
+### 3.1 Judicative Pipelines
+1. **G-Eval (Chain-of-Thought)**: First constructs step-by-step criteria instructions dynamically from the metric definition, and then executes step-level evaluation and weight averaging.
+2. **DeepEval Wrapper**: Wraps domain-specific evaluators (hallucination scoring, factual recall, and contextual relevance).
+3. **Custom Rubric Judicature**: Compiles Jinja2 prompt layouts, letting developers write personalized judge templates.
 
 ---
 
-## Testing Architecture
+## 4. Asynchronous Task Orchestration
 
-We utilize `pytest` to run full integration checks. To prevent environmental dependencies when Docker services are not running during local/CI test execution:
-1. **SQLite In-Memory**: We run tests against an in-memory SQLite database utilizing the `aiosqlite` async driver.
-2. **Redis Mocking**: The active Redis connection manager is patched at the session level to respond with mock active health stats.
+LLM evaluation is inherently high-latency due to remote inference. EvalForge handles this asynchronously:
+1. **API Handshake**: The API receives the run submission, verifies quotas, creates a DB record with a `PENDING` state, and returns a `202 Accepted` response with a polling URL.
+2. **Task Enqueuing**: The task is dispatched to Redis via Celery, categorized into priority queues:
+   - `high`: CI/CD automation pipelines.
+   - `default`: User-facing interactive runs.
+3. **Progress Broadcasting**: Celery workers stream real-time task progress (completion ratios) via a WebSocket server or SSE fallback, keeping user interfaces synced instantly.
+4. **Retry Handling**: Per-test-case retry loops handle rate limits and transient connection timeouts with exponential backoff.
 
 ---
 
-## Async Pipeline & Concurrency
+## 5. Observability Stack
 
-Evaluations involve calling third-party LLMs which introduces high latency. 
-- API endpoints that initiate runs will register a new job in the database.
-- Jobs are queued using Redis as a message broker.
-- Workers retrieve runs from the queue and perform evaluations asynchronously, updating the database status once complete.
-- Client applications check run updates periodically or via SSE (Server-Sent Events) in the future.
+- **Request ID Tracking**: Correlation IDs are attached to HTTP context and threaded to all log statements using `structlog`.
+- **Metrics Scraping**: Prometheus gathers performance metrics (endpoint response distributions, queue depth, Celery thread saturation).
+- **Grafana Dashboard**: Visual templates show request latencies, evaluation success rates, and token consumption statistics.
