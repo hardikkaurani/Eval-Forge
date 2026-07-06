@@ -27,6 +27,18 @@ from app.models.analytics import (
     Alert,
     DashboardSnapshot,
 )
+from app.models.advanced_ai import (
+    RAGEvaluation,
+    HallucinationReport,
+    SafetyEvaluation,
+    SecurityEvaluation,
+    ConversationEvaluation,
+    AgentEvaluation,
+    Policy,
+    RegressionRun,
+    PromptVersion,
+    RiskAssessment,
+)
 from app.jobs.models.job import (
     Job,
     JobLog,
@@ -68,4 +80,14 @@ __all__ = [
     "Insight",
     "Alert",
     "DashboardSnapshot",
+    "RAGEvaluation",
+    "HallucinationReport",
+    "SafetyEvaluation",
+    "SecurityEvaluation",
+    "ConversationEvaluation",
+    "AgentEvaluation",
+    "Policy",
+    "RegressionRun",
+    "PromptVersion",
+    "RiskAssessment",
 ]

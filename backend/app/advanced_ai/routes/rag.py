@@ -1,0 +1,53 @@
+from typing import List, Optional
+from fastapi import APIRouter, Depends, Query, status
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.database.session import get_db
+from app.advanced_ai.schemas import RAGEvaluationCreate, RAGEvaluationResponse, HallucinationReportResponse
+from app.advanced_ai.services.rag import RAGService
+from app.advanced_ai.repositories import AdvancedAIRepository
+
+router = APIRouter(prefix="/rag", tags=["rag"])
+
+
+@router.post("", response_model=RAGEvaluationResponse, status_code=status.HTTP_201_CREATED)
+async def create_rag_evaluation(
+    payload: RAGEvaluationCreate,
+    db: AsyncSession = Depends(get_db)
+):
+    service = RAGService(db)
+    # Simulate execution context retrieval
+    return await service.evaluate_rag_run(
+        project_id=payload.project_id,
+        run_id=payload.run_id,
+        contexts=["Context 1 details", "Context 2 details"],
+        question="Query sentence",
+        answer="Model answer text",
+        ground_truth="Ground truth sentence"
+    )
+
+
+@router.get("", response_model=List[RAGEvaluationResponse])
+async def list_rag_evaluations(
+    project_id: str,
+    skip: int = Query(0, ge=0),
+    limit: int = Query(10, ge=1, le=100),
+    db: AsyncSession = Depends(get_db)
+):
+    repo = AdvancedAIRepository(db)
+    return await repo.get_rag_evaluations(project_id, skip=skip, limit=limit)
+
+
+@router.post("/hallucinations", response_model=HallucinationReportResponse, status_code=status.HTTP_201_CREATED)
+async def generate_hallucination_report(
+    result_id: str,
+    project_id: str,
+    db: AsyncSession = Depends(get_db)
+):
+    service = RAGService(db)
+    return await service.generate_hallucination_report(
+        project_id=project_id,
+        result_id=result_id,
+        contexts=["Context document reference"],
+        answer="Generated response details"
+    )
