@@ -270,7 +270,7 @@ export function Profile() {
       className="space-y-6 max-w-2xl mx-auto"
     >
       <div>
-        <h1 className="font-heading font-bold text-3xl text-white font-bold">Developer Profile</h1>
+        <h1 className="font-heading text-3xl text-white font-bold">Developer Profile</h1>
         <p className="text-gray-400 text-sm mt-1">
           Configure profile notifications, check credentials and security tokens.
         </p>
