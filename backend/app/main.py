@@ -84,9 +84,13 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+from app.core.production_security import RateLimitingMiddleware, IdempotencyMiddleware
+
 # Register Middlewares (Outermost first for request execution, innermost first for response headers)
 # 1. Custom Security Headers
 app.add_middleware(SecurityHeadersMiddleware)
+app.add_middleware(RateLimitingMiddleware, requests_per_minute=300)
+app.add_middleware(IdempotencyMiddleware)
 
 # 2. GZip Compression Middleware
 app.add_middleware(GZipMiddleware, minimum_size=1000)

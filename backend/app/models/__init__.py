@@ -49,6 +49,13 @@ from app.jobs.models.job import (
     Cancellation,
 )
 
+from app.platform.models import (
+    DeveloperProfile,
+    WebhookSubscription,
+    WebhookDelivery,
+    PluginDescriptor,
+)
+
 __all__ = [
     "Base",
     "Project",
@@ -90,4 +97,8 @@ __all__ = [
     "RegressionRun",
     "PromptVersion",
     "RiskAssessment",
+    "DeveloperProfile",
+    "WebhookSubscription",
+    "WebhookDelivery",
+    "PluginDescriptor",
 ]

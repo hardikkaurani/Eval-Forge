@@ -1,6 +1,5 @@
 from fastapi import APIRouter
 
-from app.api.v1.endpoints import evaluation, health, judges, project, providers, rubrics
 from app.datasets.routers import benchmark_router, dataset_router, experiment_router
 from app.jobs.routes.job import router as jobs_router
 from app.analytics.routes import (
@@ -12,10 +11,13 @@ from app.analytics.routes import (
     system_router,
 )
 
+from app.api.v1.endpoints import evaluation, health, judges, project, providers, rubrics, metrics
+
 api_router = APIRouter()
 
 # Register endpoints
 api_router.include_router(health.router, tags=["System"])
+api_router.include_router(metrics.router, tags=["System"])
 api_router.include_router(project.router, prefix="/projects", tags=["Projects"])
 api_router.include_router(providers.router, tags=["Providers"])
 api_router.include_router(judges.router, tags=["Judges"])
@@ -47,6 +49,13 @@ from app.advanced_ai.routes.tool_calls import router as tool_calls_router
 from app.advanced_ai.routes.policies import router as policies_router
 from app.advanced_ai.routes.dashboards import router as dashboards_router
 
+# Register Developer Platform routes
+from app.platform.routes.webhooks_api import router as webhooks_router
+from app.platform.routes.plugins_api import router as plugins_router
+from app.platform.routes.mcp_api import router as mcp_router
+from app.platform.routes.playground_api import router as playground_router
+from app.platform.routes.public_api import router as public_router
+
 api_router.include_router(rag_router)
 api_router.include_router(safety_router)
 api_router.include_router(security_router)
@@ -56,4 +65,10 @@ api_router.include_router(regressions_router)
 api_router.include_router(tool_calls_router)
 api_router.include_router(policies_router)
 api_router.include_router(dashboards_router)
+
+api_router.include_router(webhooks_router)
+api_router.include_router(plugins_router)
+api_router.include_router(mcp_router)
+api_router.include_router(playground_router)
+api_router.include_router(public_router)
 

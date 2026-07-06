@@ -25,7 +25,7 @@
 <img src="https://img.shields.io/badge/Celery-Workers-37814A?logo=celery&logoColor=white" />
 <img src="https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white" />
 <img src="https://img.shields.io/badge/License-MIT-blue.svg" />
-<img src="https://img.shields.io/badge/Status-Phase%202%20Active-22c55e" />
+<img src="https://img.shields.io/badge/Status-Phase%209%20Completed-22c55e" />
 <img src="https://img.shields.io/github/stars/hardikkaurani/Eval-Forge?style=social" />
 
 <br/><br/>
