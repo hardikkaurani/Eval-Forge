@@ -13,8 +13,9 @@ Please check the options that are relevant:
 
 ## How Has This Been Tested?
 Please describe the tests that you ran to verify your changes. Provide instructions so we can reproduce. Please also list any relevant details for your test configuration.
-- [ ] Test Unit
-- [ ] E2E Test
+- [ ] Unit Tests Passed (`pytest` / frontend checks)
+- [ ] Linting & Formatting Passed (`ruff` / `eslint` & `prettier`)
+- [ ] Integration or Local E2E Verification
 
 ## Checklist:
 - [ ] My code follows the style guidelines of this project
