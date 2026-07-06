@@ -14,7 +14,6 @@ import {
   Menu,
   X,
   ChevronRight,
-  Sparkles,
   Command,
   Heart,
 } from 'lucide-react';
