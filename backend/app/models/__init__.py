@@ -17,6 +17,16 @@ from app.models.evaluation import (
     RubricScore,
 )
 from app.models.project import Project
+from app.models.analytics import (
+    AnalyticsSnapshot,
+    Metric,
+    Trend,
+    Leaderboard,
+    Report,
+    Insight,
+    Alert,
+    DashboardSnapshot,
+)
 from app.jobs.models.job import (
     Job,
     JobLog,
@@ -50,4 +60,12 @@ __all__ = [
     "ExecutionHistory",
     "RetryHistory",
     "Cancellation",
+    "AnalyticsSnapshot",
+    "Metric",
+    "Trend",
+    "Leaderboard",
+    "Report",
+    "Insight",
+    "Alert",
+    "DashboardSnapshot",
 ]
