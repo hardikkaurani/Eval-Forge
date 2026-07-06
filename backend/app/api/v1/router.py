@@ -1,6 +1,5 @@
 from fastapi import APIRouter
 
-from app.api.v1.endpoints import evaluation, health, judges, project, providers, rubrics
 from app.datasets.routers import benchmark_router, dataset_router, experiment_router
 from app.jobs.routes.job import router as jobs_router
 from app.analytics.routes import (
@@ -12,10 +11,13 @@ from app.analytics.routes import (
     system_router,
 )
 
+from app.api.v1.endpoints import evaluation, health, judges, project, providers, rubrics, metrics
+
 api_router = APIRouter()
 
 # Register endpoints
 api_router.include_router(health.router, tags=["System"])
+api_router.include_router(metrics.router, tags=["System"])
 api_router.include_router(project.router, prefix="/projects", tags=["Projects"])
 api_router.include_router(providers.router, tags=["Providers"])
 api_router.include_router(judges.router, tags=["Judges"])
