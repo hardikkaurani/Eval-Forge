@@ -1,10 +1,10 @@
-from typing import List, Dict, Any, Optional
-from datetime import datetime
+from typing import List, Optional
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.advanced_ai import RAGEvaluation, HallucinationReport
-from app.advanced_ai.repositories import AdvancedAIRepository
 from app.advanced_ai.exceptions import RAGEvaluationError
+from app.advanced_ai.repositories import AdvancedAIRepository
+from app.models.advanced_ai import HallucinationReport, RAGEvaluation
 
 
 class RAGService:
@@ -19,7 +19,7 @@ class RAGService:
         contexts: List[str],
         question: str,
         answer: str,
-        ground_truth: Optional[str] = None
+        ground_truth: Optional[str] = None,
     ) -> RAGEvaluation:
         """Calculates context recall, precision, faithfulness, relevancy, groundedness, and citation validations."""
         try:
@@ -27,7 +27,7 @@ class RAGService:
             context_text = " ".join(contexts).lower()
             answer_lower = answer.lower()
             question_lower = question.lower()
-            
+
             # Context Precision: how relevant are the retrieved contexts to the question
             q_words = set(question_lower.split())
             c_words = set(context_text.split())
@@ -52,8 +52,14 @@ class RAGService:
             groundedness = faithfulness
 
             # Citation validation & source attribution
-            citation_validation = 0.95 if "[" in answer or "cite" in answer_lower else 0.0
-            source_attribution = 0.90 if any(str(i) in answer for i in range(1, len(contexts) + 1)) else 0.0
+            citation_validation = (
+                0.95 if "[" in answer or "cite" in answer_lower else 0.0
+            )
+            source_attribution = (
+                0.90
+                if any(str(i) in answer for i in range(1, len(contexts) + 1))
+                else 0.0
+            )
             context_coverage = min(1.0, len(c_words) / 500.0)
             knowledge_utilization = (faithfulness + answer_relevancy) / 2.0
 
@@ -69,20 +75,16 @@ class RAGService:
                 source_attribution=round(source_attribution, 4),
                 context_coverage=round(context_coverage, 4),
                 knowledge_utilization=round(knowledge_utilization, 4),
-                custom_retrieval_metrics={"mrr": 1.0, "ndcg": 0.95}
+                custom_retrieval_metrics={"mrr": 1.0, "ndcg": 0.95},
             )
 
             res = await self.repo.create_rag_evaluation(eval_obj)
             return res
         except Exception as e:
-            raise RAGEvaluationError(f"Failed to evaluate RAG: {str(e)}")
+            raise RAGEvaluationError(f"Failed to evaluate RAG: {str(e)}") from e
 
     async def generate_hallucination_report(
-        self,
-        project_id: str,
-        result_id: str,
-        contexts: List[str],
-        answer: str
+        self, project_id: str, result_id: str, contexts: List[str], answer: str
     ) -> HallucinationReport:
         """Inspects response text against source contexts to detect claims without grounding, fabrication, or contradiction."""
         try:
@@ -93,18 +95,24 @@ class RAGService:
             evidence_mismatch = False
 
             answer_lower = answer.lower()
-            context_text = " ".join(contexts).lower()
+            " ".join(contexts).lower()
 
             # Mock check rules:
             if "hallucinated" in answer_lower or "fake info" in answer_lower:
                 fabricated_facts.append("Fabricated claims found in output.")
                 evidence_mismatch = True
-            
-            if not any(c.split()[0].lower() in answer_lower for c in contexts if len(c.split()) > 0):
+
+            if not any(
+                c.split()[0].lower() in answer_lower
+                for c in contexts
+                if len(c.split()) > 0
+            ):
                 missing_citations.append("Context sources are not cited in response.")
 
             if "not matching" in answer_lower or "conflict" in answer_lower:
-                contradictions.append("Contradictions between generated response and context.")
+                contradictions.append(
+                    "Contradictions between generated response and context."
+                )
                 evidence_mismatch = True
 
             # Calculate confidence score
@@ -127,10 +135,12 @@ class RAGService:
                 confidence_score=round(confidence, 4),
                 reasoning_trace="Evaluated answer claims relative to grounding documents.",
                 evidence_mismatch=evidence_mismatch,
-                detailed_explanation=f"Hallucination inspection finalized with confidence score {confidence * 100}%."
+                detailed_explanation=f"Hallucination inspection finalized with confidence score {confidence * 100}%.",
             )
 
             res = await self.repo.create_hallucination_report(report)
             return res
         except Exception as e:
-            raise RAGEvaluationError(f"Failed to compile hallucination report: {str(e)}")
+            raise RAGEvaluationError(
+                f"Failed to compile hallucination report: {str(e)}"
+            ) from e

@@ -1,5 +1,7 @@
 from typing import Dict, Set
+
 from fastapi import WebSocket
+
 
 class WebSocketManager:
     """Manages active WebSocket connections for real-time progress updates and notification events."""

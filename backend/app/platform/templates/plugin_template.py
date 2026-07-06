@@ -4,7 +4,7 @@ Inherit from this base layout to implement custom LLM judges, metrics, or export
 and load them using the plugin engine registry.
 """
 
-from typing import Dict, Any
+from typing import Any, Dict
 
 
 class BasePlugin:
@@ -20,7 +20,7 @@ class CustomMetricPlugin(BasePlugin):
 
     def execute(self, inputs: Dict[str, Any]) -> Dict[str, Any]:
         # Extract inputs
-        prompt = inputs.get("prompt", "")
+        inputs.get("prompt", "")
         output = inputs.get("output", "")
         reference = inputs.get("reference", "")
 
@@ -30,5 +30,5 @@ class CustomMetricPlugin(BasePlugin):
         return {
             "success": True,
             "metric_score": score * self.settings.get("scale_factor", 1.0),
-            "reasoning": "Evaluated match criteria successfully."
+            "reasoning": "Evaluated match criteria successfully.",
         }

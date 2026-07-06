@@ -1,10 +1,12 @@
 from datetime import datetime
-from typing import Dict, Any, List, Optional
-from pydantic import BaseModel, Field, ConfigDict
+from typing import Any, Dict, List, Optional
+
+from pydantic import BaseModel, ConfigDict, Field
+
 
 class AnalyticsOverview(BaseModel):
     model_config = ConfigDict(from_attributes=True)
-    
+
     total_evaluations: int
     success_rate: float
     avg_score: float

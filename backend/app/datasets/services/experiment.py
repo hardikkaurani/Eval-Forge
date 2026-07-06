@@ -162,9 +162,9 @@ class ExperimentService:
                         "score": r.score,
                         "passed": r.passed,
                         "reasoning": r.reasoning,
-                        "evaluated_at": r.evaluated_at.isoformat()
-                        if r.evaluated_at
-                        else None,
+                        "evaluated_at": (
+                            r.evaluated_at.isoformat() if r.evaluated_at else None
+                        ),
                     }
                 )
 

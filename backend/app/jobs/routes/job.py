@@ -1,22 +1,24 @@
 from typing import List, Optional
-from fastapi import APIRouter, Depends, Query, status, WebSocket, WebSocketDisconnect
+
+from fastapi import APIRouter, Depends, Query, WebSocket, WebSocketDisconnect, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.session import get_db
+from app.jobs.progress.websocket import websocket_manager
 from app.jobs.schemas.job import (
     JobCreate,
-    JobResponse,
     JobDetailResponse,
-    WorkerResponse,
+    JobResponse,
     QueueResponse,
     SystemMetricsResponse,
+    WorkerResponse,
 )
 from app.jobs.services.job import JobService
-from app.jobs.progress.websocket import websocket_manager
 from app.utils.pagination import PaginatedResponse, create_pagination_meta
 from app.utils.responses import ApiResponse, create_response
 
 router = APIRouter()
+
 
 @router.post(
     "/jobs",
@@ -38,6 +40,7 @@ async def create_job(
         message="Background job queued successfully.",
         data=JobResponse.model_validate(job),
     )
+
 
 @router.get(
     "/jobs",
@@ -77,6 +80,7 @@ async def list_jobs(
         data=paginated_data,
     )
 
+
 @router.get(
     "/jobs/{id}",
     response_model=ApiResponse[JobDetailResponse],
@@ -96,6 +100,7 @@ async def get_job(
         data=JobDetailResponse.model_validate(job),
     )
 
+
 @router.delete(
     "/jobs/{id}",
     response_model=ApiResponse[None],
@@ -108,6 +113,7 @@ async def delete_job(
 ):
     """Deletes a job and all its related cascades from the database."""
     from app.jobs.models.job import Job
+
     job = await db.get(Job, id)
     if not job:
         return create_response(
@@ -121,6 +127,7 @@ async def delete_job(
         success=True,
         message="Job record deleted successfully.",
     )
+
 
 @router.post(
     "/jobs/{id}/cancel",
@@ -142,6 +149,7 @@ async def cancel_job(
         data=JobResponse.model_validate(job),
     )
 
+
 @router.get(
     "/queues",
     response_model=ApiResponse[List[QueueResponse]],
@@ -159,6 +167,7 @@ async def list_queues(
         message="Queues retrieved successfully.",
         data=[QueueResponse.model_validate(q) for q in queues],
     )
+
 
 @router.get(
     "/workers",
@@ -178,6 +187,7 @@ async def list_workers(
         data=[WorkerResponse.model_validate(w) for w in workers],
     )
 
+
 @router.get(
     "/system/jobs",
     response_model=ApiResponse[SystemMetricsResponse],
@@ -196,6 +206,7 @@ async def get_system_jobs_metrics(
         data=metrics,
     )
 
+
 # WebSocket connection routes
 @router.websocket("/jobs/{id}/progress")
 async def job_progress_websocket(websocket: WebSocket, id: str):
@@ -207,6 +218,7 @@ async def job_progress_websocket(websocket: WebSocket, id: str):
             await websocket.receive_text()
     except WebSocketDisconnect:
         websocket_manager.disconnect_job(id, websocket)
+
 
 @router.websocket("/projects/{id}/jobs/progress")
 async def project_jobs_websocket(websocket: WebSocket, id: str):

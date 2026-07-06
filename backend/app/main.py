@@ -11,6 +11,7 @@ from app.config.config import settings
 from app.core.exceptions import register_exception_handlers
 from app.core.logging import setup_logging
 from app.core.middleware import RequestLoggingMiddleware, SecurityHeadersMiddleware
+from app.core.production_security import IdempotencyMiddleware, RateLimitingMiddleware
 from app.core.redis import redis_manager
 from app.database.session import engine
 
@@ -83,8 +84,6 @@ app = FastAPI(
     openapi_url="/openapi.json" if settings.APP_ENV != "production" else None,
     lifespan=lifespan,
 )
-
-from app.core.production_security import RateLimitingMiddleware, IdempotencyMiddleware
 
 # Register Middlewares (Outermost first for request execution, innermost first for response headers)
 # 1. Custom Security Headers

@@ -1,18 +1,32 @@
 from datetime import datetime
 from typing import Any, Dict, List, Optional
+
 from pydantic import BaseModel, Field
+
 
 class JobCreate(BaseModel):
     name: str = Field(..., max_length=255, description="Name of the background job")
     queue_name: str = Field("default", max_length=100, description="Target queue name")
-    payload: Dict[str, Any] = Field(default_factory=dict, description="Job parameters and inputs")
-    max_retries: int = Field(3, ge=0, le=10, description="Max retry attempts on failure")
-    scheduled_at: Optional[datetime] = Field(None, description="Delayed execution timestamp")
-    recurring_cron: Optional[str] = Field(None, max_length=255, description="Cron format for recurring executions")
-    timezone: str = Field("UTC", max_length=100, description="Timezone context for cron schedules")
+    payload: Dict[str, Any] = Field(
+        default_factory=dict, description="Job parameters and inputs"
+    )
+    max_retries: int = Field(
+        3, ge=0, le=10, description="Max retry attempts on failure"
+    )
+    scheduled_at: Optional[datetime] = Field(
+        None, description="Delayed execution timestamp"
+    )
+    recurring_cron: Optional[str] = Field(
+        None, max_length=255, description="Cron format for recurring executions"
+    )
+    timezone: str = Field(
+        "UTC", max_length=100, description="Timezone context for cron schedules"
+    )
+
 
 class JobCancel(BaseModel):
     reason: Optional[str] = Field(None, description="Reason for cancelling the job")
+
 
 class JobLogResponse(BaseModel):
     id: str
@@ -23,6 +37,7 @@ class JobLogResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
 
 class ExecutionHistoryResponse(BaseModel):
     id: str
@@ -36,6 +51,7 @@ class ExecutionHistoryResponse(BaseModel):
     class Config:
         from_attributes = True
 
+
 class RetryHistoryResponse(BaseModel):
     id: str
     job_id: str
@@ -47,6 +63,7 @@ class RetryHistoryResponse(BaseModel):
     class Config:
         from_attributes = True
 
+
 class CancellationResponse(BaseModel):
     id: str
     job_id: str
@@ -56,6 +73,7 @@ class CancellationResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
 
 class JobResponse(BaseModel):
     id: str
@@ -81,6 +99,7 @@ class JobResponse(BaseModel):
     class Config:
         from_attributes = True
 
+
 class JobDetailResponse(JobResponse):
     logs: List[JobLogResponse] = []
     execution_history: List[ExecutionHistoryResponse] = []
@@ -89,6 +108,7 @@ class JobDetailResponse(JobResponse):
 
     class Config:
         from_attributes = True
+
 
 class WorkerResponse(BaseModel):
     id: str
@@ -103,6 +123,7 @@ class WorkerResponse(BaseModel):
     class Config:
         from_attributes = True
 
+
 class QueueResponse(BaseModel):
     id: str
     name: str
@@ -112,6 +133,7 @@ class QueueResponse(BaseModel):
     class Config:
         from_attributes = True
 
+
 class QueueMetricsResponse(BaseModel):
     queue_name: str
     active_jobs: int
@@ -119,6 +141,7 @@ class QueueMetricsResponse(BaseModel):
     completed_jobs: int
     failed_jobs: int
     latency_seconds: float
+
 
 class SystemMetricsResponse(BaseModel):
     queue_size: int

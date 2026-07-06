@@ -146,6 +146,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             </span>
           </Link>
           <button
+            type="button"
+            aria-label="Close sidebar"
+            title="Close sidebar"
             className="md:hidden text-muted hover:text-white"
             onClick={() => setSidebarOpen(false)}
           >
@@ -160,6 +163,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           </label>
           <div className="relative">
             <select
+              aria-label="Active project"
+              title="Active project"
               value={projectId || ''}
               onChange={(e) => {
                 if (e.target.value) {
@@ -234,6 +239,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         <header className="h-16 bg-[#111827] border-b border-[#2A3352] flex items-center justify-between px-6 sticky top-0 z-30">
           <div className="flex items-center gap-4">
             <button
+              type="button"
+              aria-label="Open sidebar"
+              title="Open sidebar"
               className="md:hidden text-muted hover:text-white"
               onClick={() => setSidebarOpen(true)}
             >
@@ -278,6 +286,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           <div className="flex items-center gap-4">
             {/* Global Search Input */}
             <button
+              type="button"
               onClick={() => setCommandPaletteOpen(true)}
               className="flex items-center gap-2 px-3 py-1.5 bg-[#050816] border border-[#2A3352] rounded-lg text-sm text-gray-400 hover:border-gray-500 transition-colors w-40 sm:w-60 text-left"
             >
@@ -291,6 +300,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             {/* Notification Center */}
             <div className="relative" ref={notificationRef}>
               <button
+                type="button"
+                aria-label="Notifications"
+                title="Notifications"
                 onClick={() => setShowNotifications(!showNotifications)}
                 className="p-2 text-gray-400 hover:text-white rounded-lg hover:bg-[#1f2937] relative"
               >
@@ -305,6 +317,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   <div className="px-4 py-2 border-b border-[#2A3352] flex justify-between items-center">
                     <span className="font-semibold text-sm">Notifications</span>
                     <button
+                      type="button"
                       className="text-xs text-primary hover:underline"
                       onClick={() => setNotifications([])}
                     >
@@ -332,6 +345,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             {/* User Profile dropdown */}
             <div className="relative" ref={userMenuRef}>
               <button
+                type="button"
+                aria-label="User menu"
+                title="User menu"
                 onClick={() => setShowUserMenu(!showUserMenu)}
                 className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-[#1f2937] transition"
               >
@@ -361,6 +377,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                     <Settings size={14} /> Providers Config
                   </Link>
                   <button
+                    type="button"
                     onClick={() => {
                       setShowUserMenu(false);
                       navigate('/login');
@@ -397,6 +414,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 autoFocus
               />
               <button
+                type="button"
                 className="text-xs bg-[#050816] border border-[#2A3352] px-1.5 py-0.5 rounded text-gray-400"
                 onClick={() => setCommandPaletteOpen(false)}
               >
@@ -411,6 +429,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               ) : (
                 filteredCommands.map((cmd, idx) => (
                   <button
+                    type="button"
                     key={idx}
                     onClick={() => {
                       cmd.action();

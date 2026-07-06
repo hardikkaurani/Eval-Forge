@@ -1,4 +1,5 @@
 from celery import Celery
+
 from app.config.config import settings
 
 # Initialize Celery app instance pointing to Redis

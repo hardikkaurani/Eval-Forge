@@ -1,7 +1,8 @@
-from uuid import UUID
 from datetime import datetime
-from typing import List, Optional, Dict, Any
-from pydantic import BaseModel, HttpUrl, Field
+from typing import Any, Dict, List, Optional
+from uuid import UUID
+
+from pydantic import BaseModel, Field
 
 
 # 1. Developer Profiles

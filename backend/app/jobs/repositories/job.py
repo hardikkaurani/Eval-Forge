@@ -1,21 +1,23 @@
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Tuple
-from sqlalchemy import select, update, delete, func, and_, or_, desc, asc
+
+from sqlalchemy import and_, asc, desc, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+from app.jobs.exceptions import (
+    InvalidStatusTransitionException,
+    JobNotFoundException,
+    WorkerNotFoundException,
+)
 from app.jobs.models.job import (
+    Cancellation,
+    ExecutionHistory,
     Job,
     JobLog,
-    Worker,
     Queue,
-    ExecutionHistory,
     RetryHistory,
-    Cancellation,
-)
-from app.jobs.exceptions import (
-    JobNotFoundException,
-    InvalidStatusTransitionException,
+    Worker,
 )
 from app.utils.time import get_utc_now
 
@@ -30,6 +32,7 @@ VALID_TRANSITIONS = {
     "CANCELLED": set(),
     "EXPIRED": set(),
 }
+
 
 class JobRepository:
     """Repository handling persistence, validation, status transitions, and queries for all job models."""
@@ -64,7 +67,9 @@ class JobRepository:
         await self.db.refresh(job)
         return job
 
-    async def get_job(self, job_id: str, include_details: bool = False) -> Optional[Job]:
+    async def get_job(
+        self, job_id: str, include_details: bool = False
+    ) -> Optional[Job]:
         """Retrieves a Job, optionally prefetching related history/logs."""
         if include_details:
             query = (
@@ -170,7 +175,9 @@ class JobRepository:
         await self.db.refresh(job)
         return job
 
-    async def update_job_progress(self, job_id: str, progress: float, current_step: Optional[str] = None) -> Job:
+    async def update_job_progress(
+        self, job_id: str, progress: float, current_step: Optional[str] = None
+    ) -> Job:
         """Updates the running completion progress percentage and stage step."""
         job = await self.get_job(job_id)
         if not job:
@@ -183,7 +190,9 @@ class JobRepository:
         await self.db.commit()
         return job
 
-    async def add_job_log(self, job_id: str, message: str, log_level: str = "INFO") -> JobLog:
+    async def add_job_log(
+        self, job_id: str, message: str, log_level: str = "INFO"
+    ) -> JobLog:
         """Appends a timestamped execution log line for a specific Job ID."""
         log = JobLog(
             job_id=job_id,
@@ -197,10 +206,12 @@ class JobRepository:
         return log
 
     # Cancellation
-    async def cancel_job(self, job_id: str, reason: Optional[str] = None, cancelled_by: str = "user") -> Job:
+    async def cancel_job(
+        self, job_id: str, reason: Optional[str] = None, cancelled_by: str = "user"
+    ) -> Job:
         """Records a job cancellation entry and transitions the job to CANCELLED state."""
         job = await self.update_job_status(job_id, "CANCELLED")
-        
+
         cancellation = Cancellation(
             job_id=job_id,
             reason=reason,
@@ -212,7 +223,9 @@ class JobRepository:
         return job
 
     # Retry History
-    async def record_retry(self, job_id: str, error_message: Optional[str] = None, delay_seconds: int = 0) -> Job:
+    async def record_retry(
+        self, job_id: str, error_message: Optional[str] = None, delay_seconds: int = 0
+    ) -> Job:
         """Records a retry attempt, bumps retry_count, and sets future next-attempt delay."""
         job = await self.get_job(job_id)
         if not job:
@@ -234,7 +247,9 @@ class JobRepository:
         return job
 
     # Worker CRUD
-    async def register_worker(self, worker_id: str, name: str, queue_name: str) -> Worker:
+    async def register_worker(
+        self, worker_id: str, name: str, queue_name: str
+    ) -> Worker:
         """Registers or updates a worker with a heartbeat timestamp."""
         worker = await self.db.get(Worker, worker_id)
         if worker:
@@ -254,7 +269,13 @@ class JobRepository:
         await self.db.refresh(worker)
         return worker
 
-    async def update_worker_heartbeat(self, worker_id: str, status: str, current_job_id: Optional[str] = None, system_load: Optional[dict] = None) -> Worker:
+    async def update_worker_heartbeat(
+        self,
+        worker_id: str,
+        status: str,
+        current_job_id: Optional[str] = None,
+        system_load: Optional[dict] = None,
+    ) -> Worker:
         """Updates worker heartbeat details, load, status, and active job ID."""
         worker = await self.db.get(Worker, worker_id)
         if not worker:
@@ -280,7 +301,7 @@ class JobRepository:
         stmt = select(Queue).where(Queue.name == name)
         res = await self.db.execute(stmt)
         queue = res.scalar_one_or_none()
-        
+
         if not queue:
             queue = Queue(name=name, is_active=True, created_at=get_utc_now())
             self.db.add(queue)
@@ -294,7 +315,9 @@ class JobRepository:
         return list(result.scalars().all())
 
     # Execution History
-    async def record_execution_start(self, job_id: str, worker_id: str) -> ExecutionHistory:
+    async def record_execution_start(
+        self, job_id: str, worker_id: str
+    ) -> ExecutionHistory:
         """Appends a new execution history entry with status RUNNING."""
         history = ExecutionHistory(
             job_id=job_id,
@@ -307,7 +330,9 @@ class JobRepository:
         await self.db.refresh(history)
         return history
 
-    async def record_execution_end(self, history_id: str, status: str) -> ExecutionHistory:
+    async def record_execution_end(
+        self, history_id: str, status: str
+    ) -> ExecutionHistory:
         """Finalizes an execution history entry, calculating execution duration."""
         history = await self.db.get(ExecutionHistory, history_id)
         if history:

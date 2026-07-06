@@ -1,20 +1,18 @@
-from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional, Tuple
-from sqlalchemy import select, func, and_
+from datetime import datetime
+from typing import List, Optional, Tuple
+
+from sqlalchemy import and_, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.jobs.models.job import Job, Worker, Queue, ExecutionHistory
+from app.core.exceptions import NotFoundException
+from app.jobs.models.job import ExecutionHistory, Job, Queue, Worker
+from app.jobs.queue.tasks import run_background_job
 from app.jobs.repositories.job import JobRepository
 from app.jobs.schemas.job import (
     JobCreate,
-    JobResponse,
-    JobDetailResponse,
-    WorkerResponse,
-    QueueResponse,
     SystemMetricsResponse,
 )
-from app.jobs.queue.tasks import run_background_job
-from app.core.exceptions import NotFoundException
+
 
 class JobService:
     """Service layer coordinating Job database interactions with Celery tasks dispatching."""
@@ -41,7 +39,9 @@ class JobService:
         # Dispatch task to Celery
         if request.scheduled_at:
             # Delayed execution
-            delay_seconds = int((request.scheduled_at - datetime.utcnow()).total_seconds())
+            delay_seconds = int(
+                (request.scheduled_at - datetime.utcnow()).total_seconds()
+            )
             if delay_seconds > 0:
                 run_background_job.apply_async(
                     args=[job.id],
@@ -89,9 +89,11 @@ class JobService:
         job = await self.repo.get_job(job_id)
         if not job:
             raise NotFoundException(f"Job with ID '{job_id}' not found.")
-        
+
         # Transition to CANCELLED state
-        cancelled_job = await self.repo.cancel_job(job_id, reason=reason, cancelled_by="user")
+        cancelled_job = await self.repo.cancel_job(
+            job_id, reason=reason, cancelled_by="user"
+        )
         return cancelled_job
 
     async def list_queues(self) -> List[Queue]:
@@ -103,23 +105,33 @@ class JobService:
     async def get_system_metrics(self) -> SystemMetricsResponse:
         """Aggregates execution rates, queue latency, and load metrics for the entire jobs system."""
         # Active/Queued/Running/Failed counts
-        q_size_res = await self.db.execute(select(func.count(Job.id)).where(Job.status == "QUEUED"))
+        q_size_res = await self.db.execute(
+            select(func.count(Job.id)).where(Job.status == "QUEUED")
+        )
         queue_size = q_size_res.scalar_one()
 
-        running_res = await self.db.execute(select(func.count(Job.id)).where(Job.status == "RUNNING"))
+        running_res = await self.db.execute(
+            select(func.count(Job.id)).where(Job.status == "RUNNING")
+        )
         running_jobs = running_res.scalar_one()
 
-        failed_res = await self.db.execute(select(func.count(Job.id)).where(Job.status == "FAILED"))
+        failed_res = await self.db.execute(
+            select(func.count(Job.id)).where(Job.status == "FAILED")
+        )
         failed_jobs = failed_res.scalar_one()
 
-        completed_res = await self.db.execute(select(func.count(Job.id)).where(Job.status == "COMPLETED"))
+        completed_res = await self.db.execute(
+            select(func.count(Job.id)).where(Job.status == "COMPLETED")
+        )
         completed_jobs = completed_res.scalar_one()
 
         workers = await self.repo.list_workers()
         worker_count = len(workers)
 
         # Average duration calculation
-        dur_res = await self.db.execute(select(func.avg(ExecutionHistory.duration_seconds)))
+        dur_res = await self.db.execute(
+            select(func.avg(ExecutionHistory.duration_seconds))
+        )
         avg_exec = dur_res.scalar() or 0.0
 
         # Success rate
@@ -127,7 +139,9 @@ class JobService:
         success_rate = (completed_jobs / total_runs) if total_runs > 0 else 1.0
 
         # Calculate average queue latency (started_at - queued_at) in seconds
-        latency_stmt = select(Job.started_at, Job.queued_at).where(and_(Job.started_at.is_not(None), Job.queued_at.is_not(None)))
+        latency_stmt = select(Job.started_at, Job.queued_at).where(
+            and_(Job.started_at.is_not(None), Job.queued_at.is_not(None))
+        )
         latency_res = await self.db.execute(latency_stmt)
         latencies = []
         for row in latency_res.all():

@@ -1,6 +1,9 @@
+import json
+from typing import Optional
+
 from fastapi import APIRouter
 from pydantic import BaseModel
-from typing import Optional
+
 from app.utils.responses import ApiResponse, create_response
 
 router = APIRouter(prefix="/playground", tags=["Developer Platform - Playground"])
@@ -66,7 +69,9 @@ func main() {{
 }}
 """
 
-    java_payload = json.dumps(payload_sample).replace('"', '\\"') if payload_sample else "{}"
+    java_payload = (
+        json.dumps(payload_sample).replace('"', '\\"') if payload_sample else "{}"
+    )
     java_code = f"""import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -94,9 +99,6 @@ public class Main {{
             "python": python_code,
             "typescript": ts_code,
             "go": go_code,
-            "java": java_code
-        }
+            "java": java_code,
+        },
     )
-
-
-import json # Ensure json is imported

@@ -1,10 +1,10 @@
-from typing import List, Dict, Any, Optional
-from datetime import datetime
+from typing import Any, Dict, List
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.advanced_ai import ConversationEvaluation, AgentEvaluation
+from app.advanced_ai.exceptions import AgentEvaluationError, ConversationEvaluationError
 from app.advanced_ai.repositories import AdvancedAIRepository
-from app.advanced_ai.exceptions import ConversationEvaluationError, AgentEvaluationError
+from app.models.advanced_ai import AgentEvaluation, ConversationEvaluation
 
 
 class AgentConversationService:
@@ -13,16 +13,15 @@ class AgentConversationService:
         self.repo = AdvancedAIRepository(db)
 
     async def evaluate_conversation(
-        self,
-        project_id: str,
-        session_id: str,
-        turns: List[Dict[str, str]]
+        self, project_id: str, session_id: str, turns: List[Dict[str, str]]
     ) -> ConversationEvaluation:
         """Evaluates multi-turn conversation coherence, memory retention, user satisfaction, and turn statistics."""
         try:
             turns_count = len(turns)
             if turns_count == 0:
-                raise ConversationEvaluationError("Cannot evaluate an empty conversation.")
+                raise ConversationEvaluationError(
+                    "Cannot evaluate an empty conversation."
+                )
 
             memory_retention = 1.0
             context_preservation = 1.0
@@ -32,7 +31,7 @@ class AgentConversationService:
             total_chars = 0
 
             # Dynamic check simulation
-            for i, turn in enumerate(turns):
+            for _i, turn in enumerate(turns):
                 role = turn.get("role", "")
                 content = turn.get("content", "").lower()
                 total_chars += len(content)
@@ -63,14 +62,16 @@ class AgentConversationService:
                 avg_turn_length=round(avg_turn_length, 2),
                 metrics_json={
                     "total_tokens_estimated": turns_count * 150,
-                    "conversation_cohesion_status": "HIGH"
-                }
+                    "conversation_cohesion_status": "HIGH",
+                },
             )
 
             res = await self.repo.create_conversation_evaluation(convo)
             return res
         except Exception as e:
-            raise ConversationEvaluationError(f"Failed to evaluate conversation: {str(e)}")
+            raise ConversationEvaluationError(
+                f"Failed to evaluate conversation: {str(e)}"
+            ) from e
 
     async def evaluate_agent(
         self,
@@ -82,19 +83,19 @@ class AgentConversationService:
         reasoning_trace_score: float,
         tool_usage_score: float,
         conversation_quality: float,
-        agent_collaboration_score: float
+        agent_collaboration_score: float,
     ) -> AgentEvaluation:
         """Evaluates single/multi-agent planning, reasoning trace, task completion, and collaboration."""
         try:
             # Overall Agent Score calculation
             agent_score = (
-                planning_quality * 0.15 +
-                task_completion * 0.20 +
-                memory_consistency * 0.15 +
-                reasoning_trace_score * 0.15 +
-                tool_usage_score * 0.15 +
-                conversation_quality * 0.10 +
-                agent_collaboration_score * 0.10
+                planning_quality * 0.15
+                + task_completion * 0.20
+                + memory_consistency * 0.15
+                + reasoning_trace_score * 0.15
+                + tool_usage_score * 0.15
+                + conversation_quality * 0.10
+                + agent_collaboration_score * 0.10
             )
 
             agent_eval = AgentEvaluation(
@@ -107,18 +108,16 @@ class AgentConversationService:
                 tool_usage_score=round(tool_usage_score, 4),
                 conversation_quality=round(conversation_quality, 4),
                 agent_collaboration_score=round(agent_collaboration_score, 4),
-                agent_score=round(agent_score, 4)
+                agent_score=round(agent_score, 4),
             )
 
             res = await self.repo.create_agent_evaluation(agent_eval)
             return res
         except Exception as e:
-            raise AgentEvaluationError(f"Failed to evaluate agent: {str(e)}")
+            raise AgentEvaluationError(f"Failed to evaluate agent: {str(e)}") from e
 
     def evaluate_tool_calls(
-        self,
-        tool_selections: List[Dict[str, Any]],
-        executions: List[Dict[str, Any]]
+        self, tool_selections: List[Dict[str, Any]], executions: List[Dict[str, Any]]
     ) -> Dict[str, Any]:
         """Validates function calling selection, argument correctness, retries, and latency."""
         total_calls = len(tool_selections)
@@ -130,22 +129,24 @@ class AgentConversationService:
         retries = 0
         errors = []
 
-        for sel, exec_item in zip(tool_selections, executions):
+        for sel, exec_item in zip(tool_selections, executions, strict=False):
             # Evaluate argument correctness
             expected_args = sel.get("expected_args", {})
             actual_args = exec_item.get("args", {})
-            
+
             # Simple match percentage
             arg_correct = True
             for k, v in expected_args.items():
                 if actual_args.get(k) != v:
                     arg_correct = False
-                    errors.append(f"Argument mismatch for tool {sel.get('name')}: expected {v}, got {actual_args.get(k)}")
+                    errors.append(
+                        f"Argument mismatch for tool {sel.get('name')}: expected {v}, got {actual_args.get(k)}"
+                    )
 
             status = exec_item.get("status", "SUCCESS")
             if status == "SUCCESS" and arg_correct:
                 successes += 1
-            
+
             total_latency += exec_item.get("latency_ms", 100.0)
             retries += exec_item.get("retries", 0)
 
@@ -157,5 +158,5 @@ class AgentConversationService:
             "average_latency_ms": round(total_latency / total_calls, 2),
             "total_retries": retries,
             "argument_errors": errors,
-            "mcp_compatibility": "READY"
+            "mcp_compatibility": "READY",
         }
