@@ -1,16 +1,24 @@
 from fastapi import APIRouter
+from pydantic import BaseModel
+from typing import Optional
 from app.utils.responses import ApiResponse, create_response
 
 router = APIRouter(prefix="/playground", tags=["Developer Platform - Playground"])
 
 
+class CodeGenerationRequest(BaseModel):
+    endpoint: str
+    method: str = "POST"
+    payload_sample: Optional[dict] = None
+
+
 @router.post("/generate-code", response_model=ApiResponse[dict])
-async def generate_sdk_snippets(
-    endpoint: str,
-    method: str = "POST",
-    payload_sample: dict = None
-):
+async def generate_sdk_snippets(req: CodeGenerationRequest):
     """Generates boilerplate integration code for Python, TypeScript, Go, and Java clients."""
+    endpoint = req.endpoint
+    method = req.method
+    payload_sample = req.payload_sample
+    p_val = payload_sample or {}
     python_code = f"""import requests
 
 url = "https://api.evalforge.com/api/v1/public{endpoint}"
@@ -18,7 +26,7 @@ headers = {{
     "X-API-Key": "your_api_key_here",
     "Content-Type": "application/json"
 }}
-response = requests.{method.lower()}(url, json={payload_sample or {}}, headers=headers)
+response = requests.{method.lower()}(url, json={p_val}, headers=headers)
 print(response.json())
 """
 
@@ -29,11 +37,12 @@ const headers = {{
   'X-API-Key': 'your_api_key_here',
   'Content-Type': 'application/json'
 }};
-axios.{method.lower()}(url, {payload_sample or {}}, {{ headers }})
+axios.{method.lower()}(url, {p_val}, {{ headers }})
   .then(res => console.log(res.data))
   .catch(err => console.error(err));
 """
 
+    go_payload = json.dumps(payload_sample) if payload_sample else "map[string]string{}"
     go_code = f"""package main
 
 import (
@@ -45,7 +54,7 @@ import (
 
 func main() {{
 	url := "https://api.evalforge.com/api/v1/public{endpoint}"
-	payload, _ := json.Marshal({payload_sample or map[string]string{{}}})
+	payload, _ := json.Marshal({go_payload})
 	req, _ := http.NewRequest("{method}", url, bytes.NewBuffer(payload))
 	req.Header.Set("X-API-Key", "your_api_key_here")
 	req.Header.Set("Content-Type", "application/json")
@@ -57,6 +66,7 @@ func main() {{
 }}
 """
 
+    java_payload = json.dumps(payload_sample).replace('"', '\\"') if payload_sample else "{}"
     java_code = f"""import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -69,7 +79,7 @@ public class Main {{
             .uri(URI.create("https://api.evalforge.com/api/v1/public{endpoint}"))
             .header("X-API-Key", "your_api_key_here")
             .header("Content-Type", "application/json")
-            .POST(HttpRequest.BodyPublishers.ofString("{json_dumps(payload_sample) if payload_sample else "{}"}"))
+            .POST(HttpRequest.BodyPublishers.ofString("{java_payload}"))
             .build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
         System.out.println(response.body());
@@ -90,5 +100,3 @@ public class Main {{
 
 
 import json # Ensure json is imported
-def json_dumps(d):
-    return json.dumps(d).replace('"', '\\"')
