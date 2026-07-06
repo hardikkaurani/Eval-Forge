@@ -1,0 +1,46 @@
+name: EvalForge CI Gateway
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  llm-evaluation:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-node: '3.12'
+
+      - name: Install dependencies
+        run: |
+          pip install requests
+
+      - name: Trigger EvalForge Run
+        env:
+          EVALFORGE_API_KEY: ${{ secrets.EVALFORGE_API_KEY }}
+          PROJECT_ID: ${{ secrets.EVALFORGE_PROJECT_ID }}
+        run: |
+          python -c '
+          import os, requests, sys
+          api_key = os.environ["EVALFORGE_API_KEY"]
+          proj_id = os.environ["PROJECT_ID"]
+          headers = {"X-API-Key": api_key, "Content-Type": "application/json"}
+          payload = {
+              "evaluation_name": "CI-Gate-Run",
+              "judge": "geval",
+              "provider": "openai",
+              "test_cases": [{"input_prompt": "Hello", "model_output": "Hi!"}]
+          }
+          res = requests.post("https://api.evalforge.com/api/v1/evaluations/batch", json=payload, headers=headers)
+          if res.status_code != 201:
+              print("Failed to trigger run:", res.text)
+              sys.exit(1)
+          print("Run initiated successfully:", res.json())
+          '
