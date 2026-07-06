@@ -15,7 +15,7 @@ from app.core.production_security import IdempotencyMiddleware, RateLimitingMidd
 from app.core.redis import redis_manager
 from app.database.session import engine
 
-# Setup structured logging before importing other modules
+# Initialize structured logging engine prior to router imports
 setup_logging()
 logger = structlog.get_logger()
 
