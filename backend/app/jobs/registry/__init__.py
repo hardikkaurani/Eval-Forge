@@ -29,9 +29,11 @@ from app.jobs.executors.evaluation import EvaluationExecutor
 from app.jobs.executors.dataset_import import DatasetImportExecutor
 from app.jobs.executors.dataset_export import DatasetExportExecutor
 from app.jobs.executors.benchmark import BenchmarkExecutor
+from app.jobs.executors.analytics_aggregation import AnalyticsAggregationExecutor
 
 job_registry.register("evaluation", EvaluationExecutor)
 job_registry.register("dataset_import", DatasetImportExecutor)
 job_registry.register("dataset_export", DatasetExportExecutor)
 job_registry.register("benchmark", BenchmarkExecutor)
+job_registry.register("analytics_aggregation", AnalyticsAggregationExecutor)
 
