@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { api } from '../services/api';
 import type { Project } from '../services/api';
+import logo from '../assets/logo.jpg';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -140,7 +141,11 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       >
         <div className="h-16 flex items-center justify-between px-6 border-b border-[#2A3352]">
           <Link to="/" className="flex items-center gap-3">
-            <Sparkles className="text-primary w-6 h-6 animate-pulse" />
+            <img
+              src={logo}
+              alt="EvalForge Logo"
+              className="w-8 h-8 rounded-lg object-cover border border-[#D8CCBD]"
+            />
             <span className="font-heading font-bold text-xl tracking-tight text-white">
               EvalForge
             </span>

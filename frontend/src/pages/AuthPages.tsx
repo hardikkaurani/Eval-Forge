@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Lock, Mail, User, ArrowLeft, CheckCircle, Save, BellRing } from 'lucide-react';
+import logo from '../assets/logo.jpg';
 
 /* ----------------- LOGIN PAGE ----------------- */
 export function Login() {
@@ -22,6 +23,13 @@ export function Login() {
         animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-sm bg-[#111827] border border-[#2A3352] rounded-xl p-8 shadow-2xl space-y-6"
       >
+        <div className="flex justify-center">
+          <img
+            src={logo}
+            alt="EvalForge Logo"
+            className="w-12 h-12 rounded-xl object-cover border border-[#D8CCBD]"
+          />
+        </div>
         <div className="text-center space-y-2">
           <h2 className="font-heading font-bold text-2xl text-white">Welcome back</h2>
           <p className="text-xs text-gray-400">Sign in to your EvalForge developer console.</p>
@@ -108,6 +116,13 @@ export function Register() {
         animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-sm bg-[#111827] border border-[#2A3352] rounded-xl p-8 shadow-2xl space-y-6"
       >
+        <div className="flex justify-center">
+          <img
+            src={logo}
+            alt="EvalForge Logo"
+            className="w-12 h-12 rounded-xl object-cover border border-[#D8CCBD]"
+          />
+        </div>
         <div className="text-center space-y-2">
           <h2 className="font-heading font-bold text-2xl text-white">Create Developer Account</h2>
           <p className="text-xs text-gray-400">Launch standard validation test suites instantly.</p>
@@ -201,6 +216,13 @@ export function ForgotPassword() {
         animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-sm bg-[#111827] border border-[#2A3352] rounded-xl p-8 shadow-2xl space-y-6"
       >
+        <div className="flex justify-center">
+          <img
+            src={logo}
+            alt="EvalForge Logo"
+            className="w-12 h-12 rounded-xl object-cover border border-[#D8CCBD]"
+          />
+        </div>
         <div className="space-y-2">
           <Link
             to="/login"
