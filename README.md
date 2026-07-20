@@ -1229,7 +1229,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for the full guide.
 
 ---
 
-## License
+## License !
 
 MIT License. See [LICENSE](LICENSE) for details.
 
