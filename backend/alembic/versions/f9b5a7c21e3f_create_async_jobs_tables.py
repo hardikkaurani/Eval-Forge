@@ -7,7 +7,9 @@ Create Date: 2026-07-05 00:00:00.000000
 """
 
 from typing import Sequence, Union
+
 import sqlalchemy as sa
+
 from alembic import op
 
 # revision identifiers, used by Alembic.
@@ -97,7 +99,9 @@ def upgrade() -> None:
         sa.ForeignKeyConstraint(["job_id"], ["jobs.id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_index(op.f("ix_execution_history_id"), "execution_history", ["id"], unique=False)
+    op.create_index(
+        op.f("ix_execution_history_id"), "execution_history", ["id"], unique=False
+    )
 
     # 6. retry_history
     op.create_table(

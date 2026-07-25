@@ -11,13 +11,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v7
+        uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
           cache: "pip"
+          cache-dependency-path: backend/requirements.txt
 
       - name: Install Dependencies
         run: |
@@ -26,11 +27,13 @@ jobs:
 
       - name: Lint with Ruff
         run: |
-          ruff check backend/app
+          cd backend
+          ruff check .
 
       - name: Verify Formatting with Black
         run: |
-          black --check backend/app
+          cd backend
+          black --check .
 
       - name: Run Tests with Pytest
         run: |
@@ -41,10 +44,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v7
+        uses: actions/checkout@v4
 
       - name: Set up Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v4
         with:
           node-version: "20"
           cache: "npm"
@@ -53,12 +56,17 @@ jobs:
       - name: Install Dependencies
         run: |
           cd frontend
-          npm install
+          npm install --legacy-peer-deps
 
       - name: Check Formatting with Prettier
         run: |
           cd frontend
           npx prettier --check "src/**/*.{ts,tsx,css,json,md}"
+
+      - name: Type Check with TypeScript
+        run: |
+          cd frontend
+          npm run typecheck
 
       - name: Lint with ESLint
         run: |
@@ -69,3 +77,13 @@ jobs:
         run: |
           cd frontend
           npm run build
+
+  docker-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Build Docker Compose
+        run: |
+          docker compose build

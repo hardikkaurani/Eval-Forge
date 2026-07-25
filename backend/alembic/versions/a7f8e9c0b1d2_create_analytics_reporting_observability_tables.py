@@ -7,7 +7,9 @@ Create Date: 2026-07-06 00:00:00.000000
 """
 
 from typing import Sequence, Union
+
 import sqlalchemy as sa
+
 from alembic import op
 
 # revision identifiers, used by Alembic.
@@ -39,8 +41,15 @@ def upgrade() -> None:
         sa.ForeignKeyConstraint(["project_id"], ["projects.id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_index(op.f("ix_analytics_snapshots_id"), "analytics_snapshots", ["id"], unique=False)
-    op.create_index(op.f("ix_analytics_snapshots_timestamp"), "analytics_snapshots", ["timestamp"], unique=False)
+    op.create_index(
+        op.f("ix_analytics_snapshots_id"), "analytics_snapshots", ["id"], unique=False
+    )
+    op.create_index(
+        op.f("ix_analytics_snapshots_timestamp"),
+        "analytics_snapshots",
+        ["timestamp"],
+        unique=False,
+    )
 
     # 2. metrics
     op.create_table(
@@ -56,7 +65,9 @@ def upgrade() -> None:
     )
     op.create_index(op.f("ix_metrics_id"), "metrics", ["id"], unique=False)
     op.create_index(op.f("ix_metrics_name"), "metrics", ["name"], unique=False)
-    op.create_index(op.f("ix_metrics_timestamp"), "metrics", ["timestamp"], unique=False)
+    op.create_index(
+        op.f("ix_metrics_timestamp"), "metrics", ["timestamp"], unique=False
+    )
 
     # 3. trends
     op.create_table(
@@ -74,7 +85,9 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_index(op.f("ix_trends_id"), "trends", ["id"], unique=False)
-    op.create_index(op.f("ix_trends_metric_name"), "trends", ["metric_name"], unique=False)
+    op.create_index(
+        op.f("ix_trends_metric_name"), "trends", ["metric_name"], unique=False
+    )
 
     # 4. leaderboards
     op.create_table(
@@ -93,7 +106,12 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_index(op.f("ix_leaderboards_id"), "leaderboards", ["id"], unique=False)
-    op.create_index(op.f("ix_leaderboards_snapshot_date"), "leaderboards", ["snapshot_date"], unique=False)
+    op.create_index(
+        op.f("ix_leaderboards_snapshot_date"),
+        "leaderboards",
+        ["snapshot_date"],
+        unique=False,
+    )
 
     # 5. reports
     op.create_table(
@@ -127,7 +145,9 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_index(op.f("ix_insights_id"), "insights", ["id"], unique=False)
-    op.create_index(op.f("ix_insights_created_at"), "insights", ["created_at"], unique=False)
+    op.create_index(
+        op.f("ix_insights_created_at"), "insights", ["created_at"], unique=False
+    )
 
     # 7. alerts
     op.create_table(
@@ -145,7 +165,9 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_index(op.f("ix_alerts_id"), "alerts", ["id"], unique=False)
-    op.create_index(op.f("ix_alerts_triggered_at"), "alerts", ["triggered_at"], unique=False)
+    op.create_index(
+        op.f("ix_alerts_triggered_at"), "alerts", ["triggered_at"], unique=False
+    )
 
     # 8. dashboard_snapshots
     op.create_table(
@@ -158,7 +180,9 @@ def upgrade() -> None:
         sa.ForeignKeyConstraint(["project_id"], ["projects.id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_index(op.f("ix_dashboard_snapshots_id"), "dashboard_snapshots", ["id"], unique=False)
+    op.create_index(
+        op.f("ix_dashboard_snapshots_id"), "dashboard_snapshots", ["id"], unique=False
+    )
 
 
 def downgrade() -> None:
@@ -182,6 +206,8 @@ def downgrade() -> None:
     op.drop_index(op.f("ix_metrics_name"), table_name="metrics")
     op.drop_index(op.f("ix_metrics_id"), table_name="metrics")
     op.drop_table("metrics")
-    op.drop_index(op.f("ix_analytics_snapshots_timestamp"), table_name="analytics_snapshots")
+    op.drop_index(
+        op.f("ix_analytics_snapshots_timestamp"), table_name="analytics_snapshots"
+    )
     op.drop_index(op.f("ix_analytics_snapshots_id"), table_name="analytics_snapshots")
     op.drop_table("analytics_snapshots")

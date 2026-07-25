@@ -1,18 +1,19 @@
 import os
+
 import pytest
 from fastapi import HTTPException
 from fastapi.testclient import TestClient
 
-from app.core.secrets import SecretManager
-from app.core.rbac import PermissionChecker, Role
 from app.core.cache import CacheEngine
 from app.core.production_security import RateLimiter
+from app.core.rbac import PermissionChecker
+from app.core.secrets import SecretManager
 
 
 def test_secret_manager_retrieval_and_rotation():
     manager = SecretManager(provider="local")
     os.environ["MOCK_ENTERPRISE_SECRET"] = "secret123"
-    
+
     assert manager.get_secret("MOCK_ENTERPRISE_SECRET") == "secret123"
     manager.rotate_key("MOCK_ENTERPRISE_SECRET", "rotated456")
     assert manager.get_secret("MOCK_ENTERPRISE_SECRET") == "rotated456"
@@ -37,11 +38,11 @@ def test_rbac_permission_checking():
 async def test_cache_engine_operations():
     cache = CacheEngine()
     prefix = "test_run"
-    
+
     # Store test payload
     payload = {"evaluation_score": 0.98}
     await cache.set(prefix, "123", payload)
-    
+
     # Fetch and verify
     res = await cache.get(prefix, "123")
     assert res == payload

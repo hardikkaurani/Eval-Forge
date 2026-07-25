@@ -7,7 +7,9 @@ Create Date: 2026-07-06 01:00:00.000000
 """
 
 from typing import Sequence, Union
+
 import sqlalchemy as sa
+
 from alembic import op
 
 # revision identifiers, used by Alembic.
@@ -36,10 +38,14 @@ def upgrade() -> None:
         sa.Column("custom_retrieval_metrics", sa.JSON(), nullable=False),
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
         sa.ForeignKeyConstraint(["project_id"], ["projects.id"], ondelete="CASCADE"),
-        sa.ForeignKeyConstraint(["run_id"], ["evaluation_runs.id"], ondelete="SET NULL"),
+        sa.ForeignKeyConstraint(
+            ["run_id"], ["evaluation_runs.id"], ondelete="SET NULL"
+        ),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_index(op.f("ix_rag_evaluations_id"), "rag_evaluations", ["id"], unique=False)
+    op.create_index(
+        op.f("ix_rag_evaluations_id"), "rag_evaluations", ["id"], unique=False
+    )
 
     # 2. hallucination_reports
     op.create_table(
@@ -57,10 +63,17 @@ def upgrade() -> None:
         sa.Column("detailed_explanation", sa.Text(), nullable=True),
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
         sa.ForeignKeyConstraint(["project_id"], ["projects.id"], ondelete="CASCADE"),
-        sa.ForeignKeyConstraint(["result_id"], ["evaluation_results.id"], ondelete="CASCADE"),
+        sa.ForeignKeyConstraint(
+            ["result_id"], ["evaluation_results.id"], ondelete="CASCADE"
+        ),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_index(op.f("ix_hallucination_reports_id"), "hallucination_reports", ["id"], unique=False)
+    op.create_index(
+        op.f("ix_hallucination_reports_id"),
+        "hallucination_reports",
+        ["id"],
+        unique=False,
+    )
 
     # 3. safety_evaluations
     op.create_table(
@@ -79,10 +92,14 @@ def upgrade() -> None:
         sa.Column("safety_score", sa.Float(), nullable=False),
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
         sa.ForeignKeyConstraint(["project_id"], ["projects.id"], ondelete="CASCADE"),
-        sa.ForeignKeyConstraint(["result_id"], ["evaluation_results.id"], ondelete="CASCADE"),
+        sa.ForeignKeyConstraint(
+            ["result_id"], ["evaluation_results.id"], ondelete="CASCADE"
+        ),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_index(op.f("ix_safety_evaluations_id"), "safety_evaluations", ["id"], unique=False)
+    op.create_index(
+        op.f("ix_safety_evaluations_id"), "safety_evaluations", ["id"], unique=False
+    )
 
     # 4. security_evaluations
     op.create_table(
@@ -100,10 +117,14 @@ def upgrade() -> None:
         sa.Column("report", sa.JSON(), nullable=False),
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
         sa.ForeignKeyConstraint(["project_id"], ["projects.id"], ondelete="CASCADE"),
-        sa.ForeignKeyConstraint(["result_id"], ["evaluation_results.id"], ondelete="CASCADE"),
+        sa.ForeignKeyConstraint(
+            ["result_id"], ["evaluation_results.id"], ondelete="CASCADE"
+        ),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_index(op.f("ix_security_evaluations_id"), "security_evaluations", ["id"], unique=False)
+    op.create_index(
+        op.f("ix_security_evaluations_id"), "security_evaluations", ["id"], unique=False
+    )
 
     # 5. conversation_evaluations
     op.create_table(
@@ -123,8 +144,18 @@ def upgrade() -> None:
         sa.ForeignKeyConstraint(["project_id"], ["projects.id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_index(op.f("ix_conversation_evaluations_id"), "conversation_evaluations", ["id"], unique=False)
-    op.create_index(op.f("ix_conversation_evaluations_session_id"), "conversation_evaluations", ["session_id"], unique=False)
+    op.create_index(
+        op.f("ix_conversation_evaluations_id"),
+        "conversation_evaluations",
+        ["id"],
+        unique=False,
+    )
+    op.create_index(
+        op.f("ix_conversation_evaluations_session_id"),
+        "conversation_evaluations",
+        ["session_id"],
+        unique=False,
+    )
 
     # 6. agent_evaluations
     op.create_table(
@@ -144,7 +175,9 @@ def upgrade() -> None:
         sa.ForeignKeyConstraint(["project_id"], ["projects.id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_index(op.f("ix_agent_evaluations_id"), "agent_evaluations", ["id"], unique=False)
+    op.create_index(
+        op.f("ix_agent_evaluations_id"), "agent_evaluations", ["id"], unique=False
+    )
 
     # 7. enterprise_policies
     op.create_table(
@@ -159,7 +192,9 @@ def upgrade() -> None:
         sa.ForeignKeyConstraint(["project_id"], ["projects.id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_index(op.f("ix_enterprise_policies_id"), "enterprise_policies", ["id"], unique=False)
+    op.create_index(
+        op.f("ix_enterprise_policies_id"), "enterprise_policies", ["id"], unique=False
+    )
 
     # 8. regression_runs
     op.create_table(
@@ -173,11 +208,17 @@ def upgrade() -> None:
         sa.Column("report_summary", sa.Text(), nullable=True),
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
         sa.ForeignKeyConstraint(["project_id"], ["projects.id"], ondelete="CASCADE"),
-        sa.ForeignKeyConstraint(["base_run_id"], ["evaluation_runs.id"], ondelete="CASCADE"),
-        sa.ForeignKeyConstraint(["compare_run_id"], ["evaluation_runs.id"], ondelete="CASCADE"),
+        sa.ForeignKeyConstraint(
+            ["base_run_id"], ["evaluation_runs.id"], ondelete="CASCADE"
+        ),
+        sa.ForeignKeyConstraint(
+            ["compare_run_id"], ["evaluation_runs.id"], ondelete="CASCADE"
+        ),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_index(op.f("ix_regression_runs_id"), "regression_runs", ["id"], unique=False)
+    op.create_index(
+        op.f("ix_regression_runs_id"), "regression_runs", ["id"], unique=False
+    )
 
     # 9. prompt_versions
     op.create_table(
@@ -192,7 +233,9 @@ def upgrade() -> None:
         sa.ForeignKeyConstraint(["project_id"], ["projects.id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_index(op.f("ix_prompt_versions_id"), "prompt_versions", ["id"], unique=False)
+    op.create_index(
+        op.f("ix_prompt_versions_id"), "prompt_versions", ["id"], unique=False
+    )
 
     # 10. risk_assessments
     op.create_table(
@@ -209,7 +252,9 @@ def upgrade() -> None:
         sa.ForeignKeyConstraint(["project_id"], ["projects.id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_index(op.f("ix_risk_assessments_id"), "risk_assessments", ["id"], unique=False)
+    op.create_index(
+        op.f("ix_risk_assessments_id"), "risk_assessments", ["id"], unique=False
+    )
 
 
 def downgrade() -> None:
@@ -223,14 +268,21 @@ def downgrade() -> None:
     op.drop_table("enterprise_policies")
     op.drop_index(op.f("ix_agent_evaluations_id"), table_name="agent_evaluations")
     op.drop_table("agent_evaluations")
-    op.drop_index(op.f("ix_conversation_evaluations_session_id"), table_name="conversation_evaluations")
-    op.drop_index(op.f("ix_conversation_evaluations_id"), table_name="conversation_evaluations")
+    op.drop_index(
+        op.f("ix_conversation_evaluations_session_id"),
+        table_name="conversation_evaluations",
+    )
+    op.drop_index(
+        op.f("ix_conversation_evaluations_id"), table_name="conversation_evaluations"
+    )
     op.drop_table("conversation_evaluations")
     op.drop_index(op.f("ix_security_evaluations_id"), table_name="security_evaluations")
     op.drop_table("security_evaluations")
     op.drop_index(op.f("ix_safety_evaluations_id"), table_name="safety_evaluations")
     op.drop_table("safety_evaluations")
-    op.drop_index(op.f("ix_hallucination_reports_id"), table_name="hallucination_reports")
+    op.drop_index(
+        op.f("ix_hallucination_reports_id"), table_name="hallucination_reports"
+    )
     op.drop_table("hallucination_reports")
     op.drop_index(op.f("ix_rag_evaluations_id"), table_name="rag_evaluations")
     op.drop_table("rag_evaluations")

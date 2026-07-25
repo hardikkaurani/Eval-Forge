@@ -1,5 +1,7 @@
 import os
+
 from fastapi.testclient import TestClient
+
 
 def test_analytics_and_reporting_lifecycle(client: TestClient) -> None:
     # 1. Create a Project
@@ -34,7 +36,7 @@ def test_analytics_and_reporting_lifecycle(client: TestClient) -> None:
     }
     batch_response = client.post("/api/v1/evaluations/batch", json=batch_payload)
     assert batch_response.status_code == 201
-    run_id = batch_response.json()["data"]["id"]
+    assert batch_response.json()["data"]["id"] is not None
 
     # 3. Manually trigger snapshot aggregation
     snapshot_response = client.post(
@@ -87,7 +89,7 @@ def test_analytics_and_reporting_lifecycle(client: TestClient) -> None:
     report_payload = {
         "name": "Quarterly Evaluation Report",
         "type": "PDF",
-        "filters": {}
+        "filters": {},
     }
     report_response = client.post(
         f"/api/v1/reports/generate?project_id={project_id}", json=report_payload
@@ -97,7 +99,9 @@ def test_analytics_and_reporting_lifecycle(client: TestClient) -> None:
     assert report_data["success"] is True
     report_id = report_data["data"]["id"]
     assert report_data["data"]["name"] == "Quarterly Evaluation Report"
-    assert report_data["data"]["status"] == "COMPLETED" # Completed synchronously in simulator
+    assert (
+        report_data["data"]["status"] == "COMPLETED"
+    )  # Completed synchronously in simulator
     assert report_data["data"]["file_path"] is not None
 
     # Verify report PDF actually got generated on disk
@@ -108,7 +112,7 @@ def test_analytics_and_reporting_lifecycle(client: TestClient) -> None:
     download_response = client.get(f"/api/v1/reports/{report_id}/download")
     assert download_response.status_code == 200
     assert download_response.headers["content-type"] == "application/pdf"
-    
+
     # Clean up generated test report file
     if os.path.exists(file_path):
         os.remove(file_path)
@@ -117,7 +121,7 @@ def test_analytics_and_reporting_lifecycle(client: TestClient) -> None:
     report_payload_csv = {
         "name": "Evaluations Export CSV",
         "type": "CSV",
-        "filters": {}
+        "filters": {},
     }
     csv_response = client.post(
         f"/api/v1/reports/generate?project_id={project_id}", json=report_payload_csv
@@ -145,9 +149,9 @@ def test_analytics_and_reporting_lifecycle(client: TestClient) -> None:
             "cols": 12,
             "widgets": [
                 {"id": "w1", "type": "metric_card", "x": 0, "y": 0, "w": 4, "h": 2},
-                {"id": "w2", "type": "time_series", "x": 4, "y": 0, "w": 8, "h": 4}
-            ]
-        }
+                {"id": "w2", "type": "time_series", "x": 4, "y": 0, "w": 8, "h": 4},
+            ],
+        },
     }
     dash_response = client.post(
         f"/api/v1/analytics/dashboards?project_id={project_id}", json=dashboard_payload
@@ -156,7 +160,7 @@ def test_analytics_and_reporting_lifecycle(client: TestClient) -> None:
     dash_data = dash_response.json()
     assert dash_data["success"] is True
     assert dash_data["data"]["name"] == "Executive QA Dashboard"
-    
+
     list_dash = client.get(f"/api/v1/analytics/dashboards?project_id={project_id}")
     assert list_dash.status_code == 200
     list_dash_data = list_dash.json()

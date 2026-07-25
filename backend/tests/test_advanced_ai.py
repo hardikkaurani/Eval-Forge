@@ -1,5 +1,5 @@
-import os
 from fastapi.testclient import TestClient
+
 
 def test_advanced_ai_and_rag_lifecycle(client: TestClient) -> None:
     # 1. Create a Project
@@ -47,7 +47,9 @@ def test_advanced_ai_and_rag_lifecycle(client: TestClient) -> None:
         ],
         "configuration": {"temperature": 0.0},
     }
-    compare_response = client.post("/api/v1/evaluations/batch", json=batch_payload_compare)
+    compare_response = client.post(
+        "/api/v1/evaluations/batch", json=batch_payload_compare
+    )
     assert compare_response.status_code == 201
     compare_run_id = compare_response.json()["data"]["id"]
 
@@ -64,7 +66,7 @@ def test_advanced_ai_and_rag_lifecycle(client: TestClient) -> None:
         "source_attribution": 0.90,
         "context_coverage": 0.75,
         "knowledge_utilization": 0.89,
-        "custom_retrieval_metrics": {"ndcg": 0.95}
+        "custom_retrieval_metrics": {"ndcg": 0.95},
     }
     rag_response = client.post("/api/v1/rag", json=rag_payload)
     assert rag_response.status_code == 201
@@ -87,7 +89,7 @@ def test_advanced_ai_and_rag_lifecycle(client: TestClient) -> None:
         "result_id": "892effd-e9c0b1d2",
         "toxicity_score": 0.0,
         "hate_speech_score": 0.0,
-        "safety_score": 100.0
+        "safety_score": 100.0,
     }
     safety_response = client.post("/api/v1/safety", json=safety_payload)
     assert safety_response.status_code == 201
@@ -104,7 +106,7 @@ def test_advanced_ai_and_rag_lifecycle(client: TestClient) -> None:
         "result_id": "892effd-e9c0b1d2",
         "prompt_injection_score": 0.0,
         "jailbreak_detected": False,
-        "risk_score": 0.0
+        "risk_score": 0.0,
     }
     security_response = client.post("/api/v1/security", json=security_payload)
     assert security_response.status_code == 201
@@ -121,11 +123,13 @@ def test_advanced_ai_and_rag_lifecycle(client: TestClient) -> None:
         "description": "Never allow generating medical advice.",
         "rules": {
             "block_medical_advice": True,
-            "prohibited_topics": ["diagnosis", "prescription"]
+            "prohibited_topics": ["diagnosis", "prescription"],
         },
-        "is_active": True
+        "is_active": True,
     }
-    policy_response = client.post(f"/api/v1/policies?project_id={project_id}", json=policy_payload)
+    policy_response = client.post(
+        f"/api/v1/policies?project_id={project_id}", json=policy_payload
+    )
     assert policy_response.status_code == 201
     policy_data = policy_response.json()
     assert policy_data["name"] == "Medical Advice Blocker"
@@ -137,17 +141,20 @@ def test_advanced_ai_and_rag_lifecycle(client: TestClient) -> None:
 
     patch_policy = client.patch(
         f"/api/v1/policies/{policy_id}",
-        json={"description": "Updated medical advice blocker guidelines"}
+        json={"description": "Updated medical advice blocker guidelines"},
     )
     assert patch_policy.status_code == 200
-    assert patch_policy.json()["description"] == "Updated medical advice blocker guidelines"
+    assert (
+        patch_policy.json()["description"]
+        == "Updated medical advice blocker guidelines"
+    )
 
     # 8. Regression Checking
     regression_payload = {
         "project_id": project_id,
         "base_run_id": base_run_id,
         "compare_run_id": compare_run_id,
-        "regression_detected": False
+        "regression_detected": False,
     }
     regression_response = client.post("/api/v1/regressions", json=regression_payload)
     assert regression_response.status_code == 201
@@ -164,7 +171,7 @@ def test_advanced_ai_and_rag_lifecycle(client: TestClient) -> None:
         "reasoning_trace_score": 0.92,
         "tool_usage_score": 0.95,
         "conversation_quality": 0.89,
-        "agent_collaboration_score": 0.80
+        "agent_collaboration_score": 0.80,
     }
     agent_response = client.post("/api/v1/agents", json=agent_payload)
     assert agent_response.status_code == 201
@@ -179,9 +186,9 @@ def test_advanced_ai_and_rag_lifecycle(client: TestClient) -> None:
         "metrics_json": {
             "turns": [
                 {"role": "user", "content": "Book a flight to Paris"},
-                {"role": "assistant", "content": "I can help with that."}
+                {"role": "assistant", "content": "I can help with that."},
             ]
-        }
+        },
     }
     convo_response = client.post("/api/v1/conversations", json=convo_payload)
     assert convo_response.status_code == 201
@@ -190,19 +197,24 @@ def test_advanced_ai_and_rag_lifecycle(client: TestClient) -> None:
 
     # 11. Tool Call Evaluation
     tool_payload = {
-        "tool_selections": [
-            {"name": "fetch_user", "expected_args": {"user_id": "u1"}}
-        ],
+        "tool_selections": [{"name": "fetch_user", "expected_args": {"user_id": "u1"}}],
         "executions": [
-            {"args": {"user_id": "u1"}, "status": "SUCCESS", "latency_ms": 120.0, "retries": 0}
-        ]
+            {
+                "args": {"user_id": "u1"},
+                "status": "SUCCESS",
+                "latency_ms": 120.0,
+                "retries": 0,
+            }
+        ],
     }
     tool_response = client.post("/api/v1/tool-calls/evaluate", json=tool_payload)
     assert tool_response.status_code == 200
     assert tool_response.json()["tool_success_rate"] == 1.0
 
     # 12. Dashboard & AI Insights Summary
-    dashboard_response = client.get(f"/api/v1/dashboards/summary?project_id={project_id}")
+    dashboard_response = client.get(
+        f"/api/v1/dashboards/summary?project_id={project_id}"
+    )
     assert dashboard_response.status_code == 200
     dashboard_data = dashboard_response.json()
     assert dashboard_data["project_id"] == project_id

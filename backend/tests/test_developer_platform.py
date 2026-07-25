@@ -1,4 +1,5 @@
 import uuid
+
 import pytest
 
 from app.platform.cli.cli_app import EvalForgeCLI
@@ -7,12 +8,8 @@ from app.platform.cli.cli_app import EvalForgeCLI
 def test_generate_and_list_api_keys(client):
     # 1. Create a key profile
     user_id = str(uuid.uuid4())
-    payload = {
-        "user_id": user_id,
-        "scope": "read:all",
-        "quota_limit": 1000
-    }
-    
+    payload = {"user_id": user_id, "scope": "read:all", "quota_limit": 1000}
+
     response = client.post("/api/v1/public/keys", json=payload)
     assert response.status_code == 201
     data = response.json()
@@ -33,7 +30,7 @@ def test_webhook_subscriptions_and_deliveries(client):
     # Create project first
     project_payload = {
         "name": "Platform Test Project",
-        "description": "Integration testing for developer platform"
+        "description": "Integration testing for developer platform",
     }
     project_response = client.post("/api/v1/projects", json=project_payload)
     assert project_response.status_code == 201
@@ -45,9 +42,9 @@ def test_webhook_subscriptions_and_deliveries(client):
         "project_id": project_id,
         "target_url": target_url,
         "events": ["eval_completed", "job_failed"],
-        "is_active": True
+        "is_active": True,
     }
-    
+
     response = client.post("/api/v1/webhooks", json=payload)
     assert response.status_code == 201
     data = response.json()
@@ -79,7 +76,7 @@ def test_plugin_registration_and_execution(client):
         "version": "1.0.0",
         "plugin_type": "metric",
         "configuration_schema": {"scale": "integer"},
-        "settings": {"weight": 1.2}
+        "settings": {"weight": 1.2},
     }
     response = client.post("/api/v1/plugins", json=payload)
     assert response.status_code == 201
@@ -91,7 +88,9 @@ def test_plugin_registration_and_execution(client):
     assert len(list_response.json()["data"]) > 0
 
     # 3. Execute plugin
-    exec_response = client.post(f"/api/v1/plugins/{identifier}/execute", json={"prompt": "test"})
+    exec_response = client.post(
+        f"/api/v1/plugins/{identifier}/execute", json={"prompt": "test"}
+    )
     assert exec_response.status_code == 200
     exec_data = exec_response.json()
     assert exec_data["success"] is True
@@ -111,7 +110,7 @@ def test_mcp_tool_listing_and_execution(client):
     # 2. Call an MCP tool
     call_payload = {
         "name": "get_project_summary",
-        "arguments": {"project_id": str(uuid.uuid4())}
+        "arguments": {"project_id": str(uuid.uuid4())},
     }
     call_response = client.post("/api/v1/mcp/tools/call", json=call_payload)
     assert call_response.status_code == 200
@@ -124,7 +123,7 @@ def test_playground_sdk_generation(client):
     payload = {
         "endpoint": "/keys",
         "method": "POST",
-        "payload_sample": {"user_id": str(uuid.uuid4())}
+        "payload_sample": {"user_id": str(uuid.uuid4())},
     }
     response = client.post("/api/v1/playground/generate-code", json=payload)
     assert response.status_code == 200
@@ -143,6 +142,18 @@ def test_cli_parser_actions():
     # Test project create CLI parse
     cli.run(["project", "create", "--name", "EvalProj", "--desc", "Test description"])
     # Test dataset upload CLI parse
-    cli.run(["dataset", "upload", "--project-id", str(uuid.uuid4()), "--file", "data.csv"])
+    cli.run(
+        ["dataset", "upload", "--project-id", str(uuid.uuid4()), "--file", "data.csv"]
+    )
     # Test evaluate trigger parse
-    cli.run(["evaluate", "--project-id", str(uuid.uuid4()), "--judge", "geval", "--provider", "openai"])
+    cli.run(
+        [
+            "evaluate",
+            "--project-id",
+            str(uuid.uuid4()),
+            "--judge",
+            "geval",
+            "--provider",
+            "openai",
+        ]
+    )

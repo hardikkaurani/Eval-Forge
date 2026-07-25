@@ -7,7 +7,9 @@ Create Date: 2026-07-06 02:00:00.000000
 """
 
 from typing import Sequence, Union
+
 import sqlalchemy as sa
+
 from alembic import op
 
 # revision identifiers, used by Alembic.
@@ -32,7 +34,9 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("api_key_hash"),
     )
-    op.create_index(op.f("ix_developer_profiles_id"), "developer_profiles", ["id"], unique=False)
+    op.create_index(
+        op.f("ix_developer_profiles_id"), "developer_profiles", ["id"], unique=False
+    )
 
     # 2. webhook_subscriptions
     op.create_table(
@@ -48,7 +52,12 @@ def upgrade() -> None:
         sa.ForeignKeyConstraint(["project_id"], ["projects.id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_index(op.f("ix_webhook_subscriptions_id"), "webhook_subscriptions", ["id"], unique=False)
+    op.create_index(
+        op.f("ix_webhook_subscriptions_id"),
+        "webhook_subscriptions",
+        ["id"],
+        unique=False,
+    )
 
     # 3. webhook_deliveries
     op.create_table(
@@ -62,10 +71,14 @@ def upgrade() -> None:
         sa.Column("latency_ms", sa.Integer(), nullable=False),
         sa.Column("success", sa.Boolean(), nullable=False),
         sa.Column("delivered_at", sa.DateTime(timezone=True), nullable=False),
-        sa.ForeignKeyConstraint(["subscription_id"], ["webhook_subscriptions.id"], ondelete="CASCADE"),
+        sa.ForeignKeyConstraint(
+            ["subscription_id"], ["webhook_subscriptions.id"], ondelete="CASCADE"
+        ),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_index(op.f("ix_webhook_deliveries_id"), "webhook_deliveries", ["id"], unique=False)
+    op.create_index(
+        op.f("ix_webhook_deliveries_id"), "webhook_deliveries", ["id"], unique=False
+    )
 
     # 4. plugin_descriptors
     op.create_table(
@@ -83,7 +96,9 @@ def upgrade() -> None:
         sa.UniqueConstraint("name"),
         sa.UniqueConstraint("identifier"),
     )
-    op.create_index(op.f("ix_plugin_descriptors_id"), "plugin_descriptors", ["id"], unique=False)
+    op.create_index(
+        op.f("ix_plugin_descriptors_id"), "plugin_descriptors", ["id"], unique=False
+    )
 
 
 def downgrade() -> None:
@@ -91,7 +106,9 @@ def downgrade() -> None:
     op.drop_table("plugin_descriptors")
     op.drop_index(op.f("ix_webhook_deliveries_id"), table_name="webhook_deliveries")
     op.drop_table("webhook_deliveries")
-    op.drop_index(op.f("ix_webhook_subscriptions_id"), table_name="webhook_subscriptions")
+    op.drop_index(
+        op.f("ix_webhook_subscriptions_id"), table_name="webhook_subscriptions"
+    )
     op.drop_table("webhook_subscriptions")
     op.drop_index(op.f("ix_developer_profiles_id"), table_name="developer_profiles")
     op.drop_table("developer_profiles")

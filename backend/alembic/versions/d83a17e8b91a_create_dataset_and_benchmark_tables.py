@@ -9,6 +9,7 @@ Create Date: 2026-07-04 00:00:00.000000
 from typing import Sequence, Union
 
 import sqlalchemy as sa
+
 from alembic import op
 
 # revision identifiers, used by Alembic.
@@ -56,7 +57,9 @@ def upgrade() -> None:
         sa.ForeignKeyConstraint(["dataset_id"], ["datasets.id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_index(op.f("ix_dataset_versions_id"), "dataset_versions", ["id"], unique=False)
+    op.create_index(
+        op.f("ix_dataset_versions_id"), "dataset_versions", ["id"], unique=False
+    )
 
     # 3. dataset_records
     op.create_table(
@@ -74,10 +77,14 @@ def upgrade() -> None:
         sa.Column("custom_fields", sa.JSON(), nullable=False),
         sa.Column("metadata_json", sa.JSON(), nullable=False),
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
-        sa.ForeignKeyConstraint(["version_id"], ["dataset_versions.id"], ondelete="CASCADE"),
+        sa.ForeignKeyConstraint(
+            ["version_id"], ["dataset_versions.id"], ondelete="CASCADE"
+        ),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_index(op.f("ix_dataset_records_id"), "dataset_records", ["id"], unique=False)
+    op.create_index(
+        op.f("ix_dataset_records_id"), "dataset_records", ["id"], unique=False
+    )
 
     # 4. benchmark_suites
     op.create_table(
@@ -92,7 +99,9 @@ def upgrade() -> None:
         sa.ForeignKeyConstraint(["project_id"], ["projects.id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_index(op.f("ix_benchmark_suites_id"), "benchmark_suites", ["id"], unique=False)
+    op.create_index(
+        op.f("ix_benchmark_suites_id"), "benchmark_suites", ["id"], unique=False
+    )
 
     # 5. benchmark_datasets
     op.create_table(
@@ -100,7 +109,9 @@ def upgrade() -> None:
         sa.Column("benchmark_suite_id", sa.String(length=36), nullable=False),
         sa.Column("dataset_id", sa.String(length=36), nullable=False),
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
-        sa.ForeignKeyConstraint(["benchmark_suite_id"], ["benchmark_suites.id"], ondelete="CASCADE"),
+        sa.ForeignKeyConstraint(
+            ["benchmark_suite_id"], ["benchmark_suites.id"], ondelete="CASCADE"
+        ),
         sa.ForeignKeyConstraint(["dataset_id"], ["datasets.id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("benchmark_suite_id", "dataset_id"),
     )
@@ -124,7 +135,9 @@ def upgrade() -> None:
         sa.Column("completed_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column("duration_seconds", sa.Float(), nullable=True),
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
-        sa.ForeignKeyConstraint(["dataset_version_id"], ["dataset_versions.id"], ondelete="CASCADE"),
+        sa.ForeignKeyConstraint(
+            ["dataset_version_id"], ["dataset_versions.id"], ondelete="CASCADE"
+        ),
         sa.ForeignKeyConstraint(["project_id"], ["projects.id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("id"),
     )

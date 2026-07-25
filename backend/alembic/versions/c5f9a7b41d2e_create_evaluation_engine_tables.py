@@ -50,10 +50,14 @@ def upgrade() -> None:
         sa.Column("completed_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column("aggregate_score", sa.Float(), nullable=True),
         sa.Column("status_detail", sa.Text(), nullable=True),
-        sa.ForeignKeyConstraint(["evaluation_id"], ["evaluations.id"], ondelete="CASCADE"),
+        sa.ForeignKeyConstraint(
+            ["evaluation_id"], ["evaluations.id"], ondelete="CASCADE"
+        ),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_index(op.f("ix_evaluation_runs_id"), "evaluation_runs", ["id"], unique=False)
+    op.create_index(
+        op.f("ix_evaluation_runs_id"), "evaluation_runs", ["id"], unique=False
+    )
 
     op.create_table(
         "evaluation_results",
@@ -76,7 +80,9 @@ def upgrade() -> None:
         sa.ForeignKeyConstraint(["run_id"], ["evaluation_runs.id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_index(op.f("ix_evaluation_results_id"), "evaluation_results", ["id"], unique=False)
+    op.create_index(
+        op.f("ix_evaluation_results_id"), "evaluation_results", ["id"], unique=False
+    )
 
     op.create_table(
         "rubric_scores",
@@ -86,7 +92,9 @@ def upgrade() -> None:
         sa.Column("rubric_key", sa.String(length=100), nullable=True),
         sa.Column("score", sa.Float(), nullable=False),
         sa.Column("reasoning", sa.Text(), nullable=True),
-        sa.ForeignKeyConstraint(["result_id"], ["evaluation_results.id"], ondelete="CASCADE"),
+        sa.ForeignKeyConstraint(
+            ["result_id"], ["evaluation_results.id"], ondelete="CASCADE"
+        ),
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_index(op.f("ix_rubric_scores_id"), "rubric_scores", ["id"], unique=False)
@@ -100,10 +108,14 @@ def upgrade() -> None:
         sa.Column("prompt_tokens", sa.Integer(), nullable=True),
         sa.Column("completion_tokens", sa.Integer(), nullable=True),
         sa.Column("latency_ms", sa.Integer(), nullable=True),
-        sa.ForeignKeyConstraint(["result_id"], ["evaluation_results.id"], ondelete="CASCADE"),
+        sa.ForeignKeyConstraint(
+            ["result_id"], ["evaluation_results.id"], ondelete="CASCADE"
+        ),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_index(op.f("ix_provider_metadata_id"), "provider_metadata", ["id"], unique=False)
+    op.create_index(
+        op.f("ix_provider_metadata_id"), "provider_metadata", ["id"], unique=False
+    )
 
 
 def downgrade() -> None:
