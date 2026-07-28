@@ -1236,7 +1236,7 @@ MIT License. See [LICENSE](LICENSE) for details.
 ---
 
 <br/><br/>
-*EvalForge — built for engineers who refuse to ship LLMs they cannot measure.*
+*EvalForge — built for engineers who refuse to ship LLMs they cannot measure !*
 
 <br/>
 
