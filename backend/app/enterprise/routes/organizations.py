@@ -41,7 +41,7 @@ async def create_org(
     return create_response(
         success=True,
         message="Organization successfully created.",
-        data=OrganizationResponse.from_orm(org),
+        data=OrganizationResponse.model_validate(org),
     )
 
 
@@ -54,7 +54,7 @@ async def get_org(org_id: uuid.UUID, db: AsyncSession = Depends(get_db)):
     return create_response(
         success=True,
         message="Organization retrieved successfully.",
-        data=OrganizationResponse.from_orm(org),
+        data=OrganizationResponse.model_validate(org),
     )
 
 
@@ -68,7 +68,7 @@ async def update_branding(
         return create_response(
             success=True,
             message="Branding updated successfully.",
-            data=OrganizationResponse.from_orm(org),
+            data=OrganizationResponse.model_validate(org),
         )
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
@@ -84,7 +84,7 @@ async def configure_domain(
         return create_response(
             success=True,
             message="Custom domain configured successfully.",
-            data=OrganizationResponse.from_orm(org),
+            data=OrganizationResponse.model_validate(org),
         )
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
@@ -123,5 +123,5 @@ async def invite_member(
     return create_response(
         success=True,
         message="Invitation sent successfully.",
-        data=InvitationResponse.from_orm(invite),
+        data=InvitationResponse.model_validate(invite),
     )

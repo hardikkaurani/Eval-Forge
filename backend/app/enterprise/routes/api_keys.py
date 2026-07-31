@@ -31,7 +31,7 @@ async def generate_api_key(
 
     data = {
         "api_key": raw_key,
-        "details": EnterpriseAPIKeyResponse.from_orm(key_record),
+        "details": EnterpriseAPIKeyResponse.model_validate(key_record),
     }
 
     return create_response(

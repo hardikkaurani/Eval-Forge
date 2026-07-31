@@ -25,5 +25,5 @@ async def query_audit_logs(
     return create_response(
         success=True,
         message="Audit logs retrieved successfully.",
-        data=[AuditLogResponse.from_orm(log) for log in logs],
+        data=[AuditLogResponse.model_validate(log) for log in logs],
     )

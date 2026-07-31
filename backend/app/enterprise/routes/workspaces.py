@@ -36,7 +36,7 @@ async def create_workspace(
         return create_response(
             success=True,
             message="Workspace successfully created.",
-            data=WorkspaceResponse.from_orm(ws),
+            data=WorkspaceResponse.model_validate(ws),
         )
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
@@ -49,7 +49,7 @@ async def list_workspaces(org_id: uuid.UUID, db: AsyncSession = Depends(get_db))
     return create_response(
         success=True,
         message="Workspaces list retrieved.",
-        data=[WorkspaceResponse.from_orm(w) for w in workspaces],
+        data=[WorkspaceResponse.model_validate(w) for w in workspaces],
     )
 
 

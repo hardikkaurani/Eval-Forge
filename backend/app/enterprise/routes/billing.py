@@ -38,7 +38,7 @@ async def create_subscription(
         return create_response(
             success=True,
             message="Subscription updated successfully.",
-            data=SubscriptionResponse.from_orm(sub),
+            data=SubscriptionResponse.model_validate(sub),
         )
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
@@ -51,5 +51,5 @@ async def get_invoice_history(org_id: uuid.UUID, db: AsyncSession = Depends(get_
     return create_response(
         success=True,
         message="Invoice history retrieved.",
-        data=[InvoiceResponse.from_orm(inv) for inv in invoices],
+        data=[InvoiceResponse.model_validate(inv) for inv in invoices],
     )
