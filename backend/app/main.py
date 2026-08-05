@@ -1,7 +1,7 @@
 from contextlib import asynccontextmanager
 
 import structlog
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
@@ -48,8 +48,7 @@ async def lifespan(app: FastAPI):
             logger.warning("Redis is unreachable or degraded.")
     except Exception as e:
         logger.error(
-            "Redis connection initialization failed during startup.",
-            error=str(e),
+            "Redis connection initialization failed during startup.", error=str(e)
         )
 
     yield
@@ -85,16 +84,22 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+# Warn about insecure CORS configuration in production
+if settings.CORS_ORIGINS == ["*"] and settings.APP_ENV == "production":
+    logger.warning(
+        "CORS is configured to allow all origins (CORS_ORIGINS='*'). "
+        "This is insecure and should be restricted in production."
+    )
+
 # Register Middlewares (Outermost first for request execution, innermost first for response headers)
-# 1. Custom Security Headers
 app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(RateLimitingMiddleware, requests_per_minute=300)
 app.add_middleware(IdempotencyMiddleware)
 
-# 2. GZip Compression Middleware
+# GZip Compression Middleware
 app.add_middleware(GZipMiddleware, minimum_size=1000)
 
-# 3. CORS Middleware
+# CORS Middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.CORS_ORIGINS,
@@ -103,13 +108,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# 4. Trusted Host Middleware
+# Trusted Host Middleware
 app.add_middleware(
     TrustedHostMiddleware,
     allowed_hosts=settings.ALLOWED_HOSTS,
 )
 
-# 5. Request logging and Request ID Middleware (Outermost wrapper)
+# Request logging and Request ID Middleware (Outermost wrapper)
 app.add_middleware(RequestLoggingMiddleware)
 
 # Register API routes under /api/v1 prefix
@@ -117,23 +122,6 @@ app.include_router(api_router, prefix=settings.API_V1_STR)
 
 # Register custom global exception handlers
 register_exception_handlers(app)
-
-
-@app.get("/", tags=["System"])
-async def root():
-    """Welcome endpoint for root verification."""
-    return {
-        "success": True,
-        "message": f"Welcome to {settings.APP_NAME}!",
-        "data": {
-            "version": "1.0.0",
-            "docs_url": (
-                "/docs"
-                if settings.APP_ENV != "production"
-                else "Disabled in production"
-            ),
-        },
-    }
 
 
 if __name__ == "__main__":

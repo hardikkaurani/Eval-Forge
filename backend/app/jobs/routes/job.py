@@ -16,6 +16,7 @@ from app.jobs.schemas.job import (
 from app.jobs.services.job import JobService
 from app.utils.pagination import PaginatedResponse, create_pagination_meta
 from app.utils.responses import ApiResponse, create_response
+from app.core.dependencies import validate_api_key
 
 router = APIRouter()
 
@@ -211,6 +212,27 @@ async def get_system_jobs_metrics(
 @router.websocket("/jobs/{id}/progress")
 async def job_progress_websocket(websocket: WebSocket, id: str):
     """Subscribes client socket to receive progress frames for a specific job."""
+    # Extract token from header or query parameters
+    token = websocket.headers.get("X-API-Key")
+    if not token:
+        token = websocket.query_params.get("token")
+    if not token:
+        await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
+        return
+
+    # Validate the token using a temporary database session
+    from app.database.session import get_db as get_db_session
+
+    db_gen = get_db_session()
+    try:
+        db = await db_gen.__anext__()
+        api_key = await validate_api_key(token, db)
+        if not api_key:
+            await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
+            return
+    finally:
+        await db_gen.aclose()
+
     await websocket_manager.connect_job(id, websocket)
     try:
         while True:
@@ -223,6 +245,27 @@ async def job_progress_websocket(websocket: WebSocket, id: str):
 @router.websocket("/projects/{id}/jobs/progress")
 async def project_jobs_websocket(websocket: WebSocket, id: str):
     """Subscribes client socket to receive project-wide progress frames."""
+    # Extract token from header or query parameters
+    token = websocket.headers.get("X-API-Key")
+    if not token:
+        token = websocket.query_params.get("token")
+    if not token:
+        await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
+        return
+
+    # Validate the token using a temporary database session
+    from app.database.session import get_db as get_db_session
+
+    db_gen = get_db_session()
+    try:
+        db = await db_gen.__anext__()
+        api_key = await validate_api_key(token, db)
+        if not api_key:
+            await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
+            return
+    finally:
+        await db_gen.aclose()
+
     await websocket_manager.connect_project(id, websocket)
     try:
         while True:

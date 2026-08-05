@@ -79,6 +79,50 @@ class Settings(BaseSettings):
             return v.lower()
         return v
 
+    @field_validator("POSTGRES_PASSWORD")
+    @classmethod
+    def check_postgres_password(cls, v: SecretStr, info):
+        if info.data.get("APP_ENV") == "production":
+            default = "postgres_password"
+            if v.get_secret_value() == default:
+                raise ValueError(
+                    "POSTGRES_PASSWORD must be set to a secure value in production environment. "
+                    "The default value is insecure."
+                )
+        return v
+
+    @field_validator("SECRET_KEY")
+    @classmethod
+    def check_secret_key(cls, v: SecretStr, info):
+        # In production, ensure the secret key is not the default placeholder
+        if info.data.get("APP_ENV") == "production":
+            default = "dev-secret-key-evalforge-placeholder"
+            if v.get_secret_value() == default:
+                raise ValueError(
+                    "SECRET_KEY must be set to a secure value in production environment. "
+                    "The default value is insecure."
+                )
+        return v
+
+    @field_validator("CORS_ORIGINS")
+    @classmethod
+    def check_cors_origins(cls, v: list[str], info):
+        if info.data.get("APP_ENV") == "production":
+            # In production, CORS should not allow all origins by default
+            if v == ["*"]:
+                raise ValueError(
+                    "CORS_ORIGINS must be set to a specific list of origins in production. "
+                    "Allowing all origins is insecure."
+                )
+        return v
+
+    @field_validator("DEBUG")
+    @classmethod
+    def check_debug(cls, v: bool, info):
+        if info.data.get("APP_ENV") == "production" and v:
+            raise ValueError("DEBUG must be False in production environment")
+        return v
+
     @property
     def get_database_url(self) -> str:
         """Constructs or retrieves the database connection string.
