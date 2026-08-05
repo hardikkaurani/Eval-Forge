@@ -15,10 +15,12 @@ export default function Evaluations() {
   const [runOpen, setRunOpen] = useState(false);
 
   // Connect WebSocket stream for real-time evaluation updates
-  const { status: wsStatus, lastEvent, progress: wsProgress, reconnect: reconnectWs } = useJobWebSocket(
-    selectedExperiment?.id,
-    projectId
-  );
+  const {
+    status: wsStatus,
+    lastEvent,
+    progress: wsProgress,
+    reconnect: reconnectWs,
+  } = useJobWebSocket(selectedExperiment?.id, projectId);
 
   // New run form states
   const [runName, setRunName] = useState('');

@@ -6,7 +6,7 @@ export interface WebSocketProgressEvent {
   status?: string;
   progress?: number;
   current_step?: string;
-  result?: any;
+  result?: Record<string, unknown> | null;
   error?: string;
   retry_count?: number;
   timestamp: string;
@@ -25,9 +25,7 @@ export function useJobWebSocket(jobId?: string | null, projectId?: string | null
     if (!jobId && !projectId) return;
 
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const host = window.location.host.includes(':5173') 
-      ? 'localhost:8000' 
-      : window.location.host;
+    const host = window.location.host.includes(':5173') ? 'localhost:8000' : window.location.host;
 
     let path = '';
     if (jobId) {

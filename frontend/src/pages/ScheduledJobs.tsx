@@ -8,7 +8,7 @@ export interface ScheduledCronJob {
   name: string;
   description: string;
   schedule_cron: string;
-  interval_seconds: int;
+  interval_seconds: number;
   is_enabled: boolean;
   last_run: string | null;
   next_run: string | null;
@@ -46,7 +46,8 @@ export default function ScheduledJobs() {
         {
           job_id: 'cron-leaderboard-recalc',
           name: 'Recalculate Leaderboards',
-          description: 'Hourly cron job updating benchmark model standings & refreshing Redis cache.',
+          description:
+            'Hourly cron job updating benchmark model standings & refreshing Redis cache.',
           schedule_cron: '0 * * * *',
           interval_seconds: 3600,
           is_enabled: true,
@@ -59,7 +60,8 @@ export default function ScheduledJobs() {
         {
           job_id: 'cron-stale-logs-cleanup',
           name: 'Cleanup Stale Job Logs',
-          description: 'Daily maintenance cron purging temporary evaluation logs older than 30 days.',
+          description:
+            'Daily maintenance cron purging temporary evaluation logs older than 30 days.',
           schedule_cron: '0 2 * * *',
           interval_seconds: 86400,
           is_enabled: true,
@@ -72,7 +74,8 @@ export default function ScheduledJobs() {
         {
           job_id: 'cron-metrics-aggregation',
           name: 'System Metrics Aggregation',
-          description: '5-minute background cron computing live throughput, latency, and success rates.',
+          description:
+            '5-minute background cron computing live throughput, latency, and success rates.',
           schedule_cron: '*/5 * * * *',
           interval_seconds: 300,
           is_enabled: true,
@@ -164,7 +167,8 @@ export default function ScheduledJobs() {
             <Clock className="text-primary" /> Scheduled Jobs & Cron
           </h1>
           <p className="text-gray-400 text-sm mt-1">
-            Automated periodic cron schedules for leaderboard recalculations, cache invalidations, and system cleanups.
+            Automated periodic cron schedules for leaderboard recalculations, cache invalidations,
+            and system cleanups.
           </p>
         </div>
         <button
@@ -182,7 +186,9 @@ export default function ScheduledJobs() {
           <div
             key={job.job_id}
             className={`bg-[#111827] border rounded-xl p-5 flex flex-col justify-between transition-all ${
-              job.is_enabled ? 'border-[#2A3352] shadow-lg shadow-black/40' : 'border-gray-800 opacity-60'
+              job.is_enabled
+                ? 'border-[#2A3352] shadow-lg shadow-black/40'
+                : 'border-gray-800 opacity-60'
             }`}
           >
             <div>
@@ -272,7 +278,8 @@ export default function ScheduledJobs() {
               {history.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="p-8 text-center text-gray-500">
-                    No execution logs available yet. Click &quot;Run Now&quot; above to trigger a job.
+                    No execution logs available yet. Click &quot;Run Now&quot; above to trigger a
+                    job.
                   </td>
                 </tr>
               ) : (
@@ -283,7 +290,9 @@ export default function ScheduledJobs() {
                     <td className="p-3.5 font-mono text-gray-400">
                       {new Date(item.triggered_at).toLocaleString()}
                     </td>
-                    <td className="p-3.5 font-mono text-cyan-400 font-semibold">{item.duration_ms} ms</td>
+                    <td className="p-3.5 font-mono text-cyan-400 font-semibold">
+                      {item.duration_ms} ms
+                    </td>
                     <td className="p-3.5">
                       <span
                         className={`inline-flex items-center gap-1 font-mono text-[10px] font-bold px-2 py-0.5 rounded border ${
@@ -292,11 +301,17 @@ export default function ScheduledJobs() {
                             : 'text-red-400 bg-red-950/30 border-red-800/40'
                         }`}
                       >
-                        {item.status === 'SUCCESS' ? <CheckCircle2 size={11} /> : <XCircle size={11} />}
+                        {item.status === 'SUCCESS' ? (
+                          <CheckCircle2 size={11} />
+                        ) : (
+                          <XCircle size={11} />
+                        )}
                         {item.status}
                       </span>
                     </td>
-                    <td className="p-3.5 font-mono text-gray-300 max-w-xs truncate">{item.details}</td>
+                    <td className="p-3.5 font-mono text-gray-300 max-w-xs truncate">
+                      {item.details}
+                    </td>
                   </tr>
                 ))
               )}
