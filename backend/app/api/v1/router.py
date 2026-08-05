@@ -35,6 +35,7 @@ from app.enterprise.routes.billing import router as ent_billing_router
 from app.enterprise.routes.organizations import router as ent_org_router
 from app.enterprise.routes.workspaces import router as ent_ws_router
 from app.jobs.routes.job import router as jobs_router
+from app.jobs.routes.scheduler_routes import router as scheduler_router
 from app.platform.routes.mcp_api import router as mcp_router
 from app.platform.routes.playground_api import router as playground_router
 from app.platform.routes.plugins_api import router as plugins_router
@@ -67,6 +68,7 @@ private_router.include_router(dataset_router)
 private_router.include_router(benchmark_router)
 private_router.include_router(experiment_router)
 private_router.include_router(jobs_router)
+private_router.include_router(scheduler_router)
 
 # Analytics and Observability
 private_router.include_router(analytics_router)

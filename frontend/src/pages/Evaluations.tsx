@@ -4,6 +4,8 @@ import { motion } from 'framer-motion';
 import { Play, CheckCircle, XCircle, AlertTriangle, Clock } from 'lucide-react';
 import { api } from '../services/api';
 import type { Experiment, ExperimentResult } from '../services/api';
+import { useJobWebSocket } from '../hooks/useJobWebSocket';
+import { WebSocketStatusBadge } from '../components/common/WebSocketStatusBadge';
 
 export default function Evaluations() {
   const { projectId } = useParams<{ projectId: string }>();
@@ -11,6 +13,12 @@ export default function Evaluations() {
   const [selectedExperiment, setSelectedExperiment] = useState<Experiment | null>(null);
   const [loading, setLoading] = useState(true);
   const [runOpen, setRunOpen] = useState(false);
+
+  // Connect WebSocket stream for real-time evaluation updates
+  const { status: wsStatus, lastEvent, progress: wsProgress, reconnect: reconnectWs } = useJobWebSocket(
+    selectedExperiment?.id,
+    projectId
+  );
 
   // New run form states
   const [runName, setRunName] = useState('');
@@ -108,19 +116,22 @@ export default function Evaluations() {
       className="space-y-6"
     >
       {/* Title */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="font-heading font-bold text-3xl text-white">Evaluation Runs</h1>
           <p className="text-gray-400 text-sm mt-1">
             Configure judges, compare scores, inspect LLM reasoning steps.
           </p>
         </div>
-        <button
-          onClick={() => setRunOpen(true)}
-          className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-white font-medium px-4 py-2.5 rounded-lg shadow-lg shadow-primary/20 transition-all text-sm animate-pulse"
-        >
-          <Play size={14} /> Execute Run
-        </button>
+        <div className="flex items-center gap-3">
+          <WebSocketStatusBadge status={wsStatus} onReconnect={reconnectWs} />
+          <button
+            onClick={() => setRunOpen(true)}
+            className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-white font-medium px-4 py-2.5 rounded-lg shadow-lg shadow-primary/20 transition-all text-sm"
+          >
+            <Play size={14} /> Execute Run
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

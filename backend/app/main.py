@@ -17,6 +17,8 @@ from app.database.session import engine
 
 # Initialize structured logging engine prior to router imports
 setup_logging()
+from app.jobs.scheduler.cron_manager import cron_scheduler, initialize_default_cron_jobs
+
 logger = structlog.get_logger()
 
 
@@ -52,15 +54,27 @@ async def lifespan(app: FastAPI):
             "Redis connection initialization failed during startup.", error=str(e)
         )
 
+    # 3. Initialize and start Cron Scheduler
+    try:
+        initialize_default_cron_jobs()
+        if settings.APP_ENV != "testing":
+            cron_scheduler.start()
+            logger.info("Periodic cron job scheduler started successfully.")
+    except Exception as e:
+        logger.error("Failed to start cron job scheduler.", error=str(e))
+
     yield
 
     # --- Shutdown Tasks ---
     logger.info("Shutting down FastAPI application")
 
-    # 1. Gracefully close Redis connections
+    # 1. Gracefully stop Cron Scheduler
+    cron_scheduler.stop()
+
+    # 2. Gracefully close Redis connections
     await redis_manager.close()
 
-    # 2. Dispose of database connections
+    # 3. Dispose of database connections
     await engine.dispose()
     logger.info("All connection resources released.")
 

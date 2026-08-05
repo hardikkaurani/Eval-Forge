@@ -16,6 +16,7 @@ import {
   ChevronRight,
   Command,
   Heart,
+  Clock,
 } from 'lucide-react';
 import { api } from '../services/api';
 import type { Project } from '../services/api';
@@ -115,6 +116,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       disabled: !projectId,
     },
     { name: 'Providers', path: '/providers', icon: Cpu },
+    { name: 'Scheduled Jobs', path: '/scheduled-jobs', icon: Clock },
   ];
 
   // Command palette commands

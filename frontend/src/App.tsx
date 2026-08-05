@@ -10,6 +10,7 @@ const Datasets = lazy(() => import('./pages/Datasets'));
 const Evaluations = lazy(() => import('./pages/Evaluations'));
 const Benchmarks = lazy(() => import('./pages/Benchmarks'));
 const Providers = lazy(() => import('./pages/Providers'));
+const ScheduledJobs = lazy(() => import('./pages/ScheduledJobs'));
 
 const Login = lazy(() => import('./pages/AuthPages').then((m) => ({ default: m.Login })));
 const Register = lazy(() => import('./pages/AuthPages').then((m) => ({ default: m.Register })));
@@ -71,6 +72,14 @@ function App() {
               element={
                 <DashboardLayout>
                   <Providers />
+                </DashboardLayout>
+              }
+            />
+            <Route
+              path="/scheduled-jobs"
+              element={
+                <DashboardLayout>
+                  <ScheduledJobs />
                 </DashboardLayout>
               }
             />

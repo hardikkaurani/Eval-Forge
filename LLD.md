@@ -329,3 +329,75 @@ All API error responses follow a standard error contract:
   }
 }
 ```
+
+---
+
+## 7. Phase 16 Concept Coverage Architecture Details
+
+### 7.1 Scheduled Jobs / Cron Engine Class Structure (`cron_manager.py`)
+
+```mermaid
+classDiagram
+    class CronJob {
+        +str job_id
+        +str name
+        +str description
+        +str schedule_cron
+        +int interval_seconds
+        +Callable handler
+        +bool is_enabled
+        +datetime last_run
+        +datetime next_run
+        +str last_status
+        +str last_error
+        +int run_count
+        +to_dict() dict
+    }
+
+    class CronSchedulerManager {
+        -dict jobs
+        -list history
+        -Task running_task
+        +register_job(job_id, name, description, schedule_cron, interval_seconds, handler) CronJob
+        +execute_job(job_id) dict
+        +toggle_job(job_id) CronJob
+        +list_jobs() list
+        +get_history(limit) list
+        +start() void
+        +stop() void
+    }
+
+    CronSchedulerManager o-- CronJob
+```
+
+### 7.2 Redis Cache Engine & Response Decorator Flow (`cache.py`)
+
+1. **`CacheEngine.get(prefix, identifier)`**: Queries Redis key `cache:{prefix}:{identifier}`. Deserializes JSON payload if present, or falls back to in-memory dictionary.
+2. **`CacheEngine.set(prefix, identifier, data, ttl_seconds)`**: Serializes JSON payload and sets Redis key with TTL expiration, writing to memory fallback on Redis connection error.
+3. **`CacheEngine.clear_prefix(prefix)`**: Performs non-blocking keyspace scan (`SCAN cache:{prefix}:*`) and invalidates all matching keys.
+4. **`@cache_response(prefix, ttl_seconds)`**: Decorator wrapping FastAPI routes. Injects `X-Cache: HIT` header on cache hit and `X-Cache: MISS` header on cache miss.
+
+### 7.3 WebSocket Progress Streaming Event Protocol (`useJobWebSocket.ts`)
+
+Endpoints: `/api/v1/jobs/{id}/progress` & `/api/v1/projects/{id}/jobs/progress`
+
+```json
+{
+  "event": "progress",
+  "job_id": "job-uuid-1234",
+  "status": "RUNNING",
+  "progress": 75.0,
+  "current_step": "Progress: 75.0% - Evaluating dataset batch #3",
+  "timestamp": "2026-08-05T22:50:00.000Z"
+}
+```
+
+Events: `started` | `progress` | `completed` | `failed` | `retrying` | `cancelled`
+
+### 7.4 Scheduled Jobs REST API Endpoints
+
+- `GET /api/v1/jobs/scheduler/jobs`: List configured cron schedules.
+- `POST /api/v1/jobs/scheduler/jobs/{job_id}/trigger`: Trigger immediate manual execution.
+- `POST /api/v1/jobs/scheduler/jobs/{job_id}/toggle`: Toggle enabled/disabled state.
+- `GET /api/v1/jobs/scheduler/history`: View execution log history.
+
