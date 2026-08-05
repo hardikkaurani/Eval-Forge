@@ -17,8 +17,6 @@ export default function Evaluations() {
   // Connect WebSocket stream for real-time evaluation updates
   const {
     status: wsStatus,
-    lastEvent,
-    progress: wsProgress,
     reconnect: reconnectWs,
   } = useJobWebSocket(selectedExperiment?.id, projectId);
 
