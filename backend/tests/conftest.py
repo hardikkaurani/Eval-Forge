@@ -65,12 +65,12 @@ def db_session_fixture() -> Generator[AsyncSession, None, None]:
 
     # Patch application SessionLocal bind to point to testing engine
     from app.database.session import SessionLocal
+
     SessionLocal.configure(bind=engine)
 
     session = TestingSessionLocal()
 
     yield session
-
 
     # Run cleanup synchronously in the loop
     async def destroy_tables():
@@ -110,6 +110,7 @@ def client_fixture(
     ):
         if x_api_key == "invalid_key":
             from fastapi import HTTPException
+
             raise HTTPException(status_code=401, detail="Invalid or inactive API key.")
         return mock_key_record
 

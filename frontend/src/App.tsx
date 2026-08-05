@@ -13,7 +13,9 @@ const Providers = lazy(() => import('./pages/Providers'));
 
 const Login = lazy(() => import('./pages/AuthPages').then((m) => ({ default: m.Login })));
 const Register = lazy(() => import('./pages/AuthPages').then((m) => ({ default: m.Register })));
-const ForgotPassword = lazy(() => import('./pages/AuthPages').then((m) => ({ default: m.ForgotPassword })));
+const ForgotPassword = lazy(() =>
+  import('./pages/AuthPages').then((m) => ({ default: m.ForgotPassword }))
+);
 const Profile = lazy(() => import('./pages/AuthPages').then((m) => ({ default: m.Profile })));
 
 const PageLoader = () => (
@@ -107,5 +109,3 @@ function App() {
 }
 
 export default App;
-
-

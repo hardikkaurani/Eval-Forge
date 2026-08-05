@@ -70,7 +70,6 @@ class AdvancedAIRepository:
         await self.db.refresh(safety)
         return safety
 
-
     async def get_safety_evaluations(
         self, project_id: str, skip: int = 0, limit: int = 100
     ) -> List[SafetyEvaluation]:
@@ -92,7 +91,6 @@ class AdvancedAIRepository:
         await self.db.commit()
         await self.db.refresh(security)
         return security
-
 
     async def get_security_evaluations(
         self, project_id: str, skip: int = 0, limit: int = 100

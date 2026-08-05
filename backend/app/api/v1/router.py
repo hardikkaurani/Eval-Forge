@@ -45,8 +45,12 @@ from app.platform.routes.webhooks_api import router as webhooks_router
 public_router = APIRouter()
 public_router.include_router(health.router, tags=["System"])
 public_router.include_router(metrics.router, tags=["System"])
-public_router.include_router(public_api_router, tags=["Developer Platform - Public credentials"])
-public_router.include_router(playground_router, tags=["Developer Platform - Playground"])
+public_router.include_router(
+    public_api_router, tags=["Developer Platform - Public credentials"]
+)
+public_router.include_router(
+    playground_router, tags=["Developer Platform - Playground"]
+)
 
 # Private router (requires API key authentication)
 private_router = APIRouter(dependencies=[Depends(get_current_api_key)])

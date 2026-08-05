@@ -39,7 +39,6 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         logger.error("Database connection check failed during startup.", error=str(e))
 
-
     # 2. Initialization of Redis connection manager
     try:
         redis_manager.init(settings.get_redis_url)
