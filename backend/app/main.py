@@ -121,6 +121,12 @@ app.add_middleware(RequestLoggingMiddleware)
 # Register API routes under /api/v1 prefix
 app.include_router(api_router, prefix=settings.API_V1_STR)
 
+# Root level health endpoint for cloud load balancers and Railway probes
+@app.get("/health", include_in_schema=False)
+async def root_health_check():
+    """Root health check endpoint for reverse proxies and container orchestrators."""
+    return {"status": "healthy", "service": settings.APP_NAME}
+
 # Register custom global exception handlers
 register_exception_handlers(app)
 
@@ -131,6 +137,6 @@ if __name__ == "__main__":
     uvicorn.run(
         "app.main:app",
         host="0.0.0.0",
-        port=8000,
+        port=settings.PORT,
         reload=settings.APP_ENV == "development",
     )

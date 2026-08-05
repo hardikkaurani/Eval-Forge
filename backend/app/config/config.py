@@ -27,6 +27,7 @@ class Settings(BaseSettings):
     APP_NAME: str = "EvalForge API"
     APP_ENV: Literal["development", "testing", "production"] = "development"
     DEBUG: bool = True
+    PORT: int = Field(8000, ge=1, le=65535)
     API_V1_STR: str = "/api/v1"
 
     # Database Configuration
@@ -128,7 +129,8 @@ class Settings(BaseSettings):
         """Constructs or retrieves the database connection string.
 
         Supports dynamic replacement of environment variables in DATABASE_URL if
-        they are in the format ${VAR}.
+        they are in the format ${VAR}. Converts postgres:// and postgresql:// to
+        postgresql+asyncpg:// for SQLAlchemy async engine compatibility.
         """
         if self.DATABASE_URL:
             db_url = self.DATABASE_URL
@@ -140,6 +142,14 @@ class Settings(BaseSettings):
                 db_url = db_url.replace("${POSTGRES_SERVER}", self.POSTGRES_SERVER)
                 db_url = db_url.replace("${POSTGRES_PORT}", str(self.POSTGRES_PORT))
                 db_url = db_url.replace("${POSTGRES_DB}", self.POSTGRES_DB)
+
+            if db_url.startswith("postgres://"):
+                db_url = db_url.replace("postgres://", "postgresql+asyncpg://", 1)
+            elif db_url.startswith("postgresql://") and not db_url.startswith(
+                "postgresql+asyncpg://"
+            ):
+                db_url = db_url.replace("postgresql://", "postgresql+asyncpg://", 1)
+
             return db_url
 
         password = self.POSTGRES_PASSWORD.get_secret_value()
