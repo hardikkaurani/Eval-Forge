@@ -1,7 +1,7 @@
 from contextlib import asynccontextmanager
 
 import structlog
-from fastapi import Depends, FastAPI
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
@@ -30,13 +30,15 @@ async def lifespan(app: FastAPI):
         debug_mode=settings.DEBUG,
     )
 
-    # 1. Verification of DB connectivity
+    # 1. Verification of DB connectivity (skip during tests)
     try:
-        async with engine.begin() as conn:
-            await conn.exec_driver_sql("SELECT 1")
-        logger.info("Database connectivity verified successfully.")
+        if settings.APP_ENV != "testing":
+            async with engine.begin() as conn:
+                await conn.exec_driver_sql("SELECT 1")
+            logger.info("Database connectivity verified successfully.")
     except Exception as e:
         logger.error("Database connection check failed during startup.", error=str(e))
+
 
     # 2. Initialization of Redis connection manager
     try:

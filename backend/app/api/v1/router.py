@@ -1,7 +1,5 @@
 from fastapi import APIRouter, Depends
 
-from app.core.dependencies import get_current_api_key
-
 from app.advanced_ai.routes.agents import router as agents_router
 from app.advanced_ai.routes.conversations import router as conversations_router
 from app.advanced_ai.routes.dashboards import router as dashboards_router
@@ -28,6 +26,7 @@ from app.api.v1.endpoints import (
     providers,
     rubrics,
 )
+from app.core.dependencies import get_current_api_key
 from app.datasets.routers import benchmark_router, dataset_router, experiment_router
 from app.enterprise.routes.admin import router as ent_admin_router
 from app.enterprise.routes.api_keys import router as ent_keys_router

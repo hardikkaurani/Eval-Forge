@@ -3,6 +3,7 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, Query, WebSocket, WebSocketDisconnect, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.dependencies import validate_api_key
 from app.database.session import get_db
 from app.jobs.progress.websocket import websocket_manager
 from app.jobs.schemas.job import (
@@ -16,7 +17,6 @@ from app.jobs.schemas.job import (
 from app.jobs.services.job import JobService
 from app.utils.pagination import PaginatedResponse, create_pagination_meta
 from app.utils.responses import ApiResponse, create_response
-from app.core.dependencies import validate_api_key
 
 router = APIRouter()
 

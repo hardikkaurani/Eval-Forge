@@ -66,8 +66,10 @@ class AdvancedAIRepository:
         self, safety: SafetyEvaluation
     ) -> SafetyEvaluation:
         self.db.add(safety)
-        await self.db.flush()
+        await self.db.commit()
+        await self.db.refresh(safety)
         return safety
+
 
     async def get_safety_evaluations(
         self, project_id: str, skip: int = 0, limit: int = 100
@@ -87,8 +89,10 @@ class AdvancedAIRepository:
         self, security: SecurityEvaluation
     ) -> SecurityEvaluation:
         self.db.add(security)
-        await self.db.flush()
+        await self.db.commit()
+        await self.db.refresh(security)
         return security
+
 
     async def get_security_evaluations(
         self, project_id: str, skip: int = 0, limit: int = 100
@@ -108,7 +112,8 @@ class AdvancedAIRepository:
         self, convo: ConversationEvaluation
     ) -> ConversationEvaluation:
         self.db.add(convo)
-        await self.db.flush()
+        await self.db.commit()
+        await self.db.refresh(convo)
         return convo
 
     async def get_conversation_evaluations(
@@ -129,7 +134,8 @@ class AdvancedAIRepository:
         self, agent_eval: AgentEvaluation
     ) -> AgentEvaluation:
         self.db.add(agent_eval)
-        await self.db.flush()
+        await self.db.commit()
+        await self.db.refresh(agent_eval)
         return agent_eval
 
     async def get_agent_evaluations(
@@ -148,7 +154,8 @@ class AdvancedAIRepository:
     # Policy
     async def create_policy(self, policy: Policy) -> Policy:
         self.db.add(policy)
-        await self.db.flush()
+        await self.db.commit()
+        await self.db.refresh(policy)
         return policy
 
     async def get_policy(self, policy_id: str) -> Optional[Policy]:
