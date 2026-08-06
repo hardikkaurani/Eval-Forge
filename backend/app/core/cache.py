@@ -70,7 +70,6 @@ class CacheEngine:
 
     async def clear_prefix(self, prefix: str) -> None:
         """Invalidates all cache keys with a matching prefix."""
-        # Clean local memory cache
         local_keys = [
             k for k in self._memory_cache.keys() if k.startswith(f"cache:{prefix}:")
         ]
@@ -79,7 +78,6 @@ class CacheEngine:
 
         try:
             if redis_manager.redis and redis_manager.redis.connection_pool:
-                # Scan keys and delete
                 cursor = 0
                 while True:
                     cursor, keys = await redis_manager.redis.scan(
@@ -94,6 +92,10 @@ class CacheEngine:
                 "Redis keys scan/delete failure for prefix invalidation.", error=str(e)
             )
 
+    async def invalidate_prefix(self, prefix: str) -> None:
+        """Alias for clear_prefix."""
+        await self.clear_prefix(prefix)
+
 
 # Global Cache Engine Singleton
 cache_engine = CacheEngine()
@@ -101,6 +103,7 @@ cache_engine = CacheEngine()
 
 def cache_response(prefix: str, ttl_seconds: int = 300):
     """FastAPI Endpoint decorator to cache JSON responses by URL."""
+    from fastapi.responses import JSONResponse
 
     def decorator(func: Callable):
         @wraps(func)
@@ -120,11 +123,34 @@ def cache_response(prefix: str, ttl_seconds: int = 300):
             cached_val = await cache_engine.get(prefix, identifier)
             if cached_val is not None:
                 logger.info("Serving response from cache", path=request.url.path)
-                return cached_val
+                response = JSONResponse(content=cached_val)
+                response.headers["X-Cache"] = "HIT"
+                return response
 
             result = await func(*args, **kwargs)
-            await cache_engine.set(prefix, identifier, result, ttl_seconds)
-            return result
+            # Serialize result to JSON-compatible data if needed
+            serializable_result = result
+            if hasattr(result, "dict") and callable(result.dict):
+                serializable_result = result.dict()
+            elif isinstance(result, list):
+                serializable_result = [
+                    (
+                        item.dict()
+                        if hasattr(item, "dict") and callable(item.dict)
+                        else item
+                    )
+                    for item in result
+                ]
+
+            await cache_engine.set(prefix, identifier, serializable_result, ttl_seconds)
+
+            if isinstance(result, JSONResponse):
+                result.headers["X-Cache"] = "MISS"
+                return result
+            else:
+                response = JSONResponse(content=serializable_result)
+                response.headers["X-Cache"] = "MISS"
+                return response
 
         return wrapper
 

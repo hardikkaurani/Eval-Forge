@@ -1,110 +1,138 @@
 # EvalForge v1.0.0 Production Deployment Guide
 
-This document outlines the requirements and procedures for deploying EvalForge to production infrastructure.
+This document provides step-by-step instructions for deploying EvalForge to production infrastructure, targeting **Vercel** (Frontend), **Railway** (Backend, PostgreSQL, and Redis), or **Docker Compose** (Self-Hosted).
 
 ---
 
-## 1. System Architecture & Requirements
+## 1. Cloud Architecture Overview
 
-A standard production deployment of EvalForge consists of:
-- **Load Balancer / Reverse Proxy**: Nginx, Traefik, or Caddy terminating SSL (HTTPS) and routing traffic.
-- **FastAPI Core Service**: Stateless API instances handling REST requests.
-- **React Frontend**: Bundled static files served by the reverse proxy.
-- **PostgreSQL Database**: Relational database (v15+) for state persistence.
-- **Redis Cache & Broker**: In-memory broker for Celery queues and query cache.
-- **Celery Workers**: Execution nodes running LLM evaluations.
-
----
-
-## 2. Configuration & Environment Variables
-
-Create a secure `.env` file in your production environment. Never commit this file to source control.
-
-| Variable Name | Description | Example / Recommended Value |
-|---|---|---|
-| `APP_ENV` | Application environment mode | `production` |
-| `DEBUG` | Enable debug logs and Swagger | `False` |
-| `SECRET_KEY` | JWT signing security key (64-char hex) | `8f2a...` |
-| `POSTGRES_SERVER` | PostgreSQL server hostname | `db.evalforge.internal` |
-| `POSTGRES_PORT` | PostgreSQL port | `5432` |
-| `POSTGRES_USER` | PostgreSQL user | `evalforge_admin` |
-| `POSTGRES_PASSWORD` | PostgreSQL database password | `[SECURE_PASSWORD]` |
-| `POSTGRES_DB` | Database name | `evalforge_prod` |
-| `REDIS_HOST` | Redis server hostname | `redis.evalforge.internal` |
-| `REDIS_PORT` | Redis port | `6379` |
-| `REDIS_DB` | Redis database index | `0` |
-| `LOG_LEVEL` | Minimum log level output | `warning` |
-| `JSON_LOGS` | Format logs as structured JSON | `True` |
-| `OPENAI_API_KEY` | OpenAI API credentials | `sk-proj-...` |
-| `ANTHROPIC_API_KEY` | Anthropic API credentials | `sk-ant-...` |
-
----
-
-## 3. Docker Compose Production Deployment
-
-The fastest way to deploy the entire stack is using our optimized production Docker Compose configuration.
-
-### 3.1 Build Production Images
-```bash
-docker compose -f docker-compose.prod.yml build
 ```
-
-### 3.2 Start Services in Detached Mode
-```bash
-docker compose -f docker-compose.prod.yml up -d
-```
-
-### 3.3 Verify Container Statuses
-```bash
-docker compose -f docker-compose.prod.yml ps
-```
-Ensure healthcheck statuses are `healthy` for PostgreSQL, Redis, and FastAPI.
-
----
-
-## 4. HTTPS and Reverse Proxy (Caddy Example)
-
-Use Caddy to automatically provision SSL certs via Let's Encrypt.
-
-Create a `Caddyfile`:
-```caddy
-evalforge.yourdomain.com {
-    # Serve static frontend files
-    root * /var/www/evalforge/frontend/dist
-    file_server
-    
-    # Route API requests to the FastAPI backend
-    handle /api/* {
-        reverse_proxy localhost:8000
-    }
-
-    # Route WebSockets progress channels
-    handle /ws/* {
-        reverse_proxy localhost:8000
-    }
-
-    # Fallback to frontend router index.html for SPA
-    try_files {path} /index.html
-}
++---------------------------------------+
+|            Vercel (CDN)               |
+|      React / Vite Frontend App        |
+|     (https://evalforge.vercel.app)    |
++-------------------+-------------------+
+                    |
+                    | API Requests (HTTPS)
+                    v
++---------------------------------------+
+|           Railway (PaaS)              |
+|        FastAPI Backend Engine         |
+|  (https://backend.up.railway.app)     |
++---------+-------------------+---------+
+          |                   |
+          v                   v
++-------------------+ +-----------------+
+| Railway Postgres  | |  Railway Redis  |
+|  (PostgreSQL 16)  | |   (Redis 7)     |
++-------------------+ +-----------------+
 ```
 
 ---
 
-## 5. Monitoring, Health Checks, & Rollback
+## 2. Environment Variables Specification
 
-### 5.1 Health Check Endpoints
-- **Liveness Probe**: `GET /api/v1/health/liveness` (returns 200 if server is running)
-- **Readiness Probe**: `GET /api/v1/health/readiness` (returns 200 if DB and Redis are connected)
+Before deploying, configure your production environment variables. Refer to [.env.example](file:///.env.example) at the project root.
 
-### 5.2 Rollback Strategy
-If an update fails:
-1. Stop running containers:
+| Variable Name | Required | Default Value | Description |
+|---|---|---|---|
+| `APP_ENV` | Yes | `production` | Enables production security checks & disables public docs |
+| `DEBUG` | Yes | `False` | Disables verbose debug logging |
+| `PORT` | Auto | `8000` | Dynamic port provided by Railway / cloud host |
+| `DATABASE_URL` | Yes | Auto-provided | PostgreSQL connection string (`postgresql://` or `postgres://` auto-converts to `postgresql+asyncpg://`) |
+| `REDIS_URL` | Yes | Auto-provided | Redis connection string (`redis://...`) |
+| `SECRET_KEY` | Yes | Secure Hex | 64-character random string for cryptography |
+| `CORS_ORIGINS` | Yes | `["https://..."]` | JSON array of trusted frontend domains allowed by CORS |
+| `ALLOWED_HOSTS` | Yes | `["*"]` | Trusted host headers allowed by proxy middleware |
+| `VITE_API_URL` | Yes | `https://...` | Base API URL configured on Vercel frontend |
+
+---
+
+## 3. Deployment Steps
+
+### Option A: Cloud Deployment (Vercel & Railway)
+
+#### Step A1: Backend & Database Deployment on Railway
+1. Sign in to [Railway.app](https://railway.app).
+2. Create a **New Project** and add a **PostgreSQL** database service and a **Redis** database service.
+3. Add a **GitHub Repository Service** pointing to `hardikkaurani/Eval-Forge`.
+4. Set the service root directory to `/backend` (or leave as root and use `railway.json`).
+5. Configure environment variables in Railway:
+   - `APP_ENV=production`
+   - `DEBUG=False`
+   - `SECRET_KEY=<your-64-character-secret>`
+   - `CORS_ORIGINS=["https://evalforge.vercel.app"]`
+   - `DATABASE_URL=${{Postgres.DATABASE_URL}}`
+   - `REDIS_URL=${{Redis.REDIS_URL}}`
+6. Railway will automatically execute `bash scripts/start.sh` (running Alembic migrations and starting Uvicorn).
+7. Copy your deployed Railway backend URL (e.g. `https://evalforge-production.up.railway.app`).
+
+#### Step A2: Frontend Deployment on Vercel
+1. Sign in to [Vercel.com](https://vercel.com).
+2. Click **Add New Project** and import `hardikkaurani/Eval-Forge`.
+3. Set **Framework Preset** to **Vite**.
+4. Set **Root Directory** to `frontend`.
+5. Configure Environment Variables:
+   - `VITE_API_URL=https://evalforge-production.up.railway.app/api/v1`
+6. Click **Deploy**. Vercel will build the frontend using `npm run build` and route all SPA paths correctly via `vercel.json`.
+
+---
+
+### Option B: Docker Production Deployment (Self-Hosted)
+
+For self-hosted virtual machines or on-premise servers:
+
+1. Clone the repository and navigate to root:
+   ```bash
+   git clone https://github.com/hardikkaurani/Eval-Forge.git
+   cd Eval-Forge
+   ```
+
+2. Copy `.env.example` to `.env` and fill in production secrets:
+   ```bash
+   cp .env.example .env
+   ```
+
+3. Build and launch services using the production compose stack:
+   ```bash
+   docker compose -f docker-compose.prod.yml up -d --build
+   ```
+
+4. Verify health status of all containers:
+   ```bash
+   docker compose -f docker-compose.prod.yml ps
+   ```
+
+5. Access your deployment:
+   - Frontend SPA: `http://localhost:80`
+   - Backend API Health: `http://localhost:8000/api/v1/health`
+
+---
+
+## 4. Post-Deployment Verification Checklist
+
+After deploying EvalForge, run through this verification checklist:
+
+- [ ] **Liveness Probe**: `GET /health` returns HTTP 200 `{"status": "healthy"}`
+- [ ] **Readiness Probe**: `GET /api/v1/ready` returns HTTP 200 with DB & Redis healthy
+- [ ] **SPA Routing**: Directly opening sub-routes (e.g. `/projects`, `/datasets`) in browser reloads cleanly without 404
+- [ ] **Database Connection**: Alembic migrations applied tables (`projects`, `datasets`, `evaluations`, `users`, etc.)
+- [ ] **Redis Connection**: Redis ping passes on container startup
+- [ ] **CORS Preflight**: Browser cross-origin OPTIONS requests succeed without CORS block
+- [ ] **API Documentation**: Docs disabled or locked in production (`APP_ENV=production`)
+
+---
+
+## 5. Rollback Procedure
+
+If a deployment fails:
+1. Revert to the previous git release tag:
+   ```bash
+   git checkout tags/v0.9.0
+   ```
+2. Re-trigger Vercel deployment or Railway build.
+3. For Docker deployments, execute:
    ```bash
    docker compose -f docker-compose.prod.yml down
-   ```
-2. Revert git tags/images to the previous stable release version (e.g. `v0.9.5`).
-3. Restore database snapshots if migrations were run and fail to downgrade automatically.
-4. Restart services:
-   ```bash
-   docker compose -f docker-compose.prod.yml up -d
+   docker compose -f docker-compose.prod.yml up -d --build
    ```

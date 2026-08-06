@@ -142,6 +142,7 @@ To become the standard open-source evaluation platform for AI application teams,
 | **Phase 10** | REST API Key System, CLI Tool, GitHub Actions CI/CD | Completed |
 | **Phase 11** | Organization Multi-Tenancy & RBAC Enforcement | Completed |
 | **Phase 12** | Observability (Prometheus + Grafana), Security Hardening | Completed |
+| **Phase 16** | Kalvium Concept Coverage: Docker Containerization, Redis Caching, WebSocket Real-time Updates, Scheduled Jobs / Cron | Completed |
 
 ---
 
@@ -149,3 +150,31 @@ To become the standard open-source evaluation platform for AI application teams,
 - Docker and Docker Compose (v2.20+) available on target execution environment.
 - Access to OpenAI, Anthropic, or local Ollama endpoints for LLM judge calls.
 - PostgreSQL 16+ and Redis 7+ services.
+
+---
+
+## 8. Kalvium Mandatory Concept Compliance Matrix
+
+The following table maps every mandatory Kalvium concept to its specification and implementation within EvalForge:
+
+| # | Mandatory Concept | Architectural Scope | Primary Implementation Location | Compliance Status |
+|---|---|---|---|---|
+| 1 | **LLM API Integration** | Backend Multi-Provider Engine | [`backend/app/evaluation/providers/`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/backend/app/evaluation/providers) | ✅ Implemented |
+| 2 | **Prompt Engineering** | System Prompts & Rubrics | [`backend/app/evaluation/prompts/`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/backend/app/evaluation/prompts) | ✅ Implemented |
+| 3 | **Structured Outputs** | Pydantic JSON Schemas | [`backend/app/schemas/`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/backend/app/schemas) | ✅ Implemented |
+| 4 | **HTTP Status Codes** | REST API Endpoints | [`backend/app/api/v1/endpoints/`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/backend/app/api/v1/endpoints) | ✅ Implemented |
+| 5 | **Middleware** | Gateway Pipelines | [`backend/app/main.py`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/backend/app/main.py) | ✅ Implemented |
+| 6 | **Problem Modeling** | DB Domain Entities | [`backend/app/models/`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/backend/app/models) | ✅ Implemented |
+| 7 | **RESTful Endpoint Design** | Gateway Routing | [`backend/app/api/v1/router.py`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/backend/app/api/v1/router.py) | ✅ Implemented |
+| 8 | **Server-side Error Handling** | Global Handlers | [`backend/app/core/exceptions.py`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/backend/app/core/exceptions.py) | ✅ Implemented |
+| 9 | **System Design** | Full-stack Architecture | [`ARCHITECTURE.md`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/ARCHITECTURE.md), [`HLD.md`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/HLD.md) | ✅ Implemented |
+| 10 | **Environment Variables** | Configuration Engine | [`backend/app/config/config.py`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/backend/app/config/config.py) | ✅ Implemented |
+| 11 | **Secrets Management** | Security Layer | [`backend/app/core/security.py`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/backend/app/core/security.py) | ✅ Implemented |
+| 12 | **Git Workflow** | Repo Governance | [`CONTRIBUTING.md`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/CONTRIBUTING.md) | ✅ Implemented |
+| 13 | **Async Data Fetching** | React Query SPA | [`frontend/src/services/api.ts`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/frontend/src/services/api.ts) | ✅ Implemented |
+| 14 | **Client-side Routing** | React Router v6 | [`frontend/src/App.tsx`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/frontend/src/App.tsx) | ✅ Implemented |
+| 15 | **JavaScript async/await** | Frontend Async Layer | [`frontend/src/services/api.ts`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/frontend/src/services/api.ts) | ✅ Implemented |
+| 16 | **JavaScript Closures** | Stateful Factories | [`frontend/src/utils/closures.ts`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/frontend/src/utils/closures.ts) | ✅ Implemented |
+| 17 | **JavaScript Event Loop** | Micro/Macrotask Queue | [`frontend/src/utils/eventLoop.ts`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/frontend/src/utils/eventLoop.ts) | ✅ Implemented |
+| 18 | **JavaScript Hoisting** | Compilation Scoping | [`frontend/src/utils/hoisting.ts`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/frontend/src/utils/hoisting.ts) | ✅ Implemented |
+

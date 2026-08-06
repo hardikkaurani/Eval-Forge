@@ -3,6 +3,7 @@ from typing import Any, Dict, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.cache import cache_engine, cache_response
 from app.database.session import get_db
 from app.datasets.exceptions.exceptions import (
     BenchmarkSuiteNotFoundException,
@@ -27,18 +28,21 @@ async def create_benchmark_suite(
 ):
     service = BenchmarkService(db)
     try:
-        return await service.create_benchmark_suite(
+        suite = await service.create_benchmark_suite(
             project_id=project_id,
             name=request.name,
             description=request.description,
             tags=request.tags,
             dataset_ids=request.dataset_ids,
         )
+        await cache_engine.clear_prefix("benchmarks")
+        return suite
     except DatasetException as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
 
 
 @router.get("/", response_model=BenchmarkSuiteListResponse)
+@cache_response(prefix="benchmarks", ttl_seconds=300)
 async def list_benchmark_suites(
     project_id: str = Query(..., description="Project ID"),
     skip: int = Query(0, ge=0),
@@ -62,6 +66,7 @@ async def list_benchmark_suites(
 
 
 @router.get("/dashboard/metrics", response_model=Dict[str, Any])
+@cache_response(prefix="benchmarks", ttl_seconds=300)
 async def get_dashboard_metrics(
     project_id: str = Query(..., description="Project ID"),
     db: AsyncSession = Depends(get_db),
@@ -95,9 +100,11 @@ async def update_benchmark_suite(
 ):
     service = BenchmarkService(db)
     try:
-        return await service.update_benchmark_suite(
+        updated = await service.update_benchmark_suite(
             suite_id, request.model_dump(exclude_unset=True)
         )
+        await cache_engine.clear_prefix("benchmarks")
+        return updated
     except BenchmarkSuiteNotFoundException as e:
         raise HTTPException(status_code=404, detail=str(e)) from e
 
@@ -110,5 +117,6 @@ async def delete_benchmark_suite(
     service = BenchmarkService(db)
     try:
         await service.delete_benchmark_suite(suite_id)
+        await cache_engine.clear_prefix("benchmarks")
     except BenchmarkSuiteNotFoundException as e:
         raise HTTPException(status_code=404, detail=str(e)) from e

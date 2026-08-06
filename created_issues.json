@@ -1,0 +1,92 @@
+[
+  {
+    "title": "Replace Anonymous Auth Dependency with Production JWT / OAuth2 Authentication & RBAC Engine",
+    "url": "https://github.com/hardikkaurani/Eval-Forge/issues/35",
+    "status": "success"
+  },
+  {
+    "title": "Secure API Key Storage with Hash-based Lookup & Restrict Wildcard CORS Configuration",
+    "url": "https://github.com/hardikkaurani/Eval-Forge/issues/36",
+    "status": "success"
+  },
+  {
+    "title": "Consolidate Fragmented SQLAlchemy Models into Model Registry for Alembic Compatibility",
+    "url": "https://github.com/hardikkaurani/Eval-Forge/issues/37",
+    "status": "success"
+  },
+  {
+    "title": "Standardize API Router Prefixes and Tag Declarations Across v1 API Router",
+    "url": "https://github.com/hardikkaurani/Eval-Forge/issues/38",
+    "status": "success"
+  },
+  {
+    "title": "Add Asynchronous HTTP Client Pooling in LLM Provider Integrations",
+    "url": "https://github.com/hardikkaurani/Eval-Forge/issues/39",
+    "status": "success"
+  },
+  {
+    "title": "Add Composite Indexes for Evaluation, Dataset, and Analytics Database Queries",
+    "url": "https://github.com/hardikkaurani/Eval-Forge/issues/40",
+    "status": "success"
+  },
+  {
+    "title": "Connect Frontend Auth Pages to Backend API with Token Storage & Auth Context",
+    "url": "https://github.com/hardikkaurani/Eval-Forge/issues/41",
+    "status": "success"
+  },
+  {
+    "title": "Set Up Vitest & React Testing Library for Frontend Unit and Component Testing",
+    "url": "https://github.com/hardikkaurani/Eval-Forge/issues/42",
+    "status": "success"
+  },
+  {
+    "title": "Add Global React Error Boundary and Toast Notification System",
+    "url": "https://github.com/hardikkaurani/Eval-Forge/issues/43",
+    "status": "success"
+  },
+  {
+    "title": "Clean Up Abandoned Root /tests/ Directory and Standardize Pytest Structure",
+    "url": "https://github.com/hardikkaurani/Eval-Forge/issues/44",
+    "status": "success"
+  },
+  {
+    "title": "Update GitHub Actions CI Workflow to Run Frontend Tests and Enforce Coverage Thresholds",
+    "url": "https://github.com/hardikkaurani/Eval-Forge/issues/45",
+    "status": "success"
+  },
+  {
+    "title": "Production-Harden Docker Compose Configuration with Service Healthchecks & Non-Root Users",
+    "url": "https://github.com/hardikkaurani/Eval-Forge/issues/46",
+    "status": "success"
+  },
+  {
+    "title": "Audit and Synchronize ARCHITECTURE.md and README.md with Live API Capabilities",
+    "url": "https://github.com/hardikkaurani/Eval-Forge/issues/47",
+    "status": "success"
+  },
+  {
+    "title": "Add Pre-Commit Configuration for Automatic Linting and Formatting",
+    "url": "https://github.com/hardikkaurani/Eval-Forge/issues/48",
+    "status": "success"
+  },
+  {
+    "title": "Add Automated OpenAPI SDK Client Code Generator Script",
+    "url": "https://github.com/hardikkaurani/Eval-Forge/issues/49",
+    "status": "success"
+  },
+  {
+    "title": "Implement Structured Logging Correlation & OpenTelemetry Tracing Pipeline",
+    "url": "https://github.com/hardikkaurani/Eval-Forge/issues/50",
+    "status": "success"
+  },
+  {
+    "title": "Add Rate-Limiting & Idempotency Key Storage in Redis",
+    "url": "https://github.com/hardikkaurani/Eval-Forge/issues/51",
+    "status": "success"
+  },
+  {
+    "title": "Implement Automatic Database Seed Script for Development & Demonstration",
+    "url": "https://github.com/hardikkaurani/Eval-Forge/issues/52",
+    "status": "success"
+  }
+]

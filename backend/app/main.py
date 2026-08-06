@@ -14,9 +14,10 @@ from app.core.middleware import RequestLoggingMiddleware, SecurityHeadersMiddlew
 from app.core.production_security import IdempotencyMiddleware, RateLimitingMiddleware
 from app.core.redis import redis_manager
 from app.database.session import engine
+from app.jobs.scheduler.cron_manager import cron_scheduler, initialize_default_cron_jobs
 
-# Initialize structured logging engine prior to router imports
 setup_logging()
+
 logger = structlog.get_logger()
 
 
@@ -30,11 +31,12 @@ async def lifespan(app: FastAPI):
         debug_mode=settings.DEBUG,
     )
 
-    # 1. Verification of DB connectivity
+    # 1. Verification of DB connectivity (skip during tests)
     try:
-        async with engine.begin() as conn:
-            await conn.exec_driver_sql("SELECT 1")
-        logger.info("Database connectivity verified successfully.")
+        if settings.APP_ENV != "testing":
+            async with engine.begin() as conn:
+                await conn.exec_driver_sql("SELECT 1")
+            logger.info("Database connectivity verified successfully.")
     except Exception as e:
         logger.error("Database connection check failed during startup.", error=str(e))
 
@@ -48,19 +50,30 @@ async def lifespan(app: FastAPI):
             logger.warning("Redis is unreachable or degraded.")
     except Exception as e:
         logger.error(
-            "Redis connection initialization failed during startup.",
-            error=str(e),
+            "Redis connection initialization failed during startup.", error=str(e)
         )
+
+    # 3. Initialize and start Cron Scheduler
+    try:
+        initialize_default_cron_jobs()
+        if settings.APP_ENV != "testing":
+            cron_scheduler.start()
+            logger.info("Periodic cron job scheduler started successfully.")
+    except Exception as e:
+        logger.error("Failed to start cron job scheduler.", error=str(e))
 
     yield
 
     # --- Shutdown Tasks ---
     logger.info("Shutting down FastAPI application")
 
-    # 1. Gracefully close Redis connections
+    # 1. Gracefully stop Cron Scheduler
+    cron_scheduler.stop()
+
+    # 2. Gracefully close Redis connections
     await redis_manager.close()
 
-    # 2. Dispose of database connections
+    # 3. Dispose of database connections
     await engine.dispose()
     logger.info("All connection resources released.")
 
@@ -85,16 +98,22 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+# Warn about insecure CORS configuration in production
+if settings.CORS_ORIGINS == ["*"] and settings.APP_ENV == "production":
+    logger.warning(
+        "CORS is configured to allow all origins (CORS_ORIGINS='*'). "
+        "This is insecure and should be restricted in production."
+    )
+
 # Register Middlewares (Outermost first for request execution, innermost first for response headers)
-# 1. Custom Security Headers
 app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(RateLimitingMiddleware, requests_per_minute=300)
 app.add_middleware(IdempotencyMiddleware)
 
-# 2. GZip Compression Middleware
+# GZip Compression Middleware
 app.add_middleware(GZipMiddleware, minimum_size=1000)
 
-# 3. CORS Middleware
+# CORS Middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.CORS_ORIGINS,
@@ -103,37 +122,28 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# 4. Trusted Host Middleware
+# Trusted Host Middleware
 app.add_middleware(
     TrustedHostMiddleware,
     allowed_hosts=settings.ALLOWED_HOSTS,
 )
 
-# 5. Request logging and Request ID Middleware (Outermost wrapper)
+# Request logging and Request ID Middleware (Outermost wrapper)
 app.add_middleware(RequestLoggingMiddleware)
 
 # Register API routes under /api/v1 prefix
 app.include_router(api_router, prefix=settings.API_V1_STR)
 
+
+# Root level health endpoint for cloud load balancers and Railway probes
+@app.get("/health", include_in_schema=False)
+async def root_health_check():
+    """Root health check endpoint for reverse proxies and container orchestrators."""
+    return {"status": "healthy", "service": settings.APP_NAME}
+
+
 # Register custom global exception handlers
 register_exception_handlers(app)
-
-
-@app.get("/", tags=["System"])
-async def root():
-    """Welcome endpoint for root verification."""
-    return {
-        "success": True,
-        "message": f"Welcome to {settings.APP_NAME}!",
-        "data": {
-            "version": "1.0.0",
-            "docs_url": (
-                "/docs"
-                if settings.APP_ENV != "production"
-                else "Disabled in production"
-            ),
-        },
-    }
 
 
 if __name__ == "__main__":
@@ -142,6 +152,6 @@ if __name__ == "__main__":
     uvicorn.run(
         "app.main:app",
         host="0.0.0.0",
-        port=8000,
+        port=settings.PORT,
         reload=settings.APP_ENV == "development",
     )

@@ -147,9 +147,18 @@ graph TB
   - Executing concurrent LLM API calls with backoff retries on rate limits (HTTP 429).
   - Atomic persistence of run state transitions (`PENDING` $\rightarrow$ `RUNNING` $\rightarrow$ `COMPLETED`).
 
-### 3.5 Storage & Persistence Layer
+### 3.5 Scheduled Jobs & Periodic Cron Subsystem (`backend/app/jobs/scheduler/`)
+- **Technology Stack:** Asyncio Periodic Loop, Celery Beat.
+- **Responsibilities:**
+  - Managing automated background schedules (`CronSchedulerManager`).
+  - Periodically updating leaderboard model rankings (`cron-leaderboard-recalc`).
+  - Purging stale job execution logs and temporary evaluation artifacts (`cron-stale-logs-cleanup`).
+  - Aggregating live system throughput and latency metrics (`cron-metrics-aggregation`).
+  - Exposing REST management endpoints (`/api/v1/jobs/scheduler/`) and React UI panel.
+
+### 3.6 Storage & Persistence Layer
 - **PostgreSQL 16:** Relational storage for organizations, workspaces, users, projects, dataset versions, run metadata, and metric results.
-- **Redis 7:** Celery task broker, caching layer, rate limiter counter storage, real-time pub/sub.
+- **Redis 7:** Celery task broker, endpoint response cache engine (`X-Cache: HIT/MISS`), rate limiter counter storage, real-time pub/sub.
 - **File Storage:** Local filesystem or Amazon S3 compatible object storage for dataset uploads and raw test artifacts.
 
 ---
@@ -161,36 +170,42 @@ graph TB
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Client as User / CI Runner
+    actor Client as User / React Client
     participant API as FastAPI Gateway
-    participant DB as PostgreSQL
+    participant Cache as Redis Cache
+    participant WS as WebSocket Stream
     participant Queue as Redis Queue
     participant Worker as Celery Worker
     participant Engine as Judge Engine
-    participant LLM as LLM Provider (OpenAI/Ollama)
 
-    Client->>API: POST /api/v1/runs (project_id, dataset_version_id, judge_config)
-    API->>DB: Validate Auth, Org Quota & Dataset Version
-    API->>DB: Insert EvalRun Record (status="PENDING")
-    API->>Queue: Enqueue task "execute_eval_run" (run_id)
-    API-->>Client: 202 Accepted (run_id, status_url)
-
-    Queue->>Worker: Pickup "execute_eval_run" task
-    Worker->>DB: Update EvalRun (status="RUNNING")
-    Worker->>Engine: Initialize Judge (GEval / DeepEval / Custom)
-
-    loop For each item in DatasetVersion
-        Engine->>LLM: Send Input & Prompt for Evaluation
-        LLM-->>Engine: Return Model Output & Judge Reasoning
-        Engine->>Engine: Calculate Normalized Score & Pass/Fail Status
-        Worker->>DB: Save EvalResult Record
+    Client->>API: GET /api/v1/datasets/benchmarks
+    API->>Cache: Check Redis Key ("cache:benchmarks:...")
+    alt Cache HIT
+        Cache-->>API: Return Cached JSON
+        API-->>Client: 200 OK (Header "X-Cache: HIT")
+    else Cache MISS
+        API->>API: Execute Database Query
+        API->>Cache: Save to Redis Cache (TTL=300s)
+        API-->>Client: 200 OK (Header "X-Cache: MISS")
     end
 
-    Worker->>DB: Update EvalRun (status="COMPLETED", summary_metrics)
-    Worker->>Queue: Publish Progress/Completion Event
-    Client->>API: GET /api/v1/runs/{run_id}
-    API->>DB: Query Run Status & Summary Metrics
-    API-->>Client: 200 OK (status="COMPLETED", metrics_summary)
+    Client->>WS: Connect /api/v1/jobs/{id}/progress
+    WS-->>Client: Connection Accepted ("Live WS Active")
+
+    Client->>API: POST /api/v1/jobs (Create Evaluation Job)
+    API->>Queue: Enqueue task "run_background_job"
+    Queue->>Worker: Pickup Task
+    Worker->>WS: Broadcast Event ("started")
+    WS-->>Client: Push Frame {event: "started"}
+
+    loop Execution Progress
+        Worker->>Engine: Run Evaluation Pipeline
+        Worker->>WS: Broadcast Event ("progress", progress=45%)
+        WS-->>Client: Push Frame {event: "progress", progress: 45}
+    end
+
+    Worker->>WS: Broadcast Event ("completed")
+    WS-->>Client: Push Frame {event: "completed"}
 ```
 
 ---
@@ -225,13 +240,13 @@ graph TB
     end
 
     subgraph DMZ [Reverse Proxy Layer]
-        NGINX[Nginx / Traefik Reverse Proxy - Port 80/443]
+        NGINX[Nginx Reverse Proxy - Port 80]
     end
 
     subgraph Internal Network [Docker Network: evalforge-net]
         FE_APP[Frontend React Container - Port 80]
         API_APP[Backend FastAPI Container - Port 8000]
-        CELERY_W[Celery Worker Containers (xN)]
+        CELERY_W[Celery Worker Container - app.jobs.queue.celery_app]
         
         subgraph Data Tier
             PG_DB[(PostgreSQL Container - Port 5432)]
@@ -241,7 +256,7 @@ graph TB
 
     CLIENTS --> NGINX
     NGINX -->|/| FE_APP
-    NGINX -->|/api/*| API_APP
+    NGINX -->|/api/* & WS Upgrade| API_APP
     API_APP --> REDIS_APP
     API_APP --> PG_DB
     CELERY_W --> REDIS_APP

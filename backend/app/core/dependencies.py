@@ -1,12 +1,14 @@
-from typing import AsyncGenerator
+from typing import AsyncGenerator, Optional
 
 import structlog
+from fastapi import Depends, Header, HTTPException, status
 from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config.config import Settings, settings
 from app.core.redis import redis_manager
 from app.database.session import get_db as db_generator
+from app.enterprise.services.apikey_service import EnterpriseAPIKeyService
 
 logger = structlog.get_logger()
 
@@ -32,15 +34,32 @@ def get_logger() -> structlog.stdlib.BoundLogger:
     return logger
 
 
-async def get_current_user_placeholder() -> dict:
-    """Placeholder dependency provider for future user authentication compatibility.
+async def validate_api_key(token: str, db: AsyncSession):
+    """Validate an API key token and return the associated API key record."""
+    if not token:
+        return None
+    key_service = EnterpriseAPIKeyService()
+    return await key_service.validate_key(db, token)
 
-    Currently returns an anonymous user context. Can be replaced with actual
-    JWT/OAuth verification in future phases.
-    """
-    return {
-        "id": "00000000-0000-0000-0000-000000000000",
-        "email": "anonymous@evalforge.ai",
-        "role": "anonymous",
-        "is_active": True,
-    }
+
+async def get_current_api_key(
+    x_api_key: Optional[str] = Header(None, alias="X-API-Key"),
+    db: AsyncSession = Depends(get_db),
+):
+    """Validate API key from X-API-Key header and return the associated API key record."""
+    if not x_api_key:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Missing API key. Provide it via X-API-Key header.",
+            headers={"WWW-Authenticate": "ApiKey"},
+        )
+
+    api_key_record = await validate_api_key(x_api_key, db)
+    if not api_key_record:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or inactive API key.",
+            headers={"WWW-Authenticate": "ApiKey"},
+        )
+
+    return api_key_record

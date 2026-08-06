@@ -649,4 +649,22 @@ export const api = {
       return { status: 'healthy', services: { api: 'healthy', database: 'healthy' } };
     }
   },
+  jobs: {
+    listScheduled: async () => {
+      const res = await apiClient.get('/jobs/scheduler/jobs');
+      return res.data.data;
+    },
+    triggerCron: async (jobId: string) => {
+      const res = await apiClient.post(`/jobs/scheduler/jobs/${jobId}/trigger`);
+      return res.data.data;
+    },
+    toggleCron: async (jobId: string) => {
+      const res = await apiClient.post(`/jobs/scheduler/jobs/${jobId}/toggle`);
+      return res.data.data;
+    },
+    getCronHistory: async () => {
+      const res = await apiClient.get('/jobs/scheduler/history');
+      return res.data.data;
+    },
+  },
 };
