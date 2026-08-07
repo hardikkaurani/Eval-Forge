@@ -1,16 +1,28 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 
-export interface WebSocketProgressEvent {
-  event: 'started' | 'progress' | 'completed' | 'failed' | 'retrying' | 'cancelled';
+interface WebSocketProgressEventBase {
   job_id: string;
   status?: string;
-  progress?: number;
   current_step?: string;
-  result?: Record<string, unknown> | null;
-  error?: string;
-  retry_count?: number;
   timestamp: string;
 }
+
+export type WebSocketProgressEvent =
+  | (WebSocketProgressEventBase & {
+      event: 'started';
+    })
+  | (WebSocketProgressEventBase & {
+      event: 'progress';
+      progress?: number;
+    })
+  | (WebSocketProgressEventBase & {
+      event: 'completed';
+      result?: Record<string, unknown> | null;
+    })
+  | (WebSocketProgressEventBase & {
+      event: 'failed';
+      error?: string;
+    });
 
 export type ConnectionStatus = 'connecting' | 'connected' | 'disconnected' | 'error';
 
@@ -50,11 +62,30 @@ export function useJobWebSocket(jobId?: string | null, projectId?: string | null
         try {
           const data: WebSocketProgressEvent = JSON.parse(event.data);
           setLastEvent(data);
-          if (typeof data.progress === 'number') {
-            setProgress(data.progress);
-          }
-          if (data.current_step) {
-            setCurrentStep(data.current_step);
+          switch (data.event) {
+            case 'started':
+              if (data.current_step) {
+                setCurrentStep(data.current_step);
+              }
+              break;
+            case 'progress':
+              if (typeof data.progress === 'number') {
+                setProgress(data.progress);
+              }
+              if (data.current_step) {
+                setCurrentStep(data.current_step);
+              }
+              break;
+            case 'completed':
+              if (data.current_step) {
+                setCurrentStep(data.current_step);
+              }
+              break;
+            case 'failed':
+              if (data.current_step) {
+                setCurrentStep(data.current_step);
+              }
+              break;
           }
         } catch (err) {
           console.error('Failed to parse WebSocket message frame', err);
