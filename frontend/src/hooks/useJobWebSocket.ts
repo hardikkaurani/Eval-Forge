@@ -22,6 +22,13 @@ export type WebSocketProgressEvent =
   | (WebSocketProgressEventBase & {
       event: 'failed';
       error?: string;
+    })
+  | (WebSocketProgressEventBase & {
+      event: 'retrying';
+      retry_count?: number;
+    })
+  | (WebSocketProgressEventBase & {
+      event: 'cancelled';
     });
 
 export type ConnectionStatus = 'connecting' | 'connected' | 'disconnected' | 'error';
@@ -64,26 +71,17 @@ export function useJobWebSocket(jobId?: string | null, projectId?: string | null
           setLastEvent(data);
           switch (data.event) {
             case 'started':
-              if (data.current_step) {
-                setCurrentStep(data.current_step);
-              }
-              break;
             case 'progress':
-              if (typeof data.progress === 'number') {
-                setProgress(data.progress);
-              }
-              if (data.current_step) {
-                setCurrentStep(data.current_step);
-              }
-              break;
             case 'completed':
+            case 'failed':
+            case 'retrying':
+            case 'cancelled':
               if (data.current_step) {
                 setCurrentStep(data.current_step);
               }
-              break;
-            case 'failed':
-              if (data.current_step) {
-                setCurrentStep(data.current_step);
+
+              if (data.event === 'progress' && typeof data.progress === 'number') {
+                setProgress(data.progress);
               }
               break;
           }
