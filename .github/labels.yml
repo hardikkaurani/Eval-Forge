@@ -1,0 +1,101 @@
+# EvalForge Repository Label Taxonomy
+
+- name: "good first issue"
+  color: "7057ff"
+  description: "Good for newcomers to open source or first-time repository contributors"
+
+- name: "help wanted"
+  color: "008672"
+  description: "Extra attention or community contribution requested by maintainers"
+
+- name: "documentation"
+  color: "0075ca"
+  description: "Improvements or additions to documentation, guides, or comments"
+
+- name: "bug"
+  color: "d73a4a"
+  description: "Something isn't working as expected or throwing runtime errors"
+
+- name: "enhancement"
+  color: "a2eeef"
+  description: "New feature, driver, or capability request"
+
+- name: "performance"
+  color: "ffab00"
+  description: "Latency, database query, memory, or bundle size optimizations"
+
+- name: "security"
+  color: "b60205"
+  description: "Security fixes, vulnerability hardening, or auth updates"
+
+- name: "testing"
+  color: "c5def5"
+  description: "Adding missing unit, integration, or end-to-end tests"
+
+- name: "backend"
+  color: "3e4b9e"
+  description: "FastAPI backend, SQLAlchemy models, Celery tasks, or Pytest issues"
+
+- name: "frontend"
+  color: "61dafb"
+  description: "React SPA, UI components, Tailwind styling, or state management issues"
+
+- name: "cli"
+  color: "444444"
+  description: "EvalForge CLI tool and terminal interface"
+
+- name: "api"
+  color: "e99695"
+  description: "REST API routing, HTTP status codes, request schemas, or OpenAPI docs"
+
+- name: "infra"
+  color: "5319e7"
+  description: "Docker, docker-compose, Nginx, Railway, or Render configurations"
+
+- name: "devops"
+  color: "0052cc"
+  description: "CI/CD GitHub Actions workflows and build scripts"
+
+- name: "ui"
+  color: "e4e667"
+  description: "User Interface visual layout, responsiveness, or components"
+
+- name: "ux"
+  color: "fbca04"
+  description: "User Experience, developer onboarding, and interaction flow"
+
+- name: "discussion"
+  color: "d4c5f9"
+  description: "Requests for Comment (RFC), design discussions, or feedback"
+
+- name: "blocked"
+  color: "000000"
+  description: "Waiting on external dependency or upstream design decision"
+
+- name: "priority: high"
+  color: "b60205"
+  description: "Critical path issue requiring immediate maintainer attention"
+
+- name: "priority: medium"
+  color: "d93f0b"
+  description: "Normal priority task scheduled for upcoming release"
+
+- name: "priority: low"
+  color: "0e8a16"
+  description: "Nice-to-have improvement or non-critical cleanup"
+
+- name: "needs review"
+  color: "fbca04"
+  description: "Requires architectural or code review from core maintainers"
+
+- name: "needs reproduction"
+  color: "d4c5f9"
+  description: "Bug report requires reproduction steps or verified sample data"
+
+- name: "dependencies"
+  color: "0366d6"
+  description: "Dependency updates, package version bumps, or vulns"
+
+- name: "refactor"
+  color: "1d76db"
+  description: "Structural code cleanup without changing runtime behavior"

@@ -1,0 +1,42 @@
+name: 🚀 Feature Request
+description: Propose a new feature, metric, provider integration, or architectural enhancement
+title: "[FEAT]: "
+labels: ["enhancement", "needs review"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for suggesting a feature! Please provide as much detail as possible to help us evaluate your proposal.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem & User Story
+      description: Is your feature request related to a problem or limitation?
+      placeholder: "As a [role], I want to [goal] so that [benefit]."
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      description: Describe the solution you'd like to see implemented.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternative Approaches Considered
+      description: Describe any alternative solutions or workarounds you've considered.
+  - type: textarea
+    id: technical_impact
+    attributes:
+      label: Technical & Architectural Impact
+      description: Which modules, routers, or frontend components would be modified?
+      placeholder: e.g., backend/app/evaluation/providers/, frontend/src/pages/Evaluations.tsx
+  - type: checkboxes
+    id: willingness
+    attributes:
+      label: Contribution Interest
+      options:
+        - label: I am willing to submit a Pull Request to implement this feature!
+          required: false

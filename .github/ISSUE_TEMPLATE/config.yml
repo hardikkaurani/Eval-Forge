@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 GitHub Discussions & Q&A
+    url: https://github.com/hardikkaurani/Eval-Forge/discussions
+    about: Ask questions, share ideas, and discuss architectural ideas with the community.
+  - name: 🔒 Security Vulnerability Report
+    url: https://github.com/hardikkaurani/Eval-Forge/security/advisories/new
+    about: Report sensitive security vulnerabilities privately.
+  - name: 📖 EvalForge Documentation
+    url: https://github.com/hardikkaurani/Eval-Forge#readme
+    about: Read full documentation, architecture guides, and API specifications.

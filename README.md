@@ -1225,21 +1225,66 @@ npm run lint
 
 4. Open a Pull Request against `main` with a description, motivation, and screenshots or test output where relevant.
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for the full guide.
+See our full guides:
+- **[CONTRIBUTING.md](CONTRIBUTING.md):** Comprehensive 23-section maintainer & contributor handbook.
+- **[FIRST_CONTRIBUTOR_GUIDE.md](.github/FIRST_CONTRIBUTOR_GUIDE.md):** 10-minute quickstart guide for first-time open source contributors.
+- **[CONTRIBUTOR_ISSUES_CATALOG.md](docs/CONTRIBUTOR_ISSUES_CATALOG.md):** 30 real, curated engineering issues ready for assignment.
+- **[SUPPORT.md](SUPPORT.md):** Support channels, GitHub Discussions, and community help.
+- **[GOVERNANCE.md](GOVERNANCE.md) & [MAINTAINERS.md](MAINTAINERS.md):** Project governance, maintainer team, and triage policies.
+- **[SECURITY.md](SECURITY.md):** Security policies and private vulnerability reporting SLAs.
+- **[CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md):** Contributor Covenant v2.1 standards.
 
 ---
 
-## License !
+## 👥 Community & Contributor Recognition
 
-MIT License. See [LICENSE](LICENSE) for details.
+We love and appreciate our open-source contributors! EvalForge is built by developers worldwide.
+
+<a href="https://github.com/hardikkaurani/Eval-Forge/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=hardikkaurani/Eval-Forge" alt="EvalForge Contributors" />
+</a>
+
+### How to Join the Contributor Hall of Fame:
+1. Pick an unassigned issue from our [`good first issue`](https://github.com/hardikkaurani/Eval-Forge/issues?q=is%3Aissue+is%3Aopen+label%3A"good+first+issue") list.
+2. Run `./scripts/setup-dev-env.sh` (or `.\scripts\setup-dev-env.ps1`) to initialize your local stack.
+3. Submit your PR — once merged, your avatar will appear above automatically!
 
 ---
 
-<br/><br/>
-*EvalForge — built for engineers who refuse to ship LLMs they cannot measure !*
+## ❓ Frequently Asked Questions (FAQ)
+
+<details>
+<summary><b>1. Can I run EvalForge 100% locally without an internet connection?</b></summary>
+<br/>
+Yes! EvalForge can be hosted entirely offline via Docker Compose using local database instances and Ollama or vLLM local judge inference models. Zero outbound telemetry is collected.
+</details>
+
+<details>
+<summary><b>2. How does EvalForge ensure evaluation reproducibility?</b></summary>
+<br/>
+Every dataset import creates an immutable version snapshot (`v1`, `v2`). Evaluation experiments are snapshot-pinned to a specific version, ensuring identical benchmark scoring results over time.
+</details>
+
+<details>
+<summary><b>3. Is EvalForge suitable for production enterprise workloads?</b></summary>
+<br/>
+Yes. EvalForge features Celery worker queues backed by Redis for horizontal scaling, PostgreSQL async connection pooling, API key SHA-256 hashing, rate limiting, and multi-tenant organization boundaries.
+</details>
+
+---
+
+## License
+
+Distributed under the **MIT License**. See [LICENSE](LICENSE) for details.
+
+---
+
+<div align="center">
+
+*EvalForge — built for AI engineers who refuse to ship LLMs they cannot measure!*
 
 <br/>
 
-**[hardikkaurani](https://github.com/hardikkaurani)** &nbsp;·&nbsp; [Issues](https://github.com/hardikkaurani/Eval-Forge/issues) &nbsp;·&nbsp; [Discussions](https://github.com/hardikkaurani/Eval-Forge/discussions) &nbsp;·&nbsp; [ROADMAP.md](ROADMAP.md)
+**[hardikkaurani](https://github.com/hardikkaurani)** &nbsp;·&nbsp; [Issues](https://github.com/hardikkaurani/Eval-Forge/issues) &nbsp;·&nbsp; [Discussions](https://github.com/hardikkaurani/Eval-Forge/discussions) &nbsp;·&nbsp; [ROADMAP.md](ROADMAP.md) &nbsp;·&nbsp; [CONTRIBUTING.md](CONTRIBUTING.md)
 
 </div>
