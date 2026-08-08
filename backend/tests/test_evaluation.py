@@ -191,3 +191,35 @@ def test_batch_evaluation_validation_errors(client: TestClient) -> None:
     response = client.post("/api/v1/evaluations/batch", json=payload)
     assert response.status_code == 400
     assert response.json()["data"]["code"] == "InvalidConfigException"
+
+
+def test_prompt_engine_jinja2_template_validation() -> None:
+    """Verifies that PromptEngine.validate_template catches syntax errors and register_template enforces valid syntax."""
+    import pytest
+    from app.evaluation.prompts.engine import PromptEngine
+
+    engine = PromptEngine()
+
+    # 1. Valid template string
+    valid_template = "Hello {{ user_name }}, welcome to {{ system_name }}!"
+    is_valid, error = engine.validate_template(valid_template)
+    assert is_valid is True
+    assert error is None
+
+    # 2. Invalid template string (unclosed variable tag)
+    invalid_template = "Hello {{ user_name, welcome to system!"
+    is_valid, error = engine.validate_template(invalid_template)
+    assert is_valid is False
+    assert error is not None
+    assert "Template syntax error" in error
+
+    # 3. Registering invalid template should raise ValueError
+    with pytest.raises(ValueError, match="Invalid Jinja2 prompt template syntax"):
+        engine.register_template("invalid_custom_prompt", invalid_template)
+
+    # 4. Registering valid template should succeed
+    engine.register_template("valid_custom_prompt", valid_template)
+    rendered = engine.render("valid_custom_prompt", user_name="User", system_name="EvalForge")
+    assert rendered == "Hello User, welcome to EvalForge!"
+
+
