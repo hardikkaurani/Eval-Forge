@@ -4,7 +4,7 @@ services:
       context: .
       dockerfile: docker/backend.Dockerfile
     ports:
-      - "${PORT:-8000}:8000"
+      - ${PORT:-8000}:8000
     environment:
       - APP_NAME=EvalForge API
       - APP_ENV=production
@@ -21,7 +21,11 @@ services:
       - CORS_ORIGINS=${CORS_ORIGINS:-["*"]}
       - ALLOWED_HOSTS=${ALLOWED_HOSTS:-["*"]}
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      test:
+        - CMD
+        - python
+        - -c
+        - import urllib.request; urllib.request.urlopen('http://localhost:8000/health')
       interval: 10s
       timeout: 5s
       retries: 5
@@ -38,7 +42,7 @@ services:
       context: .
       dockerfile: docker/frontend.Dockerfile
     ports:
-      - "80:80"
+      - 80:80
     depends_on:
       - backend
     restart: always
@@ -51,11 +55,13 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres_password}
       POSTGRES_DB: ${POSTGRES_DB:-evalforge}
     ports:
-      - "5432:5432"
+      - 5432:5432
     volumes:
       - postgres_prod_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-evalforge}"]
+      test:
+        - CMD-SHELL
+        - pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-evalforge}
       interval: 5s
       timeout: 5s
       retries: 5
@@ -64,11 +70,14 @@ services:
     image: redis:7-alpine
     restart: always
     ports:
-      - "6379:6379"
+      - 6379:6379
     volumes:
       - redis_prod_data:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test:
+        - CMD
+        - redis-cli
+        - ping
       interval: 5s
       timeout: 5s
       retries: 5

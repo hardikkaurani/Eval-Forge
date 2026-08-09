@@ -20,7 +20,11 @@ services:
     volumes:
       - ./backend/app:/app/app
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/live')"]
+      test:
+        - CMD
+        - python
+        - -c
+        - import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/live')
       interval: 10s
       timeout: 5s
       retries: 3
@@ -60,7 +64,7 @@ services:
       context: .
       dockerfile: docker/frontend.Dockerfile
     ports:
-      - "80:80"
+      - 80:80
     depends_on:
       - backend
 
@@ -72,11 +76,13 @@ services:
       POSTGRES_PASSWORD: postgres_password
       POSTGRES_DB: evalforge
     ports:
-      - "5432:5432"
+      - 5432:5432
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d evalforge"]
+      test:
+        - CMD-SHELL
+        - pg_isready -U postgres -d evalforge
       interval: 5s
       timeout: 5s
       retries: 5
@@ -85,11 +91,14 @@ services:
     image: redis:7-alpine
     restart: always
     ports:
-      - "6379:6379"
+      - 6379:6379
     volumes:
       - redis_data:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test:
+        - CMD
+        - redis-cli
+        - ping
       interval: 5s
       timeout: 5s
       retries: 5
