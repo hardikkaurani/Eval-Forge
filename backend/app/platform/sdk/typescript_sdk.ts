@@ -1,9 +1,9 @@
-import axios, { AxiosInstance } from 'axios';
+import axios, { AxiosInstance } from "axios";
 
 export interface EvaluationPayload {
   evaluation_name: string;
   evaluation_description?: string;
-  judge: 'geval' | 'deepeval' | 'rubric';
+  judge: "geval" | "deepeval" | "rubric";
   provider: string;
   test_cases: Array<{
     input_prompt: string;
@@ -18,16 +18,19 @@ export class EvalForgeClient {
 
   constructor(baseURL: string, apiKey: string) {
     this.client = axios.create({
-      baseURL: baseURL.replace(/\/$/, ''),
+      baseURL: baseURL.replace(/\/$/, ""),
       headers: {
-        'X-API-Key': apiKey,
-        'Content-Type': 'application/json',
+        "X-API-Key": apiKey,
+        "Content-Type": "application/json",
       },
     });
   }
 
-  public async triggerRun(projectId: string, payload: EvaluationPayload): Promise<any> {
-    const url = '/api/v1/evaluations/batch';
+  public async triggerRun(
+    projectId: string,
+    payload: EvaluationPayload,
+  ): Promise<any> {
+    const url = "/api/v1/evaluations/batch";
     const body = { ...payload, project_id: projectId };
     const response = await this.client.post(url, body);
     return response.data;
@@ -38,8 +41,12 @@ export class EvalForgeClient {
     return response.data;
   }
 
-  public async registerWebhook(projectId: string, targetUrl: string, events: string[]): Promise<any> {
-    const response = await this.client.post('/api/v1/webhooks', {
+  public async registerWebhook(
+    projectId: string,
+    targetUrl: string,
+    events: string[],
+  ): Promise<any> {
+    const response = await this.client.post("/api/v1/webhooks", {
       project_id: projectId,
       target_url: targetUrl,
       events,

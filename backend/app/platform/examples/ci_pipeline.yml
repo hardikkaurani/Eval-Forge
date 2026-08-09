@@ -2,9 +2,9 @@ name: EvalForge CI Gateway
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   llm-evaluation:
@@ -16,7 +16,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-node: '3.12'
+          python-node: "3.12"
 
       - name: Install dependencies
         run: |
