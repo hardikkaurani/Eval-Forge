@@ -196,6 +196,7 @@ def test_batch_evaluation_validation_errors(client: TestClient) -> None:
 def test_prompt_engine_jinja2_template_validation() -> None:
     """Verifies that PromptEngine.validate_template catches syntax errors and register_template enforces valid syntax."""
     import pytest
+
     from app.evaluation.prompts.engine import PromptEngine
 
     engine = PromptEngine()
