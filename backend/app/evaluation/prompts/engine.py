@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Any
 
-from jinja2 import Template
+from jinja2 import Environment, Template, TemplateSyntaxError
 
 
 @dataclass(frozen=True, slots=True)
@@ -129,6 +129,19 @@ class PromptEngine:
         )
         self.register_template("pairwise", DEFAULT_PAIRWISE_PROMPT, version="v1")
 
+    @staticmethod
+    def validate_template(template_str: str) -> tuple[bool, str | None]:
+        """Validates if a template string contains valid Jinja2 syntax without rendering it.
+
+        Returns (True, None) if valid, or (False, error_description) if invalid.
+        """
+        env = Environment()
+        try:
+            env.parse(template_str)
+            return True, None
+        except TemplateSyntaxError as err:
+            return False, f"Template syntax error at line {err.lineno}: {err.message}"
+
     def register_template(
         self,
         name: str,
@@ -137,7 +150,14 @@ class PromptEngine:
         version: str = "v1",
         description: str | None = None,
     ) -> None:
-        """Register or override a prompt template version."""
+        """Register or override a prompt template version.
+
+        Raises ValueError if template_str contains invalid Jinja2 syntax.
+        """
+        is_valid, error_msg = self.validate_template(template_str)
+        if not is_valid:
+            raise ValueError(f"Invalid Jinja2 prompt template syntax: {error_msg}")
+
         self._templates.setdefault(name, {})[version] = PromptTemplateVersion(
             name=name, version=version, template=template_str, description=description
         )
