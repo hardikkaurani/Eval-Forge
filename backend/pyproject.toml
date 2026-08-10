@@ -19,9 +19,7 @@ exclude = '''
 [tool.ruff]
 line-length = 88
 target-version = "py312"
-exclude = [
-    "alembic",
-]
+exclude = ["alembic"]
 
 [tool.ruff.lint]
 select = [
