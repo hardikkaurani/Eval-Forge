@@ -1,16 +1,35 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 
-export interface WebSocketProgressEvent {
-  event: 'started' | 'progress' | 'completed' | 'failed' | 'retrying' | 'cancelled';
+interface WebSocketProgressEventBase {
   job_id: string;
   status?: string;
-  progress?: number;
   current_step?: string;
-  result?: Record<string, unknown> | null;
-  error?: string;
-  retry_count?: number;
   timestamp: string;
 }
+
+export type WebSocketProgressEvent =
+  | (WebSocketProgressEventBase & {
+      event: 'started';
+    })
+  | (WebSocketProgressEventBase & {
+      event: 'progress';
+      progress?: number;
+    })
+  | (WebSocketProgressEventBase & {
+      event: 'completed';
+      result?: Record<string, unknown> | null;
+    })
+  | (WebSocketProgressEventBase & {
+      event: 'failed';
+      error?: string;
+    })
+  | (WebSocketProgressEventBase & {
+      event: 'retrying';
+      retry_count?: number;
+    })
+  | (WebSocketProgressEventBase & {
+      event: 'cancelled';
+    });
 
 export type ConnectionStatus = 'connecting' | 'connected' | 'disconnected' | 'error';
 
@@ -48,13 +67,37 @@ export function useJobWebSocket(jobId?: string | null, projectId?: string | null
 
       ws.onmessage = (event) => {
         try {
-          const data: WebSocketProgressEvent = JSON.parse(event.data);
-          setLastEvent(data);
-          if (typeof data.progress === 'number') {
-            setProgress(data.progress);
+          const parsed = JSON.parse(event.data);
+          if (!parsed || typeof parsed !== 'object' || typeof parsed.event !== 'string') {
+            console.warn('Received invalid WebSocket message frame:', parsed);
+            return;
           }
+
+          const data = parsed as WebSocketProgressEvent;
+          setLastEvent(data);
+
           if (data.current_step) {
             setCurrentStep(data.current_step);
+          }
+
+          switch (data.event) {
+            case 'progress':
+              if (typeof data.progress === 'number') {
+                setProgress(data.progress);
+              }
+              break;
+            case 'completed':
+              setProgress(100);
+              break;
+            case 'started':
+            case 'failed':
+            case 'retrying':
+            case 'cancelled':
+              break;
+            default:
+              // Fallback log for unknown event types
+              console.warn(`Unhandled WebSocket event type: ${(data as { event: string }).event}`);
+              break;
           }
         } catch (err) {
           console.error('Failed to parse WebSocket message frame', err);
