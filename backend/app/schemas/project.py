@@ -21,6 +21,10 @@ class ProjectBase(BaseModel):
         default=PROJECT_STATUS_ACTIVE,
         description="Project status (active, inactive, archived)",
     )
+    workspace_id: str | None = Field(
+        None,
+        description="Workspace UUID associated with the project",
+    )
 
     @field_validator("status")
     @classmethod
@@ -54,6 +58,10 @@ class ProjectUpdate(BaseModel):
         None,
         description="Project status (active, inactive, archived)",
     )
+    workspace_id: str | None = Field(
+        None,
+        description="Workspace UUID associated with the project",
+    )
 
     @field_validator("status")
     @classmethod
@@ -69,6 +77,7 @@ class ProjectResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: str
+    workspace_id: str | None = None
     name: str
     description: str | None = None
     status: str

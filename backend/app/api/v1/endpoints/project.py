@@ -1,13 +1,21 @@
+from typing import Any
+
 from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.database.session import get_db
+from app.core.dependencies import get_current_api_key, get_db
 from app.schemas.project import ProjectCreate, ProjectResponse, ProjectUpdate
 from app.services.project import ProjectService
 from app.utils.pagination import PaginatedResponse
 from app.utils.responses import ApiResponse, create_response
 
 router = APIRouter()
+
+
+def _extract_workspace_id(api_key_record: Any) -> str | None:
+    if api_key_record and getattr(api_key_record, "workspace_id", None):
+        return str(api_key_record.workspace_id)
+    return None
 
 
 @router.post(
@@ -20,9 +28,11 @@ router = APIRouter()
 async def create_project(
     payload: ProjectCreate,
     db: AsyncSession = Depends(get_db),
+    current_key: Any = Depends(get_current_api_key),
 ):
-    """Creates a new project record and returns the detailed project resource."""
-    service = ProjectService(db)
+    """Creates a new project record scoped to authorized workspace context."""
+    workspace_id = _extract_workspace_id(current_key)
+    service = ProjectService(db, workspace_id=workspace_id)
     project = await service.create_project(payload)
     return create_response(
         success=True,
@@ -40,9 +50,11 @@ async def create_project(
 async def get_project(
     project_id: str,
     db: AsyncSession = Depends(get_db),
+    current_key: Any = Depends(get_current_api_key),
 ):
-    """Retrieves a specific project by its UUID."""
-    service = ProjectService(db)
+    """Retrieves a specific project by UUID within authorized workspace boundary."""
+    workspace_id = _extract_workspace_id(current_key)
+    service = ProjectService(db, workspace_id=workspace_id)
     project = await service.get_project(project_id)
     return create_response(
         success=True,
@@ -69,9 +81,11 @@ async def list_projects(
     sort_by: str = Query("created_at", description="Field to sort projects by"),
     sort_order: str = Query("desc", description="Sort order direction (asc, desc)"),
     db: AsyncSession = Depends(get_db),
+    current_key: Any = Depends(get_current_api_key),
 ):
-    """Lists, filters, searches, and sorts projects with pagination."""
-    service = ProjectService(db)
+    """Lists, filters, searches, and sorts projects within authorized workspace boundary."""
+    workspace_id = _extract_workspace_id(current_key)
+    service = ProjectService(db, workspace_id=workspace_id)
     items, meta = await service.list_projects(
         page=page,
         page_size=page_size,
@@ -103,9 +117,11 @@ async def update_project(
     project_id: str,
     payload: ProjectUpdate,
     db: AsyncSession = Depends(get_db),
+    current_key: Any = Depends(get_current_api_key),
 ):
-    """Updates one or more attributes of a project (sparse update)."""
-    service = ProjectService(db)
+    """Updates one or more attributes of a project within authorized workspace boundary."""
+    workspace_id = _extract_workspace_id(current_key)
+    service = ProjectService(db, workspace_id=workspace_id)
     project = await service.update_project(project_id, payload)
     return create_response(
         success=True,
@@ -123,9 +139,11 @@ async def update_project(
 async def delete_project(
     project_id: str,
     db: AsyncSession = Depends(get_db),
+    current_key: Any = Depends(get_current_api_key),
 ):
-    """Soft deletes a project by updating its deleted_at timestamp."""
-    service = ProjectService(db)
+    """Soft deletes a project by updating its deleted_at timestamp within authorized workspace boundary."""
+    workspace_id = _extract_workspace_id(current_key)
+    service = ProjectService(db, workspace_id=workspace_id)
     project = await service.delete_project(project_id)
     return create_response(
         success=True,

@@ -1,9 +1,9 @@
-from typing import List
+from typing import Any, List
 
 from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.database.session import get_db
+from app.core.dependencies import get_current_api_key, get_db
 from app.evaluation.schemas.evaluation import (
     BatchEvaluationRequest,
     EvaluationCreate,
@@ -23,6 +23,12 @@ from app.utils.responses import ApiResponse, create_response
 router = APIRouter()
 
 
+def _extract_workspace_id(api_key_record: Any) -> str | None:
+    if api_key_record and getattr(api_key_record, "workspace_id", None):
+        return str(api_key_record.workspace_id)
+    return None
+
+
 @router.post(
     "",
     response_model=ApiResponse[EvaluationResponse],
@@ -32,13 +38,16 @@ router = APIRouter()
 async def create_evaluation(
     payload: EvaluationCreate,
     db: AsyncSession = Depends(get_db),
+    current_key: Any = Depends(get_current_api_key),
 ):
-    """Creates a new evaluation configuration for a project."""
+    """Creates a new evaluation configuration for an authorized project."""
+    workspace_id = _extract_workspace_id(current_key)
     evaluation = await EvaluationService.create_evaluation(
         db=db,
         project_id=payload.project_id,
         name=payload.name,
         description=payload.description,
+        workspace_id=workspace_id,
     )
     await db.commit()
     return create_response(
@@ -58,10 +67,16 @@ async def list_evaluations(
     page: int = Query(1, ge=1, description="Page number"),
     page_size: int = Query(10, ge=1, le=100, description="Page size"),
     db: AsyncSession = Depends(get_db),
+    current_key: Any = Depends(get_current_api_key),
 ):
-    """Lists evaluations with pagination for a project."""
+    """Lists evaluations with pagination for an authorized project."""
+    workspace_id = _extract_workspace_id(current_key)
     items, total = await EvaluationService.list_evaluations(
-        db=db, project_id=project_id, page=page, page_size=page_size
+        db=db,
+        project_id=project_id,
+        page=page,
+        page_size=page_size,
+        workspace_id=workspace_id,
     )
 
     meta = create_pagination_meta(page=page, page_size=page_size, total_items=total)
@@ -123,9 +138,13 @@ async def delete_evaluation(
 async def run_batch_evaluation(
     payload: BatchEvaluationRequest,
     db: AsyncSession = Depends(get_db),
+    current_key: Any = Depends(get_current_api_key),
 ):
-    """Orchestrates and executes a batch run of LLM-as-a-Judge evaluations."""
-    run = await EvaluationService.run_batch_evaluation(db, payload)
+    """Orchestrates and executes a batch run of LLM-as-a-Judge evaluations on authorized project."""
+    workspace_id = _extract_workspace_id(current_key)
+    run = await EvaluationService.run_batch_evaluation(
+        db, payload, workspace_id=workspace_id
+    )
     return create_response(
         success=True,
         message="Batch evaluation completed.",

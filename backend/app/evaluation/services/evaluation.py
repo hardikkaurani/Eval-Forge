@@ -14,12 +14,16 @@ class EvaluationService:
 
     @staticmethod
     async def create_evaluation(
-        db: AsyncSession, project_id: str, name: str, description: str | None = None
+        db: AsyncSession,
+        project_id: str,
+        name: str,
+        description: str | None = None,
+        workspace_id: str | None = None,
     ) -> Evaluation:
         from app.database.repository import ProjectRepository
 
         project_repo = ProjectRepository(db)
-        project = await project_repo.get_by_id(project_id)
+        project = await project_repo.get_by_id(project_id, workspace_id=workspace_id)
         if not project:
             raise NotFoundException(f"Project with ID '{project_id}' not found.")
 
@@ -36,8 +40,19 @@ class EvaluationService:
 
     @staticmethod
     async def list_evaluations(
-        db: AsyncSession, project_id: str, page: int = 1, page_size: int = 10
+        db: AsyncSession,
+        project_id: str,
+        page: int = 1,
+        page_size: int = 10,
+        workspace_id: str | None = None,
     ) -> Tuple[List[Evaluation], int]:
+        from app.database.repository import ProjectRepository
+
+        project_repo = ProjectRepository(db)
+        project = await project_repo.get_by_id(project_id, workspace_id=workspace_id)
+        if not project:
+            raise NotFoundException(f"Project with ID '{project_id}' not found.")
+
         skip = (page - 1) * page_size
         evals = await EvaluationRepository.list_evaluations(
             db, project_id, skip=skip, limit=page_size
@@ -61,12 +76,14 @@ class EvaluationService:
 
     @staticmethod
     async def run_batch_evaluation(
-        db: AsyncSession, request: BatchEvaluationRequest
+        db: AsyncSession,
+        request: BatchEvaluationRequest,
+        workspace_id: str | None = None,
     ) -> EvaluationRun:
         from app.database.repository import ProjectRepository
 
         project_repo = ProjectRepository(db)
-        project = await project_repo.get_by_id(request.project_id)
+        project = await project_repo.get_by_id(request.project_id, workspace_id=workspace_id)
         if not project:
             raise NotFoundException(
                 f"Project with ID '{request.project_id}' not found."
