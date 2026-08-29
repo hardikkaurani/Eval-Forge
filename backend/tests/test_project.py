@@ -1,3 +1,4 @@
+import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -99,8 +100,9 @@ def test_project_validation_errors(client: TestClient) -> None:
 def test_tenant_workspace_isolation(db_session: AsyncSession) -> None:
     """Verifies that project access, listing, updating, and soft deletion are strictly scoped to the authenticated workspace context."""
     from unittest.mock import MagicMock
-    from app.main import app
+
     from app.core.dependencies import get_current_api_key, get_db
+    from app.main import app
 
     async def override_get_db():
         yield db_session
@@ -189,12 +191,12 @@ def test_adversarial_tenant_isolation_scenarios(db_session: AsyncSession) -> Non
     """Adversarial regression test verifying null workspace isolation, ownership mutation prevention, and direct repository/service boundary enforcement."""
     import asyncio
     from unittest.mock import MagicMock
-    from app.main import app
+
     from app.core.dependencies import get_current_api_key, get_db
-    from app.database.repository import ProjectRepository
-    from app.services.project import ProjectService
-    from app.schemas.project import ProjectCreate, ProjectUpdate
     from app.core.exceptions import NotFoundException
+    from app.database.repository import ProjectRepository
+    from app.main import app
+    from app.services.project import ProjectService
 
     async def override_get_db():
         yield db_session
@@ -259,22 +261,22 @@ def test_adversarial_tenant_isolation_scenarios(db_session: AsyncSession) -> Non
         assert repo_null_res is None
 
         # Direct service get with wrong workspace_id raises NotFoundException
-        try:
+        with pytest.raises(NotFoundException):
             await service.get_project(proj_a_id)
-            assert False, "Should have raised NotFoundException"
-        except NotFoundException:
-            pass
 
     asyncio.run(run_direct_checks())
 
     app.dependency_overrides.clear()
 
 
-def test_evaluation_flow_cross_tenant_isolation_red_team(db_session: AsyncSession) -> None:
+def test_evaluation_flow_cross_tenant_isolation_red_team(
+    db_session: AsyncSession,
+) -> None:
     """Verifies that Tenant B cannot create evaluations, list evaluations, or run batch evaluations on Tenant A's project."""
     from unittest.mock import MagicMock
-    from app.main import app
+
     from app.core.dependencies import get_current_api_key, get_db
+    from app.main import app
 
     async def override_get_db():
         yield db_session

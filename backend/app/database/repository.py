@@ -146,7 +146,9 @@ class ProjectRepository:
         """Performs a sparse update of a project's fields within authorized workspace boundary."""
         project = await self.get_by_id(project_id, workspace_id=workspace_id)
         if not project:
-            raise NotFoundException(message=f"Project with ID '{project_id}' was not found.")
+            raise NotFoundException(
+                message=f"Project with ID '{project_id}' was not found."
+            )
 
         try:
             update_data = schema.model_dump(exclude_unset=True)
@@ -181,7 +183,9 @@ class ProjectRepository:
         """Marks a project as soft-deleted within authorized workspace boundary."""
         project = await self.get_by_id(project_id, workspace_id=workspace_id)
         if not project:
-            raise NotFoundException(message=f"Project with ID '{project_id}' was not found.")
+            raise NotFoundException(
+                message=f"Project with ID '{project_id}' was not found."
+            )
 
         try:
             project.deleted_at = get_utc_now()

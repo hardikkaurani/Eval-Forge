@@ -83,7 +83,9 @@ class EvaluationService:
         from app.database.repository import ProjectRepository
 
         project_repo = ProjectRepository(db)
-        project = await project_repo.get_by_id(request.project_id, workspace_id=workspace_id)
+        project = await project_repo.get_by_id(
+            request.project_id, workspace_id=workspace_id
+        )
         if not project:
             raise NotFoundException(
                 f"Project with ID '{request.project_id}' not found."

@@ -14,9 +14,7 @@ logger = structlog.get_logger()
 class ProjectService:
     """Service class encapsulating the business logic for Project resources."""
 
-    def __init__(
-        self, db: AsyncSession, workspace_id: str | None = None
-    ) -> None:
+    def __init__(self, db: AsyncSession, workspace_id: str | None = None) -> None:
         self.repo = ProjectRepository(db)
         self.workspace_id = workspace_id
 
@@ -25,7 +23,9 @@ class ProjectService:
     ) -> Project:
         """Handles business logic and persistence for creating a project."""
         target_ws_id = workspace_id or self.workspace_id
-        logger.info("Service: Creating project", name=schema.name, workspace_id=target_ws_id)
+        logger.info(
+            "Service: Creating project", name=schema.name, workspace_id=target_ws_id
+        )
         return await self.repo.create(schema, workspace_id=target_ws_id)
 
     async def get_project(

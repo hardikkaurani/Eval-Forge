@@ -20,8 +20,12 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     """Upgrade schema by adding nullable workspace_id column, index, and foreign key constraint to projects table."""
-    op.add_column("projects", sa.Column("workspace_id", sa.String(length=36), nullable=True))
-    op.create_index(op.f("ix_projects_workspace_id"), "projects", ["workspace_id"], unique=False)
+    op.add_column(
+        "projects", sa.Column("workspace_id", sa.String(length=36), nullable=True)
+    )
+    op.create_index(
+        op.f("ix_projects_workspace_id"), "projects", ["workspace_id"], unique=False
+    )
     op.create_foreign_key(
         "fk_projects_workspace_id_workspaces",
         "projects",
@@ -34,6 +38,8 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     """Downgrade schema by removing workspace_id foreign key, index, and column from projects table."""
-    op.drop_constraint("fk_projects_workspace_id_workspaces", "projects", type_="foreignkey")
+    op.drop_constraint(
+        "fk_projects_workspace_id_workspaces", "projects", type_="foreignkey"
+    )
     op.drop_index(op.f("ix_projects_workspace_id"), table_name="projects")
     op.drop_column("projects", "workspace_id")
