@@ -1,6 +1,6 @@
 # EvalForge v1.0.0 Production Deployment Guide
 
-This document provides step-by-step instructions for deploying EvalForge to production infrastructure, targeting **Vercel** (Frontend), **Railway** (Backend, PostgreSQL, and Redis), or **Docker Compose** (Self-Hosted).
+This document provides step-by-step instructions for deploying EvalForge to production infrastructure, targeting **Vercel** (Frontend), **Render** (Backend, PostgreSQL, and Redis), or **Docker Compose** (Self-Hosted).
 
 ---
 
@@ -16,15 +16,15 @@ This document provides step-by-step instructions for deploying EvalForge to prod
                     | API Requests (HTTPS)
                     v
 +---------------------------------------+
-|           Railway (PaaS)              |
+|            Render (PaaS)              |
 |        FastAPI Backend Engine         |
-|  (https://backend.up.railway.app)     |
+|   (https://backend.onrender.com)      |
 +---------+-------------------+---------+
           |                   |
           v                   v
 +-------------------+ +-----------------+
-| Railway Postgres  | |  Railway Redis  |
-|  (PostgreSQL 16)  | |   (Redis 7)     |
+|  Render Postgres  | |   Render Redis  |
+|  (PostgreSQL 16)  | |    (Redis 7)    |
 +-------------------+ +-----------------+
 ```
 
@@ -38,7 +38,7 @@ Before deploying, configure your production environment variables. Refer to [.en
 |---|---|---|---|
 | `APP_ENV` | Yes | `production` | Enables production security checks & disables public docs |
 | `DEBUG` | Yes | `False` | Disables verbose debug logging |
-| `PORT` | Auto | `8000` | Dynamic port provided by Railway / cloud host |
+| `PORT` | Auto | `8000` | Dynamic port provided by Render / cloud host |
 | `DATABASE_URL` | Yes | Auto-provided | PostgreSQL connection string (`postgresql://` or `postgres://` auto-converts to `postgresql+asyncpg://`) |
 | `REDIS_URL` | Yes | Auto-provided | Redis connection string (`redis://...`) |
 | `SECRET_KEY` | Yes | Secure Hex | 64-character random string for cryptography |
@@ -50,22 +50,22 @@ Before deploying, configure your production environment variables. Refer to [.en
 
 ## 3. Deployment Steps
 
-### Option A: Cloud Deployment (Vercel & Railway)
+### Option A: Cloud Deployment (Vercel & Render)
 
-#### Step A1: Backend & Database Deployment on Railway
-1. Sign in to [Railway.app](https://railway.app).
-2. Create a **New Project** and add a **PostgreSQL** database service and a **Redis** database service.
-3. Add a **GitHub Repository Service** pointing to `hardikkaurani/Eval-Forge`.
-4. Set the service root directory to `/backend` (or leave as root and use `railway.json`).
-5. Configure environment variables in Railway:
+#### Step A1: Backend & Database Deployment on Render
+1. Sign in to [Render.com](https://render.com).
+2. Create a **New PostgreSQL** database and a **New Redis** instance.
+3. Create a **New Web Service** pointing to `hardikkaurani/Eval-Forge`.
+4. Set Root Directory to `backend` and Build/Start command to `bash scripts/start.sh`.
+5. Configure environment variables in Render:
    - `APP_ENV=production`
    - `DEBUG=False`
    - `SECRET_KEY=<your-64-character-secret>`
    - `CORS_ORIGINS=["https://evalforge.vercel.app"]`
-   - `DATABASE_URL=${{Postgres.DATABASE_URL}}`
-   - `REDIS_URL=${{Redis.REDIS_URL}}`
-6. Railway will automatically execute `bash scripts/start.sh` (running Alembic migrations and starting Uvicorn).
-7. Copy your deployed Railway backend URL (e.g. `https://evalforge-production.up.railway.app`).
+   - `DATABASE_URL=<Render-Internal-Postgres-URL>`
+   - `REDIS_URL=<Render-Internal-Redis-URL>`
+6. Render will automatically execute `bash scripts/start.sh` (running Alembic migrations and starting Uvicorn).
+7. Copy your deployed Render backend URL (e.g. `https://evalforge-backend.onrender.com`).
 
 #### Step A2: Frontend Deployment on Vercel
 1. Sign in to [Vercel.com](https://vercel.com).
