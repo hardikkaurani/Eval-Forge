@@ -1,5 +1,7 @@
 import json
 
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.datasets.parsers.parsers import DatasetParser
 from app.datasets.validators.validators import DatasetValidator
 
@@ -292,3 +294,190 @@ def test_experiment_flow(client):
     # 5. Delete Experiment
     resp = client.delete(f"/api/v1/experiments/{experiment_id}")
     assert resp.status_code == 204
+
+
+def test_dataset_download_path_traversal(client):
+    import os
+
+    os.makedirs("datasets", exist_ok=True)
+
+    # 1. Valid file download
+    test_file_path = os.path.join("datasets", "test_download.csv")
+    with open(test_file_path, "w") as f:
+        f.write("prompt,output\ntest,test\n")
+
+    try:
+        resp = client.get("/api/v1/datasets/download/test_download.csv")
+        assert resp.status_code == 200
+        assert "prompt,output" in resp.text
+
+        # 2. Simple ../ encoded traversal
+        resp = client.get("/api/v1/datasets/download/..%2Fpyproject.toml")
+        assert resp.status_code == 400
+
+        # 3. Deep ../../ encoded traversal
+        resp = client.get("/api/v1/datasets/download/..%2F..%2F.env")
+        assert resp.status_code == 400
+
+        # 4. Windows backslash traversal
+        resp = client.get("/api/v1/datasets/download/..%5C..%5C.env")
+        assert resp.status_code == 400
+
+        # 5. Non-existent legitimate file
+        resp = client.get("/api/v1/datasets/download/non_existent.csv")
+        assert resp.status_code == 404
+    finally:
+        if os.path.exists(test_file_path):
+            os.remove(test_file_path)
+
+
+def test_datasets_benchmarks_experiments_tenant_isolation(
+    db_session: AsyncSession,
+) -> None:
+    """Verifies that Datasets, Benchmarks, and Experiments CRUD and execution paths enforce strict workspace isolation."""
+    from unittest.mock import MagicMock
+
+    from fastapi.testclient import TestClient
+
+    from app.core.dependencies import get_current_api_key, get_db
+    from app.main import app
+
+    async def override_get_db():
+        yield db_session
+
+    app.dependency_overrides[get_db] = override_get_db
+
+    ws_a_id = "aaaaaaaa-1111-4111-a111-aaaaaaaaaaaa"
+    ws_b_id = "bbbbbbbb-2222-4222-b222-bbbbbbbbbbbb"
+
+    key_tenant_a = MagicMock()
+    key_tenant_a.id = "key_tenant_a"
+    key_tenant_a.workspace_id = ws_a_id
+
+    key_tenant_b = MagicMock()
+    key_tenant_b.id = "key_tenant_b"
+    key_tenant_b.workspace_id = ws_b_id
+
+    # 1. Tenant A creates resources under Project A
+    app.dependency_overrides[get_current_api_key] = lambda: key_tenant_a
+    with TestClient(app) as client_a:
+        res_a = client_a.post(
+            "/api/v1/projects", json={"name": "Project A", "status": "active"}
+        )
+        assert res_a.status_code == 201
+        proj_a_id = res_a.json()["data"]["id"]
+
+        # Tenant A creates Dataset A
+        ds_a_res = client_a.post(
+            f"/api/v1/datasets/?project_id={proj_a_id}",
+            json={"name": "Dataset A", "visibility": "private"},
+        )
+        assert ds_a_res.status_code == 201
+        dataset_a_id = ds_a_res.json()["id"]
+
+        # Tenant A lists versions
+        ver_res = client_a.get(f"/api/v1/datasets/{dataset_a_id}/versions")
+        assert ver_res.status_code == 200
+        version_a_id = ver_res.json()[0]["id"]
+
+        # Tenant A creates Benchmark Suite A
+        bs_a_res = client_a.post(
+            f"/api/v1/benchmarks/?project_id={proj_a_id}",
+            json={"name": "Benchmark A", "dataset_ids": [dataset_a_id]},
+        )
+        assert bs_a_res.status_code == 201
+        suite_a_id = bs_a_res.json()["id"]
+
+        # Tenant A creates Experiment A
+        exp_a_res = client_a.post(
+            f"/api/v1/experiments/?project_id={proj_a_id}",
+            json={
+                "name": "Experiment A",
+                "dataset_version_id": version_a_id,
+                "judge": "rubric",
+                "provider": "openai",
+            },
+        )
+        assert exp_a_res.status_code == 201
+        experiment_a_id = exp_a_res.json()["id"]
+
+    # 2. Tenant B attempts cross-tenant access to Tenant A's resources
+    app.dependency_overrides[get_current_api_key] = lambda: key_tenant_b
+    with TestClient(app) as client_b:
+        res_b = client_b.post(
+            "/api/v1/projects", json={"name": "Project B", "status": "active"}
+        )
+        assert res_b.status_code == 201
+        proj_b_id = res_b.json()["data"]["id"]
+
+        # Dataset isolation checks
+        assert (
+            client_b.post(
+                f"/api/v1/datasets/?project_id={proj_a_id}",
+                json={"name": "Attacker Dataset"},
+            ).status_code
+            == 404
+        )
+        assert client_b.get(f"/api/v1/datasets/{dataset_a_id}").status_code == 404
+        assert (
+            client_b.get(f"/api/v1/datasets/?project_id={proj_a_id}").status_code == 404
+        )
+        assert (
+            client_b.put(
+                f"/api/v1/datasets/{dataset_a_id}",
+                json={"name": "Hacked Dataset Name"},
+            ).status_code
+            == 404
+        )
+        assert client_b.delete(f"/api/v1/datasets/{dataset_a_id}").status_code == 404
+        assert (
+            client_b.get(f"/api/v1/datasets/{dataset_a_id}/versions").status_code == 404
+        )
+        assert (
+            client_b.get(
+                f"/api/v1/datasets/versions/{version_a_id}/records"
+            ).status_code
+            == 404
+        )
+
+        # Benchmark isolation checks
+        assert client_b.get(f"/api/v1/benchmarks/{suite_a_id}").status_code == 404
+        assert (
+            client_b.put(
+                f"/api/v1/benchmarks/{suite_a_id}",
+                json={"name": "Hacked Benchmark Name"},
+            ).status_code
+            == 404
+        )
+        assert client_b.delete(f"/api/v1/benchmarks/{suite_a_id}").status_code == 404
+        assert (
+            client_b.get(
+                f"/api/v1/benchmarks/dashboard/metrics?project_id={proj_a_id}"
+            ).status_code
+            == 404
+        )
+        assert client_b.post(
+            f"/api/v1/benchmarks/?project_id={proj_b_id}",
+            json={"name": "Spoofed Suite", "dataset_ids": [dataset_a_id]},
+        ).status_code in (400, 404)
+
+        # Experiment isolation checks
+        assert client_b.get(f"/api/v1/experiments/{experiment_a_id}").status_code == 404
+        assert (
+            client_b.post(f"/api/v1/experiments/{experiment_a_id}/execute").status_code
+            == 404
+        )
+        assert (
+            client_b.delete(f"/api/v1/experiments/{experiment_a_id}").status_code == 404
+        )
+        assert client_b.post(
+            f"/api/v1/experiments/?project_id={proj_b_id}",
+            json={
+                "name": "Cross Tenant Experiment",
+                "dataset_version_id": version_a_id,
+                "judge": "rubric",
+                "provider": "openai",
+            },
+        ).status_code in (400, 404)
+
+    app.dependency_overrides.clear()

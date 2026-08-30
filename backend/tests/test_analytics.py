@@ -176,3 +176,89 @@ def test_analytics_and_reporting_lifecycle(client: TestClient) -> None:
     assert "cpu_usage_percent" in system_data["data"]
     assert "memory_usage_bytes" in system_data["data"]
     assert "redis_health" in system_data["data"]
+
+
+def test_analytics_tenant_isolation(db_session) -> None:
+    """Verifies that Analytics, Reports, Dashboards, Leaderboards, and Trends enforce strict workspace isolation."""
+    from unittest.mock import MagicMock
+
+    from app.core.dependencies import get_current_api_key, get_db
+    from app.main import app
+
+    async def override_get_db():
+        yield db_session
+
+    app.dependency_overrides[get_db] = override_get_db
+
+    ws_a_id = "ana-ws-a-1111-4111-a111-aaaaaaaaaaaa"
+    ws_b_id = "ana-ws-b-2222-4222-b222-bbbbbbbbbbbb"
+
+    key_tenant_a = MagicMock()
+    key_tenant_a.id = "key_tenant_a"
+    key_tenant_a.workspace_id = ws_a_id
+
+    key_tenant_b = MagicMock()
+    key_tenant_b.id = "key_tenant_b"
+    key_tenant_b.workspace_id = ws_b_id
+
+    # 1. Tenant A creates Project A and Report A
+    app.dependency_overrides[get_current_api_key] = lambda: key_tenant_a
+    with TestClient(app) as client_a:
+        res_proj_a = client_a.post(
+            "/api/v1/projects", json={"name": "Analytics Project A"}
+        )
+        assert res_proj_a.status_code == 201
+        proj_a_id = res_proj_a.json()["data"]["id"]
+
+        report_res = client_a.post(
+            f"/api/v1/reports/generate?project_id={proj_a_id}",
+            json={"name": "Secret Report A", "type": "PDF", "filters": {}},
+        )
+        assert report_res.status_code == 202
+        report_a_id = report_res.json()["data"]["id"]
+
+        # Tenant A can view overview
+        overview_a = client_a.get(f"/api/v1/analytics?project_id={proj_a_id}")
+        assert overview_a.status_code == 200
+
+    # 2. Tenant B attempts cross-tenant analytics access
+    app.dependency_overrides[get_current_api_key] = lambda: key_tenant_b
+    with TestClient(app) as client_b:
+        # Overview -> 404
+        assert (
+            client_b.get(f"/api/v1/analytics?project_id={proj_a_id}").status_code == 404
+        )
+
+        # Reports list -> 404
+        assert (
+            client_b.get(f"/api/v1/reports?project_id={proj_a_id}").status_code == 404
+        )
+
+        # Download report -> 404
+        assert (
+            client_b.get(f"/api/v1/reports/{report_a_id}/download").status_code == 404
+        )
+
+        # Trends -> 404
+        assert client_b.get(f"/api/v1/trends?project_id={proj_a_id}").status_code == 404
+
+        # Leaderboards -> 404
+        assert (
+            client_b.get(f"/api/v1/leaderboards?project_id={proj_a_id}").status_code
+            == 404
+        )
+
+        # Insights -> 404
+        assert (
+            client_b.get(f"/api/v1/insights?project_id={proj_a_id}").status_code == 404
+        )
+
+        # Snapshots -> 404
+        assert (
+            client_b.post(
+                f"/api/v1/analytics/snapshots?project_id={proj_a_id}"
+            ).status_code
+            == 404
+        )
+
+    app.dependency_overrides.clear()

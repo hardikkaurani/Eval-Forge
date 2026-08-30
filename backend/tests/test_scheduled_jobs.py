@@ -43,9 +43,19 @@ async def test_cron_scheduler_manager_registration_and_execution():
 
 
 def test_scheduler_api_routes():
-    app = FastAPI()
-    app.include_router(scheduler_router)
+    from app.core.dependencies import get_current_api_key
 
+    # 1. Test unauthenticated access returns 401 Unauthorized
+    app_unauth = FastAPI()
+    app_unauth.include_router(scheduler_router)
+    client_unauth = TestClient(app_unauth)
+    res_unauth = client_unauth.get("/jobs/scheduler/jobs")
+    assert res_unauth.status_code == 401
+
+    # 2. Test authenticated access
+    app = FastAPI()
+    app.dependency_overrides[get_current_api_key] = lambda: {"id": "test_key"}
+    app.include_router(scheduler_router)
     client = TestClient(app)
 
     # Test list jobs endpoint

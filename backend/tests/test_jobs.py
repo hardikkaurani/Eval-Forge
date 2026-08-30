@@ -1,4 +1,3 @@
-import asyncio
 from unittest.mock import patch
 
 import pytest
@@ -6,7 +5,6 @@ from fastapi.testclient import TestClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.jobs.executors.base import BaseJobExecutor
-from app.jobs.queue.tasks import async_run_background_job
 from app.jobs.registry import job_registry
 
 
@@ -59,21 +57,10 @@ def mock_session_local(db_session: AsyncSession):
 
 @pytest.fixture(autouse=True)
 def mock_celery_apply_async():
-    """Mock Celery's apply_async to execute the background task synchronously within the test event loop."""
+    """Mock Celery's apply_async to avoid dangling background tasks."""
 
     def fake_apply_async_sync(args=None, kwargs=None, **opts):
-        job_id = args[0]
-        try:
-            loop = asyncio.get_event_loop()
-        except RuntimeError:
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-
-        if loop.is_running():
-            # Schedule task execution asynchronously within the running event loop
-            loop.create_task(async_run_background_job(job_id, "test_task_id"))
-        else:
-            loop.run_until_complete(async_run_background_job(job_id, "test_task_id"))
+        return None
 
     with patch(
         "app.jobs.services.job.run_background_job.apply_async", fake_apply_async_sync
@@ -140,3 +127,82 @@ def test_jobs_lifecycle_endpoints(client: TestClient) -> None:
     del_response = client.delete(f"/api/v1/jobs/{job_id}")
     assert del_response.status_code == 200
     assert del_response.json()["success"] is True
+
+
+def test_jobs_tenant_isolation(db_session: AsyncSession) -> None:
+    """Verifies strict tenant isolation for background job creation, retrieval, cancellation, and deletion."""
+    from unittest.mock import MagicMock
+
+    from app.core.dependencies import get_current_api_key, get_db
+    from app.main import app
+
+    async def override_get_db():
+        yield db_session
+
+    app.dependency_overrides[get_db] = override_get_db
+
+    ws_a_id = "job-ws-a-1111-4111-a111-aaaaaaaaaaaa"
+    ws_b_id = "job-ws-b-2222-4222-b222-bbbbbbbbbbbb"
+
+    key_tenant_a = MagicMock()
+    key_tenant_a.id = "key_tenant_a"
+    key_tenant_a.workspace_id = ws_a_id
+
+    key_tenant_b = MagicMock()
+    key_tenant_b.id = "key_tenant_b"
+    key_tenant_b.workspace_id = ws_b_id
+
+    # 1. Tenant A creates Project A and queues Job A
+    app.dependency_overrides[get_current_api_key] = lambda: key_tenant_a
+    with TestClient(app) as client_a:
+        res_proj_a = client_a.post("/api/v1/projects", json={"name": "Job Project A"})
+        assert res_proj_a.status_code == 201
+        proj_a_id = res_proj_a.json()["data"]["id"]
+
+        res_job_a = client_a.post(
+            f"/api/v1/jobs?project_id={proj_a_id}",
+            json={"name": "test_job", "queue_name": "default", "payload": {}},
+        )
+        assert res_job_a.status_code == 201
+        job_a_id = res_job_a.json()["data"]["id"]
+
+        # Tenant A can access Job A
+        get_own = client_a.get(f"/api/v1/jobs/{job_a_id}")
+        assert get_own.status_code == 200
+
+    # 2. Tenant B attempts cross-tenant access and mutation
+    app.dependency_overrides[get_current_api_key] = lambda: key_tenant_b
+    with TestClient(app) as client_b:
+        # Tenant B GET Job A -> 404
+        get_cross = client_b.get(f"/api/v1/jobs/{job_a_id}")
+        assert get_cross.status_code == 404
+
+        # Tenant B CANCEL Job A -> 404
+        cancel_cross = client_b.post(f"/api/v1/jobs/{job_a_id}/cancel")
+        assert cancel_cross.status_code == 404
+
+        # Tenant B DELETE Job A -> 404
+        del_cross = client_b.delete(f"/api/v1/jobs/{job_a_id}")
+        assert del_cross.status_code == 404
+
+        # Tenant B cannot queue job under Project A -> 404
+        create_cross = client_b.post(
+            f"/api/v1/jobs?project_id={proj_a_id}",
+            json={"name": "test_job", "queue_name": "default", "payload": {}},
+        )
+        assert create_cross.status_code == 404
+
+        # Tenant B list jobs does not contain Job A
+        list_jobs_b = client_b.get("/api/v1/jobs")
+        assert list_jobs_b.status_code == 200
+        b_job_ids = [item["id"] for item in list_jobs_b.json()["data"]["items"]]
+        assert job_a_id not in b_job_ids
+
+    # 3. Database State Verification: Tenant A's job remains intact and active
+    app.dependency_overrides[get_current_api_key] = lambda: key_tenant_a
+    with TestClient(app) as client_a:
+        get_intact = client_a.get(f"/api/v1/jobs/{job_a_id}")
+        assert get_intact.status_code == 200
+        assert get_intact.json()["data"]["status"] in {"QUEUED", "RUNNING", "COMPLETED"}
+
+    app.dependency_overrides.clear()

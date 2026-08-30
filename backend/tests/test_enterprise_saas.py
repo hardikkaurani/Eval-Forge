@@ -191,3 +191,123 @@ def test_admin_console_endpoints(client):
     )
     assert sso_res.status_code == 200
     assert sso_res.json()["data"]["provider"] == "oidc"
+
+
+def test_billing_subscription_authorization_and_isolation(
+    db_session: AsyncSession,
+) -> None:
+    """Verifies strict tenant isolation and role/scope authorization for billing and subscription endpoints."""
+    from unittest.mock import MagicMock
+
+    from fastapi.testclient import TestClient
+
+    from app.core.dependencies import get_current_api_key, get_db
+    from app.main import app
+
+    async def override_get_db():
+        yield db_session
+
+    app.dependency_overrides[get_db] = override_get_db
+
+    ws_a_id = str(uuid.uuid4())
+    ws_b_id = str(uuid.uuid4())
+
+    key_owner_a = MagicMock()
+    key_owner_a.id = "key_owner_a"
+    key_owner_a.scopes = ["billing:write", "billing:read"]
+    key_owner_a.role = "Owner"
+
+    key_dev_a = MagicMock()
+    key_dev_a.id = "key_dev_a"
+    key_dev_a.scopes = ["read:all", "write:evaluations"]
+    key_dev_a.role = "Developer"
+
+    key_owner_b = MagicMock()
+    key_owner_b.id = "key_owner_b"
+    key_owner_b.scopes = ["billing:write", "billing:read"]
+    key_owner_b.role = "Owner"
+
+    client_init = TestClient(app)
+    app.dependency_overrides[get_current_api_key] = lambda: key_owner_a
+    client_init.post("/api/v1/admin/seed-plans")
+
+    # 1. Owner A creates Org A and Workspace A
+    with TestClient(app) as client_a:
+        res_org_a = client_a.post(
+            "/api/v1/organizations", json={"name": "Org A Billing"}
+        )
+        assert res_org_a.status_code == 201
+        org_a_id = res_org_a.json()["data"]["id"]
+
+        res_ws_a = client_a.post(
+            "/api/v1/workspaces",
+            json={"organization_id": org_a_id, "name": "WS A"},
+        )
+        assert res_ws_a.status_code == 201
+        ws_a_id = res_ws_a.json()["data"]["id"]
+
+    key_owner_a.organization_id = org_a_id
+    key_owner_a.workspace_id = ws_a_id
+    key_dev_a.organization_id = org_a_id
+    key_dev_a.workspace_id = ws_a_id
+
+    # 2. Owner B creates Org B and Workspace B
+    app.dependency_overrides[get_current_api_key] = lambda: key_owner_b
+    with TestClient(app) as client_b:
+        res_org_b = client_b.post(
+            "/api/v1/organizations", json={"name": "Org B Billing"}
+        )
+        assert res_org_b.status_code == 201
+        org_b_id = res_org_b.json()["data"]["id"]
+
+        res_ws_b = client_b.post(
+            "/api/v1/workspaces",
+            json={"organization_id": org_b_id, "name": "WS B"},
+        )
+        assert res_ws_b.status_code == 201
+        ws_b_id = res_ws_b.json()["data"]["id"]
+
+    key_owner_b.organization_id = org_b_id
+    key_owner_b.workspace_id = ws_b_id
+
+    # 3. Cross-Tenant Attacks (Owner B attempts billing mutations on Org A)
+    app.dependency_overrides[get_current_api_key] = lambda: key_owner_b
+    with TestClient(app) as client_attacker:
+        cross_sub = client_attacker.post(
+            f"/api/v1/billing/subscriptions?org_id={org_a_id}&plan_name=Enterprise"
+        )
+        assert cross_sub.status_code == 404
+
+        cross_chk = client_attacker.post(
+            f"/api/v1/billing/checkout?org_id={org_a_id}&plan_name=Pro"
+        )
+        assert cross_chk.status_code == 404
+
+        cross_inv = client_attacker.get(f"/api/v1/billing/invoices?org_id={org_a_id}")
+        assert cross_inv.status_code == 404
+
+    # 4. Low-Privilege Member Attacks (Developer A attempts billing mutation on Org A)
+    app.dependency_overrides[get_current_api_key] = lambda: key_dev_a
+    with TestClient(app) as client_dev:
+        dev_sub = client_dev.post(
+            f"/api/v1/billing/subscriptions?org_id={org_a_id}&plan_name=Enterprise"
+        )
+        assert dev_sub.status_code == 403
+
+        dev_chk = client_dev.post(
+            f"/api/v1/billing/checkout?org_id={org_a_id}&plan_name=Pro"
+        )
+        assert dev_chk.status_code == 403
+
+    # 5. Legitimate Administrative Mutation (Owner A mutates subscription on Org A)
+    app.dependency_overrides[get_current_api_key] = lambda: key_owner_a
+    with TestClient(app) as client_owner:
+        legit_sub = client_owner.post(
+            f"/api/v1/billing/subscriptions?org_id={org_a_id}&plan_name=Enterprise"
+        )
+        assert legit_sub.status_code == 200
+        assert legit_sub.json()["data"]["status"] == "active"
+
+        legit_inv = client_owner.get(f"/api/v1/billing/invoices?org_id={org_a_id}")
+        assert legit_inv.status_code == 200
+        assert len(legit_inv.json()["data"]) > 0

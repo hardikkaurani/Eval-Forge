@@ -224,3 +224,91 @@ def test_advanced_ai_and_rag_lifecycle(client: TestClient) -> None:
     # Cleanup policy
     delete_policy = client.delete(f"/api/v1/policies/{policy_id}")
     assert delete_policy.status_code == 204
+
+
+def test_rag_metrics_input_sensitivity_and_mathematical_correctness(
+    db_session,
+) -> None:
+    """Verifies that RAG evaluation metrics (MRR, nDCG) are input-sensitive and mathematically correct."""
+    import pytest
+
+    from app.advanced_ai.services.rag import RAGService
+    from app.jobs.services.job import JobService
+
+    pytest_asyncio = pytest.mark.asyncio
+
+    @pytest_asyncio
+    async def run_test():
+        rag_service = RAGService(db_session)
+        project_id = "proj_sensitivity_test"
+
+        # Case 1: Relevant context at Rank 1
+        eval_rank1 = await rag_service.evaluate_rag_run(
+            project_id=project_id,
+            run_id="run_1",
+            contexts=[
+                "Python programming language for web apps",
+                "Cooking recipes for pasta",
+            ],
+            question="Tell me about Python programming",
+            answer="Python is a programming language [1].",
+            ground_truth="Python programming language for web apps",
+        )
+
+        # Case 2: Relevant context moved to Rank 2
+        eval_rank2 = await rag_service.evaluate_rag_run(
+            project_id=project_id,
+            run_id="run_2",
+            contexts=[
+                "Cooking recipes for pasta",
+                "Python programming language for web apps",
+            ],
+            question="Tell me about Python programming",
+            answer="Python is a programming language [2].",
+            ground_truth="Python programming language for web apps",
+        )
+
+        # Case 3: Completely irrelevant contexts
+        eval_irrelevant = await rag_service.evaluate_rag_run(
+            project_id=project_id,
+            run_id="run_3",
+            contexts=["Cooking recipes for pasta", "Weather forecast for tomorrow"],
+            question="Tell me about Python programming",
+            answer="Python is a programming language.",
+            ground_truth="Python programming language for web apps",
+        )
+
+        # 1. Assert MRR Input Sensitivity & Mathematical Correctness
+        mrr1 = eval_rank1.custom_retrieval_metrics["mrr"]
+        mrr2 = eval_rank2.custom_retrieval_metrics["mrr"]
+        mrr3 = eval_irrelevant.custom_retrieval_metrics["mrr"]
+
+        assert mrr1 == 1.0
+        assert mrr2 == 0.5
+        assert mrr3 == 0.0
+        assert mrr1 > mrr2 > mrr3
+
+        # 2. Assert nDCG Input Sensitivity & Mathematical Correctness
+        ndcg1 = eval_rank1.custom_retrieval_metrics["ndcg"]
+        ndcg2 = eval_rank2.custom_retrieval_metrics["ndcg"]
+        ndcg3 = eval_irrelevant.custom_retrieval_metrics["ndcg"]
+
+        assert ndcg1 == 1.0
+        assert 0.0 < ndcg2 < 1.0
+        assert ndcg3 == 0.0
+        assert ndcg1 > ndcg2 > ndcg3
+
+        # 3. Verify Job System Metrics remove hardcoded constants (0.05, 1.24, etc.)
+        job_service = JobService(db_session)
+        sys_metrics = await job_service.get_system_metrics()
+        assert (
+            sys_metrics.retry_rate == 0.0
+        )  # 0.0 when no retries exist, not hardcoded 0.05
+        assert (
+            "openai" not in sys_metrics.provider_latency
+            or sys_metrics.provider_latency["openai"] != 1.24
+        )
+
+    import asyncio
+
+    asyncio.run(run_test())

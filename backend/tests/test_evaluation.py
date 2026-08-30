@@ -1,5 +1,6 @@
 import pytest
 from fastapi.testclient import TestClient
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.evaluation.prompts.engine import PromptEngine
 
@@ -223,3 +224,115 @@ def test_prompt_engine_jinja2_template_validation() -> None:
         "valid_custom_prompt", user_name="User", system_name="EvalForge"
     )
     assert rendered == "Hello User, welcome to EvalForge!"
+
+
+def test_evaluation_tenant_workspace_isolation(db_session: AsyncSession) -> None:
+    """Verifies that GET and DELETE evaluations and list/batch creation enforce strict workspace isolation."""
+    from unittest.mock import MagicMock
+
+    from app.core.dependencies import get_current_api_key, get_db
+    from app.main import app
+
+    async def override_get_db():
+        yield db_session
+
+    app.dependency_overrides[get_db] = override_get_db
+
+    ws_a_id = "eval-ws-a-1111-4111-a111-aaaaaaaaaaaa"
+    ws_b_id = "eval-ws-b-2222-4222-b222-bbbbbbbbbbbb"
+
+    key_tenant_a = MagicMock()
+    key_tenant_a.id = "key_tenant_a"
+    key_tenant_a.workspace_id = ws_a_id
+
+    key_tenant_b = MagicMock()
+    key_tenant_b.id = "key_tenant_b"
+    key_tenant_b.workspace_id = ws_b_id
+
+    # 1. Tenant A creates Project A and Evaluation A
+    app.dependency_overrides[get_current_api_key] = lambda: key_tenant_a
+    with TestClient(app) as client_a:
+        res_proj_a = client_a.post(
+            "/api/v1/projects", json={"name": "Eval Project A", "status": "active"}
+        )
+        assert res_proj_a.status_code == 201
+        proj_a_id = res_proj_a.json()["data"]["id"]
+
+        res_eval_a = client_a.post(
+            "/api/v1/evaluations",
+            json={
+                "name": "Tenant A Evaluation",
+                "description": "Private",
+                "project_id": proj_a_id,
+            },
+        )
+        assert res_eval_a.status_code == 201
+        eval_a_id = res_eval_a.json()["data"]["id"]
+
+        # 1. Tenant A GET own evaluation -> 200
+        get_own = client_a.get(f"/api/v1/evaluations/{eval_a_id}")
+        assert get_own.status_code == 200
+        assert get_own.json()["data"]["id"] == eval_a_id
+
+    # 2. Tenant B sets up Project B and attempts attacks against Tenant A Evaluation
+    app.dependency_overrides[get_current_api_key] = lambda: key_tenant_b
+    with TestClient(app) as client_b:
+        res_proj_b = client_b.post(
+            "/api/v1/projects", json={"name": "Eval Project B", "status": "active"}
+        )
+        assert res_proj_b.status_code == 201
+        proj_b_id = res_proj_b.json()["data"]["id"]
+
+        # 2. Tenant B GET Tenant A evaluation -> 404
+        get_cross = client_b.get(f"/api/v1/evaluations/{eval_a_id}")
+        assert get_cross.status_code == 404
+
+        # 4. Tenant B DELETE Tenant A evaluation -> 404
+        del_cross = client_b.delete(f"/api/v1/evaluations/{eval_a_id}")
+        assert del_cross.status_code == 404
+
+        # 7. Tenant B cannot manipulate project_id to create evaluation under Tenant A Project -> 404
+        post_cross_project = client_b.post(
+            "/api/v1/evaluations",
+            json={"name": "Attacker Evaluation", "project_id": proj_a_id},
+        )
+        assert post_cross_project.status_code == 404
+
+        # 8. Tenant B cannot manipulate workspace_id in payload to bypass authorization
+        post_spoof = client_b.post(
+            "/api/v1/evaluations",
+            json={
+                "name": "Spoofed Workspace Evaluation",
+                "project_id": proj_b_id,
+                "workspace_id": ws_a_id,
+            },
+        )
+        assert post_spoof.status_code == 201
+        eval_b_id = post_spoof.json()["data"]["id"]
+
+        # 9. Evaluation LIST remains workspace scoped
+        list_cross_proj = client_b.get(f"/api/v1/evaluations?project_id={proj_a_id}")
+        assert list_cross_proj.status_code == 404
+
+        list_own = client_b.get(f"/api/v1/evaluations?project_id={proj_b_id}")
+        assert list_own.status_code == 200
+        items_b = list_own.json()["data"]["items"]
+        b_ids = [item["id"] for item in items_b]
+        assert eval_b_id in b_ids
+        assert eval_a_id not in b_ids
+
+    # 5. Database State Verification: Verify Tenant A's evaluation is STILL INTACT and not deleted after Tenant B's DELETE attempt
+    app.dependency_overrides[get_current_api_key] = lambda: key_tenant_a
+    with TestClient(app) as client_a:
+        get_intact = client_a.get(f"/api/v1/evaluations/{eval_a_id}")
+        assert get_intact.status_code == 200
+
+        # 3. Tenant A DELETE own evaluation -> success
+        del_own = client_a.delete(f"/api/v1/evaluations/{eval_a_id}")
+        assert del_own.status_code == 200
+
+        # Verify soft deleted for Tenant A
+        get_deleted = client_a.get(f"/api/v1/evaluations/{eval_a_id}")
+        assert get_deleted.status_code == 404
+
+    app.dependency_overrides.clear()

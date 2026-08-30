@@ -1,6 +1,7 @@
 import uuid
 
 import pytest
+from fastapi.testclient import TestClient
 
 from app.platform.cli.cli_app import EvalForgeCLI
 
@@ -157,3 +158,78 @@ def test_cli_parser_actions():
             "openai",
         ]
     )
+
+
+def test_webhooks_tenant_isolation(db_session) -> None:
+    """Verifies that webhook subscription creation, listing, and delivery logs enforce strict workspace isolation."""
+    from unittest.mock import MagicMock
+
+    from app.core.dependencies import get_current_api_key, get_db
+    from app.main import app
+
+    async def override_get_db():
+        yield db_session
+
+    app.dependency_overrides[get_db] = override_get_db
+
+    ws_a_id = "wh-ws-a-1111-4111-a111-aaaaaaaaaaaa"
+    ws_b_id = "wh-ws-b-2222-4222-b222-bbbbbbbbbbbb"
+
+    key_tenant_a = MagicMock()
+    key_tenant_a.id = "key_tenant_a"
+    key_tenant_a.workspace_id = ws_a_id
+
+    key_tenant_b = MagicMock()
+    key_tenant_b.id = "key_tenant_b"
+    key_tenant_b.workspace_id = ws_b_id
+
+    # 1. Tenant A creates Project A and Webhook A
+    app.dependency_overrides[get_current_api_key] = lambda: key_tenant_a
+    with TestClient(app) as client_a:
+        res_proj_a = client_a.post(
+            "/api/v1/projects", json={"name": "Webhook Project A"}
+        )
+        assert res_proj_a.status_code == 201
+        proj_a_id = res_proj_a.json()["data"]["id"]
+
+        res_sub_a = client_a.post(
+            "/api/v1/webhooks",
+            json={
+                "project_id": proj_a_id,
+                "target_url": "https://tenant-a.com/webhook",
+                "events": ["eval_completed"],
+            },
+        )
+        assert res_sub_a.status_code == 201
+        sub_a_id = res_sub_a.json()["data"]["id"]
+
+        # Tenant A can list webhooks for Project A
+        list_own = client_a.get(f"/api/v1/webhooks?project_id={proj_a_id}")
+        assert list_own.status_code == 200
+        assert len(list_own.json()["data"]) == 1
+
+    # 2. Tenant B attempts cross-tenant webhook access
+    app.dependency_overrides[get_current_api_key] = lambda: key_tenant_b
+    with TestClient(app) as client_b:
+        # Tenant B list webhooks for Project A -> 404
+        assert (
+            client_b.get(f"/api/v1/webhooks?project_id={proj_a_id}").status_code == 404
+        )
+
+        # Tenant B list deliveries for Sub A -> 404
+        assert (
+            client_b.get(f"/api/v1/webhooks/{sub_a_id}/deliveries").status_code == 404
+        )
+
+        # Tenant B create webhook under Project A -> 404
+        create_cross = client_b.post(
+            "/api/v1/webhooks",
+            json={
+                "project_id": proj_a_id,
+                "target_url": "https://attacker.com/webhook",
+                "events": ["eval_completed"],
+            },
+        )
+        assert create_cross.status_code == 404
+
+    app.dependency_overrides.clear()
