@@ -116,7 +116,7 @@ def test_batch_evaluation_execution(client: TestClient) -> None:
         "evaluation_name": "Test Batch Run",
         "evaluation_description": "Validates single rubric scoring flow.",
         "judge": "rubric",
-        "provider": "openai",
+        "provider": "mock",
         "test_cases": [
             {
                 "input_prompt": "What is the capital of France?",
@@ -140,7 +140,7 @@ def test_batch_evaluation_execution(client: TestClient) -> None:
     run = res_data["data"]
     assert run["status"] == "COMPLETED"
     assert run["judge"] == "rubric"
-    assert run["provider"] == "openai"
+    assert run["provider"] == "mock"
     assert run["total_cases"] == 2
     assert run["completed_cases"] == 2
     assert run["aggregate_score"] is not None
