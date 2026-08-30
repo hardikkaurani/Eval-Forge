@@ -1,6 +1,7 @@
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.jobs.routes.scheduler_routes import router as scheduler_router
 from app.jobs.scheduler.cron_manager import CronSchedulerManager
@@ -42,30 +43,34 @@ async def test_cron_scheduler_manager_registration_and_execution():
     assert toggled.is_enabled is False
 
 
-def test_scheduler_api_routes():
-    from app.core.dependencies import get_current_api_key
+def test_scheduler_api_routes(db_session: AsyncSession):
+    from app.core.dependencies import get_current_api_key, get_db
+
+    async def override_get_db():
+        yield db_session
 
     # 1. Test unauthenticated access returns 401 Unauthorized
     app_unauth = FastAPI()
+    app_unauth.dependency_overrides[get_db] = override_get_db
     app_unauth.include_router(scheduler_router)
-    client_unauth = TestClient(app_unauth)
-    res_unauth = client_unauth.get("/jobs/scheduler/jobs")
-    assert res_unauth.status_code == 401
+    with TestClient(app_unauth) as client_unauth:
+        res_unauth = client_unauth.get("/jobs/scheduler/jobs")
+        assert res_unauth.status_code == 401
 
     # 2. Test authenticated access
     app = FastAPI()
+    app.dependency_overrides[get_db] = override_get_db
     app.dependency_overrides[get_current_api_key] = lambda: {"id": "test_key"}
     app.include_router(scheduler_router)
-    client = TestClient(app)
+    with TestClient(app) as client:
+        # Test list jobs endpoint
+        res = client.get("/jobs/scheduler/jobs")
+        assert res.status_code == 200
+        assert res.json()["success"] is True
+        assert isinstance(res.json()["data"], list)
 
-    # Test list jobs endpoint
-    res = client.get("/jobs/scheduler/jobs")
-    assert res.status_code == 200
-    assert res.json()["success"] is True
-    assert isinstance(res.json()["data"], list)
-
-    # Test history endpoint
-    res_history = client.get("/jobs/scheduler/history")
-    assert res_history.status_code == 200
-    assert res_history.json()["success"] is True
-    assert isinstance(res_history.json()["data"], list)
+        # Test history endpoint
+        res_history = client.get("/jobs/scheduler/history")
+        assert res_history.status_code == 200
+        assert res_history.json()["success"] is True
+        assert isinstance(res_history.json()["data"], list)
