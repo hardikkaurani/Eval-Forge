@@ -4,6 +4,7 @@ import httpx
 
 from app.config.config import settings
 from app.evaluation.exceptions.exceptions import (
+    ProviderAuthenticationException,
     ProviderUnavailableException,
     RateLimitException,
     TimeoutException,
@@ -35,18 +36,9 @@ class OpenAIProvider(BaseProvider):
         timeout: float = 30.0,
         **kwargs,
     ) -> ProviderResponse:
-        # Fallback for testing or missing credentials
-        if (
-            not self.api_key
-            or self.api_key == "mock-key"
-            or "mock" in self.api_key.lower()
-        ):
-            return ProviderResponse(
-                text='{"score": 4.5, "reasoning": "Mocked OpenAI response reflecting high quality."}',
-                prompt_tokens=10,
-                completion_tokens=15,
-                latency_ms=120,
-                model_name=self.model,
+        if not self.api_key or not self.api_key.strip():
+            raise ProviderAuthenticationException(
+                "openai", "Missing or empty OPENAI_API_KEY credential."
             )
 
         url = "https://api.openai.com/v1/chat/completions"

@@ -4,6 +4,7 @@ import httpx
 
 from app.config.config import settings
 from app.evaluation.exceptions.exceptions import (
+    ProviderAuthenticationException,
     ProviderUnavailableException,
     RateLimitException,
     TimeoutException,
@@ -35,17 +36,9 @@ class DeepSeekProvider(BaseProvider):
         timeout: float = 30.0,
         **kwargs,
     ) -> ProviderResponse:
-        if (
-            not self.api_key
-            or self.api_key == "mock-key"
-            or "mock" in self.api_key.lower()
-        ):
-            return ProviderResponse(
-                text='{"score": 4.6, "reasoning": "Mocked DeepSeek response."}',
-                prompt_tokens=11,
-                completion_tokens=17,
-                latency_ms=110,
-                model_name=self.model,
+        if not self.api_key or not self.api_key.strip():
+            raise ProviderAuthenticationException(
+                "deepseek", "Missing or empty DEEPSEEK_API_KEY credential."
             )
 
         url = "https://api.deepseek.com/chat/completions"

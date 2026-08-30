@@ -4,6 +4,7 @@ import httpx
 
 from app.config.config import settings
 from app.evaluation.exceptions.exceptions import (
+    ProviderAuthenticationException,
     ProviderUnavailableException,
     RateLimitException,
     TimeoutException,
@@ -37,17 +38,9 @@ class AnthropicProvider(BaseProvider):
         timeout: float = 30.0,
         **kwargs,
     ) -> ProviderResponse:
-        if (
-            not self.api_key
-            or self.api_key == "mock-key"
-            or "mock" in self.api_key.lower()
-        ):
-            return ProviderResponse(
-                text='{"score": 4.8, "reasoning": "Mocked Claude response."}',
-                prompt_tokens=12,
-                completion_tokens=18,
-                latency_ms=180,
-                model_name=self.model,
+        if not self.api_key or not self.api_key.strip():
+            raise ProviderAuthenticationException(
+                "claude", "Missing or empty ANTHROPIC_API_KEY credential."
             )
 
         url = "https://api.anthropic.com/v1/messages"

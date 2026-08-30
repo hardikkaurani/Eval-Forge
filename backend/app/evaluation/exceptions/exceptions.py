@@ -15,6 +15,16 @@ class ProviderUnavailableException(EvaluationException):
         super().__init__(message=message, status_code=503)
 
 
+class ProviderAuthenticationException(EvaluationException):
+    """Raised when an LLM provider is missing required API keys or credentials."""
+
+    def __init__(self, provider: str, details: str = ""):
+        message = (
+            f"Authentication failed for provider '{provider}'. Missing or invalid API key credential. {details}"
+        ).strip()
+        super().__init__(message=message, status_code=401)
+
+
 class TimeoutException(EvaluationException):
     """Raised when a request to a provider times out."""
 

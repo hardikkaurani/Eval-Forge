@@ -4,6 +4,7 @@ import httpx
 
 from app.config.config import settings
 from app.evaluation.exceptions.exceptions import (
+    ProviderAuthenticationException,
     ProviderUnavailableException,
     RateLimitException,
     TimeoutException,
@@ -39,17 +40,9 @@ class NVIDIAProvider(BaseProvider):
         timeout: float = 30.0,
         **kwargs,
     ) -> ProviderResponse:
-        if (
-            not self.api_key
-            or self.api_key == "mock-key"
-            or "mock" in self.api_key.lower()
-        ):
-            return ProviderResponse(
-                text='{"score": 4.6, "reasoning": "Mocked NVIDIA NIM response."}',
-                prompt_tokens=15,
-                completion_tokens=20,
-                latency_ms=150,
-                model_name=self.model,
+        if not self.api_key or not self.api_key.strip():
+            raise ProviderAuthenticationException(
+                "nvidia", "Missing or empty NVIDIA_API_KEY credential."
             )
 
         url = "https://integrate.api.nvidia.com/v1/chat/completions"

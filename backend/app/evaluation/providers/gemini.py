@@ -4,6 +4,7 @@ import httpx
 
 from app.config.config import settings
 from app.evaluation.exceptions.exceptions import (
+    ProviderAuthenticationException,
     ProviderUnavailableException,
     RateLimitException,
     TimeoutException,
@@ -35,17 +36,9 @@ class GeminiProvider(BaseProvider):
         timeout: float = 30.0,
         **kwargs,
     ) -> ProviderResponse:
-        if (
-            not self.api_key
-            or self.api_key == "mock-key"
-            or "mock" in self.api_key.lower()
-        ):
-            return ProviderResponse(
-                text='{"score": 4.2, "reasoning": "Mocked Gemini response."}',
-                prompt_tokens=8,
-                completion_tokens=12,
-                latency_ms=150,
-                model_name=self.model,
+        if not self.api_key or not self.api_key.strip():
+            raise ProviderAuthenticationException(
+                "gemini", "Missing or empty GEMINI_API_KEY credential."
             )
 
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{self.model}:generateContent?key={self.api_key}"

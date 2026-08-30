@@ -2,7 +2,6 @@ import time
 
 import httpx
 
-from app.config.config import settings
 from app.evaluation.exceptions.exceptions import (
     ProviderUnavailableException,
     TimeoutException,
@@ -30,16 +29,6 @@ class OllamaProvider(BaseProvider):
         timeout: float = 30.0,
         **kwargs,
     ) -> ProviderResponse:
-        # Fallback in tests or when explicitly requested.
-        if settings.APP_ENV == "testing" or kwargs.get("mock_fallback", False):
-            return ProviderResponse(
-                text='{"score": 3.9, "reasoning": "Mocked Ollama response."}',
-                prompt_tokens=15,
-                completion_tokens=20,
-                latency_ms=80,
-                model_name=self.model,
-            )
-
         url = f"{self.base_url}/api/chat"
 
         messages = []

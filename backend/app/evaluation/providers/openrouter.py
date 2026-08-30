@@ -4,6 +4,7 @@ import httpx
 
 from app.config.config import settings
 from app.evaluation.exceptions.exceptions import (
+    ProviderAuthenticationException,
     ProviderUnavailableException,
     RateLimitException,
     TimeoutException,
@@ -39,17 +40,9 @@ class OpenRouterProvider(BaseProvider):
         timeout: float = 30.0,
         **kwargs,
     ) -> ProviderResponse:
-        if (
-            not self.api_key
-            or self.api_key == "mock-key"
-            or "mock" in self.api_key.lower()
-        ):
-            return ProviderResponse(
-                text='{"score": 4.0, "reasoning": "Mocked OpenRouter response."}',
-                prompt_tokens=14,
-                completion_tokens=22,
-                latency_ms=130,
-                model_name=self.model,
+        if not self.api_key or not self.api_key.strip():
+            raise ProviderAuthenticationException(
+                "openrouter", "Missing or empty OPENROUTER_API_KEY credential."
             )
 
         url = "https://openrouter.ai/api/v1/chat/completions"
