@@ -43,6 +43,8 @@ class PairwiseJudge(BaseJudge):
             score_diff = float(parsed.get("score_difference", 0.0))
             confidence = float(parsed.get("confidence", 1.0))
             reasoning = parsed.get("reasoning", "")
+            success = True
+            error_message = None
 
             # Map winner to a score
             # Winner A = 1.0, Tie = 0.5, Winner B = 0.0
@@ -59,12 +61,16 @@ class PairwiseJudge(BaseJudge):
             score_diff = 0.0
             confidence = 0.0
             reasoning = f"Failed to parse response: {str(e)}. Raw text: {response.text}"
+            success = False
+            error_message = f"Failed to parse pairwise judge JSON: {str(e)}"
 
         return JudgeResult(
             score=score,
             confidence=confidence,
             reasoning=reasoning,
             winner=winner,
+            success=success,
+            error_message=error_message,
             metadata={
                 "score_difference": score_diff,
                 "model_name": response.model_name,

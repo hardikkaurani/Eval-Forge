@@ -16,6 +16,8 @@ class JudgeResult(BaseModel):
     criterion_scores: Dict[str, Any] = Field(default_factory=dict)
     winner: str | None = None  # Specific to pairwise comparison: "A", "B", or "Tie"
     metadata: Dict[str, Any] = Field(default_factory=dict)
+    success: bool = True
+    error_message: str | None = None
 
 
 class BaseJudge(ABC):

@@ -48,15 +48,21 @@ class ReferenceJudge(BaseJudge):
             score = float(parsed.get("score", 0.0))
             confidence = float(parsed.get("confidence", 1.0))
             reasoning = parsed.get("reasoning", "")
+            success = True
+            error_message = None
         except Exception as e:
             score = 0.0
             confidence = 0.0
             reasoning = f"Failed to parse response: {str(e)}. Raw text: {response.text}"
+            success = False
+            error_message = f"Failed to parse reference judge JSON: {str(e)}"
 
         return JudgeResult(
             score=score,
             confidence=confidence,
             reasoning=reasoning,
+            success=success,
+            error_message=error_message,
             metadata={
                 "model_name": response.model_name,
                 "prompt_tokens": response.prompt_tokens,

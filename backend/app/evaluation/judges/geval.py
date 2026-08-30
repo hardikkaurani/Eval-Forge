@@ -60,11 +60,15 @@ class GEvalJudge(BaseJudge):
             confidence = float(parsed.get("confidence", 1.0))
             reasoning = parsed.get("reasoning", "")
             criterion_scores = parsed.get("criterion_scores", {})
+            success = True
+            error_message = None
         except Exception as e:
             score = 0.0
             confidence = 0.0
             reasoning = f"Failed to parse G-Eval scoring response: {str(e)}. Raw text: {score_response.text}"
             criterion_scores = {}
+            success = False
+            error_message = f"Failed to parse G-Eval judge JSON: {str(e)}"
 
         # Add total execution tokens and latency metrics
         prompt_tokens = (step_response.prompt_tokens or 0) + (
@@ -80,6 +84,8 @@ class GEvalJudge(BaseJudge):
             confidence=confidence,
             reasoning=reasoning,
             criterion_scores=criterion_scores,
+            success=success,
+            error_message=error_message,
             metadata={
                 "steps": steps,
                 "model_name": score_response.model_name,
