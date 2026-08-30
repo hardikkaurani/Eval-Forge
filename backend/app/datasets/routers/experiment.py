@@ -1,8 +1,9 @@
-from typing import Optional
+from typing import Any, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.dependencies import extract_workspace_id, get_current_api_key
 from app.database.session import get_db
 from app.datasets.exceptions.exceptions import ExperimentNotFoundException
 from app.datasets.schemas.experiment import (
@@ -21,7 +22,9 @@ async def create_experiment(
     request: ExperimentCreate,
     project_id: str = Query(..., description="Project ID"),
     db: AsyncSession = Depends(get_db),
+    current_key: Any = Depends(get_current_api_key),
 ):
+    workspace_id = extract_workspace_id(current_key)
     service = ExperimentService(db)
     try:
         return await service.create_experiment(
@@ -33,7 +36,10 @@ async def create_experiment(
             provider=request.provider,
             model=request.model,
             configuration=request.configuration,
+            workspace_id=workspace_id,
         )
+    except ExperimentNotFoundException as e:
+        raise HTTPException(status_code=404, detail=str(e)) from e
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
 
@@ -46,15 +52,22 @@ async def list_experiments(
     search: Optional[str] = Query(None, description="Search name/description"),
     status: Optional[str] = Query(None, description="Filter by status"),
     db: AsyncSession = Depends(get_db),
+    current_key: Any = Depends(get_current_api_key),
 ):
+    workspace_id = extract_workspace_id(current_key)
     service = ExperimentService(db)
-    experiments, total = await service.list_experiments(
-        project_id=project_id,
-        skip=skip,
-        limit=limit,
-        search=search,
-        status=status,
-    )
+    try:
+        experiments, total = await service.list_experiments(
+            project_id=project_id,
+            skip=skip,
+            limit=limit,
+            search=search,
+            status=status,
+            workspace_id=workspace_id,
+        )
+    except ExperimentNotFoundException as e:
+        raise HTTPException(status_code=404, detail=str(e)) from e
+
     return {
         "experiments": experiments,
         "total": total,
@@ -67,10 +80,12 @@ async def list_experiments(
 async def get_experiment(
     experiment_id: str,
     db: AsyncSession = Depends(get_db),
+    current_key: Any = Depends(get_current_api_key),
 ):
+    workspace_id = extract_workspace_id(current_key)
     service = ExperimentService(db)
     try:
-        return await service.get_experiment(experiment_id)
+        return await service.get_experiment(experiment_id, workspace_id=workspace_id)
     except ExperimentNotFoundException as e:
         raise HTTPException(status_code=404, detail=str(e)) from e
 
@@ -79,10 +94,14 @@ async def get_experiment(
 async def execute_experiment(
     experiment_id: str,
     db: AsyncSession = Depends(get_db),
+    current_key: Any = Depends(get_current_api_key),
 ):
+    workspace_id = extract_workspace_id(current_key)
     service = ExperimentService(db)
     try:
-        return await service.execute_experiment(experiment_id)
+        return await service.execute_experiment(
+            experiment_id, workspace_id=workspace_id
+        )
     except ExperimentNotFoundException as e:
         raise HTTPException(status_code=404, detail=str(e)) from e
     except Exception as e:
@@ -95,9 +114,11 @@ async def execute_experiment(
 async def delete_experiment(
     experiment_id: str,
     db: AsyncSession = Depends(get_db),
+    current_key: Any = Depends(get_current_api_key),
 ):
+    workspace_id = extract_workspace_id(current_key)
     service = ExperimentService(db)
     try:
-        await service.delete_experiment(experiment_id)
+        await service.delete_experiment(experiment_id, workspace_id=workspace_id)
     except ExperimentNotFoundException as e:
         raise HTTPException(status_code=404, detail=str(e)) from e

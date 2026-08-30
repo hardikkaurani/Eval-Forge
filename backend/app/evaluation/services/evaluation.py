@@ -32,8 +32,12 @@ class EvaluationService:
         )
 
     @staticmethod
-    async def get_evaluation(db: AsyncSession, id: str) -> Evaluation:
-        evaluation = await EvaluationRepository.get_evaluation(db, id)
+    async def get_evaluation(
+        db: AsyncSession, id: str, workspace_id: str | None = None
+    ) -> Evaluation:
+        evaluation = await EvaluationRepository.get_evaluation(
+            db, id, workspace_id=workspace_id
+        )
         if not evaluation:
             raise NotFoundException(f"Evaluation with ID '{id}' not found.")
         return evaluation
@@ -69,8 +73,12 @@ class EvaluationService:
         return evals, total
 
     @staticmethod
-    async def delete_evaluation(db: AsyncSession, id: str) -> None:
-        success = await EvaluationRepository.delete_evaluation(db, id)
+    async def delete_evaluation(
+        db: AsyncSession, id: str, workspace_id: str | None = None
+    ) -> None:
+        success = await EvaluationRepository.delete_evaluation(
+            db, id, workspace_id=workspace_id
+        )
         if not success:
             raise NotFoundException(f"Evaluation with ID '{id}' not found.")
 

@@ -2,6 +2,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.database.repository import ProjectRepository
 from app.datasets.exceptions.exceptions import (
     DatasetNotFoundException,
 )
@@ -16,6 +17,7 @@ class DatasetService:
     def __init__(self, db: AsyncSession):
         self.db = db
         self.dataset_repo = DatasetRepository(db)
+        self.project_repo = ProjectRepository(db)
 
     async def create_empty_dataset(
         self,
@@ -28,7 +30,16 @@ class DatasetService:
         language: Optional[str] = "en",
         license: Optional[str] = None,
         tags: List[str] = None,
+        workspace_id: Optional[str] = None,
     ) -> Dataset:
+        project = await self.project_repo.get_by_id(
+            project_id, workspace_id=workspace_id
+        )
+        if not project:
+            raise DatasetNotFoundException(
+                project_id, f"Project '{project_id}' not found."
+            )
+
         tags = tags or []
         dataset = await self.dataset_repo.create_dataset(
             project_id=project_id,
@@ -55,9 +66,16 @@ class DatasetService:
         await self.db.commit()
         return dataset
 
-    async def get_dataset(self, dataset_id: str) -> Dataset:
+    async def get_dataset(
+        self, dataset_id: str, workspace_id: Optional[str] = None
+    ) -> Dataset:
         dataset = await self.dataset_repo.get_dataset(dataset_id)
         if not dataset:
+            raise DatasetNotFoundException(dataset_id)
+        project = await self.project_repo.get_by_id(
+            dataset.project_id, workspace_id=workspace_id
+        )
+        if not project:
             raise DatasetNotFoundException(dataset_id)
         return dataset
 
@@ -70,7 +88,16 @@ class DatasetService:
         tag: Optional[str] = None,
         language: Optional[str] = None,
         visibility: Optional[str] = None,
+        workspace_id: Optional[str] = None,
     ) -> Tuple[List[Dataset], int]:
+        project = await self.project_repo.get_by_id(
+            project_id, workspace_id=workspace_id
+        )
+        if not project:
+            raise DatasetNotFoundException(
+                project_id, f"Project '{project_id}' not found."
+            )
+
         return await self.dataset_repo.list_datasets(
             project_id=project_id,
             skip=skip,
@@ -82,23 +109,31 @@ class DatasetService:
         )
 
     async def update_dataset(
-        self, dataset_id: str, update_data: Dict[str, Any]
+        self,
+        dataset_id: str,
+        update_data: Dict[str, Any],
+        workspace_id: Optional[str] = None,
     ) -> Dataset:
+        await self.get_dataset(dataset_id, workspace_id=workspace_id)
         dataset = await self.dataset_repo.update_dataset(dataset_id, update_data)
         if not dataset:
             raise DatasetNotFoundException(dataset_id)
         await self.db.commit()
         return dataset
 
-    async def delete_dataset(self, dataset_id: str) -> None:
+    async def delete_dataset(
+        self, dataset_id: str, workspace_id: Optional[str] = None
+    ) -> None:
+        await self.get_dataset(dataset_id, workspace_id=workspace_id)
         success = await self.dataset_repo.delete_dataset(dataset_id)
         if not success:
             raise DatasetNotFoundException(dataset_id)
         await self.db.commit()
 
     async def get_dataset_version_by_label(
-        self, dataset_id: str, version_label: str
+        self, dataset_id: str, version_label: str, workspace_id: Optional[str] = None
     ) -> DatasetVersion:
+        await self.get_dataset(dataset_id, workspace_id=workspace_id)
         version = await self.dataset_repo.get_version_by_label(
             dataset_id, version_label
         )
@@ -108,22 +143,41 @@ class DatasetService:
             )
         return version
 
-    async def list_versions(self, dataset_id: str) -> List[DatasetVersion]:
-        # Verify dataset exists
-        await self.get_dataset(dataset_id)
+    async def list_versions(
+        self, dataset_id: str, workspace_id: Optional[str] = None
+    ) -> List[DatasetVersion]:
+        await self.get_dataset(dataset_id, workspace_id=workspace_id)
         return await self.dataset_repo.list_versions(dataset_id)
 
     async def get_records(
-        self, version_id: str, skip: int = 0, limit: int = 100
+        self,
+        version_id: str,
+        skip: int = 0,
+        limit: int = 100,
+        workspace_id: Optional[str] = None,
     ) -> Tuple[Any, int]:
+        version = await self.dataset_repo.get_version(version_id)
+        if not version:
+            raise DatasetNotFoundException(
+                version_id, f"Version '{version_id}' not found."
+            )
+        await self.get_dataset(version.dataset_id, workspace_id=workspace_id)
         return await self.dataset_repo.get_records(version_id, skip=skip, limit=limit)
 
     async def generate_diff(
-        self, dataset_id: str, version_a_label: str, version_b_label: str
+        self,
+        dataset_id: str,
+        version_a_label: str,
+        version_b_label: str,
+        workspace_id: Optional[str] = None,
     ) -> List[DatasetDiffItem]:
         """Compares two versions of a dataset and returns detailed changes per record."""
-        ver_a = await self.get_dataset_version_by_label(dataset_id, version_a_label)
-        ver_b = await self.get_dataset_version_by_label(dataset_id, version_b_label)
+        ver_a = await self.get_dataset_version_by_label(
+            dataset_id, version_a_label, workspace_id=workspace_id
+        )
+        ver_b = await self.get_dataset_version_by_label(
+            dataset_id, version_b_label, workspace_id=workspace_id
+        )
 
         records_a, _ = await self.dataset_repo.get_records(ver_a.id, limit=1000000)
         records_b, _ = await self.dataset_repo.get_records(ver_b.id, limit=1000000)
@@ -182,11 +236,14 @@ class DatasetService:
         return diffs
 
     async def rollback_version(
-        self, dataset_id: str, target_version_label: str
+        self,
+        dataset_id: str,
+        target_version_label: str,
+        workspace_id: Optional[str] = None,
     ) -> DatasetVersion:
         """Promotes an old version by creating a new version cloned from the target version."""
         target_version = await self.get_dataset_version_by_label(
-            dataset_id, target_version_label
+            dataset_id, target_version_label, workspace_id=workspace_id
         )
         records, _ = await self.dataset_repo.get_records(
             target_version.id, limit=1000000

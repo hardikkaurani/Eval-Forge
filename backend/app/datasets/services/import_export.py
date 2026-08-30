@@ -5,6 +5,7 @@ from typing import Any, Dict, List, Optional
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.database.repository import ProjectRepository
 from app.datasets.exceptions.exceptions import (
     DatasetValidationException,
     InvalidDatasetFormatException,
@@ -12,6 +13,7 @@ from app.datasets.exceptions.exceptions import (
 from app.datasets.metadata.engine import DatasetMetadataEngine
 from app.datasets.parsers.parsers import DatasetParser
 from app.datasets.repositories.dataset import DatasetRepository
+from app.datasets.services.dataset import DatasetService
 from app.datasets.storage.local import LocalStorage
 from app.datasets.validators.validators import DatasetValidator
 from app.models.dataset import ExportJob, ImportJob
@@ -24,9 +26,18 @@ class ImportExportService:
     def __init__(self, db: AsyncSession):
         self.db = db
         self.dataset_repo = DatasetRepository(db)
+        self.project_repo = ProjectRepository(db)
         self.storage = LocalStorage()
 
-    async def create_import_job(self, project_id: str, file_format: str) -> ImportJob:
+    async def create_import_job(
+        self, project_id: str, file_format: str, workspace_id: Optional[str] = None
+    ) -> ImportJob:
+        project = await self.project_repo.get_by_id(
+            project_id, workspace_id=workspace_id
+        )
+        if not project:
+            raise ValueError(f"Project '{project_id}' not found.")
+
         job = ImportJob(
             project_id=project_id,
             status="PENDING",
@@ -56,7 +67,13 @@ class ImportExportService:
         tags: List[str] = None,
         existing_dataset_id: Optional[str] = None,
         version_label: str = "v1",
+        workspace_id: Optional[str] = None,
     ) -> Dict[str, Any]:
+        project = await self.project_repo.get_by_id(
+            project_id, workspace_id=workspace_id
+        )
+        if not project:
+            raise ValueError(f"Project '{project_id}' not found.")
         tags = tags or []
 
         # Find or fetch import job
@@ -105,7 +122,9 @@ class ImportExportService:
 
             # 5. Save or find dataset
             if existing_dataset_id:
-                dataset = await self.dataset_repo.get_dataset(existing_dataset_id)
+                dataset = await DatasetService(self.db).get_dataset(
+                    existing_dataset_id, workspace_id=workspace_id
+                )
                 if not dataset:
                     raise ValueError(f"Dataset '{existing_dataset_id}' not found.")
             else:
@@ -161,8 +180,22 @@ class ImportExportService:
             raise e
 
     async def create_export_job(
-        self, project_id: str, file_format: str, dataset_id: Optional[str] = None
+        self,
+        project_id: str,
+        file_format: str,
+        dataset_id: Optional[str] = None,
+        workspace_id: Optional[str] = None,
     ) -> ExportJob:
+        project = await self.project_repo.get_by_id(
+            project_id, workspace_id=workspace_id
+        )
+        if not project:
+            raise ValueError(f"Project '{project_id}' not found.")
+        if dataset_id:
+            await DatasetService(self.db).get_dataset(
+                dataset_id, workspace_id=workspace_id
+            )
+
         job = ExportJob(
             project_id=project_id,
             dataset_id=dataset_id,

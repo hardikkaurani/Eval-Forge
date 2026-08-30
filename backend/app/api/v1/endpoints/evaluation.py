@@ -101,9 +101,13 @@ async def list_evaluations(
 async def get_evaluation(
     id: str,
     db: AsyncSession = Depends(get_db),
+    current_key: Any = Depends(get_current_api_key),
 ):
     """Retrieves detailed evaluation by its UUID."""
-    evaluation = await EvaluationService.get_evaluation(db, id)
+    workspace_id = _extract_workspace_id(current_key)
+    evaluation = await EvaluationService.get_evaluation(
+        db, id, workspace_id=workspace_id
+    )
     return create_response(
         success=True,
         message="Evaluation retrieved successfully.",
@@ -119,9 +123,11 @@ async def get_evaluation(
 async def delete_evaluation(
     id: str,
     db: AsyncSession = Depends(get_db),
+    current_key: Any = Depends(get_current_api_key),
 ):
     """Soft deletes an evaluation."""
-    await EvaluationService.delete_evaluation(db, id)
+    workspace_id = _extract_workspace_id(current_key)
+    await EvaluationService.delete_evaluation(db, id, workspace_id=workspace_id)
     await db.commit()
     return create_response(
         success=True,

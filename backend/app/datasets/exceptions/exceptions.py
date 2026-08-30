@@ -38,19 +38,17 @@ class InvalidDatasetFormatException(DatasetException):
 class BenchmarkSuiteNotFoundException(DatasetException):
     """Raised when a benchmark suite is not found."""
 
-    def __init__(self, suite_id: str):
-        super().__init__(
-            message=f"Benchmark suite '{suite_id}' not found.", status_code=404
-        )
+    def __init__(self, suite_id: str, message: str | None = None):
+        msg = message or f"Benchmark suite '{suite_id}' not found."
+        super().__init__(message=msg, status_code=404)
 
 
 class ExperimentNotFoundException(DatasetException):
     """Raised when an experiment run is not found."""
 
-    def __init__(self, experiment_id: str):
-        super().__init__(
-            message=f"Experiment '{experiment_id}' not found.", status_code=404
-        )
+    def __init__(self, experiment_id: str, message: str | None = None):
+        msg = message or f"Experiment '{experiment_id}' not found."
+        super().__init__(message=msg, status_code=404)
 
 
 class StorageException(DatasetException):

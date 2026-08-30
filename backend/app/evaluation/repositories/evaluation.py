@@ -10,6 +10,7 @@ from app.models.evaluation import (
     ProviderMetadata,
     RubricScore,
 )
+from app.models.project import Project
 from app.utils.time import get_utc_now
 
 
@@ -30,10 +31,22 @@ class EvaluationRepository:
         return evaluation
 
     @staticmethod
-    async def get_evaluation(db: AsyncSession, id: str) -> Optional[Evaluation]:
-        stmt = select(Evaluation).where(
-            and_(Evaluation.id == id, Evaluation.deleted_at.is_(None))
+    async def get_evaluation(
+        db: AsyncSession, id: str, workspace_id: str | None = None
+    ) -> Optional[Evaluation]:
+        stmt = (
+            select(Evaluation)
+            .join(Project, Evaluation.project_id == Project.id)
+            .where(
+                and_(
+                    Evaluation.id == id,
+                    Evaluation.deleted_at.is_(None),
+                    Project.deleted_at.is_(None),
+                )
+            )
         )
+        if workspace_id is not None:
+            stmt = stmt.where(Project.workspace_id == workspace_id)
         result = await db.execute(stmt)
         return result.scalar_one_or_none()
 
@@ -56,10 +69,22 @@ class EvaluationRepository:
         return list(result.scalars().all())
 
     @staticmethod
-    async def delete_evaluation(db: AsyncSession, id: str) -> bool:
-        stmt = select(Evaluation).where(
-            and_(Evaluation.id == id, Evaluation.deleted_at.is_(None))
+    async def delete_evaluation(
+        db: AsyncSession, id: str, workspace_id: str | None = None
+    ) -> bool:
+        stmt = (
+            select(Evaluation)
+            .join(Project, Evaluation.project_id == Project.id)
+            .where(
+                and_(
+                    Evaluation.id == id,
+                    Evaluation.deleted_at.is_(None),
+                    Project.deleted_at.is_(None),
+                )
+            )
         )
+        if workspace_id is not None:
+            stmt = stmt.where(Project.workspace_id == workspace_id)
         result = await db.execute(stmt)
         evaluation = result.scalar_one_or_none()
         if not evaluation:

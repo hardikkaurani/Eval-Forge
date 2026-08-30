@@ -5,9 +5,11 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+from app.database.repository import ProjectRepository
 from app.datasets.exceptions.exceptions import ExperimentNotFoundException
 from app.datasets.repositories.dataset import DatasetRepository
 from app.datasets.repositories.experiment import ExperimentRepository
+from app.datasets.services.dataset import DatasetService
 from app.evaluation.pipelines.pipeline import EvaluationPipeline
 from app.evaluation.schemas.evaluation import BatchEvaluationRequest, TestCaseInput
 from app.models.dataset import Experiment
@@ -24,6 +26,8 @@ class ExperimentService:
         self.db = db
         self.experiment_repo = ExperimentRepository(db)
         self.dataset_repo = DatasetRepository(db)
+        self.project_repo = ProjectRepository(db)
+        self.dataset_service = DatasetService(db)
 
     async def create_experiment(
         self,
@@ -35,7 +39,16 @@ class ExperimentService:
         provider: str = "openai",
         model: Optional[str] = None,
         configuration: Dict[str, Any] = None,
+        workspace_id: Optional[str] = None,
     ) -> Experiment:
+        project = await self.project_repo.get_by_id(
+            project_id, workspace_id=workspace_id
+        )
+        if not project:
+            raise ExperimentNotFoundException(
+                project_id, f"Project '{project_id}' not found."
+            )
+
         configuration = configuration or {
             "temperature": 0.0,
             "max_tokens": None,
@@ -44,10 +57,15 @@ class ExperimentService:
             "retry_count": 2,
         }
 
-        # Check that version exists
+        # Check that version exists and belongs to workspace
         version = await self.dataset_repo.get_version(dataset_version_id)
         if not version:
-            raise ValueError(f"Dataset version '{dataset_version_id}' not found.")
+            raise ExperimentNotFoundException(
+                dataset_version_id, f"Dataset version '{dataset_version_id}' not found."
+            )
+        await self.dataset_service.get_dataset(
+            version.dataset_id, workspace_id=workspace_id
+        )
 
         experiment = await self.experiment_repo.create_experiment(
             project_id=project_id,
@@ -62,9 +80,16 @@ class ExperimentService:
         await self.db.commit()
         return experiment
 
-    async def get_experiment(self, experiment_id: str) -> Experiment:
+    async def get_experiment(
+        self, experiment_id: str, workspace_id: Optional[str] = None
+    ) -> Experiment:
         experiment = await self.experiment_repo.get_experiment(experiment_id)
         if not experiment:
+            raise ExperimentNotFoundException(experiment_id)
+        project = await self.project_repo.get_by_id(
+            experiment.project_id, workspace_id=workspace_id
+        )
+        if not project:
             raise ExperimentNotFoundException(experiment_id)
         return experiment
 
@@ -75,7 +100,16 @@ class ExperimentService:
         limit: int = 10,
         search: Optional[str] = None,
         status: Optional[str] = None,
+        workspace_id: Optional[str] = None,
     ) -> Tuple[List[Experiment], int]:
+        project = await self.project_repo.get_by_id(
+            project_id, workspace_id=workspace_id
+        )
+        if not project:
+            raise ExperimentNotFoundException(
+                project_id, f"Project '{project_id}' not found."
+            )
+
         return await self.experiment_repo.list_experiments(
             project_id=project_id,
             skip=skip,
@@ -84,15 +118,20 @@ class ExperimentService:
             status=status,
         )
 
-    async def delete_experiment(self, experiment_id: str) -> None:
+    async def delete_experiment(
+        self, experiment_id: str, workspace_id: Optional[str] = None
+    ) -> None:
+        await self.get_experiment(experiment_id, workspace_id=workspace_id)
         success = await self.experiment_repo.delete_experiment(experiment_id)
         if not success:
             raise ExperimentNotFoundException(experiment_id)
         await self.db.commit()
 
-    async def execute_experiment(self, experiment_id: str) -> Experiment:
+    async def execute_experiment(
+        self, experiment_id: str, workspace_id: Optional[str] = None
+    ) -> Experiment:
         """Executes the evaluation pipeline asynchronously for all dataset records."""
-        experiment = await self.get_experiment(experiment_id)
+        experiment = await self.get_experiment(experiment_id, workspace_id=workspace_id)
 
         try:
             # 1. Update status to RUNNING

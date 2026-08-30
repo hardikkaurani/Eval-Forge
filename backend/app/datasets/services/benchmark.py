@@ -3,9 +3,11 @@ from typing import Any, Dict, List, Optional, Tuple
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.database.repository import ProjectRepository
 from app.datasets.exceptions.exceptions import BenchmarkSuiteNotFoundException
 from app.datasets.repositories.benchmark import BenchmarkRepository
 from app.datasets.repositories.dataset import DatasetRepository
+from app.datasets.services.dataset import DatasetService
 from app.models.dataset import BenchmarkSuite, Dataset, DatasetVersion, Experiment
 
 
@@ -16,6 +18,8 @@ class BenchmarkService:
         self.db = db
         self.benchmark_repo = BenchmarkRepository(db)
         self.dataset_repo = DatasetRepository(db)
+        self.project_repo = ProjectRepository(db)
+        self.dataset_service = DatasetService(db)
 
     async def create_benchmark_suite(
         self,
@@ -24,9 +28,22 @@ class BenchmarkService:
         description: Optional[str] = None,
         tags: List[str] = None,
         dataset_ids: List[str] = None,
+        workspace_id: Optional[str] = None,
     ) -> BenchmarkSuite:
+        project = await self.project_repo.get_by_id(
+            project_id, workspace_id=workspace_id
+        )
+        if not project:
+            raise BenchmarkSuiteNotFoundException(
+                project_id, f"Project '{project_id}' not found."
+            )
+
         tags = tags or []
         dataset_ids = dataset_ids or []
+
+        if dataset_ids:
+            for d_id in dataset_ids:
+                await self.dataset_service.get_dataset(d_id, workspace_id=workspace_id)
 
         suite = await self.benchmark_repo.create_benchmark_suite(
             project_id=project_id,
@@ -41,11 +58,18 @@ class BenchmarkService:
 
         await self.db.commit()
         # Fetch populated suite
-        return await self.get_benchmark_suite(suite.id)
+        return await self.get_benchmark_suite(suite.id, workspace_id=workspace_id)
 
-    async def get_benchmark_suite(self, suite_id: str) -> BenchmarkSuite:
+    async def get_benchmark_suite(
+        self, suite_id: str, workspace_id: Optional[str] = None
+    ) -> BenchmarkSuite:
         suite = await self.benchmark_repo.get_benchmark_suite(suite_id)
         if not suite:
+            raise BenchmarkSuiteNotFoundException(suite_id)
+        project = await self.project_repo.get_by_id(
+            suite.project_id, workspace_id=workspace_id
+        )
+        if not project:
             raise BenchmarkSuiteNotFoundException(suite_id)
         return suite
 
@@ -55,7 +79,16 @@ class BenchmarkService:
         skip: int = 0,
         limit: int = 10,
         search: Optional[str] = None,
+        workspace_id: Optional[str] = None,
     ) -> Tuple[List[BenchmarkSuite], int]:
+        project = await self.project_repo.get_by_id(
+            project_id, workspace_id=workspace_id
+        )
+        if not project:
+            raise BenchmarkSuiteNotFoundException(
+                project_id, f"Project '{project_id}' not found."
+            )
+
         return await self.benchmark_repo.list_benchmark_suites(
             project_id=project_id,
             skip=skip,
@@ -67,8 +100,14 @@ class BenchmarkService:
         self,
         suite_id: str,
         update_data: Dict[str, Any],
+        workspace_id: Optional[str] = None,
     ) -> BenchmarkSuite:
+        await self.get_benchmark_suite(suite_id, workspace_id=workspace_id)
         dataset_ids = update_data.pop("dataset_ids", None)
+
+        if dataset_ids is not None:
+            for d_id in dataset_ids:
+                await self.dataset_service.get_dataset(d_id, workspace_id=workspace_id)
 
         suite = await self.benchmark_repo.update_benchmark_suite(suite_id, update_data)
         if not suite:
@@ -78,16 +117,29 @@ class BenchmarkService:
             await self.benchmark_repo.set_suite_datasets(suite_id, dataset_ids)
 
         await self.db.commit()
-        return await self.get_benchmark_suite(suite_id)
+        return await self.get_benchmark_suite(suite_id, workspace_id=workspace_id)
 
-    async def delete_benchmark_suite(self, suite_id: str) -> None:
+    async def delete_benchmark_suite(
+        self, suite_id: str, workspace_id: Optional[str] = None
+    ) -> None:
+        await self.get_benchmark_suite(suite_id, workspace_id=workspace_id)
         success = await self.benchmark_repo.delete_benchmark_suite(suite_id)
         if not success:
             raise BenchmarkSuiteNotFoundException(suite_id)
         await self.db.commit()
 
-    async def get_dashboard_metrics(self, project_id: str) -> Dict[str, Any]:
+    async def get_dashboard_metrics(
+        self, project_id: str, workspace_id: Optional[str] = None
+    ) -> Dict[str, Any]:
         """Aggregates metrics and statistics for datasets and benchmarks in a project."""
+        project = await self.project_repo.get_by_id(
+            project_id, workspace_id=workspace_id
+        )
+        if not project:
+            raise BenchmarkSuiteNotFoundException(
+                project_id, f"Project '{project_id}' not found."
+            )
+
         # 1. Dataset stats
         ds_count_result = await self.db.execute(
             select(func.count(Dataset.id)).where(Dataset.project_id == project_id)
