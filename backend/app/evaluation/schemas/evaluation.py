@@ -53,6 +53,7 @@ class EvaluationRunResponse(BaseModel):
     started_at: Optional[datetime] = None
     completed_at: Optional[datetime] = None
     aggregate_score: Optional[float] = None
+    total_cost_usd: Optional[float] = None
     success_rate: Optional[float] = None
     status_detail: Optional[str] = None
 
@@ -74,6 +75,7 @@ class ProviderMetadataResponse(BaseModel):
     prompt_tokens: Optional[int] = None
     completion_tokens: Optional[int] = None
     latency_ms: Optional[int] = None
+    cost_usd: Optional[float] = None
 
 
 class EvaluationResultResponse(BaseModel):

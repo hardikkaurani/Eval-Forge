@@ -210,7 +210,15 @@ class EvaluationRepository:
         prompt_tokens: int | None = None,
         completion_tokens: int | None = None,
         latency_ms: int | None = None,
+        cost_usd: float | None = None,
     ) -> ProviderMetadata:
+        from app.evaluation.pricing.pricing import CostCalculator
+
+        if cost_usd is None and provider_name:
+            cost_usd = CostCalculator.calculate_cost(
+                provider_name, model_name, prompt_tokens, completion_tokens
+            )
+
         metadata = ProviderMetadata(
             result_id=result_id,
             provider_name=provider_name,
@@ -218,6 +226,7 @@ class EvaluationRepository:
             prompt_tokens=prompt_tokens,
             completion_tokens=completion_tokens,
             latency_ms=latency_ms,
+            cost_usd=cost_usd,
         )
         db.add(metadata)
         await db.flush()

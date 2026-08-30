@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import logging
 from typing import List
 
@@ -53,6 +54,10 @@ class EvaluationPipeline:
     @staticmethod
     async def run(db: AsyncSession, request: BatchEvaluationRequest) -> EvaluationRun:
         EvaluationValidator.validate_provider(request.provider)
+        EvaluationValidator.validate_provider_model(
+            request.provider,
+            request.provider_model or request.configuration.get("model"),
+        )
         EvaluationValidator.validate_judge(request.judge)
         EvaluationValidator.validate_configuration(request.configuration)
         EvaluationValidator.validate_batch_size(
@@ -97,10 +102,6 @@ class EvaluationPipeline:
         run = await EvaluationRepository.update_run(db, run.id, status="RUNNING")
         await db.commit()
 
-        scores: List[float] = []
-        weights: List[float] = []
-        completed_count = 0
-        failed_count = 0
         threshold = request.configuration.get(
             "threshold", settings.EVALUATION_SCORE_THRESHOLD
         )
@@ -110,131 +111,186 @@ class EvaluationPipeline:
         prompt_version = request.configuration.get(
             "prompt_version", settings.DEFAULT_EVALUATION_PROMPT_VERSION
         )
+        max_concurrency = int(request.configuration.get("max_concurrency", 5))
+        semaphore = asyncio.Semaphore(max(1, max_concurrency))
 
-        for case in request.test_cases:
-            attempt = 0
-            last_error: Exception | None = None
-            result_record = None
+        async def evaluate_single_case(index: int, case):
+            async with semaphore:
+                attempt = 0
+                last_error: Exception | None = None
 
-            while attempt <= retry_count:
-                try:
-                    EvaluationValidator.validate_case(
-                        prompt=case.input_prompt,
-                        output=case.model_output,
-                        reference=case.reference,
-                        judge=request.judge,
-                        response_b=case.response_b,
-                    )
+                while attempt <= retry_count:
+                    try:
+                        EvaluationValidator.validate_case(
+                            prompt=case.input_prompt,
+                            output=case.model_output,
+                            reference=case.reference,
+                            judge=request.judge,
+                            response_b=case.response_b,
+                        )
 
-                    judge_result = await judge.evaluate(
-                        prompt=case.input_prompt,
-                        output=case.model_output,
-                        reference=case.reference,
-                        rubric=rubric,
-                        temperature=request.configuration.get("temperature", 0.0),
-                        max_tokens=request.configuration.get("max_tokens"),
-                        timeout=request.configuration.get(
-                            "timeout", settings.EVALUATION_TIMEOUT_SECONDS
-                        ),
-                        response_b=case.response_b,
-                        prompt_version=prompt_version,
-                    )
+                        judge_result = await judge.evaluate(
+                            prompt=case.input_prompt,
+                            output=case.model_output,
+                            reference=case.reference,
+                            rubric=rubric,
+                            temperature=request.configuration.get("temperature", 0.0),
+                            max_tokens=request.configuration.get("max_tokens"),
+                            timeout=request.configuration.get(
+                                "timeout", settings.EVALUATION_TIMEOUT_SECONDS
+                            ),
+                            response_b=case.response_b,
+                            prompt_version=prompt_version,
+                        )
 
-                    normalized = MetricsCalculator.normalize(
-                        judge_result.score, rubric.scoring_scale
-                    )
-                    passed = MetricsCalculator.calculate_passed(
-                        judge_result.score, rubric.scoring_scale, threshold
-                    )
-
-                    result_record = await EvaluationRepository.create_result(
-                        db=db,
-                        run_id=run.id,
-                        input_prompt=case.input_prompt,
-                        model_output=case.model_output,
-                        reference=case.reference,
-                        judge=request.judge,
-                        provider=request.provider,
-                        prompt_version=prompt_version,
-                        raw_response=judge_result.metadata.get("raw_response"),
-                        status="COMPLETED",
-                        score=judge_result.score,
-                        passed=passed,
-                        confidence=judge_result.confidence,
-                        reasoning=judge_result.reasoning,
-                    )
-
-                    if (
-                        request.judge == "geval"
-                        and "step_scores" in judge_result.criterion_scores
-                    ):
-                        for step_score in judge_result.criterion_scores["step_scores"]:
-                            await EvaluationRepository.create_rubric_score(
-                                db=db,
-                                result_id=result_record.id,
-                                criterion_name=step_score.get("step", "Step"),
-                                rubric_key=rubric.name.lower(),
-                                score=float(step_score.get("score", 0.0)),
-                                reasoning=step_score.get("reasoning"),
+                        if judge_result.success is False:
+                            raise EvaluationFailureException(
+                                judge_result.error_message
+                                or "Judge evaluation failed to parse response."
                             )
 
-                    await EvaluationRepository.create_provider_metadata(
-                        db=db,
-                        result_id=result_record.id,
-                        provider_name=request.provider,
-                        model_name=judge_result.metadata.get(
-                            "model_name", request.provider
-                        ),
-                        prompt_tokens=judge_result.metadata.get("prompt_tokens"),
-                        completion_tokens=judge_result.metadata.get(
-                            "completion_tokens"
-                        ),
-                        latency_ms=judge_result.metadata.get("latency_ms"),
-                    )
+                        normalized = MetricsCalculator.normalize(
+                            judge_result.score, rubric.scoring_scale
+                        )
+                        passed = MetricsCalculator.calculate_passed(
+                            judge_result.score, rubric.scoring_scale, threshold
+                        )
 
-                    scores.append(normalized)
-                    weights.append(rubric.weight)
-                    completed_count += 1
-                    await EvaluationRepository.update_run(
-                        db, run.id, completed_cases=completed_count
-                    )
-                    await db.commit()
-                    last_error = None
-                    break
+                        return {
+                            "index": index,
+                            "case": case,
+                            "status": "COMPLETED",
+                            "score": judge_result.score,
+                            "normalized": normalized,
+                            "passed": passed,
+                            "judge_result": judge_result,
+                            "error": None,
+                        }
 
-                except Exception as exc:  # noqa: BLE001
-                    last_error = exc
-                    logger.error(
-                        "Failed to evaluate test case: prompt=%s, attempt=%d, error=%s",
-                        case.input_prompt[:120],
-                        attempt + 1,
-                        str(exc),
-                    )
-                    if not EvaluationPipeline._retryable(exc) or attempt >= retry_count:
-                        break
-                    attempt += 1
+                    except Exception as exc:  # noqa: BLE001
+                        last_error = exc
+                        logger.error(
+                            "Failed to evaluate test case: prompt=%s, attempt=%d, error=%s",
+                            case.input_prompt[:120],
+                            attempt + 1,
+                            str(exc),
+                        )
+                        if (
+                            not EvaluationPipeline._retryable(exc)
+                            or attempt >= retry_count
+                        ):
+                            break
+                        attempt += 1
 
-            if last_error is not None:
+                return {
+                    "index": index,
+                    "case": case,
+                    "status": "FAILED",
+                    "score": 0.0,
+                    "normalized": 0.0,
+                    "passed": False,
+                    "judge_result": None,
+                    "error": (
+                        str(last_error) if last_error else "Unknown execution failure"
+                    ),
+                }
+
+        # Concurrently execute test case evaluations
+        tasks = [
+            evaluate_single_case(idx, case)
+            for idx, case in enumerate(request.test_cases)
+        ]
+        results = await asyncio.gather(*tasks)
+
+        # Sort results by index to preserve order
+        results.sort(key=lambda r: r["index"])
+
+        scores: List[float] = []
+        weights: List[float] = []
+        completed_count = 0
+        failed_count = 0
+        total_cost: float = 0.0
+        has_valid_cost: bool = False
+
+        # Sequential DB persistence to prevent AsyncSession concurrency conflicts
+        for res in results:
+            case = res["case"]
+            if res["status"] == "COMPLETED" and res["judge_result"] is not None:
+                judge_result = res["judge_result"]
+                result_record = await EvaluationRepository.create_result(
+                    db=db,
+                    run_id=run.id,
+                    input_prompt=case.input_prompt,
+                    model_output=case.model_output,
+                    reference=case.reference,
+                    judge=request.judge,
+                    provider=request.provider,
+                    prompt_version=prompt_version,
+                    raw_response=judge_result.metadata.get("raw_response"),
+                    status="COMPLETED",
+                    score=judge_result.score,
+                    passed=res["passed"],
+                    confidence=judge_result.confidence,
+                    reasoning=judge_result.reasoning,
+                )
+
+                if (
+                    request.judge == "geval"
+                    and "step_scores" in judge_result.criterion_scores
+                ):
+                    for step_score in judge_result.criterion_scores["step_scores"]:
+                        await EvaluationRepository.create_rubric_score(
+                            db=db,
+                            result_id=result_record.id,
+                            criterion_name=step_score.get("step", "Step"),
+                            rubric_key=rubric.name.lower(),
+                            score=float(step_score.get("score", 0.0)),
+                            reasoning=step_score.get("reasoning"),
+                        )
+
+                pm = await EvaluationRepository.create_provider_metadata(
+                    db=db,
+                    result_id=result_record.id,
+                    provider_name=request.provider,
+                    model_name=judge_result.metadata.get(
+                        "model_name", request.provider
+                    ),
+                    prompt_tokens=judge_result.metadata.get("prompt_tokens"),
+                    completion_tokens=judge_result.metadata.get("completion_tokens"),
+                    latency_ms=judge_result.metadata.get("latency_ms"),
+                )
+
+                if pm.cost_usd is not None:
+                    total_cost += pm.cost_usd
+                    has_valid_cost = True
+
+                scores.append(res["normalized"])
+                weights.append(rubric.weight)
+                completed_count += 1
+            else:
                 failed_count += 1
-                if result_record is None:
-                    await EvaluationRepository.create_result(  # best-effort failure record
-                        db=db,
-                        run_id=run.id,
-                        input_prompt=case.input_prompt,
-                        model_output=case.model_output,
-                        reference=case.reference,
-                        judge=request.judge,
-                        provider=request.provider,
-                        prompt_version=prompt_version,
-                        raw_response=None,
-                        status="FAILED",
-                        error_message=str(last_error),
-                        score=0.0,
-                        passed=False,
-                        confidence=0.0,
-                        reasoning=None,
-                    )
-                    await db.commit()
+                await EvaluationRepository.create_result(
+                    db=db,
+                    run_id=run.id,
+                    input_prompt=case.input_prompt,
+                    model_output=case.model_output,
+                    reference=case.reference,
+                    judge=request.judge,
+                    provider=request.provider,
+                    prompt_version=prompt_version,
+                    raw_response=None,
+                    status="FAILED",
+                    error_message=res["error"],
+                    score=0.0,
+                    passed=False,
+                    confidence=0.0,
+                    reasoning=None,
+                )
+
+            await EvaluationRepository.update_run(
+                db, run.id, completed_cases=completed_count, failed_cases=failed_count
+            )
+            await db.commit()
 
         if completed_count == 0 and failed_count > 0:
             status = "FAILED"
@@ -261,6 +317,7 @@ class EvaluationPipeline:
             failed_cases=failed_count,
             completed_at=get_utc_now(),
             aggregate_score=aggregate_score,
+            total_cost_usd=round(total_cost, 8) if has_valid_cost else None,
             success_rate=success_rate,
             status_detail=(
                 None

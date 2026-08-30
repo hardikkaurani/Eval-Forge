@@ -67,6 +67,7 @@ class EvaluationRun(Base):
         DateTime(timezone=True), nullable=True
     )
     aggregate_score: Mapped[float | None] = mapped_column(Float, nullable=True)
+    total_cost_usd: Mapped[float | None] = mapped_column(Float, nullable=True)
     status_detail: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     evaluation: Mapped["Evaluation"] = relationship("Evaluation", back_populates="runs")
@@ -149,6 +150,7 @@ class ProviderMetadata(Base):
     prompt_tokens: Mapped[int | None] = mapped_column(Integer, nullable=True)
     completion_tokens: Mapped[int | None] = mapped_column(Integer, nullable=True)
     latency_ms: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    cost_usd: Mapped[float | None] = mapped_column(Float, nullable=True)
 
     result: Mapped["EvaluationResult"] = relationship(
         "EvaluationResult", back_populates="provider_metadata"
