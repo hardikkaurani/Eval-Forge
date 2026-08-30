@@ -5,8 +5,10 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
+from app.core.dependencies import _extract_workspace_id, get_current_api_key
 from app.database.session import get_db
-from app.enterprise.models import Organization
+from app.enterprise.models import Organization, Workspace
+from app.enterprise.routes.organizations import _verify_org_membership
 from app.enterprise.services.billing_service import BillingService
 from app.utils.responses import ApiResponse, create_response
 
@@ -15,7 +17,10 @@ billing_service = BillingService()
 
 
 @router.post("/seed-plans", response_model=ApiResponse[bool])
-async def seed_saas_plans(db: AsyncSession = Depends(get_db)):
+async def seed_saas_plans(
+    db: AsyncSession = Depends(get_db),
+    current_key: Any = Depends(get_current_api_key),
+):
     """Seeds default SaaS plans (Starter, Pro, Team, Business, Enterprise) to the database."""
     await billing_service.seed_plans(db)
     return create_response(
@@ -24,11 +29,25 @@ async def seed_saas_plans(db: AsyncSession = Depends(get_db)):
 
 
 @router.get("/organizations", response_model=ApiResponse[List[Dict[str, Any]]])
-async def list_all_organizations(db: AsyncSession = Depends(get_db)):
-    """Exposes all tenant organizations for global system administrators (Admin Console)."""
-    stmt = select(Organization)
-    res = await db.execute(stmt)
-    orgs = res.scalars().all()
+async def list_all_organizations(
+    db: AsyncSession = Depends(get_db),
+    current_key: Any = Depends(get_current_api_key),
+):
+    """Exposes tenant organization for current user context."""
+    workspace_id = _extract_workspace_id(current_key)
+    orgs = []
+    if workspace_id:
+        try:
+            ws_uuid = uuid.UUID(workspace_id)
+            stmt = (
+                select(Organization)
+                .join(Workspace, Workspace.organization_id == Organization.id)
+                .where(Workspace.id == ws_uuid)
+            )
+            res = await db.execute(stmt)
+            orgs = res.scalars().all()
+        except ValueError:
+            pass
 
     org_list = []
     for o in orgs:
@@ -42,20 +61,22 @@ async def list_all_organizations(db: AsyncSession = Depends(get_db)):
         )
 
     return create_response(
-        success=True, message="All tenant organizations retrieved.", data=org_list
+        success=True, message="Tenant organizations retrieved.", data=org_list
     )
 
 
 @router.post("/sso/identity-providers", response_model=ApiResponse[dict])
 async def configure_sso_identity_provider(
     org_id: uuid.UUID,
-    provider_type: str,  # "saml", "oidc", "google", "github", "microsoft"
+    provider_type: str,
     metadata_url: str,
     client_id: str,
     client_secret: str,
+    db: AsyncSession = Depends(get_db),
+    current_key: Any = Depends(get_current_api_key),
 ):
     """Configures SAML/OIDC Single Sign-On (SSO) identity provider settings for an organization."""
-    # Placeholders for future OAuth/SAML connection setup
+    await _verify_org_membership(db, current_key, org_id)
     mock_config = {
         "org_id": str(org_id),
         "provider": provider_type,

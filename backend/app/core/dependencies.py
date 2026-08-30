@@ -1,4 +1,4 @@
-from typing import AsyncGenerator, Optional
+from typing import Any, AsyncGenerator, Optional
 
 import structlog
 from fastapi import Depends, Header, HTTPException, status
@@ -40,6 +40,16 @@ async def validate_api_key(token: str, db: AsyncSession):
         return None
     key_service = EnterpriseAPIKeyService()
     return await key_service.validate_key(db, token)
+
+
+def extract_workspace_id(api_key_record: Any) -> Optional[str]:
+    """Safely extract workspace_id string from authenticated API key record."""
+    if api_key_record and getattr(api_key_record, "workspace_id", None):
+        return str(api_key_record.workspace_id)
+    return None
+
+
+_extract_workspace_id = extract_workspace_id
 
 
 async def get_current_api_key(
