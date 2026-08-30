@@ -310,11 +310,17 @@ async def download_file(
     os.makedirs(base_dir, exist_ok=True)
 
     try:
+        if "\\" in filename or ".." in filename:
+            raise HTTPException(
+                status_code=400, detail="Invalid filename or path traversal detected."
+            )
         target_path = os.path.realpath(os.path.join(base_dir, filename))
         if os.path.commonpath([base_dir, target_path]) != base_dir:
             raise HTTPException(
                 status_code=400, detail="Invalid filename or path traversal detected."
             )
+    except HTTPException:
+        raise
     except (ValueError, Exception):
         raise HTTPException(
             status_code=400, detail="Invalid filename or path traversal detected."
