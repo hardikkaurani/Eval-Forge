@@ -899,11 +899,18 @@ class ObservabilityService:
             except Exception:
                 pass
         else:
-            # Simulated fallback stats if psutil cannot run in this env
-            cpu = 12.5
-            mem_bytes = 4_294_967_296
-            mem_pct = 40.0
-            disk_pct = 65.0
+            cpu = 0.0
+            mem_bytes = 0
+            mem_pct = 0.0
+            disk_pct = 0.0
+
+        # Count actual evaluation results in last 1 hour
+        one_hour_ago = datetime.utcnow() - timedelta(hours=1)
+        stmt = select(func.count(EvaluationResult.id)).where(
+            EvaluationResult.evaluated_at >= one_hour_ago
+        )
+        res = await self.db.execute(stmt)
+        api_request_count_1h = res.scalar() or 0
 
         return {
             "cpu_usage_percent": cpu,
@@ -915,7 +922,7 @@ class ObservabilityService:
             "postgres_health": postgres_health,
             "queue_backlog": 0,
             "active_worker_count": 1,
-            "api_request_count_1h": 142,
+            "api_request_count_1h": api_request_count_1h,
             "provider_status": {
                 "openai": "online",
                 "gemini": "online",

@@ -5,6 +5,7 @@ from sqlalchemy import and_, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.exceptions import NotFoundException
+from app.database.repository import ProjectRepository
 from app.jobs.models.job import ExecutionHistory, Job, Queue, Worker
 from app.jobs.queue.tasks import run_background_job
 from app.jobs.repositories.job import JobRepository
@@ -21,12 +22,44 @@ class JobService:
         self.db = db
         self.repo = JobRepository(db)
 
-    async def create_job(self, project_id: str, request: JobCreate) -> Job:
+    async def _verify_job_workspace(self, job: Job, workspace_id: str) -> None:
+        job_ws = job.payload.get("workspace_id")
+        if job_ws and job_ws == workspace_id:
+            return
+        project_id = job.payload.get("project_id")
+        if project_id:
+            from app.database.repository import ProjectRepository
+
+            project_repo = ProjectRepository(self.db)
+            project = await project_repo.get_by_id(
+                project_id, workspace_id=workspace_id
+            )
+            if project:
+                return
+        raise NotFoundException(f"Job with ID '{job.id}' not found.")
+
+    async def create_job(
+        self, project_id: str, request: JobCreate, workspace_id: Optional[str] = None
+    ) -> Job:
+        if workspace_id is not None:
+            from app.database.repository import ProjectRepository
+
+            project_repo = ProjectRepository(self.db)
+            project = await project_repo.get_by_id(
+                project_id, workspace_id=workspace_id
+            )
+            if not project:
+                raise NotFoundException(f"Project with ID '{project_id}' not found.")
+
         # Create DB record in CREATED state
         job = await self.repo.create_job(
             name=request.name,
             queue_name=request.queue_name,
-            payload={**request.payload, "project_id": project_id},
+            payload={
+                **request.payload,
+                "project_id": project_id,
+                "workspace_id": workspace_id,
+            },
             max_retries=request.max_retries,
             scheduled_at=request.scheduled_at,
             recurring_cron=request.recurring_cron,
@@ -58,10 +91,12 @@ class JobService:
         await self.repo.update_job_status(job.id, "QUEUED")
         return job
 
-    async def get_job(self, job_id: str) -> Job:
+    async def get_job(self, job_id: str, workspace_id: Optional[str] = None) -> Job:
         job = await self.repo.get_job(job_id, include_details=True)
         if not job:
             raise NotFoundException(f"Job with ID '{job_id}' not found.")
+        if workspace_id is not None:
+            await self._verify_job_workspace(job, workspace_id)
         return job
 
     async def list_jobs(
@@ -73,22 +108,44 @@ class JobService:
         page_size: int = 10,
         sort_by: str = "created_at",
         sort_order: str = "desc",
+        workspace_id: Optional[str] = None,
     ) -> Tuple[List[Job], int]:
         skip = (page - 1) * page_size
-        return await self.repo.list_jobs(
+        items, total = await self.repo.list_jobs(
             queue_name=queue_name,
             status=status,
             search=search,
-            skip=skip,
-            limit=page_size,
+            skip=0,
+            limit=1000,
             sort_by=sort_by,
             sort_order=sort_order,
         )
+        if workspace_id is not None:
+            project_repo = ProjectRepository(self.db)
+            projects, _ = await project_repo.list(workspace_id=workspace_id, limit=1000)
+            valid_project_ids = {p.id for p in projects}
 
-    async def cancel_job(self, job_id: str, reason: Optional[str] = None) -> Job:
-        job = await self.repo.get_job(job_id)
-        if not job:
-            raise NotFoundException(f"Job with ID '{job_id}' not found.")
+            filtered = []
+            for job in items:
+                job_ws = job.payload.get("workspace_id")
+                job_proj = job.payload.get("project_id")
+                if (job_ws and job_ws == workspace_id) or (
+                    job_proj and job_proj in valid_project_ids
+                ):
+                    filtered.append(job)
+            items = filtered
+            total = len(filtered)
+            items = items[skip : skip + page_size]
+
+        return items, total
+
+    async def cancel_job(
+        self,
+        job_id: str,
+        reason: Optional[str] = None,
+        workspace_id: Optional[str] = None,
+    ) -> Job:
+        await self.get_job(job_id, workspace_id=workspace_id)
 
         # Transition to CANCELLED state
         cancelled_job = await self.repo.cancel_job(
@@ -155,9 +212,42 @@ class JobService:
             active_workers = sum(1 for w in workers if w.status == "BUSY")
             utilization = active_workers / worker_count
 
-        # Build dummy metrics for error frequencies and LLM providers
-        error_frequencies = {}
-        provider_latencies = {"openai": 1.24, "gemini": 1.86, "anthropic": 2.11}
+        # Real retry rate calculation from Job.retry_count and ExecutionHistory
+        retry_res = await self.db.execute(
+            select(func.coalesce(func.sum(Job.retry_count), 0))
+        )
+        total_retries = int(retry_res.scalar_one())
+        total_attempts = completed_jobs + failed_jobs + total_retries
+        retry_rate = (total_retries / total_attempts) if total_attempts > 0 else 0.0
+
+        # Real provider latencies from ProviderMetadata table
+        from app.models.evaluation import ProviderMetadata
+
+        p_stmt = (
+            select(
+                func.lower(ProviderMetadata.provider_name),
+                func.avg(ProviderMetadata.latency_ms),
+            )
+            .where(ProviderMetadata.latency_ms.is_not(None))
+            .group_by(func.lower(ProviderMetadata.provider_name))
+        )
+        p_res = await self.db.execute(p_stmt)
+        provider_latencies = {}
+        for p_name, avg_lat_ms in p_res.all():
+            if p_name:
+                provider_latencies[p_name] = round((avg_lat_ms or 0.0) / 1000.0, 2)
+
+        # Real error frequency breakdown from failed jobs
+        error_stmt = (
+            select(Job.error_message, func.count(Job.id))
+            .where(Job.status == "FAILED")
+            .group_by(Job.error_message)
+        )
+        error_res = await self.db.execute(error_stmt)
+        error_frequencies = {
+            (err[:50] if err else "Unknown Error"): count
+            for err, count in error_res.all()
+        }
 
         return SystemMetricsResponse(
             queue_size=queue_size,
@@ -165,7 +255,7 @@ class JobService:
             running_jobs=running_jobs,
             failed_jobs=failed_jobs,
             average_execution_time=round(avg_exec, 2),
-            retry_rate=0.05,
+            retry_rate=round(retry_rate, 4),
             success_rate=round(success_rate, 4),
             queue_latency=round(avg_latency, 2),
             worker_utilization=round(utilization, 2),

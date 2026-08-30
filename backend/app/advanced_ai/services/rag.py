@@ -1,3 +1,4 @@
+import math
 from typing import List, Optional
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -21,9 +22,9 @@ class RAGService:
         answer: str,
         ground_truth: Optional[str] = None,
     ) -> RAGEvaluation:
-        """Calculates context recall, precision, faithfulness, relevancy, groundedness, and citation validations."""
+        """Calculates context recall, precision, faithfulness, relevancy, groundedness, MRR, nDCG, and citation validations."""
         try:
-            # 1. Math rules simulation for RAG metrics based on matching tokens/heuristics
+            # 1. Token matching heuristics for RAG metrics
             context_text = " ".join(contexts).lower()
             answer_lower = answer.lower()
             question_lower = question.lower()
@@ -51,13 +52,79 @@ class RAGService:
             faithfulness = len(ans_intersection) / max(len(a_words), 1)
             groundedness = faithfulness
 
+            # Dynamic MRR & nDCG calculation based on input context rank relevance
+            stopwords = {
+                "a",
+                "an",
+                "the",
+                "in",
+                "on",
+                "at",
+                "to",
+                "for",
+                "of",
+                "with",
+                "by",
+                "from",
+                "and",
+                "or",
+                "is",
+                "are",
+                "was",
+                "were",
+                "be",
+                "been",
+                "it",
+                "this",
+                "that",
+                "me",
+                "about",
+                "tell",
+            }
+            target_text = ground_truth if ground_truth else question
+            raw_words = set(target_text.lower().split()) if target_text else set()
+            target_words = raw_words - stopwords
+
+            context_relevances: List[float] = []
+            first_relevant_rank: Optional[int] = None
+
+            for idx, c in enumerate(contexts):
+                c_w = set(c.lower().split()) - stopwords
+                rel = (
+                    len(target_words.intersection(c_w)) / max(len(target_words), 1)
+                    if target_words
+                    else 0.0
+                )
+                context_relevances.append(rel)
+                if first_relevant_rank is None and rel >= 0.1:
+                    first_relevant_rank = idx + 1
+
+            # Reciprocal Rank (MRR for single run)
+            mrr_val = 1.0 / first_relevant_rank if first_relevant_rank else 0.0
+
+            # nDCG calculation
+            k = len(contexts)
+            if k == 0 or sum(context_relevances) == 0.0:
+                ndcg_val = 0.0
+            else:
+                dcg = sum(
+                    rel / math.log2(idx + 2)
+                    for idx, rel in enumerate(context_relevances)
+                )
+                ideal_rel = sorted(context_relevances, reverse=True)
+                idcg = sum(
+                    rel / math.log2(idx + 2) for idx, rel in enumerate(ideal_rel)
+                )
+                ndcg_val = (dcg / idcg) if idcg > 0 else 0.0
+
             # Citation validation & source attribution
             citation_validation = (
-                0.95 if "[" in answer or "cite" in answer_lower else 0.0
+                1.0 if ("[" in answer or "cite" in answer_lower) else 0.0
             )
             source_attribution = (
-                0.90
-                if any(str(i) in answer for i in range(1, len(contexts) + 1))
+                sum(1 for i in range(1, len(contexts) + 1) if str(i) in answer)
+                / max(len(contexts), 1)
+                if contexts
                 else 0.0
             )
             context_coverage = min(1.0, len(c_words) / 500.0)
@@ -75,7 +142,10 @@ class RAGService:
                 source_attribution=round(source_attribution, 4),
                 context_coverage=round(context_coverage, 4),
                 knowledge_utilization=round(knowledge_utilization, 4),
-                custom_retrieval_metrics={"mrr": 1.0, "ndcg": 0.95},
+                custom_retrieval_metrics={
+                    "mrr": round(mrr_val, 4),
+                    "ndcg": round(ndcg_val, 4),
+                },
             )
 
             res = await self.repo.create_rag_evaluation(eval_obj)
