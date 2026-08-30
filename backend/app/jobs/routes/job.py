@@ -1,9 +1,13 @@
-from typing import List, Optional
+from typing import Any, List, Optional
 
 from fastapi import APIRouter, Depends, Query, WebSocket, WebSocketDisconnect, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.dependencies import validate_api_key
+from app.core.dependencies import (
+    _extract_workspace_id,
+    get_current_api_key,
+    validate_api_key,
+)
 from app.database.session import get_db
 from app.jobs.progress.websocket import websocket_manager
 from app.jobs.schemas.job import (
@@ -32,10 +36,12 @@ async def create_job(
     payload: JobCreate,
     project_id: str = Query(..., description="Project UUID to associate with this job"),
     db: AsyncSession = Depends(get_db),
+    current_key: Any = Depends(get_current_api_key),
 ):
     """Submits a job request and dispatches it to Celery workers."""
+    workspace_id = _extract_workspace_id(current_key)
     service = JobService(db)
-    job = await service.create_job(project_id, payload)
+    job = await service.create_job(project_id, payload, workspace_id=workspace_id)
     return create_response(
         success=True,
         message="Background job queued successfully.",
@@ -58,8 +64,10 @@ async def list_jobs(
     sort_by: str = Query("created_at", description="Sort field name"),
     sort_order: str = Query("desc", description="Sort direction order"),
     db: AsyncSession = Depends(get_db),
+    current_key: Any = Depends(get_current_api_key),
 ):
     """Retrieves a paginated list of background jobs matching query filters."""
+    workspace_id = _extract_workspace_id(current_key)
     service = JobService(db)
     items, total = await service.list_jobs(
         queue_name=queue_name,
@@ -69,6 +77,7 @@ async def list_jobs(
         page_size=page_size,
         sort_by=sort_by,
         sort_order=sort_order,
+        workspace_id=workspace_id,
     )
     meta = create_pagination_meta(page=page, page_size=page_size, total_items=total)
     paginated_data = PaginatedResponse(
@@ -91,10 +100,12 @@ async def list_jobs(
 async def get_job(
     id: str,
     db: AsyncSession = Depends(get_db),
+    current_key: Any = Depends(get_current_api_key),
 ):
     """Retrieves full detail data, execution logs, and histories for a background job."""
+    workspace_id = _extract_workspace_id(current_key)
     service = JobService(db)
-    job = await service.get_job(id)
+    job = await service.get_job(id, workspace_id=workspace_id)
     return create_response(
         success=True,
         message="Job details retrieved successfully.",
@@ -111,17 +122,12 @@ async def get_job(
 async def delete_job(
     id: str,
     db: AsyncSession = Depends(get_db),
+    current_key: Any = Depends(get_current_api_key),
 ):
     """Deletes a job and all its related cascades from the database."""
-    from app.jobs.models.job import Job
-
-    job = await db.get(Job, id)
-    if not job:
-        return create_response(
-            success=False,
-            message=f"Job with ID '{id}' not found.",
-            status_code=404,
-        )
+    workspace_id = _extract_workspace_id(current_key)
+    service = JobService(db)
+    job = await service.get_job(id, workspace_id=workspace_id)
     await db.delete(job)
     await db.commit()
     return create_response(
@@ -140,10 +146,12 @@ async def cancel_job(
     id: str,
     reason: Optional[str] = Query(None, description="Reason for cancellation"),
     db: AsyncSession = Depends(get_db),
+    current_key: Any = Depends(get_current_api_key),
 ):
     """Flags a running or queued job as cancelled to interrupt workers execution loop."""
+    workspace_id = _extract_workspace_id(current_key)
     service = JobService(db)
-    job = await service.cancel_job(id, reason=reason)
+    job = await service.cancel_job(id, reason=reason, workspace_id=workspace_id)
     return create_response(
         success=True,
         message="Job cancellation request received.",
@@ -159,6 +167,7 @@ async def cancel_job(
 )
 async def list_queues(
     db: AsyncSession = Depends(get_db),
+    current_key: Any = Depends(get_current_api_key),
 ):
     """Lists queues configured inside the EvalForge jobs platform."""
     service = JobService(db)
@@ -178,6 +187,7 @@ async def list_queues(
 )
 async def list_workers(
     db: AsyncSession = Depends(get_db),
+    current_key: Any = Depends(get_current_api_key),
 ):
     """Lists all active and offline workers registered with the platform."""
     service = JobService(db)
@@ -197,6 +207,7 @@ async def list_workers(
 )
 async def get_system_jobs_metrics(
     db: AsyncSession = Depends(get_db),
+    current_key: Any = Depends(get_current_api_key),
 ):
     """Retrieves high-level performance and error metrics for monitoring dashboards."""
     service = JobService(db)
@@ -230,6 +241,14 @@ async def job_progress_websocket(websocket: WebSocket, id: str):
         if not api_key:
             await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
             return
+
+        workspace_id = _extract_workspace_id(api_key)
+        service = JobService(db)
+        try:
+            await service.get_job(id, workspace_id=workspace_id)
+        except Exception:
+            await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
+            return
     finally:
         await db_gen.aclose()
 
@@ -261,6 +280,15 @@ async def project_jobs_websocket(websocket: WebSocket, id: str):
         db = await db_gen.__anext__()
         api_key = await validate_api_key(token, db)
         if not api_key:
+            await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
+            return
+
+        workspace_id = _extract_workspace_id(api_key)
+        from app.database.repository import ProjectRepository
+
+        project_repo = ProjectRepository(db)
+        project = await project_repo.get_by_id(id, workspace_id=workspace_id)
+        if not project:
             await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
             return
     finally:

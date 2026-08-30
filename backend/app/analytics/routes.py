@@ -17,6 +17,8 @@ from app.analytics.schemas import (
     TrendResponse,
 )
 from app.analytics.services import AnalyticsService, ObservabilityService
+from app.core.dependencies import _extract_workspace_id, get_current_api_key
+from app.database.repository import ProjectRepository
 from app.database.session import get_db
 from app.models.analytics import DashboardSnapshot
 from app.utils.pagination import PaginatedResponse, create_pagination_meta
@@ -31,6 +33,18 @@ trends_router = APIRouter(prefix="/trends", tags=["Trends"])
 system_router = APIRouter(prefix="/system", tags=["System"])
 
 
+async def _verify_project_workspace(
+    db: AsyncSession, project_id: str, workspace_id: str
+) -> None:
+    project_repo = ProjectRepository(db)
+    project = await project_repo.get_by_id(project_id, workspace_id=workspace_id)
+    if not project:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Project with ID '{project_id}' not found.",
+        )
+
+
 # --- Analytics Router ---
 
 
@@ -42,8 +56,11 @@ system_router = APIRouter(prefix="/system", tags=["System"])
 async def get_project_analytics(
     project_id: str = Query(..., description="Project UUID to fetch analytics for"),
     db: AsyncSession = Depends(get_db),
+    current_key: Any = Depends(get_current_api_key),
 ):
     """Retrieves high-level aggregated evaluation statistics and trends for a project."""
+    workspace_id = _extract_workspace_id(current_key)
+    await _verify_project_workspace(db, project_id, workspace_id)
     service = AnalyticsService(db)
     overview = await service.get_overview(project_id)
     return create_response(
@@ -68,8 +85,11 @@ async def trigger_analytics_snapshot(
         None, description="Identifier of the scope element"
     ),
     db: AsyncSession = Depends(get_db),
+    current_key: Any = Depends(get_current_api_key),
 ):
     """Triggers background data aggregation and persists a new AnalyticsSnapshot."""
+    workspace_id = _extract_workspace_id(current_key)
+    await _verify_project_workspace(db, project_id, workspace_id)
     service = AnalyticsService(db)
     snapshot = await service.compute_and_save_snapshot(project_id, scope, scope_id)
     return create_response(
@@ -89,8 +109,11 @@ async def save_dashboard_snapshot(
     payload: DashboardSnapshotCreate,
     project_id: str = Query(..., description="Project UUID"),
     db: AsyncSession = Depends(get_db),
+    current_key: Any = Depends(get_current_api_key),
 ):
     """Stores a dashboard layout grid snapshot configuration for a project."""
+    workspace_id = _extract_workspace_id(current_key)
+    await _verify_project_workspace(db, project_id, workspace_id)
     repo = AnalyticsRepository(db)
     snap = DashboardSnapshot(
         project_id=project_id, name=payload.name, layout=payload.layout
@@ -112,8 +135,11 @@ async def save_dashboard_snapshot(
 async def list_dashboard_snapshots(
     project_id: str = Query(..., description="Project UUID"),
     db: AsyncSession = Depends(get_db),
+    current_key: Any = Depends(get_current_api_key),
 ):
     """Retrieves all stored dashboard layouts for a project."""
+    workspace_id = _extract_workspace_id(current_key)
+    await _verify_project_workspace(db, project_id, workspace_id)
     repo = AnalyticsRepository(db)
     items = await repo.list_dashboard_snapshots(project_id)
     return create_response(
@@ -138,8 +164,11 @@ async def list_reports(
     page: int = Query(1, ge=1),
     page_size: int = Query(10, ge=1, le=100),
     db: AsyncSession = Depends(get_db),
+    current_key: Any = Depends(get_current_api_key),
 ):
     """Lists compiled and pending executive reports for a project."""
+    workspace_id = _extract_workspace_id(current_key)
+    await _verify_project_workspace(db, project_id, workspace_id)
     repo = AnalyticsRepository(db)
     skip = (page - 1) * page_size
     items, total = await repo.list_reports(project_id, type, status, skip, page_size)
@@ -162,8 +191,11 @@ async def generate_report(
     payload: ReportCreate,
     project_id: str = Query(..., description="Project UUID"),
     db: AsyncSession = Depends(get_db),
+    current_key: Any = Depends(get_current_api_key),
 ):
     """Triggers background generation of a PDF or CSV format executive evaluation report."""
+    workspace_id = _extract_workspace_id(current_key)
+    await _verify_project_workspace(db, project_id, workspace_id)
     service = AnalyticsService(db)
     report = await service.generate_report_file(
         project_id, payload.name, payload.type, payload.filters
@@ -182,12 +214,16 @@ async def generate_report(
 async def download_report(
     id: str,
     db: AsyncSession = Depends(get_db),
+    current_key: Any = Depends(get_current_api_key),
 ):
     """Downloads the compiled PDF or CSV file binary."""
+    workspace_id = _extract_workspace_id(current_key)
     repo = AnalyticsRepository(db)
     report = await repo.get_report(id)
     if not report or not report.file_path:
         raise HTTPException(status_code=404, detail="Compiled report file not found.")
+
+    await _verify_project_workspace(db, report.project_id, workspace_id)
 
     media_type = "application/pdf" if report.type.upper() == "PDF" else "text/csv"
     return FileResponse(
@@ -211,8 +247,11 @@ async def get_leaderboard(
         "model", description="model, provider, dataset, or benchmark"
     ),
     db: AsyncSession = Depends(get_db),
+    current_key: Any = Depends(get_current_api_key),
 ):
     """Retrieves ranked standings of models or providers based on quality scores."""
+    workspace_id = _extract_workspace_id(current_key)
+    await _verify_project_workspace(db, project_id, workspace_id)
     service = AnalyticsService(db)
     items = await service.get_leaderboard(project_id, entity_type)
     return create_response(
@@ -237,8 +276,11 @@ async def list_insights(
     ),
     severity: Optional[str] = Query(None, description="low, medium, high, critical"),
     db: AsyncSession = Depends(get_db),
+    current_key: Any = Depends(get_current_api_key),
 ):
     """Lists auto-detected performance regression and latency spike insights."""
+    workspace_id = _extract_workspace_id(current_key)
+    await _verify_project_workspace(db, project_id, workspace_id)
     repo = AnalyticsRepository(db)
     items = await repo.list_insights(project_id, type, severity)
     return create_response(
@@ -265,8 +307,11 @@ async def get_trends(
     granularity: str = Query("daily", description="daily, weekly, monthly"),
     compare: bool = Query(True, description="Compare with previous period"),
     db: AsyncSession = Depends(get_db),
+    current_key: Any = Depends(get_current_api_key),
 ):
     """Retrieves quality score, token count, cost, or failure rate trends over time."""
+    workspace_id = _extract_workspace_id(current_key)
+    await _verify_project_workspace(db, project_id, workspace_id)
     service = AnalyticsService(db)
     trends = await service.get_trends(project_id, metric_name, granularity, compare)
     return create_response(
@@ -284,6 +329,7 @@ async def get_trends(
 )
 async def get_system_metrics(
     db: AsyncSession = Depends(get_db),
+    current_key: Any = Depends(get_current_api_key),
 ):
     """Retrieves CPU, Memory, Redis pool connection sizes, and database transaction health metrics."""
     service = ObservabilityService(db)

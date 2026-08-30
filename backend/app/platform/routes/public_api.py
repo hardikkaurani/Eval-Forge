@@ -1,12 +1,12 @@
 import hashlib
-from typing import List
+from typing import Any, List
 from uuid import UUID, uuid4
 
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
-from app.database.session import get_db
+from app.core.dependencies import get_current_api_key, get_db
 from app.platform.models import DeveloperProfile
 from app.platform.schemas import DeveloperProfileCreate, DeveloperProfileResponse
 from app.utils.responses import ApiResponse, create_response
@@ -18,7 +18,9 @@ router = APIRouter(prefix="/public", tags=["Developer Platform - Public credenti
     "/keys", response_model=ApiResponse[DeveloperProfileResponse], status_code=201
 )
 async def generate_api_key(
-    payload: DeveloperProfileCreate, db: AsyncSession = Depends(get_db)
+    payload: DeveloperProfileCreate,
+    db: AsyncSession = Depends(get_db),
+    current_key: Any = Depends(get_current_api_key),
 ):
     """Generates a secure API key credentials profile for a user."""
     raw_key = f"ef_{uuid4().hex}{uuid4().hex}"
@@ -46,7 +48,11 @@ async def generate_api_key(
 
 
 @router.get("/keys", response_model=ApiResponse[List[DeveloperProfileResponse]])
-async def list_user_api_keys(user_id: UUID, db: AsyncSession = Depends(get_db)):
+async def list_user_api_keys(
+    user_id: UUID,
+    db: AsyncSession = Depends(get_db),
+    current_key: Any = Depends(get_current_api_key),
+):
     result = await db.execute(
         select(DeveloperProfile).where(DeveloperProfile.user_id == user_id)
     )
