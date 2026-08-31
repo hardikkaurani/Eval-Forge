@@ -15,51 +15,76 @@ import {
   X,
   ChevronRight,
   Command,
-  Heart,
   Clock,
+  ChevronDown,
+  CheckCircle2,
+  ShieldAlert,
+  FileText,
+  KeyRound,
+  Users,
+  HardDrive,
+  BarChart3,
+  BookOpen,
+  CreditCard,
+  SlidersHorizontal,
+  Workflow,
+  Sparkles,
 } from 'lucide-react';
-import { api } from '../services/api';
-import type { Project } from '../services/api';
+import { useWorkspace } from '../context/WorkspaceContext';
+import { useAuth } from '../context/AuthContext';
 import logo from '../assets/logo.jpg';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
 }
 
+interface NavLinkItem {
+  name: string;
+  path: string;
+  icon: React.ComponentType<{ className?: string }>;
+  exact?: boolean;
+  disabled?: boolean;
+}
+
+interface NavGroup {
+  label: string;
+  links: NavLinkItem[];
+}
+
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const navigate = useNavigate();
   const location = useLocation();
-  const { projectId } = useParams();
+  const { projectId: routeProjectId } = useParams();
+
+  const { projects, currentProjectId, currentProject, setCurrentProjectId } = useWorkspace();
+  const { user, logout } = useAuth();
+
+  const activeProjectId = routeProjectId || currentProjectId || (projects[0]?.id ?? '');
+
+  // Keep WorkspaceContext in sync with URL parameter if present
+  useEffect(() => {
+    if (routeProjectId && routeProjectId !== currentProjectId) {
+      setCurrentProjectId(routeProjectId);
+    }
+  }, [routeProjectId, currentProjectId, setCurrentProjectId]);
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [projectDropdownOpen, setProjectDropdownOpen] = useState(false);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [currentProjectName, setCurrentProjectName] = useState('Select Project');
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const [notifications, setNotifications] = useState<string[]>([
+  const [showNotifications, setShowNotifications] = useState(false);
+
+  const notifications = [
     'Evaluation pipeline Chatbot Alignment complete (Score: 0.94)',
     'Database connection established with healthy status',
     'Rate limit alert on OpenAI provider',
-  ]);
-  const [showNotifications, setShowNotifications] = useState(false);
+  ];
 
   const commandPaletteRef = useRef<HTMLDivElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const notificationRef = useRef<HTMLDivElement>(null);
-
-  // Fetch projects list for sidebar and command palette
-  useEffect(() => {
-    const fetchProjects = async () => {
-      const projs = await api.projects.list();
-      setProjects(projs);
-      if (projectId) {
-        const current = projs.find((p: Project) => p.id === projectId);
-        if (current) setCurrentProjectName(current.name);
-      }
-    };
-    fetchProjects();
-  }, [projectId]);
+  const projectDropdownRef = useRef<HTMLDivElement>(null);
 
   // Keyboard shortcut Ctrl+K / Cmd+K for command palette
   useEffect(() => {
@@ -72,6 +97,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         setCommandPaletteOpen(false);
         setShowUserMenu(false);
         setShowNotifications(false);
+        setProjectDropdownOpen(false);
+        setSidebarOpen(false);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -81,52 +108,128 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   // Click outside handlers
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (commandPaletteRef.current && !commandPaletteRef.current.contains(e.target as Node)) {
+      const target = e.target as Node;
+      if (commandPaletteRef.current && !commandPaletteRef.current.contains(target)) {
         setCommandPaletteOpen(false);
       }
-      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+      if (userMenuRef.current && !userMenuRef.current.contains(target)) {
         setShowUserMenu(false);
       }
-      if (notificationRef.current && !notificationRef.current.contains(e.target as Node)) {
+      if (notificationRef.current && !notificationRef.current.contains(target)) {
         setShowNotifications(false);
+      }
+      if (projectDropdownRef.current && !projectDropdownRef.current.contains(target)) {
+        setProjectDropdownOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const navLinks = [
-    { name: 'Dashboard', path: '/', icon: Layers },
+  const navGroups: NavGroup[] = [
     {
-      name: 'Datasets',
-      path: projectId ? `/projects/${projectId}/datasets` : '#',
-      icon: Database,
-      disabled: !projectId,
+      label: 'Workbench',
+      links: [
+        { name: 'Dashboard', path: '/', icon: Layers, exact: true },
+        {
+          name: 'Datasets',
+          path: activeProjectId ? `/projects/${activeProjectId}/datasets` : '#',
+          icon: Database,
+          disabled: !activeProjectId,
+        },
+        {
+          name: 'Evaluations',
+          path: activeProjectId ? `/projects/${activeProjectId}/evaluations` : '#',
+          icon: Terminal,
+          disabled: !activeProjectId,
+        },
+        {
+          name: 'Benchmarks',
+          path: activeProjectId ? `/projects/${activeProjectId}/benchmarks` : '#',
+          icon: Activity,
+          disabled: !activeProjectId,
+        },
+      ],
     },
     {
-      name: 'Evaluations',
-      path: projectId ? `/projects/${projectId}/evaluations` : '#',
-      icon: Terminal,
-      disabled: !projectId,
+      label: 'Advanced AI & Safety',
+      links: [
+        {
+          name: 'RAG Evaluation',
+          path: activeProjectId ? `/projects/${activeProjectId}/rag` : '#',
+          icon: Sparkles,
+          disabled: !activeProjectId,
+        },
+        {
+          name: 'Policy Rules',
+          path: activeProjectId ? `/projects/${activeProjectId}/policy` : '#',
+          icon: SlidersHorizontal,
+          disabled: !activeProjectId,
+        },
+        {
+          name: 'AI Safety',
+          path: activeProjectId ? `/projects/${activeProjectId}/safety` : '#',
+          icon: ShieldAlert,
+          disabled: !activeProjectId,
+        },
+        {
+          name: 'Reports',
+          path: activeProjectId ? `/projects/${activeProjectId}/reports` : '#',
+          icon: FileText,
+          disabled: !activeProjectId,
+        },
+      ],
     },
     {
-      name: 'Benchmarks',
-      path: projectId ? `/projects/${projectId}/benchmarks` : '#',
-      icon: Activity,
-      disabled: !projectId,
+      label: 'Jobs & Execution',
+      links: [
+        { name: 'Providers', path: '/providers', icon: Cpu },
+        { name: 'Scheduled Jobs', path: '/scheduled-jobs', icon: Clock },
+        {
+          name: 'Jobs Queue',
+          path: activeProjectId ? `/projects/${activeProjectId}/jobs` : '#',
+          icon: Workflow,
+          disabled: !activeProjectId,
+        },
+        {
+          name: 'Audit Logs',
+          path: activeProjectId ? `/projects/${activeProjectId}/logs` : '#',
+          icon: BarChart3,
+          disabled: !activeProjectId,
+        },
+      ],
     },
-    { name: 'Providers', path: '/providers', icon: Cpu },
-    { name: 'Scheduled Jobs', path: '/scheduled-jobs', icon: Clock },
+    {
+      label: 'Settings & Administration',
+      links: [
+        { name: 'Workspace', path: '/settings/workspace', icon: Settings },
+        { name: 'Members & Access', path: '/settings/members', icon: Users },
+        { name: 'API & Webhooks', path: '/settings/keys', icon: KeyRound },
+        { name: 'Audit Trail', path: '/settings/audit', icon: HardDrive },
+        { name: 'Billing & Usage', path: '/settings/billing', icon: CreditCard },
+      ],
+    },
+    {
+      label: 'Platform & Docs',
+      links: [
+        { name: 'Developer Portal', path: '/developer', icon: BookOpen },
+      ],
+    },
   ];
 
-  // Command palette commands
+  // Command palette options
   const commands = [
     { title: 'Go to Dashboard', action: () => navigate('/') },
     { title: 'Configure Providers', action: () => navigate('/providers') },
-    { title: 'User Profile', action: () => navigate('/profile') },
+    { title: 'View Scheduled Jobs', action: () => navigate('/scheduled-jobs') },
+    { title: 'User Profile & Settings', action: () => navigate('/profile') },
+    { title: 'Developer Portal & MCP', action: () => navigate('/developer') },
     ...projects.map((p) => ({
-      title: `Switch to Project: ${p.name}`,
-      action: () => navigate(`/projects/${p.id}/datasets`),
+      title: `Switch Project: ${p.name}`,
+      action: () => {
+        setCurrentProjectId(p.id);
+        navigate(`/projects/${p.id}/datasets`);
+      },
     })),
   ];
 
@@ -134,263 +237,301 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     c.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const getBreadcrumbTitle = () => {
+    const path = location.pathname;
+    if (path === '/') return 'Dashboard';
+    if (path === '/providers') return 'Providers';
+    if (path === '/scheduled-jobs') return 'Scheduled Jobs';
+    if (path === '/profile') return 'Profile';
+    if (path === '/developer') return 'Developer Portal';
+    if (path.startsWith('/settings/workspace')) return 'Workspace Settings';
+    if (path.startsWith('/settings/members')) return 'Members & Access';
+    if (path.startsWith('/settings/keys')) return 'API & Webhooks';
+    if (path.startsWith('/settings/audit')) return 'Audit Trail';
+    if (path.startsWith('/settings/billing')) return 'Billing & Usage';
+    if (path.includes('/datasets')) return 'Datasets';
+    if (path.includes('/evaluations')) return 'Evaluations';
+    if (path.includes('/benchmarks')) return 'Benchmarks';
+    if (path.includes('/rag')) return 'RAG Evaluation';
+    if (path.includes('/policy')) return 'Policy Rules';
+    if (path.includes('/safety')) return 'AI Safety';
+    if (path.includes('/jobs')) return 'Jobs Queue';
+    if (path.includes('/logs')) return 'Log Viewer';
+    if (path.includes('/reports')) return 'Reports';
+    return 'Workbench';
+  };
+
   return (
-    <div className="min-h-screen bg-[#050816] text-white flex">
-      {/* Sidebar for Desktop */}
+    <div className="min-h-screen bg-chrome-bg flex text-chrome-text">
+      {/* Mobile Drawer Overlay */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm md:hidden"
+          onClick={() => setSidebarOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+
+      {/* Sidebar Navigation */}
       <aside
-        className={`fixed inset-y-0 left-0 z-40 w-64 bg-[#111827] border-r border-[#2A3352] transform transition-transform md:translate-x-0 md:static md:flex md:flex-col ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
+        role="navigation"
+        aria-label="Main Navigation"
+        className={`fixed inset-y-0 left-0 z-50 w-64 bg-chrome-panel border-r border-chrome-border transform transition-transform duration-200 ease-in-out md:translate-x-0 md:static md:flex md:flex-col ${
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
       >
-        <div className="h-16 flex items-center justify-between px-6 border-b border-[#2A3352]">
-          <Link to="/" className="flex items-center gap-3">
+        {/* Brand Header */}
+        <div className="h-16 flex items-center justify-between px-5 border-b border-chrome-border">
+          <Link to="/" className="flex items-center gap-3 group">
             <img
               src={logo}
-              alt="EvalForge Logo"
-              className="w-8 h-8 rounded-lg object-cover border border-[#D8CCBD]"
+              alt="Eval-Forge Logo"
+              className="w-8 h-8 rounded-md object-cover border border-chrome-border group-hover:border-brand-sky transition-colors"
             />
-            <span className="font-heading font-bold text-xl tracking-tight text-white">
-              EvalForge
-            </span>
+            <div className="flex flex-col">
+              <span className="font-bold text-base tracking-tight text-chrome-text flex items-center gap-1.5">
+                Eval-Forge
+                <span className="text-[10px] font-mono uppercase bg-brand-terracotta/20 text-brand-terracotta px-1.5 py-0.5 rounded border border-brand-terracotta/30">
+                  OS
+                </span>
+              </span>
+              <span className="text-[11px] font-mono text-chrome-muted -mt-0.5">
+                v1.4.0 • Enterprise
+              </span>
+            </div>
           </Link>
           <button
-            type="button"
-            aria-label="Close sidebar"
-            title="Close sidebar"
-            className="md:hidden text-muted hover:text-white"
             onClick={() => setSidebarOpen(false)}
+            className="md:hidden text-chrome-muted hover:text-chrome-text p-1 rounded-md"
+            aria-label="Close sidebar"
           >
-            <X size={20} />
+            <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Project Selector dropdown inside Sidebar */}
-        <div className="px-4 py-4 border-b border-[#2A3352]">
-          <label className="text-xs uppercase text-gray-500 font-semibold tracking-wider block mb-1.5">
+        {/* Workspace / Project Switcher */}
+        <div className="p-3 border-b border-chrome-border relative" ref={projectDropdownRef}>
+          <label className="text-[10px] font-mono uppercase text-chrome-muted px-2 block mb-1">
             Active Project
           </label>
-          <div className="relative">
-            <select
-              aria-label="Active project"
-              title="Active project"
-              value={projectId || ''}
-              onChange={(e) => {
-                if (e.target.value) {
-                  navigate(`/projects/${e.target.value}/datasets`);
-                } else {
-                  navigate('/');
-                }
-              }}
-              className="w-full bg-[#050816] text-white border border-[#2A3352] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary appearance-none cursor-pointer"
-            >
-              <option value="">-- Select Project --</option>
-              {projects.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name}
-                </option>
-              ))}
-            </select>
-            <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none text-muted">
-              <ChevronRight size={14} className="rotate-90" />
+          <button
+            onClick={() => setProjectDropdownOpen(!projectDropdownOpen)}
+            className="w-full flex items-center justify-between px-3 py-2 rounded-md bg-chrome-bg border border-chrome-border hover:border-chrome-text text-left transition-colors"
+            aria-haspopup="listbox"
+            aria-expanded={projectDropdownOpen}
+          >
+            <div className="truncate pr-2">
+              <div className="text-xs font-semibold text-chrome-text truncate">
+                {currentProject ? currentProject.name : 'Select Project'}
+              </div>
+              <div className="text-[10px] font-mono text-chrome-muted truncate">
+                {currentProject ? `${currentProject.datasets_count || 0} Datasets` : 'No project'}
+              </div>
             </div>
-          </div>
+            <ChevronDown className={`w-4 h-4 text-chrome-muted shrink-0 transition-transform ${projectDropdownOpen ? 'rotate-180' : ''}`} />
+          </button>
+
+          {/* Dropdown Menu */}
+          {projectDropdownOpen && (
+            <div className="absolute left-3 right-3 top-full mt-1 bg-chrome-panel border border-chrome-border rounded-md shadow-chrome z-50 py-1 max-h-60 overflow-y-auto">
+              {projects.length === 0 ? (
+                <div className="px-3 py-2 text-xs text-chrome-muted">No projects found</div>
+              ) : (
+                projects.map((p) => (
+                  <button
+                    key={p.id}
+                    onClick={() => {
+                      setCurrentProjectId(p.id);
+                      setProjectDropdownOpen(false);
+                      if (location.pathname.includes('/projects/')) {
+                        const currentSection = location.pathname.split('/').pop() || 'datasets';
+                        navigate(`/projects/${p.id}/${currentSection}`);
+                      }
+                    }}
+                    className={`w-full text-left px-3 py-2 text-xs flex items-center justify-between hover:bg-chrome-hover transition-colors ${
+                      p.id === activeProjectId ? 'bg-chrome-hover text-brand-sky font-semibold' : 'text-chrome-text'
+                    }`}
+                  >
+                    <span className="truncate">{p.name}</span>
+                    {p.id === activeProjectId && <CheckCircle2 className="w-3.5 h-3.5 text-brand-sky shrink-0" />}
+                  </button>
+                ))
+              )}
+            </div>
+          )}
         </div>
 
-        {/* Sidebar Nav Links */}
-        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-          {navLinks.map((link) => {
-            const Icon = link.icon;
-            const isActive =
-              location.pathname === link.path ||
-              (link.path !== '/' &&
-                location.pathname.startsWith(link.path.replace(/\/:projectId.*/, '')));
+        {/* Navigation Links Group */}
+        <nav className="flex-1 overflow-y-auto p-3 space-y-4">
+          {navGroups.map((group, idx) => (
+            <div key={idx}>
+              <div className="text-[10px] font-mono uppercase text-chrome-muted px-3 mb-1.5 tracking-wider">
+                {group.label}
+              </div>
+              <div className="space-y-0.5">
+                {group.links.map((link) => {
+                  const Icon = link.icon;
+                  const isActive = link.exact
+                    ? location.pathname === link.path
+                    : location.pathname.startsWith(link.path) && link.path !== '#';
 
-            if (link.disabled) {
-              return (
-                <div
-                  key={link.name}
-                  className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-600 cursor-not-allowed text-sm"
-                  title="Select a project first"
-                >
-                  <Icon size={18} />
-                  <span>{link.name}</span>
-                </div>
-              );
-            }
+                  if (link.disabled) {
+                    return (
+                      <span
+                        key={link.name}
+                        className="flex items-center gap-3 px-3 py-1.5 rounded-md text-xs font-medium text-chrome-muted/40 cursor-not-allowed select-none"
+                      >
+                        <Icon className="w-4 h-4 shrink-0" />
+                        <span>{link.name}</span>
+                      </span>
+                    );
+                  }
 
-            return (
-              <Link
-                key={link.name}
-                to={link.path}
-                onClick={() => setSidebarOpen(false)}
-                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all text-sm font-medium ${isActive ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-gray-400 hover:bg-[#1f2937] hover:text-white'}`}
-              >
-                <Icon size={18} />
-                <span>{link.name}</span>
-              </Link>
-            );
-          })}
+                  return (
+                    <Link
+                      key={link.name}
+                      to={link.path}
+                      onClick={() => setSidebarOpen(false)}
+                      className={`flex items-center justify-between px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                        isActive
+                          ? 'bg-chrome-hover text-brand-sky border-l-2 border-brand-sky'
+                          : 'text-chrome-muted hover:text-chrome-text hover:bg-chrome-hover/50'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3 truncate">
+                        <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-brand-sky' : 'text-chrome-muted'}`} />
+                        <span className="truncate">{link.name}</span>
+                      </div>
+                      {isActive && <ChevronRight className="w-3.5 h-3.5 text-brand-sky shrink-0" />}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
         </nav>
 
-        {/* Footer in Sidebar */}
-        <div className="p-4 border-t border-[#2A3352] text-xs text-gray-500 flex items-center justify-between">
-          <span>v0.1.0 (Beta)</span>
-          <span className="flex items-center gap-1">
-            Made with <Heart size={10} className="text-red-500 fill-red-500" />
-          </span>
+        {/* Footer Info */}
+        <div className="p-3 border-t border-chrome-border bg-chrome-bg/50">
+          <div className="flex items-center justify-between text-[11px] font-mono text-chrome-muted">
+            <span className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              Engine Online
+            </span>
+            <span>REST / WS</span>
+          </div>
         </div>
       </aside>
 
-      {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0">
-        {/* Top Navbar */}
-        <header className="h-16 bg-[#111827] border-b border-[#2A3352] flex items-center justify-between px-6 sticky top-0 z-30">
+      {/* Main Content Layout */}
+      <div className="flex-1 flex flex-col min-w-0 bg-workbench-bg text-workbench-text">
+        {/* Sticky Header Bar */}
+        <header className="h-16 bg-chrome-panel border-b border-chrome-border sticky top-0 z-30 flex items-center justify-between px-4 md:px-8 text-chrome-text">
           <div className="flex items-center gap-4">
             <button
-              type="button"
-              aria-label="Open sidebar"
-              title="Open sidebar"
-              className="md:hidden text-muted hover:text-white"
               onClick={() => setSidebarOpen(true)}
+              className="md:hidden p-2 text-chrome-muted hover:text-chrome-text rounded-md"
+              aria-label="Open navigation menu"
             >
-              <Menu size={20} />
+              <Menu className="w-5 h-5" />
             </button>
 
-            {/* Breadcrumbs */}
-            <div className="hidden sm:flex items-center gap-2 text-sm text-gray-400">
-              <Link to="/" className="hover:text-white transition">
-                Home
-              </Link>
-              <ChevronRight size={14} className="text-gray-600" />
-              {projectId ? (
+            {/* Breadcrumb Context */}
+            <div className="flex items-center gap-2 text-xs font-mono">
+              <span className="text-chrome-muted">Eval-Forge</span>
+              <ChevronRight className="w-3.5 h-3.5 text-chrome-muted" />
+              {currentProject && (
                 <>
-                  <span className="text-gray-300 font-semibold">{currentProjectName}</span>
-                  {location.pathname.includes('/datasets') && (
-                    <>
-                      <ChevronRight size={14} className="text-gray-600" />
-                      <span className="text-white">Datasets</span>
-                    </>
-                  )}
-                  {location.pathname.includes('/evaluations') && (
-                    <>
-                      <ChevronRight size={14} className="text-gray-600" />
-                      <span className="text-white">Evaluations</span>
-                    </>
-                  )}
-                  {location.pathname.includes('/benchmarks') && (
-                    <>
-                      <ChevronRight size={14} className="text-gray-600" />
-                      <span className="text-white">Benchmarks</span>
-                    </>
-                  )}
+                  <span className="text-chrome-muted truncate max-w-[120px] md:max-w-[200px]">
+                    {currentProject.name}
+                  </span>
+                  <ChevronRight className="w-3.5 h-3.5 text-chrome-muted" />
                 </>
-              ) : (
-                <span className="text-white">Workspace Overview</span>
               )}
+              <span className="text-brand-sky font-medium">{getBreadcrumbTitle()}</span>
             </div>
           </div>
 
-          {/* User Section, Notification & Global Search */}
-          <div className="flex items-center gap-4">
-            {/* Global Search Input */}
+          {/* Header Controls */}
+          <div className="flex items-center gap-3">
+            {/* Command Palette Trigger Button */}
             <button
-              type="button"
               onClick={() => setCommandPaletteOpen(true)}
-              className="flex items-center gap-2 px-3 py-1.5 bg-[#050816] border border-[#2A3352] rounded-lg text-sm text-gray-400 hover:border-gray-500 transition-colors w-40 sm:w-60 text-left"
+              className="flex items-center gap-3 px-3 py-1.5 rounded-md bg-chrome-bg border border-chrome-border text-xs text-chrome-muted hover:text-chrome-text hover:border-chrome-text transition-colors"
+              aria-label="Search and command palette"
             >
-              <Search size={14} />
-              <span className="flex-1 truncate">Search...</span>
-              <kbd className="hidden sm:inline-flex items-center gap-1 bg-[#111827] border border-[#2A3352] px-1.5 py-0.5 rounded text-[10px] font-mono text-gray-500">
-                <Command size={10} />K
+              <Search className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Search commands...</span>
+              <kbd className="hidden sm:inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-chrome-panel border border-chrome-border text-[10px] font-mono text-chrome-muted">
+                <Command className="w-2.5 h-2.5" /> K
               </kbd>
             </button>
 
-            {/* Notification Center */}
+            {/* Notifications Trigger */}
             <div className="relative" ref={notificationRef}>
               <button
-                type="button"
-                aria-label="Notifications"
-                title="Notifications"
                 onClick={() => setShowNotifications(!showNotifications)}
-                className="p-2 text-gray-400 hover:text-white rounded-lg hover:bg-[#1f2937] relative"
+                className="p-2 rounded-md hover:bg-chrome-hover text-chrome-muted hover:text-chrome-text relative"
+                aria-label="Notifications"
               >
-                <Bell size={18} />
-                {notifications.length > 0 && (
-                  <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-accent rounded-full animate-ping" />
-                )}
+                <Bell className="w-4 h-4" />
+                <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-brand-terracotta" />
               </button>
 
               {showNotifications && (
-                <div className="absolute right-0 mt-2 w-80 bg-[#111827] border border-[#2A3352] rounded-lg shadow-xl py-2 z-50">
-                  <div className="px-4 py-2 border-b border-[#2A3352] flex justify-between items-center">
-                    <span className="font-semibold text-sm">Notifications</span>
-                    <button
-                      type="button"
-                      className="text-xs text-primary hover:underline"
-                      onClick={() => setNotifications([])}
-                    >
-                      Clear all
-                    </button>
+                <div className="absolute right-0 top-full mt-2 w-80 bg-chrome-panel border border-chrome-border rounded-md shadow-chrome z-50 p-3 space-y-2">
+                  <div className="flex items-center justify-between text-xs font-semibold border-b border-chrome-border pb-2">
+                    <span>Notifications</span>
+                    <span className="text-[10px] font-mono text-brand-sky">{notifications.length} New</span>
                   </div>
-                  <div className="divide-y divide-[#2A3352] max-h-60 overflow-y-auto">
-                    {notifications.length === 0 ? (
-                      <div className="p-4 text-center text-sm text-gray-500">No new alerts</div>
-                    ) : (
-                      notifications.map((notif, index) => (
-                        <div
-                          key={index}
-                          className="p-3 text-xs text-gray-300 hover:bg-[#1f2937] transition-colors"
-                        >
-                          {notif}
-                        </div>
-                      ))
-                    )}
+                  <div className="space-y-2 max-h-60 overflow-y-auto">
+                    {notifications.map((n, i) => (
+                      <div key={i} className="text-[11px] p-2 rounded bg-chrome-bg border border-chrome-border text-chrome-muted">
+                        {n}
+                      </div>
+                    ))}
                   </div>
                 </div>
               )}
             </div>
 
-            {/* User Profile dropdown */}
+            {/* User Profile Menu */}
             <div className="relative" ref={userMenuRef}>
               <button
-                type="button"
-                aria-label="User menu"
-                title="User menu"
                 onClick={() => setShowUserMenu(!showUserMenu)}
-                className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-[#1f2937] transition"
+                className="flex items-center gap-2 p-1.5 rounded-md hover:bg-chrome-hover border border-transparent hover:border-chrome-border transition-colors"
+                aria-label="User menu"
               >
-                <div className="w-8 h-8 bg-gradient-to-tr from-primary to-accent rounded-lg flex items-center justify-center font-bold text-white text-sm">
-                  HK
+                <div className="w-7 h-7 rounded-full bg-brand-terracotta text-white flex items-center justify-center font-bold text-xs">
+                  {user?.name?.[0] || 'E'}
                 </div>
+                <ChevronDown className="w-3.5 h-3.5 text-chrome-muted hidden sm:block" />
               </button>
 
               {showUserMenu && (
-                <div className="absolute right-0 mt-2 w-48 bg-[#111827] border border-[#2A3352] rounded-lg shadow-xl py-1 z-50">
-                  <div className="px-4 py-2 border-b border-[#2A3352]">
-                    <p className="text-sm font-semibold text-white">Hardik Kaurani</p>
-                    <p className="text-xs text-gray-500 truncate">hardikkaurani1@gmail.com</p>
+                <div className="absolute right-0 top-full mt-2 w-56 bg-chrome-panel border border-chrome-border rounded-md shadow-chrome z-50 py-1 text-xs">
+                  <div className="px-3 py-2 border-b border-chrome-border">
+                    <p className="font-semibold text-chrome-text truncate">{user?.name || 'Engineer'}</p>
+                    <p className="text-[10px] font-mono text-chrome-muted truncate">{user?.email || 'engineer@evalforge.ai'}</p>
                   </div>
                   <Link
                     to="/profile"
-                    className="flex items-center gap-2 px-4 py-2 text-sm text-gray-300 hover:bg-[#1f2937] hover:text-white"
                     onClick={() => setShowUserMenu(false)}
+                    className="flex items-center gap-2 px-3 py-2 text-chrome-muted hover:text-chrome-text hover:bg-chrome-hover transition-colors"
                   >
-                    <User size={14} /> Profile
-                  </Link>
-                  <Link
-                    to="/providers"
-                    className="flex items-center gap-2 px-4 py-2 text-sm text-gray-300 hover:bg-[#1f2937] hover:text-white"
-                    onClick={() => setShowUserMenu(false)}
-                  >
-                    <Settings size={14} /> Providers Config
+                    <User className="w-3.5 h-3.5" />
+                    <span>Profile Settings</span>
                   </Link>
                   <button
-                    type="button"
                     onClick={() => {
+                      logout();
                       setShowUserMenu(false);
                       navigate('/login');
                     }}
-                    className="w-full text-left flex items-center gap-2 px-4 py-2 text-sm text-red-400 hover:bg-red-950/20 hover:text-red-300"
+                    className="w-full flex items-center gap-2 px-3 py-2 text-red-400 hover:bg-chrome-hover transition-colors text-left"
                   >
-                    <LogOut size={14} /> Log Out
+                    <LogOut className="w-3.5 h-3.5" />
+                    <span>Sign Out</span>
                   </button>
                 </div>
               )}
@@ -398,53 +539,51 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           </div>
         </header>
 
-        {/* Content Wrapper */}
-        <main className="flex-1 p-6 overflow-y-auto">{children}</main>
+        {/* Content Workbench Area */}
+        <main className="flex-1 p-4 md:p-8 max-w-7xl w-full mx-auto">
+          {children}
+        </main>
       </div>
 
-      {/* Keyboard Command Palette Dialog Modal */}
+      {/* Command Palette Modal */}
       {commandPaletteOpen && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-start justify-center pt-24 px-4">
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-start justify-center pt-20 px-4">
           <div
             ref={commandPaletteRef}
-            className="w-full max-w-xl bg-[#111827] border border-[#2A3352] rounded-xl shadow-2xl overflow-hidden"
+            className="w-full max-w-xl bg-chrome-panel border border-chrome-border rounded-md shadow-chrome overflow-hidden text-chrome-text"
           >
-            <div className="p-3 border-b border-[#2A3352] flex items-center gap-2">
-              <Search className="text-gray-400 w-5 h-5" />
+            <div className="flex items-center px-4 border-b border-chrome-border">
+              <Search className="w-4 h-4 text-chrome-muted mr-3" />
               <input
                 type="text"
+                autoFocus
+                placeholder="Type a command or search..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search projects, shortcuts, commands..."
-                className="w-full bg-transparent border-0 text-white placeholder-gray-500 focus:outline-none focus:ring-0 text-sm"
-                autoFocus
+                className="w-full py-3.5 bg-transparent text-xs text-chrome-text focus:outline-none placeholder:text-chrome-muted"
               />
               <button
-                type="button"
-                className="text-xs bg-[#050816] border border-[#2A3352] px-1.5 py-0.5 rounded text-gray-400"
                 onClick={() => setCommandPaletteOpen(false)}
+                className="text-chrome-muted hover:text-chrome-text text-xs font-mono"
               >
                 ESC
               </button>
             </div>
-            <div className="max-h-80 overflow-y-auto p-2">
+            <div className="max-h-72 overflow-y-auto p-2 space-y-1">
               {filteredCommands.length === 0 ? (
-                <div className="py-8 text-center text-sm text-gray-500">
-                  No results found for &ldquo;{searchQuery}&rdquo;
-                </div>
+                <div className="px-4 py-3 text-xs text-chrome-muted text-center">No commands found</div>
               ) : (
-                filteredCommands.map((cmd, idx) => (
+                filteredCommands.map((c, i) => (
                   <button
-                    type="button"
-                    key={idx}
+                    key={i}
                     onClick={() => {
-                      cmd.action();
+                      c.action();
                       setCommandPaletteOpen(false);
                     }}
-                    className="w-full text-left px-3 py-2 rounded-lg text-sm text-gray-300 hover:bg-primary hover:text-white transition flex items-center justify-between"
+                    className="w-full text-left px-3 py-2 rounded-md text-xs hover:bg-chrome-hover flex items-center justify-between transition-colors"
                   >
-                    <span>{cmd.title}</span>
-                    <span className="text-xs opacity-50 font-mono">Action</span>
+                    <span>{c.title}</span>
+                    <ChevronRight className="w-3.5 h-3.5 text-chrome-muted" />
                   </button>
                 ))
               )}

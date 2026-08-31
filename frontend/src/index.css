@@ -1,204 +1,81 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;450;500;600&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --color-primary: #4b3425; /* Deep Walnut */
-  --color-accent: #70513a; /* Dark Bronze */
-  --color-muted: #8a7c6e; /* Ash Brown */
+  /* Chrome (Dark Application Shell) */
+  --color-chrome-bg: #0b1326;
+  --color-chrome-panel: #131b2e;
+  --color-chrome-border: #3e484f;
+  --color-chrome-text: #dae2fd;
+  --color-chrome-muted: #bdc8d1;
+  --color-chrome-hover: #222a3d;
 
-  --font-sans: 'Inter', system-ui, sans-serif;
-  --font-heading: 'Lora', Georgia, serif;
+  /* Content Workbench (Warm Light Surface) */
+  --color-workbench-bg: #fdf8f8;
+  --color-workbench-card: #f7f3f2;
+  --color-workbench-border: #e5e2e1;
+  --color-workbench-text: #1c1b1b;
+  --color-workbench-muted: #444748;
+
+  /* Brand Accents */
+  --color-terracotta: #904c21;
+  --color-terracotta-hover: #783a0f;
+  --color-sky: #38bdf8;
+  --color-indigo: #3131c0;
+
+  /* Well (Dark Code / Log Container) */
+  --color-well-bg: #060e20;
+
+  /* Fonts */
+  --font-sans: 'Geist', 'Inter', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
-
-  --color-bg-primary: #f8f5f0;
-  --color-bg-secondary: #f2eee7;
-  --color-surface: #fcfbf8;
-  --color-card: #efe7da;
-
-  --color-text-primary: #2b2118;
-  --color-text-secondary: #5e5347;
-  --color-text-muted: #8a7c6e;
-
-  --color-accent-primary: #4b3425;
-  --color-accent-secondary: #70513a;
-  --color-highlight: #c8a977;
-  --color-border: #d8ccbd;
-}
-
-@layer utilities {
-  .bg-grid-pattern {
-    background-size: 40px 40px;
-    background-image:
-      linear-gradient(to right, rgba(216, 204, 189, 0.15) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(216, 204, 189, 0.15) 1px, transparent 1px);
-  }
 }
 
 @layer base {
   body {
-    @apply bg-[#F8F5F0] text-[#2B2118] font-sans antialiased overflow-x-hidden;
-    background-image: none !important;
+    @apply bg-workbench-bg text-workbench-text font-sans antialiased overflow-x-hidden min-h-screen;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply tracking-tight font-semibold;
   }
 }
 
-/* Custom scrollbars for clean, elegant look */
+/* Custom Scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #f8f5f0;
+  background: #0b1326;
 }
 ::-webkit-scrollbar-thumb {
-  background: #d8ccbd;
+  background: #3e484f;
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #4b3425;
+  background: #87929a;
 }
 
-/* Global design tokens override for existing dark layout elements */
-.bg-\[\#050816\] {
-  background-color: #f8f5f0 !important; /* Warm Ivory background */
-}
-.bg-\[\#111827\] {
-  background-color: #fcfbf8 !important; /* Pearl White surface */
-}
-.bg-\[\#111827\]\/30 {
-  background-color: rgba(252, 251, 248, 0.3) !important;
-}
-.bg-\[\#111827\]\/50 {
-  background-color: rgba(252, 251, 248, 0.5) !important;
-}
-.bg-\[\#050816\]\/30 {
-  background-color: rgba(248, 245, 240, 0.3) !important;
-}
-.bg-\[\#050816\]\/40 {
-  background-color: rgba(248, 245, 240, 0.4) !important;
-}
-.bg-\[\#050816\]\/50 {
-  background-color: rgba(248, 245, 240, 0.5) !important;
-}
-.bg-\[\#050816\]\/60 {
-  background-color: rgba(248, 245, 240, 0.6) !important;
-}
-.border-\[\#2A3352\] {
-  border-color: #d8ccbd !important; /* Soft Sand border */
-}
-.border-\[\#2A3352\]\/40 {
-  border-color: rgba(216, 204, 189, 0.4) !important;
-}
-.divide-\[\#2A3352\] > * + * {
-  border-color: #d8ccbd !important;
-}
-.divide-y.divide-\[\#2A3352\] > * + * {
-  border-color: #d8ccbd !important;
+/* Monospace Utility */
+.font-mono-code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8125rem;
+  line-height: 1.25rem;
 }
 
-/* Hover styling */
-.hover\:bg-\[\#1f2937\]:hover,
-.hover\:bg-\[\#1f2937\]\/40:hover {
-  background-color: #f2eee7 !important; /* Soft Linen */
+.font-mono-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6875rem;
+  line-height: 1rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
 }
 
-/* Typography & Contrast Override */
-.text-white {
-  color: #2b2118 !important; /* Rich Espresso */
-}
-.text-gray-400 {
-  color: #5e5347 !important; /* Warm Slate */
-}
-.text-gray-300 {
-  color: #2b2118 !important;
-}
-.text-gray-500 {
-  color: #8a7c6e !important; /* Ash Brown */
-}
-.text-gray-600 {
-  color: #8a7c6e !important;
-}
-.text-indigo-300 {
-  color: #70513a !important; /* Dark Bronze */
-}
-.text-indigo-400 {
-  color: #4b3425 !important; /* Deep Walnut */
-}
-.text-purple-400 {
-  color: #70513a !important;
-}
-.text-cyan-400 {
-  color: #334e68 !important; /* Muted Navy */
-}
-.text-emerald-400 {
-  color: #4c6b4f !important; /* Forest Olive */
-}
-.hover\:text-white:hover {
-  color: #2b2118 !important;
-}
-
-/* Accent element backgrounds */
-.bg-primary {
-  background-color: #4b3425 !important; /* Deep Walnut */
-  color: #fcfbf8 !important;
-}
-.bg-primary:hover {
-  background-color: #70513a !important; /* Dark Bronze */
-}
-.bg-accent {
-  background-color: #70513a !important;
-  color: #fcfbf8 !important;
-}
-
-/* Input elements placeholder styling */
-input::placeholder,
-textarea::placeholder {
-  color: #8a7c6e !important;
-}
-
-/* High contrast text inside buttons / primary elements */
-.bg-primary,
-.bg-primary *,
-.bg-accent,
-.bg-accent *,
-.bg-accent-primary,
-.bg-accent-primary * {
-  color: #fcfbf8 !important;
-}
-
-/* Remove shiny gradients and enforce flat solid luxury styles */
-.bg-gradient-to-tr,
-.bg-gradient-to-r {
-  background-image: none !important;
-  background-color: #efe7da !important; /* Warm Stone background */
-  color: #2b2118 !important;
-}
-
-/* Recharts overrides */
-.recharts-default-tooltip {
-  background-color: #fcfbf8 !important;
-  border-color: #d8ccbd !important;
-  border-radius: 12px !important;
-  color: #2b2118 !important;
-}
-.recharts-tooltip-item {
-  color: #2b2118 !important;
-}
-path.recharts-curve {
-  stroke: #4b3425 !important;
-  stroke-width: 2px !important;
-}
-.recharts-area-area {
-  fill: #efe7da !important;
-  fill-opacity: 0.5 !important;
-}
-.recharts-bar-rectangle {
-  fill: #70513a !important;
-}
-.recharts-cartesian-grid-horizontal line,
-.recharts-cartesian-grid-vertical line {
-  stroke: #d8ccbd !important;
-  stroke-opacity: 0.5 !important;
+/* Active Nav Glow Accent */
+.nav-item-active {
+  @apply bg-chrome-hover text-brand-sky border-l-2 border-brand-sky font-medium;
 }
