@@ -3,9 +3,11 @@ from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile
 from fastapi.responses import FileResponse
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.dependencies import extract_workspace_id, get_current_api_key
+from app.database.repository import ProjectRepository
 from app.database.session import get_db
 from app.datasets.exceptions.exceptions import (
     DatasetException,
@@ -18,13 +20,17 @@ from app.datasets.schemas.dataset import (
     DatasetDetailResponse,
     DatasetDiffItem,
     DatasetListResponse,
+    DatasetRecordCreate,
+    DatasetRecordResponse,
     DatasetRecordsPaginated,
+    DatasetRecordUpdate,
     DatasetResponse,
     DatasetUpdate,
     DatasetVersionResponse,
 )
 from app.datasets.services.dataset import DatasetService
 from app.datasets.services.import_export import ImportExportService
+from app.models.dataset import ExportJob, ImportJob
 
 router = APIRouter(prefix="/datasets", tags=["datasets"])
 
@@ -272,6 +278,73 @@ async def list_version_records(
         raise HTTPException(status_code=404, detail=str(e)) from e
 
 
+@router.post(
+    "/versions/{version_id}/records",
+    response_model=List[DatasetRecordResponse],
+    status_code=201,
+)
+async def create_version_records(
+    version_id: str,
+    records: List[DatasetRecordCreate],
+    db: AsyncSession = Depends(get_db),
+    current_key: Any = Depends(get_current_api_key),
+):
+    workspace_id = extract_workspace_id(current_key)
+    service = DatasetService(db)
+    records_data = [r.model_dump() for r in records]
+    try:
+        return await service.create_records(
+            version_id, records_data, workspace_id=workspace_id
+        )
+    except DatasetNotFoundException as e:
+        raise HTTPException(status_code=404, detail=str(e)) from e
+
+
+@router.get("/records/{record_id}", response_model=DatasetRecordResponse)
+async def get_record(
+    record_id: str,
+    db: AsyncSession = Depends(get_db),
+    current_key: Any = Depends(get_current_api_key),
+):
+    workspace_id = extract_workspace_id(current_key)
+    service = DatasetService(db)
+    try:
+        return await service.get_single_record(record_id, workspace_id=workspace_id)
+    except DatasetNotFoundException as e:
+        raise HTTPException(status_code=404, detail=str(e)) from e
+
+
+@router.put("/records/{record_id}", response_model=DatasetRecordResponse)
+async def update_record(
+    record_id: str,
+    request: DatasetRecordUpdate,
+    db: AsyncSession = Depends(get_db),
+    current_key: Any = Depends(get_current_api_key),
+):
+    workspace_id = extract_workspace_id(current_key)
+    service = DatasetService(db)
+    try:
+        return await service.update_record(
+            record_id, request.model_dump(exclude_unset=True), workspace_id=workspace_id
+        )
+    except DatasetNotFoundException as e:
+        raise HTTPException(status_code=404, detail=str(e)) from e
+
+
+@router.delete("/records/{record_id}", status_code=204)
+async def delete_record(
+    record_id: str,
+    db: AsyncSession = Depends(get_db),
+    current_key: Any = Depends(get_current_api_key),
+):
+    workspace_id = extract_workspace_id(current_key)
+    service = DatasetService(db)
+    try:
+        await service.delete_record(record_id, workspace_id=workspace_id)
+    except DatasetNotFoundException as e:
+        raise HTTPException(status_code=404, detail=str(e)) from e
+
+
 @router.post("/export", response_model=Dict[str, Any], status_code=202)
 async def export_dataset(
     project_id: str = Query(...),
@@ -287,7 +360,9 @@ async def export_dataset(
         job = await import_export_service.create_export_job(
             project_id, file_format, dataset_id, workspace_id=workspace_id
         )
-        file_path = await import_export_service.execute_export(job.id, version_id)
+        file_path = await import_export_service.execute_export(
+            job.id, version_id, workspace_id=workspace_id
+        )
         return {
             "job_id": job.id,
             "status": "COMPLETED",
@@ -326,25 +401,81 @@ async def download_file(
             status_code=400, detail="Invalid filename or path traversal detected."
         ) from None
 
-    if not os.path.exists(target_path) or not os.path.isfile(target_path):
+    if (
+        not os.path.exists(target_path)
+        or not os.path.isfile(target_path)
+        or os.path.islink(target_path)
+    ):
         raise HTTPException(status_code=404, detail="File not found")
 
     clean_fn = os.path.basename(target_path)
-    if clean_fn.startswith("export_"):
-        parts = clean_fn.split(".")
-        if len(parts) >= 2:
-            job_id = parts[0].replace("export_", "")
-            from app.database.repository import ProjectRepository
-            from app.models.dataset import ExportJob
+    relative_path = os.path.relpath(target_path, base_dir).replace("\\", "/")
 
-            job_res = await db.get(ExportJob, job_id)
-            if not job_res:
-                raise HTTPException(status_code=404, detail="File not found")
-            project_repo = ProjectRepository(db)
+    project_repo = ProjectRepository(db)
+    is_authorized = False
+
+    # 1. Check ExportJob ownership
+    if clean_fn.startswith("export_"):
+        export_stmt = select(ExportJob).where(
+            (ExportJob.file_path == target_path)
+            | (ExportJob.file_path == relative_path)
+            | (ExportJob.file_path == clean_fn)
+        )
+        export_res = (await db.execute(export_stmt)).scalars().all()
+
+        if not export_res:
+            parts = clean_fn.split(".")
+            if len(parts) >= 2:
+                job_id = parts[0].replace("export_", "")
+                job = await db.get(ExportJob, job_id)
+                if job and (
+                    job.file_path == target_path
+                    or job.file_path == relative_path
+                    or job.file_path == clean_fn
+                    or os.path.basename(job.file_path) == clean_fn
+                ):
+                    export_res = [job]
+
+        for job in export_res:
             proj = await project_repo.get_by_id(
-                job_res.project_id, workspace_id=workspace_id
+                job.project_id, workspace_id=workspace_id
             )
-            if not proj:
-                raise HTTPException(status_code=404, detail="File not found")
+            if proj:
+                is_authorized = True
+                break
+
+    # 2. Check ImportJob ownership
+    if not is_authorized and clean_fn.startswith("import_"):
+        import_stmt = select(ImportJob).where(
+            (ImportJob.file_path == target_path)
+            | (ImportJob.file_path == relative_path)
+            | (ImportJob.file_path == clean_fn)
+        )
+        import_res = (await db.execute(import_stmt)).scalars().all()
+
+        if not import_res:
+            parts = clean_fn.split(".")
+            if len(parts) >= 2:
+                job_id = parts[0].replace("import_", "")
+                job = await db.get(ImportJob, job_id)
+                if job and (
+                    job.file_path == target_path
+                    or job.file_path == relative_path
+                    or job.file_path == clean_fn
+                    or os.path.basename(job.file_path) == clean_fn
+                ):
+                    import_res = [job]
+
+        for job in import_res:
+            proj = await project_repo.get_by_id(
+                job.project_id, workspace_id=workspace_id
+            )
+            if proj:
+                is_authorized = True
+                break
+
+    # 3. DENY access if ownership cannot be established for caller's workspace
+    if not is_authorized:
+        raise HTTPException(status_code=404, detail="File not found")
 
     return FileResponse(target_path, filename=clean_fn)

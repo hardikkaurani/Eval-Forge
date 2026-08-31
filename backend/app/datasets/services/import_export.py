@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.repository import ProjectRepository
 from app.datasets.exceptions.exceptions import (
+    DatasetNotFoundException,
     DatasetValidationException,
     InvalidDatasetFormatException,
 )
@@ -79,12 +80,19 @@ class ImportExportService:
         # Find or fetch import job
         job_result = await self.db.get(ImportJob, job_id)
         if not job_result:
-            raise ValueError(f"Import job '{job_id}' not found.")
+            raise DatasetNotFoundException(job_id, f"Import job '{job_id}' not found.")
         job = job_result
+
+        if job.project_id != project_id:
+            raise DatasetNotFoundException(job_id, f"Import job '{job_id}' not found.")
 
         try:
             job.status = "PROCESSING"
             job.progress = 10.0
+
+            filename = f"import_{job.id}.{job.file_format}"
+            saved_path = await self.storage.save(filename, io.BytesIO(file_content))
+            job.file_path = saved_path
             await self.db.commit()
 
             # 1. Encoding check
@@ -126,7 +134,12 @@ class ImportExportService:
                     existing_dataset_id, workspace_id=workspace_id
                 )
                 if not dataset:
-                    raise ValueError(f"Dataset '{existing_dataset_id}' not found.")
+                    raise DatasetNotFoundException(existing_dataset_id)
+                if dataset.project_id != project_id:
+                    raise DatasetNotFoundException(
+                        existing_dataset_id,
+                        f"Dataset '{existing_dataset_id}' does not belong to project '{project_id}'.",
+                    )
             else:
                 dataset = await self.dataset_repo.create_dataset(
                     project_id=project_id,
@@ -190,7 +203,9 @@ class ImportExportService:
             project_id, workspace_id=workspace_id
         )
         if not project:
-            raise ValueError(f"Project '{project_id}' not found.")
+            raise DatasetNotFoundException(
+                project_id, f"Project '{project_id}' not found."
+            )
         if dataset_id:
             await DatasetService(self.db).get_dataset(
                 dataset_id, workspace_id=workspace_id
@@ -208,43 +223,76 @@ class ImportExportService:
         await self.db.refresh(job)
         return job
 
-    async def execute_export(self, job_id: str, version_id: str) -> str:
+    async def execute_export(
+        self, job_id: str, version_id: str, workspace_id: Optional[str] = None
+    ) -> str:
         job_result = await self.db.get(ExportJob, job_id)
         if not job_result:
-            raise ValueError(f"Export job '{job_id}' not found.")
+            raise DatasetNotFoundException(job_id, f"Export job '{job_id}' not found.")
         job = job_result
+
+        # Verify job project workspace ownership
+        job_proj = await self.project_repo.get_by_id(
+            job.project_id, workspace_id=workspace_id
+        )
+        if not job_proj:
+            raise DatasetNotFoundException(job_id, f"Export job '{job_id}' not found.")
+
+        # Validate version ownership before starting execution
+        version = await self.dataset_repo.get_version(version_id)
+        if not version:
+            raise DatasetNotFoundException(version_id)
+
+        # DatasetService.get_dataset validates version.dataset_id -> project_id -> workspace_id
+        dataset = await DatasetService(self.db).get_dataset(
+            version.dataset_id, workspace_id=workspace_id
+        )
+        if job.dataset_id and version.dataset_id != job.dataset_id:
+            raise DatasetNotFoundException(
+                version_id,
+                f"Version '{version_id}' does not belong to dataset '{job.dataset_id}'.",
+            )
+        if dataset.project_id != job.project_id:
+            raise DatasetNotFoundException(
+                version_id,
+                f"Version '{version_id}' does not belong to project '{job.project_id}'.",
+            )
 
         try:
             job.status = "PROCESSING"
             job.progress = 20.0
             await self.db.commit()
 
-            # Retrieve version and records
-            version = await self.dataset_repo.get_version(version_id)
-            if not version:
-                raise ValueError(f"Dataset version '{version_id}' not found.")
-
-            records, _ = await self.dataset_repo.get_records(version_id, limit=1000000)
-            job.progress = 50.0
-            await self.db.commit()
-
-            # Build list of dicts to serialize
+            # Paginate through records in chunks of 1,000 to prevent RAM exhaustion
             data = []
-            for rec in records:
-                row = {
-                    "prompt": rec.prompt,
-                    "input": rec.input,
-                    "context": rec.context,
-                    "reference_output": rec.reference_output,
-                    "candidate_output": rec.candidate_output,
-                    "ground_truth": rec.ground_truth,
-                    "expected_score": rec.expected_score,
-                    "tags": ",".join(rec.tags) if rec.tags else "",
-                }
-                # merge custom fields if they exist
-                if rec.custom_fields:
-                    row.update(rec.custom_fields)
-                data.append(row)
+            chunk_size = 1000
+            offset = 0
+
+            while True:
+                records, count = await self.dataset_repo.get_records(
+                    version_id, skip=offset, limit=chunk_size
+                )
+                if not records:
+                    break
+
+                for rec in records:
+                    row = {
+                        "prompt": rec.prompt,
+                        "input": rec.input,
+                        "context": rec.context,
+                        "reference_output": rec.reference_output,
+                        "candidate_output": rec.candidate_output,
+                        "ground_truth": rec.ground_truth,
+                        "expected_score": rec.expected_score,
+                        "tags": ",".join(rec.tags) if rec.tags else "",
+                    }
+                    if rec.custom_fields:
+                        row.update(rec.custom_fields)
+                    data.append(row)
+
+                offset += len(records)
+                if offset >= count:
+                    break
 
             job.progress = 80.0
             await self.db.commit()
