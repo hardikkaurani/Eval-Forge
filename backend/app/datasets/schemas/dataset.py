@@ -33,6 +33,19 @@ class DatasetRecordCreate(DatasetRecordBase):
     pass
 
 
+class DatasetRecordUpdate(BaseModel):
+    prompt: Optional[str] = None
+    input: Optional[str] = None
+    context: Optional[str] = None
+    reference_output: Optional[str] = None
+    candidate_output: Optional[str] = None
+    ground_truth: Optional[str] = None
+    expected_score: Optional[float] = None
+    tags: Optional[List[str]] = None
+    custom_fields: Optional[Dict[str, Any]] = None
+    metadata_json: Optional[Dict[str, Any]] = None
+
+
 class DatasetRecordResponse(DatasetRecordBase):
     id: str
     version_id: str
