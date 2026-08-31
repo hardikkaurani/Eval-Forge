@@ -5,7 +5,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.dependencies import extract_workspace_id, get_current_api_key
 from app.database.session import get_db
-from app.datasets.exceptions.exceptions import ExperimentNotFoundException
+from app.datasets.exceptions.exceptions import (
+    DatasetNotFoundException,
+    ExperimentNotFoundException,
+)
 from app.datasets.schemas.experiment import (
     ExperimentCreate,
     ExperimentDetailResponse,
@@ -38,7 +41,7 @@ async def create_experiment(
             configuration=request.configuration,
             workspace_id=workspace_id,
         )
-    except ExperimentNotFoundException as e:
+    except (ExperimentNotFoundException, DatasetNotFoundException) as e:
         raise HTTPException(status_code=404, detail=str(e)) from e
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
@@ -65,7 +68,7 @@ async def list_experiments(
             status=status,
             workspace_id=workspace_id,
         )
-    except ExperimentNotFoundException as e:
+    except (ExperimentNotFoundException, DatasetNotFoundException) as e:
         raise HTTPException(status_code=404, detail=str(e)) from e
 
     return {
@@ -86,7 +89,7 @@ async def get_experiment(
     service = ExperimentService(db)
     try:
         return await service.get_experiment(experiment_id, workspace_id=workspace_id)
-    except ExperimentNotFoundException as e:
+    except (ExperimentNotFoundException, DatasetNotFoundException) as e:
         raise HTTPException(status_code=404, detail=str(e)) from e
 
 
@@ -102,8 +105,10 @@ async def execute_experiment(
         return await service.execute_experiment(
             experiment_id, workspace_id=workspace_id
         )
-    except ExperimentNotFoundException as e:
+    except (ExperimentNotFoundException, DatasetNotFoundException) as e:
         raise HTTPException(status_code=404, detail=str(e)) from e
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
     except Exception as e:
         raise HTTPException(
             status_code=500, detail=f"Execution failed: {str(e)}"

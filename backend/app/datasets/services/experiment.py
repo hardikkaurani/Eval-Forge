@@ -57,15 +57,20 @@ class ExperimentService:
             "retry_count": 2,
         }
 
-        # Check that version exists and belongs to workspace
+        # Check that version exists and belongs to workspace and project
         version = await self.dataset_repo.get_version(dataset_version_id)
         if not version:
             raise ExperimentNotFoundException(
                 dataset_version_id, f"Dataset version '{dataset_version_id}' not found."
             )
-        await self.dataset_service.get_dataset(
+        dataset = await self.dataset_service.get_dataset(
             version.dataset_id, workspace_id=workspace_id
         )
+        if dataset.project_id != project_id:
+            raise ExperimentNotFoundException(
+                dataset_version_id,
+                f"Dataset version '{dataset_version_id}' does not belong to project '{project_id}'.",
+            )
 
         experiment = await self.experiment_repo.create_experiment(
             project_id=project_id,
@@ -139,10 +144,21 @@ class ExperimentService:
             experiment.started_at = get_utc_now()
             await self.db.commit()
 
-            # 2. Get dataset records
-            records, _ = await self.dataset_repo.get_records(
-                experiment.dataset_version_id, limit=1000000
-            )
+            # 2. Get dataset records in paginated chunks
+            records = []
+            chunk_size = 1000
+            offset = 0
+            while True:
+                chunk, count = await self.dataset_repo.get_records(
+                    experiment.dataset_version_id, skip=offset, limit=chunk_size
+                )
+                if not chunk:
+                    break
+                records.extend(chunk)
+                offset += len(chunk)
+                if offset >= count:
+                    break
+
             if not records:
                 raise ValueError(
                     "No records found in the associated dataset version to evaluate."
@@ -155,7 +171,12 @@ class ExperimentService:
                 test_cases.append(
                     TestCaseInput(
                         input_prompt=rec.prompt,
-                        model_output=rec.candidate_output or rec.expected_score or "",
+                        model_output=rec.candidate_output
+                        or (
+                            str(rec.expected_score)
+                            if rec.expected_score is not None
+                            else ""
+                        ),
                         reference=rec.reference_output or rec.ground_truth or "",
                         response_b=rec.custom_fields.get("response_b"),  # for pairwise
                     )

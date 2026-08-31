@@ -89,6 +89,11 @@ class ExperimentRepository:
         if not experiment:
             return None
 
+        # Enforce field immutability: id, project_id, dataset_version_id cannot be reassigned
+        update_data.pop("id", None)
+        update_data.pop("project_id", None)
+        update_data.pop("dataset_version_id", None)
+
         for key, val in update_data.items():
             if val is not None:
                 setattr(experiment, key, val)
