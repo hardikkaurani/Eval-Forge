@@ -9,6 +9,7 @@ from app.database.session import get_db
 from app.datasets.exceptions.exceptions import (
     BenchmarkSuiteNotFoundException,
     DatasetException,
+    DatasetNotFoundException,
 )
 from app.datasets.schemas.benchmark import (
     BenchmarkSuiteCreate,
@@ -41,7 +42,7 @@ async def create_benchmark_suite(
         )
         await cache_engine.clear_prefix("benchmarks")
         return suite
-    except BenchmarkSuiteNotFoundException as e:
+    except (BenchmarkSuiteNotFoundException, DatasetNotFoundException) as e:
         raise HTTPException(status_code=404, detail=str(e)) from e
     except DatasetException as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
@@ -130,7 +131,7 @@ async def update_benchmark_suite(
         )
         await cache_engine.clear_prefix("benchmarks")
         return updated
-    except BenchmarkSuiteNotFoundException as e:
+    except (BenchmarkSuiteNotFoundException, DatasetNotFoundException) as e:
         raise HTTPException(status_code=404, detail=str(e)) from e
 
 

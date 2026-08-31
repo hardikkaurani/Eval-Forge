@@ -78,6 +78,10 @@ class BenchmarkRepository:
         if not suite:
             return None
 
+        # Enforce field immutability: id and project_id cannot be reassigned or mutated
+        update_data.pop("id", None)
+        update_data.pop("project_id", None)
+
         for key, val in update_data.items():
             if val is not None:
                 setattr(suite, key, val)
@@ -102,8 +106,11 @@ class BenchmarkRepository:
             )
         )
 
+        # Deduplicate dataset_ids while preserving order to prevent primary key collisions
+        unique_dataset_ids = list(dict.fromkeys(dataset_ids))
+
         # Insert new associations
-        for d_id in dataset_ids:
+        for d_id in unique_dataset_ids:
             association = BenchmarkDataset(benchmark_suite_id=suite_id, dataset_id=d_id)
             self.db.add(association)
 
