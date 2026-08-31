@@ -99,6 +99,10 @@ class DatasetRepository:
         if not dataset:
             return None
 
+        # Enforce field immutability: id and project_id cannot be reassigned or mutated
+        update_data.pop("id", None)
+        update_data.pop("project_id", None)
+
         for key, val in update_data.items():
             if val is not None:
                 setattr(dataset, key, val)
@@ -140,9 +144,7 @@ class DatasetRepository:
 
     async def get_version(self, version_id: str) -> Optional[DatasetVersion]:
         result = await self.db.execute(
-            select(DatasetVersion)
-            .where(DatasetVersion.id == version_id)
-            .options(selectinload(DatasetVersion.records))
+            select(DatasetVersion).where(DatasetVersion.id == version_id)
         )
         return result.scalar_one_or_none()
 
@@ -150,14 +152,12 @@ class DatasetRepository:
         self, dataset_id: str, version_label: str
     ) -> Optional[DatasetVersion]:
         result = await self.db.execute(
-            select(DatasetVersion)
-            .where(
+            select(DatasetVersion).where(
                 and_(
                     DatasetVersion.dataset_id == dataset_id,
                     DatasetVersion.version == version_label,
                 )
             )
-            .options(selectinload(DatasetVersion.records))
         )
         return result.scalar_one_or_none()
 
@@ -198,16 +198,54 @@ class DatasetRepository:
         skip: int = 0,
         limit: int = 100,
     ) -> Tuple[List[DatasetRecord], int]:
+        # Bound and normalize pagination parameters
+        skip = max(0, skip)
+        if limit < 1:
+            limit = 100
+        else:
+            limit = min(limit, 1000)
+
         query = select(DatasetRecord).where(DatasetRecord.version_id == version_id)
 
-        # Count
-        count_query = select(func.count()).select_from(query.subquery())
+        # Count using SQL count without row materialization
+        count_query = select(func.count(DatasetRecord.id)).where(
+            DatasetRecord.version_id == version_id
+        )
         count_result = await self.db.execute(count_query)
         total = count_result.scalar() or 0
 
-        # Paginated records
+        # Paginated records with deterministic order
         query = query.order_by(DatasetRecord.created_at.asc()).offset(skip).limit(limit)
         result = await self.db.execute(query)
         records = list(result.scalars().all())
 
         return records, total
+
+    async def get_record(self, record_id: str) -> Optional[DatasetRecord]:
+        result = await self.db.execute(
+            select(DatasetRecord).where(DatasetRecord.id == record_id)
+        )
+        return result.scalar_one_or_none()
+
+    async def update_record(
+        self, record_id: str, update_data: Dict[str, Any]
+    ) -> Optional[DatasetRecord]:
+        record = await self.get_record(record_id)
+        if not record:
+            return None
+        # Enforce field immutability: version_id and id cannot be mutated or reassigned
+        update_data.pop("id", None)
+        update_data.pop("version_id", None)
+        for key, val in update_data.items():
+            if val is not None and hasattr(record, key):
+                setattr(record, key, val)
+        await self.db.flush()
+        return record
+
+    async def delete_record(self, record_id: str) -> bool:
+        record = await self.get_record(record_id)
+        if not record:
+            return False
+        await self.db.delete(record)
+        await self.db.flush()
+        return True
