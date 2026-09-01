@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Lock, Mail, User, ArrowLeft, CheckCircle, Save, BellRing } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 import logo from '../assets/logo.jpg';
 
 /* ----------------- LOGIN PAGE ----------------- */
@@ -10,9 +11,18 @@ export function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
+  const { login } = useAuth();
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Redirect straight to dashboard for preview purposes
+    const cleanEmail = email.trim() || 'developer@evalforge.ai';
+    const userName = cleanEmail.includes('@') ? cleanEmail.split('@')[0] : cleanEmail;
+    login(`ef_session_${Date.now()}`, {
+      id: `usr_${Date.now()}`,
+      name: userName,
+      email: cleanEmail,
+      role: 'Member',
+    });
     navigate('/');
   };
 

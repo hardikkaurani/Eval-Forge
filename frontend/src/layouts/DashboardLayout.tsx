@@ -344,8 +344,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                       setCurrentProjectId(p.id);
                       setProjectDropdownOpen(false);
                       if (location.pathname.includes('/projects/')) {
-                        const currentSection = location.pathname.split('/').pop() || 'datasets';
-                        navigate(`/projects/${p.id}/${currentSection}`);
+                        const parts = location.pathname.split('/');
+                        const section = parts[3] || 'datasets';
+                        navigate(`/projects/${p.id}/${section}`);
                       }
                     }}
                     className={`w-full text-left px-3 py-2 text-xs flex items-center justify-between hover:bg-chrome-hover transition-colors ${
@@ -511,8 +512,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               {showUserMenu && (
                 <div className="absolute right-0 top-full mt-2 w-56 bg-chrome-panel border border-chrome-border rounded-md shadow-chrome z-50 py-1 text-xs">
                   <div className="px-3 py-2 border-b border-chrome-border">
-                    <p className="font-semibold text-chrome-text truncate">{user?.name || 'Engineer'}</p>
-                    <p className="text-[10px] font-mono text-chrome-muted truncate">{user?.email || 'engineer@evalforge.ai'}</p>
+                    <p className="font-semibold text-chrome-text truncate">{user?.name || 'Developer'}</p>
+                    <p className="text-[10px] font-mono text-chrome-muted truncate">{user?.email || 'developer@evalforge.ai'}</p>
                   </div>
                   <Link
                     to="/profile"
