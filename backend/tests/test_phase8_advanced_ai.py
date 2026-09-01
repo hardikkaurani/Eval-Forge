@@ -221,12 +221,8 @@ def test_phase8_jinja2_ssti_and_sandbox_security() -> None:
     assert "Evaluate Huge" in r_huge.render_prompt()
 
 
-def test_phase8_persistent_elo_and_concurrency(client: TestClient, db_session) -> None:
+def test_phase8_persistent_elo_and_concurrency(client: TestClient) -> None:
     """Verify ELO rating persistence in DB across requests and process restart simulation."""
-    from sqlalchemy import select
-
-    from app.models.evaluation import ModelEloRating
-
     # 1. Create Project via API
     proj_res = client.post("/api/v1/projects", json={"name": "ELO Persistent Project"})
     assert proj_res.status_code == 201

@@ -8,7 +8,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.dependencies import get_current_api_key
 from app.database.session import get_db
 from app.evaluation.rubrics.rubrics import (
-    BUILT_IN_RUBRICS,
     MAX_CUSTOM_RUBRICS_PER_PROJECT,
     MAX_DESCRIPTION_LENGTH,
     MAX_KEY_LENGTH,

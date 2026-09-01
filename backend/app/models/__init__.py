@@ -65,6 +65,8 @@ __all__ = [
     "EvaluationResult",
     "RubricScore",
     "ProviderMetadata",
+    "CustomRubric",
+    "ModelEloRating",
     "Dataset",
     "DatasetVersion",
     "DatasetRecord",

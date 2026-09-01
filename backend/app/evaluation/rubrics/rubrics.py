@@ -1,4 +1,5 @@
 import re
+
 from pydantic import BaseModel, Field
 
 MAX_KEY_LENGTH = 64
