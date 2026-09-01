@@ -206,3 +206,43 @@ def test_jobs_tenant_isolation(db_session: AsyncSession) -> None:
         assert get_intact.json()["data"]["status"] in {"QUEUED", "RUNNING", "COMPLETED"}
 
     app.dependency_overrides.clear()
+
+
+def test_phase6_job_retry_and_worker_status(client: TestClient) -> None:
+    """Verifies Phase 6 job retry endpoint, workers status metrics, and SSE fallback endpoint."""
+    # 1. Create Project
+    p_res = client.post("/api/v1/projects", json={"name": "Phase 6 Test Project"})
+    assert p_res.status_code == 201
+    proj_id = p_res.json()["data"]["id"]
+
+    # 2. Queue Job
+    j_res = client.post(
+        f"/api/v1/jobs?project_id={proj_id}",
+        json={"name": "test_job", "queue_name": "high", "payload": {}},
+    )
+    assert j_res.status_code == 201
+    job_id = j_res.json()["data"]["id"]
+
+    # 3. Cancel Job
+    cancel_res = client.post(f"/api/v1/jobs/{job_id}/cancel")
+    assert cancel_res.status_code == 200
+    assert cancel_res.json()["data"]["status"] == "CANCELLED"
+
+    # 4. Retry Job (Phase 6 endpoint)
+    retry_res = client.post(f"/api/v1/jobs/{job_id}/retry")
+    assert retry_res.status_code == 200
+    assert retry_res.json()["data"]["status"] in {"QUEUED", "RUNNING", "COMPLETED"}
+
+    # 5. Workers Status endpoint (Phase 6 endpoint)
+    worker_res = client.get("/api/v1/workers/status")
+    assert worker_res.status_code == 200
+    worker_data = worker_res.json()["data"]
+    assert "workers_total" in worker_data
+    assert "tasks_active" in worker_data
+    assert "tasks_reserved" in worker_data
+
+    # 6. SSE Fallback endpoint (Phase 6 endpoint)
+    sse_res = client.get(f"/api/v1/jobs/{job_id}/progress/sse")
+    assert sse_res.status_code == 200
+    assert "text/event-stream" in sse_res.headers.get("content-type", "")
+
