@@ -155,3 +155,56 @@ class ProviderMetadata(Base):
     result: Mapped["EvaluationResult"] = relationship(
         "EvaluationResult", back_populates="provider_metadata"
     )
+
+
+class ModelEloRating(Base):
+    __tablename__ = "model_elo_ratings"
+
+    id: Mapped[str] = mapped_column(
+        String(36), primary_key=True, default=generate_uuid, index=True
+    )
+    project_id: Mapped[str] = mapped_column(
+        String(36),
+        ForeignKey("projects.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    model_name: Mapped[str] = mapped_column(String(100), nullable=False)
+    rating: Mapped[float] = mapped_column(Float, default=1500.0, nullable=False)
+    matches_played: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    wins: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    losses: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    draws: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=get_utc_now, nullable=False
+    )
+
+    project: Mapped["Project"] = relationship("Project")
+
+
+class CustomRubric(Base):
+    __tablename__ = "custom_rubrics"
+
+    id: Mapped[str] = mapped_column(
+        String(36), primary_key=True, default=generate_uuid, index=True
+    )
+    project_id: Mapped[str | None] = mapped_column(
+        String(36),
+        ForeignKey("projects.id", ondelete="CASCADE"),
+        nullable=True,
+        index=True,
+    )
+    rubric_key: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
+    name: Mapped[str] = mapped_column(String(128), nullable=False)
+    description: Mapped[str] = mapped_column(String(1024), nullable=False)
+    weight: Mapped[float] = mapped_column(Float, default=1.0, nullable=False)
+    scoring_scale: Mapped[int] = mapped_column(Integer, default=5, nullable=False)
+    prompt_template: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=get_utc_now, nullable=False
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=get_utc_now, nullable=False
+    )
+
+    project: Mapped["Project"] = relationship("Project")

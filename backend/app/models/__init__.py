@@ -41,9 +41,11 @@ from app.models.dataset import (
     ImportJob,
 )
 from app.models.evaluation import (
+    CustomRubric,
     Evaluation,
     EvaluationResult,
     EvaluationRun,
+    ModelEloRating,
     ProviderMetadata,
     RubricScore,
 )
