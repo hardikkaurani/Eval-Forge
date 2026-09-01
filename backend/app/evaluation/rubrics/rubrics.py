@@ -1,4 +1,11 @@
+import re
 from pydantic import BaseModel, Field
+
+MAX_KEY_LENGTH = 64
+MAX_NAME_LENGTH = 128
+MAX_DESCRIPTION_LENGTH = 1024
+MAX_TEMPLATE_LENGTH = 4096
+MAX_CUSTOM_RUBRICS_PER_PROJECT = 50
 
 
 class Rubric(BaseModel):
@@ -10,6 +17,29 @@ class Rubric(BaseModel):
     scoring_scale: int = Field(default=5, ge=1, le=10)
     prompt_template: str | None = None
 
+    def render_prompt(self, **kwargs) -> str:
+        """Render prompt template using Jinja2 SandboxedEnvironment."""
+        if not self.prompt_template:
+            return f"Evaluate {self.name}: {self.description} (Scale: 1 to {self.scoring_scale})"
+
+        if len(self.prompt_template) > MAX_TEMPLATE_LENGTH:
+            return f"Evaluate {self.name}: {self.description} (Scale: 1 to {self.scoring_scale})"
+
+        try:
+            from jinja2 import StrictUndefined
+            from jinja2.sandbox import SandboxedEnvironment
+
+            env = SandboxedEnvironment(
+                autoescape=False,
+                undefined=StrictUndefined,
+            )
+            env.globals.clear()
+
+            template = env.from_string(self.prompt_template)
+            return template.render(**kwargs)
+        except Exception:
+            return f"Evaluate {self.name}: {self.description} (Scale: 1 to {self.scoring_scale})"
+
     def validate_score(self, score: float) -> bool:
         """Validate if a score falls within the scoring scale range (0 to scoring_scale)."""
         return 0.0 <= score <= float(self.scoring_scale)
@@ -18,19 +48,52 @@ class Rubric(BaseModel):
         return self.weight >= 0.0
 
 
+CUSTOM_RUBRICS: dict[str, Rubric] = {}
+
+
 def get_rubric(key: str) -> Rubric | None:
-    return BUILT_IN_RUBRICS.get(key.lower())
+    k = key.lower()
+    return CUSTOM_RUBRICS.get(k) or BUILT_IN_RUBRICS.get(k)
 
 
 def list_rubrics() -> dict[str, Rubric]:
-    return dict(BUILT_IN_RUBRICS)
+    return {**BUILT_IN_RUBRICS, **CUSTOM_RUBRICS}
 
 
-def validate_custom_rubric(rubric: Rubric) -> None:
+def register_custom_rubric(key: str, rubric: Rubric) -> Rubric:
+    validate_custom_rubric(rubric, key=key)
+    k = key.lower().strip()
+    CUSTOM_RUBRICS[k] = rubric
+    return rubric
+
+
+def validate_custom_rubric(rubric: Rubric, key: str | None = None) -> None:
+    if key is not None:
+        k = key.lower().strip()
+        if len(k) > MAX_KEY_LENGTH:
+            raise ValueError(f"Rubric key cannot exceed {MAX_KEY_LENGTH} characters.")
+        if not re.match(r"^[a-zA-Z0-9_-]+$", k):
+            raise ValueError("Rubric key contains invalid characters.")
+        if k in BUILT_IN_RUBRICS:
+            raise ValueError(f"Cannot overwrite built-in rubric key '{k}'.")
+
     if not rubric.name.strip():
         raise ValueError("Rubric name cannot be empty.")
+    if len(rubric.name) > MAX_NAME_LENGTH:
+        raise ValueError(f"Rubric name cannot exceed {MAX_NAME_LENGTH} characters.")
+
     if not rubric.description.strip():
         raise ValueError("Rubric description cannot be empty.")
+    if len(rubric.description) > MAX_DESCRIPTION_LENGTH:
+        raise ValueError(
+            f"Rubric description cannot exceed {MAX_DESCRIPTION_LENGTH} characters."
+        )
+
+    if rubric.prompt_template and len(rubric.prompt_template) > MAX_TEMPLATE_LENGTH:
+        raise ValueError(
+            f"Rubric prompt template cannot exceed {MAX_TEMPLATE_LENGTH} characters."
+        )
+
     if not rubric.validate_weight():
         raise ValueError("Rubric weight must be non-negative.")
     if rubric.scoring_scale < 1:
