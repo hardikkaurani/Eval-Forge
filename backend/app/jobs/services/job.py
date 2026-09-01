@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 from sqlalchemy import and_, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -153,11 +153,65 @@ class JobService:
         )
         return cancelled_job
 
+    async def retry_job(
+        self,
+        job_id: str,
+        workspace_id: Optional[str] = None,
+    ) -> Job:
+        """Restarts a failed, cancelled, or completed job by re-queueing it."""
+        job = await self.get_job(job_id, workspace_id=workspace_id)
+
+        # Reset status to QUEUED and clear error message
+        updated_job = await self.repo.update_job_status(job_id, "QUEUED", error_message=None)
+        await self.repo.add_job_log(job_id, "Job restart dispatched by user request.", "INFO")
+
+        # Dispatch task to Celery
+        run_background_job.apply_async(args=[job_id], queue=updated_job.queue_name or "default")
+        return updated_job
+
     async def list_queues(self) -> List[Queue]:
         return await self.repo.list_queues()
 
     async def list_workers(self) -> List[Worker]:
         return await self.repo.list_workers()
+
+    async def get_workers_status(self) -> Dict[str, Any]:
+        """Inspects active, reserved, and scheduled Celery tasks and worker nodes health."""
+        workers = await self.repo.list_workers()
+        active_count = sum(1 for w in workers if w.status == "BUSY")
+        idle_count = sum(1 for w in workers if w.status == "IDLE")
+
+        q_res = await self.db.execute(select(func.count(Job.id)).where(Job.status == "QUEUED"))
+        reserved_tasks = q_res.scalar_one()
+
+        r_res = await self.db.execute(select(func.count(Job.id)).where(Job.status == "RUNNING"))
+        active_tasks = r_res.scalar_one()
+
+        s_res = await self.db.execute(
+            select(func.count(Job.id)).where(and_(Job.status == "CREATED", Job.scheduled_at.is_not(None)))
+        )
+        scheduled_tasks = s_res.scalar_one()
+
+        return {
+            "workers_total": len(workers),
+            "workers_active": active_count,
+            "workers_idle": idle_count,
+            "tasks_active": active_tasks,
+            "tasks_reserved": reserved_tasks,
+            "tasks_scheduled": scheduled_tasks,
+            "nodes": [
+                {
+                    "id": w.id,
+                    "hostname": w.hostname,
+                    "status": w.status,
+                    "active_tasks_count": w.active_tasks_count,
+                    "completed_tasks_count": w.completed_tasks_count,
+                    "failed_tasks_count": w.failed_tasks_count,
+                    "last_heartbeat": w.last_heartbeat.isoformat() if w.last_heartbeat else None,
+                }
+                for w in workers
+            ],
+        }
 
     async def get_system_metrics(self) -> SystemMetricsResponse:
         """Aggregates execution rates, queue latency, and load metrics for the entire jobs system."""

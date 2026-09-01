@@ -27,10 +27,10 @@ VALID_TRANSITIONS = {
     "WAITING": {"RUNNING", "CANCELLED"},
     "RUNNING": {"COMPLETED", "FAILED", "CANCELLED", "RETRYING"},
     "RETRYING": {"QUEUED", "RUNNING", "FAILED", "CANCELLED"},
-    "COMPLETED": set(),
-    "FAILED": set(),
-    "CANCELLED": set(),
-    "EXPIRED": set(),
+    "COMPLETED": {"QUEUED"},
+    "FAILED": {"QUEUED"},
+    "CANCELLED": {"QUEUED"},
+    "EXPIRED": {"QUEUED"},
 }
 
 
