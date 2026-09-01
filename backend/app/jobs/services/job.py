@@ -162,11 +162,17 @@ class JobService:
         await self.get_job(job_id, workspace_id=workspace_id)
 
         # Reset status to QUEUED and clear error message
-        updated_job = await self.repo.update_job_status(job_id, "QUEUED", error_message=None)
-        await self.repo.add_job_log(job_id, "Job restart dispatched by user request.", "INFO")
+        updated_job = await self.repo.update_job_status(
+            job_id, "QUEUED", error_message=None
+        )
+        await self.repo.add_job_log(
+            job_id, "Job restart dispatched by user request.", "INFO"
+        )
 
         # Dispatch task to Celery
-        run_background_job.apply_async(args=[job_id], queue=updated_job.queue_name or "default")
+        run_background_job.apply_async(
+            args=[job_id], queue=updated_job.queue_name or "default"
+        )
         return updated_job
 
     async def list_queues(self) -> List[Queue]:
@@ -181,14 +187,20 @@ class JobService:
         active_count = sum(1 for w in workers if w.status == "BUSY")
         idle_count = sum(1 for w in workers if w.status == "IDLE")
 
-        q_res = await self.db.execute(select(func.count(Job.id)).where(Job.status == "QUEUED"))
+        q_res = await self.db.execute(
+            select(func.count(Job.id)).where(Job.status == "QUEUED")
+        )
         reserved_tasks = q_res.scalar_one()
 
-        r_res = await self.db.execute(select(func.count(Job.id)).where(Job.status == "RUNNING"))
+        r_res = await self.db.execute(
+            select(func.count(Job.id)).where(Job.status == "RUNNING")
+        )
         active_tasks = r_res.scalar_one()
 
         s_res = await self.db.execute(
-            select(func.count(Job.id)).where(and_(Job.status == "CREATED", Job.scheduled_at.is_not(None)))
+            select(func.count(Job.id)).where(
+                and_(Job.status == "CREATED", Job.scheduled_at.is_not(None))
+            )
         )
         scheduled_tasks = s_res.scalar_one()
 
@@ -207,7 +219,9 @@ class JobService:
                     "active_tasks_count": w.active_tasks_count,
                     "completed_tasks_count": w.completed_tasks_count,
                     "failed_tasks_count": w.failed_tasks_count,
-                    "last_heartbeat": w.last_heartbeat.isoformat() if w.last_heartbeat else None,
+                    "last_heartbeat": (
+                        w.last_heartbeat.isoformat() if w.last_heartbeat else None
+                    ),
                 }
                 for w in workers
             ],

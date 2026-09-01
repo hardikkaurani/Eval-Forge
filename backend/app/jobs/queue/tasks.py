@@ -196,4 +196,3 @@ def run_background_job(self, job_id: str) -> Any:
 def run_evaluation_job(self, job_id: str) -> Any:
     """Dedicated Celery task wrapper for high-priority evaluation jobs."""
     return run_background_job(self, job_id)
-

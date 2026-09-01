@@ -291,8 +291,13 @@ async def job_progress_sse(
             async with SessionLocal() as poll_db:
                 poll_service = JobService(poll_db)
                 try:
-                    current_j = await poll_service.get_job(id, workspace_id=workspace_id)
-                    if current_j.progress != last_progress or current_j.status != last_status:
+                    current_j = await poll_service.get_job(
+                        id, workspace_id=workspace_id
+                    )
+                    if (
+                        current_j.progress != last_progress
+                        or current_j.status != last_status
+                    ):
                         last_progress = current_j.progress
                         last_status = current_j.status
                         yield f"data: {json.dumps({'event': 'progress', 'job_id': current_j.id, 'status': current_j.status, 'progress': current_j.progress, 'step': current_j.current_step})}\n\n"

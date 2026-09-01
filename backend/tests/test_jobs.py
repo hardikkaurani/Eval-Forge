@@ -245,4 +245,3 @@ def test_phase6_job_retry_and_worker_status(client: TestClient) -> None:
     sse_res = client.get(f"/api/v1/jobs/{job_id}/progress/sse")
     assert sse_res.status_code == 200
     assert "text/event-stream" in sse_res.headers.get("content-type", "")
-
