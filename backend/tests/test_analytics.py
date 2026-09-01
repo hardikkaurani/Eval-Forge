@@ -261,4 +261,93 @@ def test_analytics_tenant_isolation(db_session) -> None:
             == 404
         )
 
+        # Distribution -> 404
+        assert (
+            client_b.get(
+                f"/api/v1/analytics/distribution?project_id={proj_a_id}"
+            ).status_code
+            == 404
+        )
+
+        # Comparison -> 404
+        assert (
+            client_b.get(
+                f"/api/v1/analytics/comparison?project_id={proj_a_id}"
+            ).status_code
+            == 404
+        )
+
+        # Radar -> 404
+        assert (
+            client_b.get(f"/api/v1/analytics/radar?project_id={proj_a_id}").status_code
+            == 404
+        )
+
+        # Exports CSV -> 404
+        assert (
+            client_b.get(
+                f"/api/v1/analytics/exports/csv?project_id={proj_a_id}"
+            ).status_code
+            == 404
+        )
+
+        # Exports JSON -> 404
+        assert (
+            client_b.get(
+                f"/api/v1/analytics/exports/json?project_id={proj_a_id}"
+            ).status_code
+            == 404
+        )
+
     app.dependency_overrides.clear()
+
+
+def test_phase7_analytics_and_export_features(client: TestClient) -> None:
+    # 1. Create Project
+    res = client.post("/api/v1/projects", json={"name": "Phase 7 Analytics Project"})
+    assert res.status_code == 201
+    proj_id = res.json()["data"]["id"]
+
+    # 2. Run Batch Evaluation
+    batch_res = client.post(
+        "/api/v1/evaluations/batch",
+        json={
+            "project_id": proj_id,
+            "evaluation_name": "Phase 7 Eval Run",
+            "judge": "rubric",
+            "provider": "openai",
+            "test_cases": [
+                {
+                    "input_prompt": "Explain Quantum Computing",
+                    "model_output": "Quantum computing uses qubits...",
+                    "reference": "Qubits allow superposition",
+                }
+            ],
+        },
+    )
+    assert batch_res.status_code == 201
+
+    # 3. Test Score Distribution
+    dist_res = client.get(f"/api/v1/analytics/distribution?project_id={proj_id}")
+    assert dist_res.status_code == 200
+    assert len(dist_res.json()["data"]) == 5
+
+    # 4. Test Run Comparison
+    comp_res = client.get(f"/api/v1/analytics/comparison?project_id={proj_id}")
+    assert comp_res.status_code == 200
+    assert len(comp_res.json()["data"]) >= 1
+
+    # 5. Test Radar Metrics
+    radar_res = client.get(f"/api/v1/analytics/radar?project_id={proj_id}")
+    assert radar_res.status_code == 200
+    assert "accuracy" in radar_res.json()["data"]
+
+    # 6. Test Export CSV
+    csv_res = client.get(f"/api/v1/analytics/exports/csv?project_id={proj_id}")
+    assert csv_res.status_code == 200
+    assert "text/csv" in csv_res.headers["content-type"]
+
+    # 7. Test Export JSON
+    json_res = client.get(f"/api/v1/analytics/exports/json?project_id={proj_id}")
+    assert json_res.status_code == 200
+    assert isinstance(json_res.json()["data"], list)

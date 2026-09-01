@@ -99,6 +99,124 @@ async def trigger_analytics_snapshot(
     )
 
 
+@analytics_router.get(
+    "/distribution",
+    response_model=ApiResponse[List[Dict[str, Any]]],
+    summary="Get score distribution histogram",
+)
+async def get_score_distribution(
+    project_id: str = Query(..., description="Project UUID"),
+    run_id: Optional[str] = Query(None, description="Optional Evaluation Run UUID"),
+    db: AsyncSession = Depends(get_db),
+    current_key: Any = Depends(get_current_api_key),
+):
+    """Retrieves histogram bucket score distributions for a project or specific run."""
+    workspace_id = _extract_workspace_id(current_key)
+    await _verify_project_workspace(db, project_id, workspace_id)
+    service = AnalyticsService(db)
+    distribution = await service.get_score_distribution(project_id, run_id)
+    return create_response(
+        success=True,
+        message="Score distribution calculated successfully.",
+        data=distribution,
+    )
+
+
+@analytics_router.get(
+    "/comparison",
+    response_model=ApiResponse[List[Dict[str, Any]]],
+    summary="Get evaluation run comparison trends",
+)
+async def get_run_comparison(
+    project_id: str = Query(..., description="Project UUID"),
+    dataset_id: Optional[str] = Query(None, description="Optional Dataset UUID filter"),
+    db: AsyncSession = Depends(get_db),
+    current_key: Any = Depends(get_current_api_key),
+):
+    """Retrieves comparative score trends across multiple evaluation runs."""
+    workspace_id = _extract_workspace_id(current_key)
+    await _verify_project_workspace(db, project_id, workspace_id)
+    service = AnalyticsService(db)
+    comparison = await service.get_run_comparison(project_id, dataset_id)
+    return create_response(
+        success=True,
+        message="Run comparison trend compiled successfully.",
+        data=comparison,
+    )
+
+
+@analytics_router.get(
+    "/radar",
+    response_model=ApiResponse[Dict[str, float]],
+    summary="Get holistic metric radar chart breakdown",
+)
+async def get_radar_metrics(
+    project_id: str = Query(..., description="Project UUID"),
+    run_id: Optional[str] = Query(None, description="Optional Evaluation Run UUID"),
+    db: AsyncSession = Depends(get_db),
+    current_key: Any = Depends(get_current_api_key),
+):
+    """Retrieves multi-dimensional quality metrics for spider/radar chart rendering."""
+    workspace_id = _extract_workspace_id(current_key)
+    await _verify_project_workspace(db, project_id, workspace_id)
+    service = AnalyticsService(db)
+    radar = await service.get_radar_metrics(project_id, run_id)
+    return create_response(
+        success=True,
+        message="Metric radar breakdown fetched successfully.",
+        data=radar,
+    )
+
+
+@analytics_router.get(
+    "/exports/csv",
+    summary="Export evaluation results as CSV",
+)
+async def export_results_csv(
+    project_id: str = Query(..., description="Project UUID"),
+    run_id: Optional[str] = Query(None, description="Optional Evaluation Run UUID"),
+    db: AsyncSession = Depends(get_db),
+    current_key: Any = Depends(get_current_api_key),
+):
+    """Exports raw evaluation results in CSV format."""
+    from fastapi.responses import Response
+
+    workspace_id = _extract_workspace_id(current_key)
+    await _verify_project_workspace(db, project_id, workspace_id)
+    service = AnalyticsService(db)
+    csv_content = await service.export_results_csv(project_id, run_id)
+    return Response(
+        content=csv_content,
+        media_type="text/csv",
+        headers={
+            "Content-Disposition": f"attachment; filename=eval_results_{project_id}.csv"
+        },
+    )
+
+
+@analytics_router.get(
+    "/exports/json",
+    response_model=ApiResponse[List[Dict[str, Any]]],
+    summary="Export evaluation results as JSON",
+)
+async def export_results_json(
+    project_id: str = Query(..., description="Project UUID"),
+    run_id: Optional[str] = Query(None, description="Optional Evaluation Run UUID"),
+    db: AsyncSession = Depends(get_db),
+    current_key: Any = Depends(get_current_api_key),
+):
+    """Exports raw evaluation results in JSON format."""
+    workspace_id = _extract_workspace_id(current_key)
+    await _verify_project_workspace(db, project_id, workspace_id)
+    service = AnalyticsService(db)
+    json_data = await service.export_results_json(project_id, run_id)
+    return create_response(
+        success=True,
+        message="Evaluation results exported as JSON.",
+        data=json_data,
+    )
+
+
 @analytics_router.post(
     "/dashboards",
     response_model=ApiResponse[DashboardSnapshotResponse],
