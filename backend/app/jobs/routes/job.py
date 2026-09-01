@@ -159,6 +159,28 @@ async def cancel_job(
     )
 
 
+@router.post(
+    "/jobs/{id}/retry",
+    response_model=ApiResponse[JobResponse],
+    summary="Restart a failed, cancelled, or completed job",
+    tags=["Jobs"],
+)
+async def retry_job(
+    id: str,
+    db: AsyncSession = Depends(get_db),
+    current_key: Any = Depends(get_current_api_key),
+):
+    """Restarts execution for a job and dispatches it back to Celery workers."""
+    workspace_id = _extract_workspace_id(current_key)
+    service = JobService(db)
+    job = await service.retry_job(id, workspace_id=workspace_id)
+    return create_response(
+        success=True,
+        message="Job restart request queued successfully.",
+        data=JobResponse.model_validate(job),
+    )
+
+
 @router.get(
     "/queues",
     response_model=ApiResponse[List[QueueResponse]],
@@ -200,6 +222,26 @@ async def list_workers(
 
 
 @router.get(
+    "/workers/status",
+    response_model=ApiResponse[dict],
+    summary="Expose Celery worker node health and task counts",
+    tags=["Workers"],
+)
+async def get_workers_status(
+    db: AsyncSession = Depends(get_db),
+    current_key: Any = Depends(get_current_api_key),
+):
+    """Exposes active, reserved, and scheduled Celery task counts and worker node statuses."""
+    service = JobService(db)
+    status_data = await service.get_workers_status()
+    return create_response(
+        success=True,
+        message="Worker status metrics retrieved successfully.",
+        data=status_data,
+    )
+
+
+@router.get(
     "/system/jobs",
     response_model=ApiResponse[SystemMetricsResponse],
     summary="Retrieve queue metrics and health",
@@ -217,6 +259,50 @@ async def get_system_jobs_metrics(
         message="Jobs system health metrics compiled successfully.",
         data=metrics,
     )
+
+
+@router.get(
+    "/jobs/{id}/progress/sse",
+    summary="Subscribe to job progress via Server-Sent Events (SSE fallback)",
+    tags=["Jobs"],
+)
+async def job_progress_sse(
+    id: str,
+    db: AsyncSession = Depends(get_db),
+    current_key: Any = Depends(get_current_api_key),
+):
+    """Provides real-time SSE stream fallback for clients that do not support WebSockets."""
+    import json
+    import asyncio
+    from fastapi.responses import StreamingResponse
+    from app.database.session import SessionLocal
+
+    workspace_id = _extract_workspace_id(current_key)
+    service = JobService(db)
+    job = await service.get_job(id, workspace_id=workspace_id)
+
+    async def event_generator():
+        yield f"data: {json.dumps({'event': 'connected', 'job_id': job.id, 'status': job.status, 'progress': job.progress})}\n\n"
+        last_progress = job.progress
+        last_status = job.status
+
+        for _ in range(30):
+            await asyncio.sleep(1)
+            async with SessionLocal() as poll_db:
+                poll_service = JobService(poll_db)
+                try:
+                    current_j = await poll_service.get_job(id, workspace_id=workspace_id)
+                    if current_j.progress != last_progress or current_j.status != last_status:
+                        last_progress = current_j.progress
+                        last_status = current_j.status
+                        yield f"data: {json.dumps({'event': 'progress', 'job_id': current_j.id, 'status': current_j.status, 'progress': current_j.progress, 'step': current_j.current_step})}\n\n"
+                    if current_j.status in ["COMPLETED", "FAILED", "CANCELLED"]:
+                        yield f"data: {json.dumps({'event': 'ended', 'job_id': current_j.id, 'status': current_j.status})}\n\n"
+                        break
+                except Exception:
+                    break
+
+    return StreamingResponse(event_generator(), media_type="text/event-stream")
 
 
 # WebSocket connection routes
