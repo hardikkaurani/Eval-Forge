@@ -67,7 +67,9 @@ export const Dialog: React.FC<DialogProps> = ({
         {(title || subtitle) && (
           <div className="flex items-start justify-between p-5 border-b border-chrome-border">
             <div>
-              {title && <h2 className="text-base font-semibold tracking-tight text-chrome-text">{title}</h2>}
+              {title && (
+                <h2 className="text-base font-semibold tracking-tight text-chrome-text">{title}</h2>
+              )}
               {subtitle && <p className="text-xs text-chrome-muted mt-0.5">{subtitle}</p>}
             </div>
             <button

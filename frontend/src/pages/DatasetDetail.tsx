@@ -1,14 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import {
-  Database,
-  ArrowLeft,
-  Upload,
-  Plus,
-  Search,
-  Loader2,
-  AlertTriangle,
-} from 'lucide-react';
+import { Database, ArrowLeft, Upload, Plus, Search, Loader2, AlertTriangle } from 'lucide-react';
 import { api } from '../services/api';
 import type { Dataset, DatasetVersion, DatasetRecord } from '../services/api';
 import { Card } from '../components/common/Card';
@@ -64,7 +56,9 @@ export default function DatasetDetail() {
     const ext = file.name.split('.').pop()?.toLowerCase();
     const ALLOWED = ['csv', 'json', 'jsonl', 'parquet'];
     if (!ext || !ALLOWED.includes(ext)) {
-      setUploadError(`Unsupported file extension (.${ext || 'none'}). Supported formats: .csv, .json, .jsonl, .parquet`);
+      setUploadError(
+        `Unsupported file extension (.${ext || 'none'}). Supported formats: .csv, .json, .jsonl, .parquet`
+      );
       setSelectedFile(null);
       return;
     }
@@ -136,7 +130,10 @@ export default function DatasetDetail() {
   );
 
   const totalPages = Math.ceil(filteredRecords.length / pageSize) || 1;
-  const paginatedRecords = filteredRecords.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  const paginatedRecords = filteredRecords.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
 
   return (
     <div className="space-y-6">
@@ -189,7 +186,11 @@ export default function DatasetDetail() {
       </Card>
 
       {/* Main Records Table Card */}
-      <Card title="Dataset Test Cases" subtitle="Prompt inputs, target references, and model predictions" padding="none">
+      <Card
+        title="Dataset Test Cases"
+        subtitle="Prompt inputs, target references, and model predictions"
+        padding="none"
+      >
         {/* Controls Bar */}
         <div className="p-4 border-b border-workbench-border flex flex-col md:flex-row md:items-center justify-between gap-3 bg-workbench-card/30">
           <div className="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0">
@@ -265,11 +266,7 @@ export default function DatasetDetail() {
                       </Badge>
                     </td>
                     <td className="px-5 py-3.5 text-right">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setSelectedRecord(r)}
-                      >
+                      <Button variant="ghost" size="sm" onClick={() => setSelectedRecord(r)}>
                         Inspect
                       </Button>
                     </td>
@@ -304,12 +301,19 @@ export default function DatasetDetail() {
               <CodeBlock code={selectedRecord.input_prompt} language="text" />
             </div>
             <div>
-              <span className="text-xs font-mono text-chrome-muted block mb-1">Reference Output</span>
-              <CodeBlock code={selectedRecord.reference || selectedRecord.candidate_output || 'N/A'} language="text" />
+              <span className="text-xs font-mono text-chrome-muted block mb-1">
+                Reference Output
+              </span>
+              <CodeBlock
+                code={selectedRecord.reference || selectedRecord.candidate_output || 'N/A'}
+                language="text"
+              />
             </div>
             {selectedRecord.reasoning && (
               <div>
-                <span className="text-xs font-mono text-chrome-muted block mb-1">Judge Reasoning</span>
+                <span className="text-xs font-mono text-chrome-muted block mb-1">
+                  Judge Reasoning
+                </span>
                 <p className="text-xs p-3 rounded bg-well-bg border border-well-border text-chrome-text font-mono">
                   {selectedRecord.reasoning}
                 </p>
@@ -343,10 +347,14 @@ export default function DatasetDetail() {
           <div className="p-8 border-2 border-dashed border-chrome-border rounded-md text-center bg-well-bg space-y-3">
             <Upload className="w-8 h-8 text-brand-terracotta mx-auto" />
             <p className="text-xs text-chrome-text font-semibold">
-              {selectedFile ? `Selected: ${selectedFile.name}` : 'Drag and drop your file here, or click to browse'}
+              {selectedFile
+                ? `Selected: ${selectedFile.name}`
+                : 'Drag and drop your file here, or click to browse'}
             </p>
-            <p className="text-[11px] text-chrome-muted">Supports .csv, .json, .jsonl, .parquet files up to 50MB</p>
-            
+            <p className="text-[11px] text-chrome-muted">
+              Supports .csv, .json, .jsonl, .parquet files up to 50MB
+            </p>
+
             <input
               type="file"
               ref={fileInputRef}

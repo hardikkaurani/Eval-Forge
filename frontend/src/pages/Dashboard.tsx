@@ -1,14 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  Database,
-  Terminal,
-  Plus,
-  ArrowUpRight,
-  Clock,
-  CheckCircle,
-  Cpu,
-} from 'lucide-react';
+import { Database, Terminal, Plus, ArrowUpRight, Clock, CheckCircle, Cpu } from 'lucide-react';
 import {
   AreaChart,
   Area,
@@ -84,7 +76,9 @@ export default function Dashboard() {
             variant="outline"
             size="sm"
             icon={Database}
-            onClick={() => navigate(currentProjectId ? `/projects/${currentProjectId}/datasets` : '/')}
+            onClick={() =>
+              navigate(currentProjectId ? `/projects/${currentProjectId}/datasets` : '/')
+            }
           >
             Manage Datasets
           </Button>
@@ -92,7 +86,9 @@ export default function Dashboard() {
             variant="primary"
             size="sm"
             icon={Plus}
-            onClick={() => navigate(currentProjectId ? `/projects/${currentProjectId}/evaluations/new` : '/')}
+            onClick={() =>
+              navigate(currentProjectId ? `/projects/${currentProjectId}/evaluations/new` : '/')
+            }
           >
             New Experiment
           </Button>
@@ -193,7 +189,9 @@ export default function Dashboard() {
         >
           <div className="space-y-3">
             {providers.length === 0 ? (
-              <div className="text-xs text-workbench-muted text-center py-6">Loading provider telemetry...</div>
+              <div className="text-xs text-workbench-muted text-center py-6">
+                Loading provider telemetry...
+              </div>
             ) : (
               providers.slice(0, 4).map((p) => (
                 <div
@@ -204,12 +202,12 @@ export default function Dashboard() {
                     <Cpu className="w-4 h-4 text-brand-terracotta" />
                     <div>
                       <span className="font-semibold block">{p.provider}</span>
-                      <span className="text-[10px] font-mono text-workbench-muted">{p.latency_ms} ms</span>
+                      <span className="text-[10px] font-mono text-workbench-muted">
+                        {p.latency_ms} ms
+                      </span>
                     </div>
                   </div>
-                  <Badge variant={p.status === 'healthy' ? 'success' : 'warning'}>
-                    {p.status}
-                  </Badge>
+                  <Badge variant={p.status === 'healthy' ? 'success' : 'warning'}>{p.status}</Badge>
                 </div>
               ))
             )}
@@ -225,7 +223,9 @@ export default function Dashboard() {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => navigate(currentProjectId ? `/projects/${currentProjectId}/evaluations` : '/')}
+            onClick={() =>
+              navigate(currentProjectId ? `/projects/${currentProjectId}/evaluations` : '/')
+            }
           >
             View All Runs
           </Button>
@@ -254,9 +254,7 @@ export default function Dashboard() {
               ) : (
                 experiments.slice(0, 5).map((exp) => (
                   <tr key={exp.id} className="hover:bg-workbench-card/50 transition-colors">
-                    <td className="px-5 py-3.5 font-semibold text-workbench-text">
-                      {exp.name}
-                    </td>
+                    <td className="px-5 py-3.5 font-semibold text-workbench-text">{exp.name}</td>
                     <td className="px-5 py-3.5 font-mono text-[11px] text-workbench-muted">
                       {exp.judge}
                     </td>
@@ -277,7 +275,11 @@ export default function Dashboard() {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => navigate(currentProjectId ? `/projects/${currentProjectId}/evaluations` : '/')}
+                        onClick={() =>
+                          navigate(
+                            currentProjectId ? `/projects/${currentProjectId}/evaluations` : '/'
+                          )
+                        }
                       >
                         Inspect
                       </Button>

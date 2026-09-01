@@ -42,9 +42,14 @@ export default function WorkspaceSettings() {
         </div>
       </Card>
 
-      <Card title="Default Evaluator Configuration" subtitle="Default LLM judge parameters for new experiments">
+      <Card
+        title="Default Evaluator Configuration"
+        subtitle="Default LLM judge parameters for new experiments"
+      >
         <div className="space-y-1.5">
-          <label className="block text-xs font-medium text-workbench-text">Default Judge Evaluator</label>
+          <label className="block text-xs font-medium text-workbench-text">
+            Default Judge Evaluator
+          </label>
           <select
             value={defaultJudge}
             onChange={(e) => setDefaultJudge(e.target.value)}

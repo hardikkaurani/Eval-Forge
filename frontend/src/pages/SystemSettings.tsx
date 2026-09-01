@@ -5,9 +5,27 @@ import { MetricCard } from '../components/common/MetricCard';
 
 export default function SystemSettings() {
   const nodes = [
-    { id: 'node-worker-01', cpu: '14%', memory: '2.4 GB / 8.0 GB', tasks: '12 active', status: 'healthy' },
-    { id: 'node-worker-02', cpu: '28%', memory: '3.8 GB / 8.0 GB', tasks: '18 active', status: 'healthy' },
-    { id: 'node-worker-03', cpu: '8%', memory: '1.2 GB / 8.0 GB', tasks: '4 active', status: 'healthy' },
+    {
+      id: 'node-worker-01',
+      cpu: '14%',
+      memory: '2.4 GB / 8.0 GB',
+      tasks: '12 active',
+      status: 'healthy',
+    },
+    {
+      id: 'node-worker-02',
+      cpu: '28%',
+      memory: '3.8 GB / 8.0 GB',
+      tasks: '18 active',
+      status: 'healthy',
+    },
+    {
+      id: 'node-worker-03',
+      cpu: '8%',
+      memory: '1.2 GB / 8.0 GB',
+      tasks: '4 active',
+      status: 'healthy',
+    },
   ];
 
   return (
@@ -25,8 +43,18 @@ export default function SystemSettings() {
 
       {/* Cluster Metrics */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <MetricCard title="Active Worker Nodes" value="3 Nodes" subtitle="All nodes healthy" icon={Server} />
-        <MetricCard title="Queue Depth" value="0 Tasks" subtitle="No queue backlog" icon={Activity} />
+        <MetricCard
+          title="Active Worker Nodes"
+          value="3 Nodes"
+          subtitle="All nodes healthy"
+          icon={Server}
+        />
+        <MetricCard
+          title="Queue Depth"
+          value="0 Tasks"
+          subtitle="No queue backlog"
+          icon={Activity}
+        />
         <MetricCard title="Cluster CPU Load" value="16.6%" subtitle="P95 load metric" icon={Cpu} />
       </div>
 
@@ -46,7 +74,9 @@ export default function SystemSettings() {
             <tbody className="divide-y divide-workbench-border">
               {nodes.map((n) => (
                 <tr key={n.id} className="hover:bg-workbench-card/50 transition-colors">
-                  <td className="px-5 py-3.5 font-mono font-semibold text-workbench-text">{n.id}</td>
+                  <td className="px-5 py-3.5 font-mono font-semibold text-workbench-text">
+                    {n.id}
+                  </td>
                   <td className="px-5 py-3.5 font-mono text-workbench-muted">{n.cpu}</td>
                   <td className="px-5 py-3.5 font-mono text-workbench-muted">{n.memory}</td>
                   <td className="px-5 py-3.5 font-mono text-workbench-muted">{n.tasks}</td>

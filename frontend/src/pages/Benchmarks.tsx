@@ -72,9 +72,10 @@ export default function Benchmarks() {
     }
   };
 
-  const filteredBenchmarks = benchmarks.filter((b) =>
-    b.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    b.description.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredBenchmarks = benchmarks.filter(
+    (b) =>
+      b.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      b.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -82,11 +83,10 @@ export default function Benchmarks() {
       {/* Top Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-workbench-border pb-4">
         <div>
-          <h1 className="text-xl font-bold tracking-tight text-workbench-text">
-            Benchmark Suites
-          </h1>
+          <h1 className="text-xl font-bold tracking-tight text-workbench-text">Benchmark Suites</h1>
           <p className="text-xs text-workbench-muted mt-1">
-            Composite benchmark suites combining multiple datasets for standardized model evaluation.
+            Composite benchmark suites combining multiple datasets for standardized model
+            evaluation.
           </p>
         </div>
         <div className="flex items-center gap-3">

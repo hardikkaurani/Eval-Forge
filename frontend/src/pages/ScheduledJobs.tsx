@@ -87,7 +87,12 @@ export default function ScheduledJobs() {
                       description="Create automated cron triggers to monitor model quality continuously."
                       icon={Clock}
                       action={
-                        <Button variant="primary" size="sm" icon={Plus} onClick={() => setIsCreateOpen(true)}>
+                        <Button
+                          variant="primary"
+                          size="sm"
+                          icon={Plus}
+                          onClick={() => setIsCreateOpen(true)}
+                        >
                           Create Schedule
                         </Button>
                       }
@@ -97,9 +102,7 @@ export default function ScheduledJobs() {
               ) : (
                 jobs.map((job) => (
                   <tr key={job.id} className="hover:bg-workbench-card/50 transition-colors">
-                    <td className="px-5 py-3.5 font-semibold text-workbench-text">
-                      {job.name}
-                    </td>
+                    <td className="px-5 py-3.5 font-semibold text-workbench-text">{job.name}</td>
                     <td className="px-5 py-3.5 font-mono text-[11px] text-workbench-muted">
                       <span className="px-2 py-0.5 rounded bg-workbench-bg border border-workbench-border">
                         {job.cron_expression}
@@ -109,7 +112,9 @@ export default function ScheduledJobs() {
                       {job.pipeline || 'Regression Evaluation'}
                     </td>
                     <td className="px-5 py-3.5 font-mono text-[11px] text-workbench-muted">
-                      {job.next_run ? new Date(job.next_run).toLocaleString() : 'Tomorrow 00:00 UTC'}
+                      {job.next_run
+                        ? new Date(job.next_run).toLocaleString()
+                        : 'Tomorrow 00:00 UTC'}
                     </td>
                     <td className="px-5 py-3.5">
                       <Badge variant={job.enabled !== false ? 'success' : 'neutral'}>

@@ -5,8 +5,22 @@ import { MetricCard } from '../components/common/MetricCard';
 
 export default function AiSafety() {
   const violations = [
-    { id: 'v-101', type: 'PROMPT_INJECTION', severity: 'HIGH', model: 'gpt-3.5-turbo', blocked: true, time: '10 mins ago' },
-    { id: 'v-102', type: 'PII_LEAKAGE_ATTEMPT', severity: 'MEDIUM', model: 'claude-3-haiku', blocked: true, time: '1 hour ago' },
+    {
+      id: 'v-101',
+      type: 'PROMPT_INJECTION',
+      severity: 'HIGH',
+      model: 'gpt-3.5-turbo',
+      blocked: true,
+      time: '10 mins ago',
+    },
+    {
+      id: 'v-102',
+      type: 'PII_LEAKAGE_ATTEMPT',
+      severity: 'MEDIUM',
+      model: 'claude-3-haiku',
+      blocked: true,
+      time: '1 hour ago',
+    },
   ];
 
   return (
@@ -18,7 +32,8 @@ export default function AiSafety() {
           AI Safety & Toxicity Guardrails
         </h1>
         <p className="text-xs text-workbench-muted mt-1">
-          Automated prompt injection testing, PII leakage detection, and jailbreak defense evaluation.
+          Automated prompt injection testing, PII leakage detection, and jailbreak defense
+          evaluation.
         </p>
       </div>
 
@@ -75,7 +90,9 @@ export default function AiSafety() {
               {violations.map((v) => (
                 <tr key={v.id} className="hover:bg-workbench-card/50 transition-colors">
                   <td className="px-5 py-3.5 font-mono text-[11px] text-workbench-muted">{v.id}</td>
-                  <td className="px-5 py-3.5 font-mono font-semibold text-workbench-text">{v.type}</td>
+                  <td className="px-5 py-3.5 font-mono font-semibold text-workbench-text">
+                    {v.type}
+                  </td>
                   <td className="px-5 py-3.5 font-mono text-workbench-muted">{v.model}</td>
                   <td className="px-5 py-3.5">
                     <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-red-500/10 text-red-600 border border-red-500/20 font-semibold">

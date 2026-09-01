@@ -29,7 +29,8 @@ Model candidate GPT-4 Turbo exhibits superior reasoning scores across RAG benchm
             Evaluation Report Generator
           </h1>
           <p className="text-xs text-workbench-muted mt-1">
-            Generate executive compliance PDF/Markdown reports summarizing evaluation runs and model telemetry.
+            Generate executive compliance PDF/Markdown reports summarizing evaluation runs and model
+            telemetry.
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -43,7 +44,11 @@ Model candidate GPT-4 Turbo exhibits superior reasoning scores across RAG benchm
       </div>
 
       {/* Report Preview */}
-      <Card title="Report Preview" subtitle="Executive Evaluation Summary Markdown Output" padding="none">
+      <Card
+        title="Report Preview"
+        subtitle="Executive Evaluation Summary Markdown Output"
+        padding="none"
+      >
         <CodeBlock code={reportMarkdown} language="markdown" maxHeight="max-h-[500px]" />
       </Card>
     </div>

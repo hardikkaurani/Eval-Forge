@@ -1,13 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import {
-  Database,
-  Plus,
-  Search,
-  Layers,
-  Tag,
-  ExternalLink,
-} from 'lucide-react';
+import { Database, Plus, Search, Layers, Tag, ExternalLink } from 'lucide-react';
 import { useWorkspace } from '../context/WorkspaceContext';
 import { api } from '../services/api';
 import type { Dataset } from '../services/api';
@@ -80,9 +73,10 @@ export default function Datasets() {
     }
   };
 
-  const filteredDatasets = datasets.filter((d) =>
-    d.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    d.description.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredDatasets = datasets.filter(
+    (d) =>
+      d.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      d.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (

@@ -16,12 +16,29 @@ export default function ApiWebhooks() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const [apiKeys, setApiKeys] = useState([
-    { id: '1', name: 'CI/CD Pipeline Key', prefix: 'ef_live_9a8f...', created: '2026-08-15', lastUsed: '2 mins ago' },
-    { id: '2', name: 'Local Dev Key', prefix: 'ef_live_3b1d...', created: '2026-08-20', lastUsed: '1 hour ago' },
+    {
+      id: '1',
+      name: 'CI/CD Pipeline Key',
+      prefix: 'ef_live_9a8f...',
+      created: '2026-08-15',
+      lastUsed: '2 mins ago',
+    },
+    {
+      id: '2',
+      name: 'Local Dev Key',
+      prefix: 'ef_live_3b1d...',
+      created: '2026-08-20',
+      lastUsed: '1 hour ago',
+    },
   ]);
 
   const webhooks = [
-    { id: 'wh-1', url: 'https://api.evalforge.ai/webhooks/eval-completed', events: ['experiment.completed'], status: 'active' },
+    {
+      id: 'wh-1',
+      url: 'https://api.evalforge.ai/webhooks/eval-completed',
+      events: ['experiment.completed'],
+      status: 'active',
+    },
   ];
 
   const handleOpenModal = () => {
@@ -45,7 +62,8 @@ export default function ApiWebhooks() {
 
     try {
       const response = await api.enterprise.apiKeys.create({ name: keyName });
-      const secret = response.api_key || response.raw_key || (response.data && response.data.api_key);
+      const secret =
+        response.api_key || response.raw_key || (response.data && response.data.api_key);
       if (secret) {
         setGeneratedKey(secret);
         setApiKeys((prev) => [
@@ -63,7 +81,9 @@ export default function ApiWebhooks() {
       }
     } catch (err: unknown) {
       console.error('Failed to generate server API Key:', err);
-      setErrorMsg('Failed to generate API Key from server endpoint. Please verify backend connectivity.');
+      setErrorMsg(
+        'Failed to generate API Key from server endpoint. Please verify backend connectivity.'
+      );
     } finally {
       setIsCreatingKey(false);
     }
@@ -88,7 +108,11 @@ export default function ApiWebhooks() {
       </div>
 
       {/* API Keys Table */}
-      <Card title="Workspace API Keys" subtitle="Secret keys used to authenticate REST API requests" padding="none">
+      <Card
+        title="Workspace API Keys"
+        subtitle="Secret keys used to authenticate REST API requests"
+        padding="none"
+      >
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead className="bg-workbench-card border-b border-workbench-border text-[10px] font-mono uppercase text-workbench-muted">
@@ -104,11 +128,19 @@ export default function ApiWebhooks() {
               {apiKeys.map((k) => (
                 <tr key={k.id} className="hover:bg-workbench-card/50 transition-colors">
                   <td className="px-5 py-3.5 font-semibold text-workbench-text">{k.name}</td>
-                  <td className="px-5 py-3.5 font-mono text-[11px] text-workbench-muted">{k.prefix}</td>
-                  <td className="px-5 py-3.5 font-mono text-[11px] text-workbench-muted">{k.created}</td>
-                  <td className="px-5 py-3.5 font-mono text-[11px] text-workbench-muted">{k.lastUsed}</td>
+                  <td className="px-5 py-3.5 font-mono text-[11px] text-workbench-muted">
+                    {k.prefix}
+                  </td>
+                  <td className="px-5 py-3.5 font-mono text-[11px] text-workbench-muted">
+                    {k.created}
+                  </td>
+                  <td className="px-5 py-3.5 font-mono text-[11px] text-workbench-muted">
+                    {k.lastUsed}
+                  </td>
                   <td className="px-5 py-3.5 text-right">
-                    <Button variant="ghost" size="sm" icon={Trash2}>Revoke</Button>
+                    <Button variant="ghost" size="sm" icon={Trash2}>
+                      Revoke
+                    </Button>
                   </td>
                 </tr>
               ))}
@@ -118,10 +150,16 @@ export default function ApiWebhooks() {
       </Card>
 
       {/* Webhooks Section */}
-      <Card title="Webhook Endpoints" subtitle="Receive HTTP POST payloads when evaluation pipeline events trigger">
+      <Card
+        title="Webhook Endpoints"
+        subtitle="Receive HTTP POST payloads when evaluation pipeline events trigger"
+      >
         <div className="space-y-3">
           {webhooks.map((w) => (
-            <div key={w.id} className="flex items-center justify-between p-3 rounded bg-workbench-bg border border-workbench-border text-xs">
+            <div
+              key={w.id}
+              className="flex items-center justify-between p-3 rounded bg-workbench-bg border border-workbench-border text-xs"
+            >
               <div className="flex items-center gap-2 font-mono text-[11px]">
                 <Globe className="w-4 h-4 text-brand-terracotta" />
                 <span className="text-workbench-text font-semibold">{w.url}</span>
@@ -141,9 +179,13 @@ export default function ApiWebhooks() {
       >
         {generatedKey ? (
           <div className="space-y-4">
-            <span className="text-xs font-mono text-emerald-400 block font-semibold">API Key Generated Successfully (One-Time Reveal):</span>
+            <span className="text-xs font-mono text-emerald-400 block font-semibold">
+              API Key Generated Successfully (One-Time Reveal):
+            </span>
             <CodeBlock code={generatedKey} language="text" />
-            <Button variant="primary" size="sm" onClick={handleCloseModal}>Done & Erase Secret from Memory</Button>
+            <Button variant="primary" size="sm" onClick={handleCloseModal}>
+              Done & Erase Secret from Memory
+            </Button>
           </div>
         ) : (
           <div className="space-y-4 text-chrome-text">
@@ -160,7 +202,9 @@ export default function ApiWebhooks() {
               variant="chrome"
             />
             <div className="flex justify-end gap-2 pt-2">
-              <Button variant="ghost" size="sm" onClick={handleCloseModal}>Cancel</Button>
+              <Button variant="ghost" size="sm" onClick={handleCloseModal}>
+                Cancel
+              </Button>
               <Button
                 variant="primary"
                 size="sm"

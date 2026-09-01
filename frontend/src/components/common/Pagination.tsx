@@ -26,19 +26,33 @@ export const Pagination: React.FC<PaginationProps> = ({
   return (
     <div
       className={`flex items-center justify-between px-4 py-3 border-t ${
-        variant === 'workbench' ? 'border-workbench-border text-workbench-muted' : 'border-chrome-border text-chrome-muted'
+        variant === 'workbench'
+          ? 'border-workbench-border text-workbench-muted'
+          : 'border-chrome-border text-chrome-muted'
       } text-xs ${className}`}
     >
       <div className="font-mono text-[11px]">
         {totalItems !== undefined && pageSize !== undefined ? (
           <span>
-            Showing <strong className={variant === 'workbench' ? 'text-workbench-text' : 'text-chrome-text'}>
+            Showing{' '}
+            <strong
+              className={variant === 'workbench' ? 'text-workbench-text' : 'text-chrome-text'}
+            >
               {(currentPage - 1) * pageSize + 1}
-            </strong> to <strong className={variant === 'workbench' ? 'text-workbench-text' : 'text-chrome-text'}>
+            </strong>{' '}
+            to{' '}
+            <strong
+              className={variant === 'workbench' ? 'text-workbench-text' : 'text-chrome-text'}
+            >
               {Math.min(currentPage * pageSize, totalItems)}
-            </strong> of <strong className={variant === 'workbench' ? 'text-workbench-text' : 'text-chrome-text'}>
+            </strong>{' '}
+            of{' '}
+            <strong
+              className={variant === 'workbench' ? 'text-workbench-text' : 'text-chrome-text'}
+            >
               {totalItems}
-            </strong> items
+            </strong>{' '}
+            items
           </span>
         ) : (
           <span>

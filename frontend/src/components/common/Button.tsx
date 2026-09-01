@@ -26,16 +26,12 @@ export const Button: React.FC<ButtonProps> = ({
     'inline-flex items-center justify-center font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-brand-sky focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed select-none';
 
   const variantClasses: Record<ButtonVariant, string> = {
-    primary:
-      'bg-brand-terracotta hover:bg-brand-terracotta-hover text-white shadow-subtle',
-    secondary:
-      'bg-chrome-panel hover:bg-chrome-hover text-chrome-text border border-chrome-border',
+    primary: 'bg-brand-terracotta hover:bg-brand-terracotta-hover text-white shadow-subtle',
+    secondary: 'bg-chrome-panel hover:bg-chrome-hover text-chrome-text border border-chrome-border',
     outline:
       'bg-white hover:bg-workbench-card text-workbench-text border border-workbench-border shadow-subtle',
-    ghost:
-      'bg-transparent hover:bg-chrome-hover/40 text-chrome-muted hover:text-chrome-text',
-    destructive:
-      'bg-red-700 hover:bg-red-800 text-white shadow-subtle',
+    ghost: 'bg-transparent hover:bg-chrome-hover/40 text-chrome-muted hover:text-chrome-text',
+    destructive: 'bg-red-700 hover:bg-red-800 text-white shadow-subtle',
   };
 
   const sizeClasses: Record<ButtonSize, string> = {

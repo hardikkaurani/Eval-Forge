@@ -43,7 +43,11 @@ export default function JobDetail() {
 
       {/* Steps Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card title="Execution Steps" subtitle="Worker pipeline execution steps" className="lg:col-span-1">
+        <Card
+          title="Execution Steps"
+          subtitle="Worker pipeline execution steps"
+          className="lg:col-span-1"
+        >
           <div className="space-y-3">
             {steps.map((s, idx) => (
               <div
@@ -51,9 +55,7 @@ export default function JobDetail() {
                 className="p-3 rounded bg-workbench-bg border border-workbench-border flex items-center justify-between text-xs font-mono"
               >
                 <span className="truncate pr-2">{s.name}</span>
-                <Badge variant={s.status === 'completed' ? 'success' : 'running'}>
-                  {s.status}
-                </Badge>
+                <Badge variant={s.status === 'completed' ? 'success' : 'running'}>{s.status}</Badge>
               </div>
             ))}
           </div>

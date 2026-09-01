@@ -1,13 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import {
-  Terminal,
-  ArrowLeft,
-  Play,
-  Database,
-  Cpu,
-  Sparkles,
-} from 'lucide-react';
+import { Terminal, ArrowLeft, Play, Database, Cpu, Sparkles } from 'lucide-react';
 import { useWorkspace } from '../context/WorkspaceContext';
 import { api } from '../services/api';
 import { Card } from '../components/common/Card';
@@ -105,7 +98,10 @@ export default function NewExperiment() {
         </Card>
 
         {/* Step 2: Dataset & Provider */}
-        <Card title="2. Evaluation Scope & Models" subtitle="Select test dataset and candidate provider">
+        <Card
+          title="2. Evaluation Scope & Models"
+          subtitle="Select test dataset and candidate provider"
+        >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <label className="block text-xs font-medium text-workbench-text flex items-center gap-1.5">
@@ -178,13 +174,7 @@ export default function NewExperiment() {
           >
             Cancel
           </Button>
-          <Button
-            type="submit"
-            variant="primary"
-            size="md"
-            icon={Play}
-            isLoading={isSubmitting}
-          >
+          <Button type="submit" variant="primary" size="md" icon={Play} isLoading={isSubmitting}>
             Execute Evaluation Pipeline
           </Button>
         </div>

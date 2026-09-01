@@ -37,7 +37,7 @@ export const WorkspaceProvider: React.FC<{ children: ReactNode }> = ({ children 
       // Ignore if a newer fetch request was initiated in the meantime
       if (currentSeq !== fetchSeqRef.current) return;
 
-      const availableList: Project[] = Array.isArray(list) ? list : (list?.data || []);
+      const availableList: Project[] = Array.isArray(list) ? list : list?.data || [];
       setProjects(availableList);
 
       const storedId = localStorage.getItem(ACTIVE_PROJECT_KEY);

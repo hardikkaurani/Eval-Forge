@@ -67,12 +67,12 @@ export default function Providers() {
                   </div>
                   <div>
                     <h3 className="text-sm font-bold text-workbench-text">{p.provider}</h3>
-                    <span className="text-[10px] font-mono text-workbench-muted">Inference Route</span>
+                    <span className="text-[10px] font-mono text-workbench-muted">
+                      Inference Route
+                    </span>
                   </div>
                 </div>
-                <Badge variant={p.status === 'healthy' ? 'success' : 'warning'}>
-                  {p.status}
-                </Badge>
+                <Badge variant={p.status === 'healthy' ? 'success' : 'warning'}>{p.status}</Badge>
               </div>
 
               {/* Telemetry Metrics */}
@@ -83,7 +83,9 @@ export default function Providers() {
                 </div>
                 <div>
                   <span className="text-[10px] text-workbench-muted block">AVAILABLE MODELS</span>
-                  <span className="font-bold text-workbench-text">{(p.models || []).length || 4}</span>
+                  <span className="font-bold text-workbench-text">
+                    {(p.models || []).length || 4}
+                  </span>
                 </div>
               </div>
 

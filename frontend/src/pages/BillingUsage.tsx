@@ -12,7 +12,8 @@ export default function BillingUsage() {
           License Tier & Token Usage Telemetry
         </h1>
         <p className="text-xs text-workbench-muted mt-1">
-          Monitor evaluation token consumption, provider quota limits, and enterprise subscription tier.
+          Monitor evaluation token consumption, provider quota limits, and enterprise subscription
+          tier.
         </p>
       </div>
 
@@ -22,7 +23,8 @@ export default function BillingUsage() {
         <div>
           <span className="font-semibold block mb-0.5">Backend Capability Gap Notice</span>
           <span>
-            Billing and subscription management is isolated on static frontend contracts. Live backend billing APIs are reserved for enterprise SaaS licensing modules.
+            Billing and subscription management is isolated on static frontend contracts. Live
+            backend billing APIs are reserved for enterprise SaaS licensing modules.
           </span>
         </div>
       </div>
@@ -31,8 +33,12 @@ export default function BillingUsage() {
       <Card title="Current Subscription Tier" subtitle="Organization license entitlement">
         <div className="flex items-center justify-between">
           <div>
-            <span className="text-lg font-bold text-workbench-text block">Enterprise Dedicated License</span>
-            <span className="text-xs text-workbench-muted">Unlimited evaluation projects & concurrent worker nodes</span>
+            <span className="text-lg font-bold text-workbench-text block">
+              Enterprise Dedicated License
+            </span>
+            <span className="text-xs text-workbench-muted">
+              Unlimited evaluation projects & concurrent worker nodes
+            </span>
           </div>
           <Badge variant="success">Active</Badge>
         </div>

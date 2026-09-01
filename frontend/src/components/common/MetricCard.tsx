@@ -32,7 +32,9 @@ export const MetricCard: React.FC<MetricCardProps> = ({
   return (
     <Card variant={variant} padding="md" className={className}>
       <div className="flex items-center justify-between mb-2">
-        <span className={`text-xs font-mono uppercase tracking-wider ${variant === 'workbench' ? 'text-workbench-muted' : 'text-chrome-muted'}`}>
+        <span
+          className={`text-xs font-mono uppercase tracking-wider ${variant === 'workbench' ? 'text-workbench-muted' : 'text-chrome-muted'}`}
+        >
           {title}
         </span>
         {Icon && (
@@ -45,14 +47,18 @@ export const MetricCard: React.FC<MetricCardProps> = ({
       <div className="flex items-baseline justify-between gap-2">
         <div className="text-2xl font-bold tracking-tight">{value}</div>
         {trend && (
-          <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full border ${trendColors[trendDirection]}`}>
+          <span
+            className={`text-[10px] font-mono px-2 py-0.5 rounded-full border ${trendColors[trendDirection]}`}
+          >
             {trend}
           </span>
         )}
       </div>
 
       {subtitle && (
-        <p className={`text-[11px] mt-1.5 ${variant === 'workbench' ? 'text-workbench-muted' : 'text-chrome-muted'}`}>
+        <p
+          className={`text-[11px] mt-1.5 ${variant === 'workbench' ? 'text-workbench-muted' : 'text-chrome-muted'}`}
+        >
           {subtitle}
         </p>
       )}

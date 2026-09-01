@@ -211,9 +211,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     },
     {
       label: 'Platform & Docs',
-      links: [
-        { name: 'Developer Portal', path: '/developer', icon: BookOpen },
-      ],
+      links: [{ name: 'Developer Portal', path: '/developer', icon: BookOpen }],
     },
   ];
 
@@ -328,7 +326,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 {currentProject ? `${currentProject.datasets_count || 0} Datasets` : 'No project'}
               </div>
             </div>
-            <ChevronDown className={`w-4 h-4 text-chrome-muted shrink-0 transition-transform ${projectDropdownOpen ? 'rotate-180' : ''}`} />
+            <ChevronDown
+              className={`w-4 h-4 text-chrome-muted shrink-0 transition-transform ${projectDropdownOpen ? 'rotate-180' : ''}`}
+            />
           </button>
 
           {/* Dropdown Menu */}
@@ -350,11 +350,15 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                       }
                     }}
                     className={`w-full text-left px-3 py-2 text-xs flex items-center justify-between hover:bg-chrome-hover transition-colors ${
-                      p.id === activeProjectId ? 'bg-chrome-hover text-brand-sky font-semibold' : 'text-chrome-text'
+                      p.id === activeProjectId
+                        ? 'bg-chrome-hover text-brand-sky font-semibold'
+                        : 'text-chrome-text'
                     }`}
                   >
                     <span className="truncate">{p.name}</span>
-                    {p.id === activeProjectId && <CheckCircle2 className="w-3.5 h-3.5 text-brand-sky shrink-0" />}
+                    {p.id === activeProjectId && (
+                      <CheckCircle2 className="w-3.5 h-3.5 text-brand-sky shrink-0" />
+                    )}
                   </button>
                 ))
               )}
@@ -400,7 +404,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                       }`}
                     >
                       <div className="flex items-center gap-3 truncate">
-                        <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-brand-sky' : 'text-chrome-muted'}`} />
+                        <Icon
+                          className={`w-4 h-4 shrink-0 ${isActive ? 'text-brand-sky' : 'text-chrome-muted'}`}
+                        />
                         <span className="truncate">{link.name}</span>
                       </div>
                       {isActive && <ChevronRight className="w-3.5 h-3.5 text-brand-sky shrink-0" />}
@@ -483,11 +489,16 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 <div className="absolute right-0 top-full mt-2 w-80 bg-chrome-panel border border-chrome-border rounded-md shadow-chrome z-50 p-3 space-y-2">
                   <div className="flex items-center justify-between text-xs font-semibold border-b border-chrome-border pb-2">
                     <span>Notifications</span>
-                    <span className="text-[10px] font-mono text-brand-sky">{notifications.length} New</span>
+                    <span className="text-[10px] font-mono text-brand-sky">
+                      {notifications.length} New
+                    </span>
                   </div>
                   <div className="space-y-2 max-h-60 overflow-y-auto">
                     {notifications.map((n, i) => (
-                      <div key={i} className="text-[11px] p-2 rounded bg-chrome-bg border border-chrome-border text-chrome-muted">
+                      <div
+                        key={i}
+                        className="text-[11px] p-2 rounded bg-chrome-bg border border-chrome-border text-chrome-muted"
+                      >
                         {n}
                       </div>
                     ))}
@@ -512,8 +523,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               {showUserMenu && (
                 <div className="absolute right-0 top-full mt-2 w-56 bg-chrome-panel border border-chrome-border rounded-md shadow-chrome z-50 py-1 text-xs">
                   <div className="px-3 py-2 border-b border-chrome-border">
-                    <p className="font-semibold text-chrome-text truncate">{user?.name || 'Developer'}</p>
-                    <p className="text-[10px] font-mono text-chrome-muted truncate">{user?.email || 'developer@evalforge.ai'}</p>
+                    <p className="font-semibold text-chrome-text truncate">
+                      {user?.name || 'Developer'}
+                    </p>
+                    <p className="text-[10px] font-mono text-chrome-muted truncate">
+                      {user?.email || 'developer@evalforge.ai'}
+                    </p>
                   </div>
                   <Link
                     to="/profile"
@@ -541,9 +556,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         </header>
 
         {/* Content Workbench Area */}
-        <main className="flex-1 p-4 md:p-8 max-w-7xl w-full mx-auto">
-          {children}
-        </main>
+        <main className="flex-1 p-4 md:p-8 max-w-7xl w-full mx-auto">{children}</main>
       </div>
 
       {/* Command Palette Modal */}
@@ -572,7 +585,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             </div>
             <div className="max-h-72 overflow-y-auto p-2 space-y-1">
               {filteredCommands.length === 0 ? (
-                <div className="px-4 py-3 text-xs text-chrome-muted text-center">No commands found</div>
+                <div className="px-4 py-3 text-xs text-chrome-muted text-center">
+                  No commands found
+                </div>
               ) : (
                 filteredCommands.map((c, i) => (
                   <button

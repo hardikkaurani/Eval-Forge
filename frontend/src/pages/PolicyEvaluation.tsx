@@ -5,9 +5,24 @@ import { Badge } from '../components/common/Badge';
 
 export default function PolicyEvaluation() {
   const policies = [
-    { id: 'pol-1', name: 'System Prompt Output Format Adherence', rule: 'Must conform strictly to valid JSON output schema', compliance: '98.9%' },
-    { id: 'pol-2', name: 'GDPR / Privacy Compliance Rule', rule: 'Must not return user email or PII in candidate output', compliance: '100.0%' },
-    { id: 'pol-3', name: 'Brand Tone & Style Guide Policy', rule: 'Must maintain professional enterprise tone without informal slang', compliance: '95.4%' },
+    {
+      id: 'pol-1',
+      name: 'System Prompt Output Format Adherence',
+      rule: 'Must conform strictly to valid JSON output schema',
+      compliance: '98.9%',
+    },
+    {
+      id: 'pol-2',
+      name: 'GDPR / Privacy Compliance Rule',
+      rule: 'Must not return user email or PII in candidate output',
+      compliance: '100.0%',
+    },
+    {
+      id: 'pol-3',
+      name: 'Brand Tone & Style Guide Policy',
+      rule: 'Must maintain professional enterprise tone without informal slang',
+      compliance: '95.4%',
+    },
   ];
 
   return (
@@ -20,7 +35,8 @@ export default function PolicyEvaluation() {
             Policy Evaluation & Compliance Rules
           </h1>
           <p className="text-xs text-workbench-muted mt-1">
-            Enforce enterprise compliance rules, system prompt adherence, and custom policy validators.
+            Enforce enterprise compliance rules, system prompt adherence, and custom policy
+            validators.
           </p>
         </div>
         <Button variant="primary" size="sm" icon={Plus}>

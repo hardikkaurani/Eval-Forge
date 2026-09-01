@@ -1,10 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import {
-  Terminal,
-  Plus,
-  Search,
-} from 'lucide-react';
+import { Terminal, Plus, Search } from 'lucide-react';
 import { useWorkspace } from '../context/WorkspaceContext';
 import { api } from '../services/api';
 import type { Experiment } from '../services/api';
@@ -45,10 +41,11 @@ export default function Evaluations() {
     };
   }, [activeProjectId]);
 
-  const filteredExperiments = experiments.filter((e) =>
-    e.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    e.judge.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    e.provider.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredExperiments = experiments.filter(
+    (e) =>
+      e.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      e.judge.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      e.provider.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -142,8 +139,10 @@ export default function Evaluations() {
                       {exp.provider}
                     </td>
                     <td className="px-5 py-3.5 font-mono text-[11px] text-workbench-muted">
-                      <span className="text-emerald-600 font-semibold">{exp.completed_cases || 50}</span> /{' '}
-                      <span className="text-red-500">{exp.failed_cases || 0}</span>
+                      <span className="text-emerald-600 font-semibold">
+                        {exp.completed_cases || 50}
+                      </span>{' '}
+                      / <span className="text-red-500">{exp.failed_cases || 0}</span>
                     </td>
                     <td className="px-5 py-3.5 font-mono text-xs">
                       <span className="font-bold text-emerald-600">
@@ -156,11 +155,7 @@ export default function Evaluations() {
                       </Badge>
                     </td>
                     <td className="px-5 py-3.5 text-right">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setSelectedExperiment(exp)}
-                      >
+                      <Button variant="ghost" size="sm" onClick={() => setSelectedExperiment(exp)}>
                         Inspect
                       </Button>
                     </td>
@@ -196,8 +191,17 @@ export default function Evaluations() {
             </div>
 
             <div>
-              <span className="text-xs font-mono text-chrome-muted block mb-1">Configuration Payload</span>
-              <CodeBlock code={JSON.stringify(selectedExperiment.configuration || { temperature: 0.2 }, null, 2)} language="json" />
+              <span className="text-xs font-mono text-chrome-muted block mb-1">
+                Configuration Payload
+              </span>
+              <CodeBlock
+                code={JSON.stringify(
+                  selectedExperiment.configuration || { temperature: 0.2 },
+                  null,
+                  2
+                )}
+                language="json"
+              />
             </div>
           </div>
         </Dialog>

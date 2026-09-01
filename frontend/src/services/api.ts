@@ -292,12 +292,15 @@ const SEED_EXPERIMENTS: Experiment[] = [
       {
         id: 'r1',
         input_prompt: 'How do I request a refund for my subscription order #EF-9482?',
-        model_output: 'To request a refund for order #EF-9482, please log into your account dashboard...',
-        reference: 'Direct the user to Account > Billing > Order History and select Request Refund.',
+        model_output:
+          'To request a refund for order #EF-9482, please log into your account dashboard...',
+        reference:
+          'Direct the user to Account > Billing > Order History and select Request Refund.',
         score: 0.98,
         passed: true,
         confidence: 0.99,
-        reasoning: 'Model output correctly identifies refund policy steps and references the order number.',
+        reasoning:
+          'Model output correctly identifies refund policy steps and references the order number.',
         judge: 'gpt-4o-judge',
         provider: 'openai',
       },
@@ -559,7 +562,9 @@ export const api = {
     records: {
       list: async (datasetId: string, versionId?: string) => {
         try {
-          const res = await apiClient.get(`/datasets/${datasetId}/records?version=${versionId || ''}`);
+          const res = await apiClient.get(
+            `/datasets/${datasetId}/records?version=${versionId || ''}`
+          );
           return res.data.records || res.data;
         } catch (err) {
           if (ENABLE_MOCKS) {
@@ -731,7 +736,12 @@ export const api = {
         const res = await apiClient.get('/api-keys');
         return res.data.data || res.data;
       },
-      create: async (data: { name: string; organization_id?: string; workspace_id?: string; expires_in_days?: number }) => {
+      create: async (data: {
+        name: string;
+        organization_id?: string;
+        workspace_id?: string;
+        expires_in_days?: number;
+      }) => {
         const res = await apiClient.post('/api-keys', data);
         return res.data.data || res.data;
       },
@@ -746,7 +756,8 @@ export const api = {
       const res = await apiClient.get('/health');
       return res.data;
     } catch (err) {
-      if (ENABLE_MOCKS) return { status: 'healthy', services: { api: 'healthy', database: 'healthy' } };
+      if (ENABLE_MOCKS)
+        return { status: 'healthy', services: { api: 'healthy', database: 'healthy' } };
       throw err;
     }
   },

@@ -16,7 +16,10 @@ export const Badge: React.FC<BadgeProps> = ({
   showDot = true,
   className = '',
 }) => {
-  const variantStyles: Record<BadgeVariant, { bg: string; text: string; border: string; dot: string }> = {
+  const variantStyles: Record<
+    BadgeVariant,
+    { bg: string; text: string; border: string; dot: string }
+  > = {
     success: {
       bg: 'bg-emerald-500/10',
       text: 'text-emerald-700 dark:text-emerald-400',

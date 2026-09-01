@@ -8,9 +8,30 @@ export default function JobsDashboard() {
   const navigate = useNavigate();
 
   const jobsList = [
-    { id: 'job-1049', type: 'IMPORT', dataset: 'Chatbot Alignment Set', status: 'completed', progress: '100%', time: '2 mins ago' },
-    { id: 'job-1050', type: 'EXPORT', dataset: 'Safety Edge Cases', status: 'running', progress: '64%', time: 'Active' },
-    { id: 'job-1051', type: 'EVALUATION', dataset: 'RAG Retrieval Suite', status: 'queued', progress: '0%', time: 'Queued' },
+    {
+      id: 'job-1049',
+      type: 'IMPORT',
+      dataset: 'Chatbot Alignment Set',
+      status: 'completed',
+      progress: '100%',
+      time: '2 mins ago',
+    },
+    {
+      id: 'job-1050',
+      type: 'EXPORT',
+      dataset: 'Safety Edge Cases',
+      status: 'running',
+      progress: '64%',
+      time: 'Active',
+    },
+    {
+      id: 'job-1051',
+      type: 'EVALUATION',
+      dataset: 'RAG Retrieval Suite',
+      status: 'queued',
+      progress: '0%',
+      time: 'Queued',
+    },
   ];
 
   return (
@@ -54,9 +75,7 @@ export default function JobsDashboard() {
                   <td className="px-5 py-3.5 font-mono text-[11px] text-workbench-muted">
                     {job.type}
                   </td>
-                  <td className="px-5 py-3.5 text-workbench-text">
-                    {job.dataset}
-                  </td>
+                  <td className="px-5 py-3.5 text-workbench-text">{job.dataset}</td>
                   <td className="px-5 py-3.5 font-mono text-xs text-workbench-muted">
                     <div className="flex items-center gap-2">
                       <div className="w-24 bg-workbench-border h-1.5 rounded-full overflow-hidden">
@@ -69,7 +88,15 @@ export default function JobsDashboard() {
                     </div>
                   </td>
                   <td className="px-5 py-3.5">
-                    <Badge variant={job.status === 'completed' ? 'success' : job.status === 'running' ? 'running' : 'neutral'}>
+                    <Badge
+                      variant={
+                        job.status === 'completed'
+                          ? 'success'
+                          : job.status === 'running'
+                            ? 'running'
+                            : 'neutral'
+                      }
+                    >
                       {job.status}
                     </Badge>
                   </td>

@@ -49,7 +49,8 @@ print(f"Pass Rate: {result.aggregate_score * 100}%")`;
           Developer Platform & SDK Documentation
         </h1>
         <p className="text-xs text-workbench-muted mt-1">
-          Integrate evaluation pipelines into CI/CD workflows via Python SDK, REST API, or Model Context Protocol (MCP).
+          Integrate evaluation pipelines into CI/CD workflows via Python SDK, REST API, or Model
+          Context Protocol (MCP).
         </p>
       </div>
 
@@ -89,9 +90,19 @@ print(f"Pass Rate: {result.aggregate_score * 100}%")`;
 
       {/* Code Snippet Display */}
       <Card padding="none">
-        {tab === 'python' && <CodeBlock title="evalforge-python v1.4.0" code={pythonCode} language="python" />}
-        {tab === 'curl' && <CodeBlock title="REST API Endpoint Example" code={curlCode} language="bash" />}
-        {tab === 'mcp' && <CodeBlock title="MCP Client Configuration (mcp_config.json)" code={mcpCode} language="json" />}
+        {tab === 'python' && (
+          <CodeBlock title="evalforge-python v1.4.0" code={pythonCode} language="python" />
+        )}
+        {tab === 'curl' && (
+          <CodeBlock title="REST API Endpoint Example" code={curlCode} language="bash" />
+        )}
+        {tab === 'mcp' && (
+          <CodeBlock
+            title="MCP Client Configuration (mcp_config.json)"
+            code={mcpCode}
+            language="json"
+          />
+        )}
       </Card>
     </div>
   );

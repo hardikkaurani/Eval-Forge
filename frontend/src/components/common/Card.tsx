@@ -34,15 +34,20 @@ export const Card: React.FC<CardProps> = ({
   };
 
   return (
-    <div
-      className={`border rounded-md ${variantClasses[variant]} ${className}`}
-      {...props}
-    >
+    <div className={`border rounded-md ${variantClasses[variant]} ${className}`} {...props}>
       {(title || action) && (
-        <div className={`flex items-center justify-between border-b ${variant === 'workbench' ? 'border-workbench-border' : 'border-chrome-border'} px-5 py-3.5`}>
+        <div
+          className={`flex items-center justify-between border-b ${variant === 'workbench' ? 'border-workbench-border' : 'border-chrome-border'} px-5 py-3.5`}
+        >
           <div>
             {title && <h3 className="text-sm font-semibold tracking-tight">{title}</h3>}
-            {subtitle && <p className={`text-xs ${variant === 'workbench' ? 'text-workbench-muted' : 'text-chrome-muted'} mt-0.5`}>{subtitle}</p>}
+            {subtitle && (
+              <p
+                className={`text-xs ${variant === 'workbench' ? 'text-workbench-muted' : 'text-chrome-muted'} mt-0.5`}
+              >
+                {subtitle}
+              </p>
+            )}
           </div>
           {action && <div>{action}</div>}
         </div>

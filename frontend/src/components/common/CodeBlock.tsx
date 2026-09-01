@@ -33,11 +33,17 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({
           className="flex items-center gap-1 hover:text-chrome-text transition-colors p-1 rounded"
           aria-label="Copy code to clipboard"
         >
-          {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+          {copied ? (
+            <Check className="w-3.5 h-3.5 text-emerald-400" />
+          ) : (
+            <Copy className="w-3.5 h-3.5" />
+          )}
           <span>{copied ? 'Copied' : 'Copy'}</span>
         </button>
       </div>
-      <pre className={`p-4 font-mono text-xs text-chrome-text overflow-x-auto ${maxHeight} leading-relaxed select-all`}>
+      <pre
+        className={`p-4 font-mono text-xs text-chrome-text overflow-x-auto ${maxHeight} leading-relaxed select-all`}
+      >
         <code>{code}</code>
       </pre>
     </div>

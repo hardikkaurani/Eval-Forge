@@ -12,9 +12,27 @@ export default function MembersAccess() {
   const [inviteRole, setInviteRole] = useState('Admin');
 
   const members = [
-    { id: '1', name: 'Hardik Kaurani', email: 'hardikkaurani1@gmail.com', role: 'Owner', status: 'active' },
-    { id: '2', name: 'Eval-Forge Lead Architect', email: 'architect@evalforge.ai', role: 'Admin', status: 'active' },
-    { id: '3', name: 'QA Benchmark Automation', email: 'qa-bot@evalforge.ai', role: 'Member', status: 'active' },
+    {
+      id: '1',
+      name: 'Hardik Kaurani',
+      email: 'hardikkaurani1@gmail.com',
+      role: 'Owner',
+      status: 'active',
+    },
+    {
+      id: '2',
+      name: 'Eval-Forge Lead Architect',
+      email: 'architect@evalforge.ai',
+      role: 'Admin',
+      status: 'active',
+    },
+    {
+      id: '3',
+      name: 'QA Benchmark Automation',
+      email: 'qa-bot@evalforge.ai',
+      role: 'Member',
+      status: 'active',
+    },
   ];
 
   return (

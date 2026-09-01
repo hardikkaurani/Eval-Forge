@@ -39,7 +39,12 @@
     @apply bg-workbench-bg text-workbench-text font-sans antialiased overflow-x-hidden min-h-screen;
   }
 
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     @apply tracking-tight font-semibold;
   }
 }

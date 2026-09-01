@@ -31,7 +31,9 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
         <Icon className="w-6 h-6" />
       </div>
       <h3 className="text-base font-semibold tracking-tight mb-1">{title}</h3>
-      <p className={`text-xs max-w-sm ${variant === 'workbench' ? 'text-workbench-muted' : 'text-chrome-muted'} mb-5`}>
+      <p
+        className={`text-xs max-w-sm ${variant === 'workbench' ? 'text-workbench-muted' : 'text-chrome-muted'} mb-5`}
+      >
         {description}
       </p>
       {action && <div>{action}</div>}

@@ -4,9 +4,27 @@ import { Button } from '../components/common/Button';
 
 export default function AuditLogs() {
   const auditEvents = [
-    { id: 'aud-101', action: 'DATASET_VERSION_CREATED', actor: 'engineer@evalforge.ai', ip: '192.168.1.45', time: '2026-09-01 00:24:10' },
-    { id: 'aud-102', action: 'EXPERIMENT_PIPELINE_EXECUTED', actor: 'architect@evalforge.ai', ip: '192.168.1.12', time: '2026-09-01 00:15:30' },
-    { id: 'aud-103', action: 'API_KEY_GENERATED', actor: 'engineer@evalforge.ai', ip: '192.168.1.45', time: '2026-08-31 23:50:00' },
+    {
+      id: 'aud-101',
+      action: 'DATASET_VERSION_CREATED',
+      actor: 'engineer@evalforge.ai',
+      ip: '192.168.1.45',
+      time: '2026-09-01 00:24:10',
+    },
+    {
+      id: 'aud-102',
+      action: 'EXPERIMENT_PIPELINE_EXECUTED',
+      actor: 'architect@evalforge.ai',
+      ip: '192.168.1.12',
+      time: '2026-09-01 00:15:30',
+    },
+    {
+      id: 'aud-103',
+      action: 'API_KEY_GENERATED',
+      actor: 'engineer@evalforge.ai',
+      ip: '192.168.1.45',
+      time: '2026-08-31 23:50:00',
+    },
   ];
 
   return (
@@ -44,10 +62,14 @@ export default function AuditLogs() {
               {auditEvents.map((a) => (
                 <tr key={a.id} className="hover:bg-workbench-card/50 transition-colors">
                   <td className="px-5 py-3.5 font-mono text-[11px] text-workbench-muted">{a.id}</td>
-                  <td className="px-5 py-3.5 font-mono text-[11px] font-semibold text-workbench-text">{a.action}</td>
+                  <td className="px-5 py-3.5 font-mono text-[11px] font-semibold text-workbench-text">
+                    {a.action}
+                  </td>
                   <td className="px-5 py-3.5 text-workbench-text">{a.actor}</td>
                   <td className="px-5 py-3.5 font-mono text-[11px] text-workbench-muted">{a.ip}</td>
-                  <td className="px-5 py-3.5 font-mono text-[11px] text-workbench-muted text-right">{a.time}</td>
+                  <td className="px-5 py-3.5 font-mono text-[11px] text-workbench-muted text-right">
+                    {a.time}
+                  </td>
                 </tr>
               ))}
             </tbody>
