@@ -13,7 +13,7 @@ interface AuthContextType {
   token: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (token: string, user?: User) => void;
+  login: (token: string, user: User) => void;
   logout: () => void;
 }
 
@@ -31,39 +31,50 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       const storedToken = localStorage.getItem(TOKEN_KEY) || localStorage.getItem('token');
       const storedUser = localStorage.getItem(USER_KEY);
-      
-      if (storedToken) {
-        setToken(storedToken);
-        if (storedUser) {
-          setUser(JSON.parse(storedUser));
+
+      if (storedToken && storedUser) {
+        const parsedUser = JSON.parse(storedUser);
+        if (parsedUser && parsedUser.id && parsedUser.email) {
+          setToken(storedToken);
+          setUser(parsedUser);
         } else {
-          // Default fallback user for UI session when token exists
-          setUser({
-            id: 'usr_1',
-            name: 'Eval-Forge Engineer',
-            email: 'engineer@evalforge.ai',
-            role: 'Lead Architect',
-          });
+          // Incomplete or invalid stored user payload
+          localStorage.removeItem(TOKEN_KEY);
+          localStorage.removeItem('token');
+          localStorage.removeItem(USER_KEY);
+          setToken(null);
+          setUser(null);
         }
+      } else {
+        // Token without verified user payload is invalid
+        if (storedToken || storedUser) {
+          localStorage.removeItem(TOKEN_KEY);
+          localStorage.removeItem('token');
+          localStorage.removeItem(USER_KEY);
+        }
+        setToken(null);
+        setUser(null);
       }
     } catch {
-      // Ignore storage errors
+      localStorage.removeItem(TOKEN_KEY);
+      localStorage.removeItem('token');
+      localStorage.removeItem(USER_KEY);
+      setToken(null);
+      setUser(null);
     } finally {
       setIsLoading(false);
     }
   }, []);
 
-  const login = (newToken: string, newUser?: User) => {
-    const userToSave = newUser || {
-      id: 'usr_1',
-      name: 'Eval-Forge Engineer',
-      email: 'engineer@evalforge.ai',
-      role: 'Lead Architect',
-    };
+  const login = (newToken: string, newUser: User) => {
+    if (!newToken || !newUser || !newUser.id || !newUser.email) {
+      console.error('Invalid login payload: Token and User details are required');
+      return;
+    }
     setToken(newToken);
-    setUser(userToSave);
+    setUser(newUser);
     localStorage.setItem(TOKEN_KEY, newToken);
-    localStorage.setItem(USER_KEY, JSON.stringify(userToSave));
+    localStorage.setItem(USER_KEY, JSON.stringify(newUser));
   };
 
   const logout = () => {
@@ -79,7 +90,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       value={{
         user,
         token,
-        isAuthenticated: !!token,
+        isAuthenticated: !!token && !!user,
         isLoading,
         login,
         logout,
