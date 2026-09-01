@@ -5,15 +5,33 @@ import DashboardLayout from './layouts/DashboardLayout';
 import { AuthProvider } from './context/AuthContext';
 import { WorkspaceProvider } from './context/WorkspaceContext';
 import { seedMockData } from './services/api';
+import { ProtectedRoute } from './components/common/ProtectedRoute';
 
-// Existing Lazy Loaded Page Routes
+// 23 Production Page Views corresponding to all 23 Stitch product screens
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const Datasets = lazy(() => import('./pages/Datasets'));
+const DatasetDetail = lazy(() => import('./pages/DatasetDetail'));
+const NewExperiment = lazy(() => import('./pages/NewExperiment'));
 const Evaluations = lazy(() => import('./pages/Evaluations'));
 const Benchmarks = lazy(() => import('./pages/Benchmarks'));
+const RagEvaluation = lazy(() => import('./pages/RagEvaluation'));
 const Providers = lazy(() => import('./pages/Providers'));
+const JobsDashboard = lazy(() => import('./pages/JobsDashboard'));
+const JobDetail = lazy(() => import('./pages/JobDetail'));
+const LogViewer = lazy(() => import('./pages/LogViewer'));
 const ScheduledJobs = lazy(() => import('./pages/ScheduledJobs'));
+const MembersAccess = lazy(() => import('./pages/MembersAccess'));
+const ApiWebhooks = lazy(() => import('./pages/ApiWebhooks'));
+const AuditLogs = lazy(() => import('./pages/AuditLogs'));
+const WorkspaceSettings = lazy(() => import('./pages/WorkspaceSettings'));
+const DeveloperPortal = lazy(() => import('./pages/DeveloperPortal'));
+const AiSafety = lazy(() => import('./pages/AiSafety'));
+const PolicyEvaluation = lazy(() => import('./pages/PolicyEvaluation'));
+const ReportGenerator = lazy(() => import('./pages/ReportGenerator'));
+const BillingUsage = lazy(() => import('./pages/BillingUsage'));
+const SystemSettings = lazy(() => import('./pages/SystemSettings'));
 
+// Auth Views (Public)
 const Login = lazy(() => import('./pages/AuthPages').then((m) => ({ default: m.Login })));
 const Register = lazy(() => import('./pages/AuthPages').then((m) => ({ default: m.Register })));
 const ForgotPassword = lazy(() =>
@@ -21,44 +39,9 @@ const ForgotPassword = lazy(() =>
 );
 const Profile = lazy(() => import('./pages/AuthPages').then((m) => ({ default: m.Profile })));
 
-// Placeholder view builder for upcoming Stitch Batch pages
-const createBatchPlaceholder = (title: string, batchName: string) => {
-  const PlaceholderView = () => (
-    <div className="p-8 rounded-md bg-workbench-card border border-workbench-border text-center space-y-3">
-      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-mono bg-brand-terracotta/10 text-brand-terracotta border border-brand-terracotta/20">
-        Scheduled for {batchName}
-      </div>
-      <h2 className="text-xl font-bold text-workbench-text">{title}</h2>
-      <p className="text-xs text-workbench-muted max-w-md mx-auto">
-        This product surface is part of the 23-screen Stitch design integration inventory and will be implemented in {batchName}.
-      </p>
-    </div>
-  );
-  PlaceholderView.displayName = `Placeholder_${title.replace(/\s+/g, '')}`;
-  return PlaceholderView;
-};
-
-// Batch 2 & Batch 4-6 Route Stubs
-const DatasetDetail = createBatchPlaceholder('Dataset Detail & Version Timeline', 'Batch 2');
-const NewExperiment = createBatchPlaceholder('New Experiment Wizard', 'Batch 3');
-const RagEvaluation = createBatchPlaceholder('RAG Evaluation Workbench', 'Batch 4');
-const PolicyEvaluation = createBatchPlaceholder('Policy Evaluation & Rules', 'Batch 6');
-const AiSafety = createBatchPlaceholder('AI Safety & Toxicity Guardrails', 'Batch 6');
-const JobsDashboard = createBatchPlaceholder('Jobs Execution Queue', 'Batch 4');
-const JobDetail = createBatchPlaceholder('Job Step Execution Viewer', 'Batch 4');
-const LogViewer = createBatchPlaceholder('System & Audit Log Viewer', 'Batch 4');
-const ReportGenerator = createBatchPlaceholder('Evaluation Report Generator', 'Batch 6');
-const WorkspaceSettings = createBatchPlaceholder('Workspace Quota & Config', 'Batch 5');
-const MembersAccess = createBatchPlaceholder('Team Members & RBAC Access', 'Batch 5');
-const ApiWebhooks = createBatchPlaceholder('API Keys & Webhook Subscriptions', 'Batch 5');
-const AuditLogs = createBatchPlaceholder('Workspace Security Audit Trail', 'Batch 5');
-const BillingUsage = createBatchPlaceholder('Billing & License Usage (Backend Gap)', 'Batch 6');
-const SystemSettings = createBatchPlaceholder('System Nodes & Worker Telemetry', 'Batch 6');
-const DeveloperPortal = createBatchPlaceholder('Developer Portal & MCP Docs', 'Batch 6');
-
 const PageLoader = () => (
   <div className="flex items-center justify-center min-h-[400px]">
-    <div className="w-8 h-8 border-4 border-brand-terracotta border-t-transparent rounded-full animate-spin"></div>
+    <div className="w-8 h-8 border-4 border-brand-terracotta border-t-transparent rounded-full animate-spin font-mono text-xs"></div>
   </div>
 );
 
@@ -84,202 +67,248 @@ function App() {
           <Router>
             <Suspense fallback={<PageLoader />}>
               <Routes>
-                {/* Auth Routes */}
+                {/* Public Auth Routes */}
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
 
-                {/* Dashboard & Profile */}
+                {/* Protected Dashboard & Profile */}
                 <Route
                   path="/"
                   element={
-                    <DashboardLayout>
-                      <Dashboard />
-                    </DashboardLayout>
+                    <ProtectedRoute>
+                      <DashboardLayout>
+                        <Dashboard />
+                      </DashboardLayout>
+                    </ProtectedRoute>
                   }
                 />
                 <Route
                   path="/profile"
                   element={
-                    <DashboardLayout>
-                      <Profile />
-                    </DashboardLayout>
+                    <ProtectedRoute>
+                      <DashboardLayout>
+                        <Profile />
+                      </DashboardLayout>
+                    </ProtectedRoute>
                   }
                 />
 
-                {/* Infrastructure */}
+                {/* Protected Infrastructure */}
                 <Route
                   path="/providers"
                   element={
-                    <DashboardLayout>
-                      <Providers />
-                    </DashboardLayout>
+                    <ProtectedRoute>
+                      <DashboardLayout>
+                        <Providers />
+                      </DashboardLayout>
+                    </ProtectedRoute>
                   }
                 />
                 <Route
                   path="/scheduled-jobs"
                   element={
-                    <DashboardLayout>
-                      <ScheduledJobs />
-                    </DashboardLayout>
+                    <ProtectedRoute>
+                      <DashboardLayout>
+                        <ScheduledJobs />
+                      </DashboardLayout>
+                    </ProtectedRoute>
                   }
                 />
 
-                {/* Project Scoped Routes */}
+                {/* Protected Project Scoped Routes */}
                 <Route
                   path="/projects/:projectId/datasets"
                   element={
-                    <DashboardLayout>
-                      <Datasets />
-                    </DashboardLayout>
+                    <ProtectedRoute>
+                      <DashboardLayout>
+                        <Datasets />
+                      </DashboardLayout>
+                    </ProtectedRoute>
                   }
                 />
                 <Route
                   path="/projects/:projectId/datasets/:datasetId"
                   element={
-                    <DashboardLayout>
-                      <DatasetDetail />
-                    </DashboardLayout>
+                    <ProtectedRoute>
+                      <DashboardLayout>
+                        <DatasetDetail />
+                      </DashboardLayout>
+                    </ProtectedRoute>
                   }
                 />
                 <Route
                   path="/projects/:projectId/evaluations"
                   element={
-                    <DashboardLayout>
-                      <Evaluations />
-                    </DashboardLayout>
+                    <ProtectedRoute>
+                      <DashboardLayout>
+                        <Evaluations />
+                      </DashboardLayout>
+                    </ProtectedRoute>
                   }
                 />
                 <Route
                   path="/projects/:projectId/evaluations/new"
                   element={
-                    <DashboardLayout>
-                      <NewExperiment />
-                    </DashboardLayout>
+                    <ProtectedRoute>
+                      <DashboardLayout>
+                        <NewExperiment />
+                      </DashboardLayout>
+                    </ProtectedRoute>
                   }
                 />
                 <Route
                   path="/projects/:projectId/benchmarks"
                   element={
-                    <DashboardLayout>
-                      <Benchmarks />
-                    </DashboardLayout>
+                    <ProtectedRoute>
+                      <DashboardLayout>
+                        <Benchmarks />
+                      </DashboardLayout>
+                    </ProtectedRoute>
                   }
                 />
                 <Route
                   path="/projects/:projectId/rag"
                   element={
-                    <DashboardLayout>
-                      <RagEvaluation />
-                    </DashboardLayout>
+                    <ProtectedRoute>
+                      <DashboardLayout>
+                        <RagEvaluation />
+                      </DashboardLayout>
+                    </ProtectedRoute>
                   }
                 />
                 <Route
                   path="/projects/:projectId/policy"
                   element={
-                    <DashboardLayout>
-                      <PolicyEvaluation />
-                    </DashboardLayout>
+                    <ProtectedRoute>
+                      <DashboardLayout>
+                        <PolicyEvaluation />
+                      </DashboardLayout>
+                    </ProtectedRoute>
                   }
                 />
                 <Route
                   path="/projects/:projectId/safety"
                   element={
-                    <DashboardLayout>
-                      <AiSafety />
-                    </DashboardLayout>
+                    <ProtectedRoute>
+                      <DashboardLayout>
+                        <AiSafety />
+                      </DashboardLayout>
+                    </ProtectedRoute>
                   }
                 />
                 <Route
                   path="/projects/:projectId/jobs"
                   element={
-                    <DashboardLayout>
-                      <JobsDashboard />
-                    </DashboardLayout>
+                    <ProtectedRoute>
+                      <DashboardLayout>
+                        <JobsDashboard />
+                      </DashboardLayout>
+                    </ProtectedRoute>
                   }
                 />
                 <Route
                   path="/projects/:projectId/jobs/:jobId"
                   element={
-                    <DashboardLayout>
-                      <JobDetail />
-                    </DashboardLayout>
+                    <ProtectedRoute>
+                      <DashboardLayout>
+                        <JobDetail />
+                      </DashboardLayout>
+                    </ProtectedRoute>
                   }
                 />
                 <Route
                   path="/projects/:projectId/logs"
                   element={
-                    <DashboardLayout>
-                      <LogViewer />
-                    </DashboardLayout>
+                    <ProtectedRoute>
+                      <DashboardLayout>
+                        <LogViewer />
+                      </DashboardLayout>
+                    </ProtectedRoute>
                   }
                 />
                 <Route
                   path="/projects/:projectId/reports"
                   element={
-                    <DashboardLayout>
-                      <ReportGenerator />
-                    </DashboardLayout>
+                    <ProtectedRoute>
+                      <DashboardLayout>
+                        <ReportGenerator />
+                      </DashboardLayout>
+                    </ProtectedRoute>
                   }
                 />
 
-                {/* Settings & Admin Routes */}
+                {/* Protected Settings & Admin Routes */}
                 <Route
                   path="/settings/workspace"
                   element={
-                    <DashboardLayout>
-                      <WorkspaceSettings />
-                    </DashboardLayout>
+                    <ProtectedRoute>
+                      <DashboardLayout>
+                        <WorkspaceSettings />
+                      </DashboardLayout>
+                    </ProtectedRoute>
                   }
                 />
                 <Route
                   path="/settings/members"
                   element={
-                    <DashboardLayout>
-                      <MembersAccess />
-                    </DashboardLayout>
+                    <ProtectedRoute>
+                      <DashboardLayout>
+                        <MembersAccess />
+                      </DashboardLayout>
+                    </ProtectedRoute>
                   }
                 />
                 <Route
                   path="/settings/keys"
                   element={
-                    <DashboardLayout>
-                      <ApiWebhooks />
-                    </DashboardLayout>
+                    <ProtectedRoute>
+                      <DashboardLayout>
+                        <ApiWebhooks />
+                      </DashboardLayout>
+                    </ProtectedRoute>
                   }
                 />
                 <Route
                   path="/settings/audit"
                   element={
-                    <DashboardLayout>
-                      <AuditLogs />
-                    </DashboardLayout>
+                    <ProtectedRoute>
+                      <DashboardLayout>
+                        <AuditLogs />
+                      </DashboardLayout>
+                    </ProtectedRoute>
                   }
                 />
                 <Route
                   path="/settings/billing"
                   element={
-                    <DashboardLayout>
-                      <BillingUsage />
-                    </DashboardLayout>
+                    <ProtectedRoute>
+                      <DashboardLayout>
+                        <BillingUsage />
+                      </DashboardLayout>
+                    </ProtectedRoute>
                   }
                 />
                 <Route
                   path="/settings/system"
                   element={
-                    <DashboardLayout>
-                      <SystemSettings />
-                    </DashboardLayout>
+                    <ProtectedRoute>
+                      <DashboardLayout>
+                        <SystemSettings />
+                      </DashboardLayout>
+                    </ProtectedRoute>
                   }
                 />
 
-                {/* Developer Portal */}
+                {/* Protected Developer Portal */}
                 <Route
                   path="/developer"
                   element={
-                    <DashboardLayout>
-                      <DeveloperPortal />
-                    </DashboardLayout>
+                    <ProtectedRoute>
+                      <DashboardLayout>
+                        <DeveloperPortal />
+                      </DashboardLayout>
+                    </ProtectedRoute>
                   }
                 />
 
