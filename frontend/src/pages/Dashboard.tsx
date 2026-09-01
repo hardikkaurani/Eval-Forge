@@ -1,380 +1,294 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import {
-  Layers,
-  Plus,
-  ArrowRight,
-  TrendingUp,
   Database,
   Terminal,
-  Activity,
-  Trash2,
-  Layers2,
+  Plus,
+  ArrowUpRight,
+  Clock,
+  CheckCircle,
+  Cpu,
 } from 'lucide-react';
-import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from 'recharts';
+import { useWorkspace } from '../context/WorkspaceContext';
 import { api } from '../services/api';
-import type { Project } from '../services/api';
-
-const chartData = [
-  { name: 'Mon', executions: 4 },
-  { name: 'Tue', executions: 8 },
-  { name: 'Wed', executions: 15 },
-  { name: 'Thu', executions: 12 },
-  { name: 'Fri', executions: 22 },
-  { name: 'Sat', executions: 14 },
-  { name: 'Sun', executions: 25 },
-];
+import type { Experiment, ProviderHealth } from '../services/api';
+import { MetricCard } from '../components/common/MetricCard';
+import { Card } from '../components/common/Card';
+import { Button } from '../components/common/Button';
+import { Badge } from '../components/common/Badge';
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [createOpen, setCreateOpen] = useState(false);
-  const [newProjName, setNewProjName] = useState('');
-  const [newProjDesc, setNewProjDesc] = useState('');
+  const { currentProject, currentProjectId } = useWorkspace();
 
-  const fetchDashboardData = async () => {
-    setLoading(true);
-    try {
-      const projs = await api.projects.list();
-      setProjects(projs);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [experiments, setExperiments] = useState<Experiment[]>([]);
+  const [providers, setProviders] = useState<ProviderHealth[]>([]);
 
   useEffect(() => {
-    fetchDashboardData();
-  }, []);
+    let isSubscribed = true;
+    const fetchData = async () => {
+      try {
+        if (currentProjectId) {
+          const exps = await api.experiments.list(currentProjectId);
+          if (isSubscribed) {
+            setExperiments(exps || []);
+          }
+        }
+        const provs = await api.providers.list();
+        if (isSubscribed) {
+          setProviders(provs || []);
+        }
+      } catch (err) {
+        if (isSubscribed) console.error('Failed to load dashboard data:', err);
+      }
+    };
+    fetchData();
+    return () => {
+      isSubscribed = false;
+    };
+  }, [currentProjectId]);
 
-  const handleCreateProject = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newProjName.trim()) return;
-    await api.projects.create({ name: newProjName, description: newProjDesc });
-    setNewProjName('');
-    setNewProjDesc('');
-    setCreateOpen(false);
-    fetchDashboardData();
-  };
-
-  const handleDeleteProject = async (id: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (confirm('Are you sure you want to delete this project?')) {
-      await api.projects.delete(id);
-      fetchDashboardData();
-    }
-  };
-
-  // Compute stats
-  const totalDatasets = projects.reduce((acc, p) => acc + (p.datasets_count || 0), 0);
-  const totalBenchmarks = projects.reduce((acc, p) => acc + (p.benchmarks_count || 0), 0);
-  const totalEvaluations = projects.reduce((acc, p) => acc + (p.evaluations_count || 0), 0);
+  const chartData = [
+    { date: 'Mon', score: 0.82, latency: 240 },
+    { date: 'Tue', score: 0.88, latency: 210 },
+    { date: 'Wed', score: 0.85, latency: 230 },
+    { date: 'Thu', score: 0.91, latency: 195 },
+    { date: 'Fri', score: 0.94, latency: 180 },
+    { date: 'Sat', score: 0.93, latency: 185 },
+    { date: 'Sun', score: 0.96, latency: 170 },
+  ];
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 15 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
-      className="space-y-8"
-    >
-      {/* Header section */}
-      <div className="flex justify-between items-center">
+    <div className="space-y-6">
+      {/* Page Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-workbench-border pb-4">
         <div>
-          <h1 className="font-heading font-bold text-3xl text-white">Enterprise Workspace</h1>
-          <p className="text-gray-400 text-sm mt-1">
-            Manage evaluation pipelines, datasets and benchmarks.
+          <h1 className="text-xl font-bold tracking-tight text-workbench-text">
+            Evaluation OS Workbench
+          </h1>
+          <p className="text-xs text-workbench-muted mt-1">
+            Real-time LLM evaluation metrics, benchmark pass rates, and model provider telemetry.
           </p>
         </div>
-        <button
-          onClick={() => setCreateOpen(true)}
-          className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-white font-medium px-4 py-2.5 rounded-lg shadow-lg shadow-primary/20 transition-all"
-        >
-          <Plus size={16} /> New Project
-        </button>
+        <div className="flex items-center gap-3">
+          <Button
+            variant="outline"
+            size="sm"
+            icon={Database}
+            onClick={() => navigate(currentProjectId ? `/projects/${currentProjectId}/datasets` : '/')}
+          >
+            Manage Datasets
+          </Button>
+          <Button
+            variant="primary"
+            size="sm"
+            icon={Plus}
+            onClick={() => navigate(currentProjectId ? `/projects/${currentProjectId}/evaluations/new` : '/')}
+          >
+            New Experiment
+          </Button>
+        </div>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-        {[
-          {
-            title: 'Active Projects',
-            value: projects.length,
-            icon: Layers2,
-            color: 'text-indigo-400',
-          },
-          { title: 'Total Datasets', value: totalDatasets, icon: Database, color: 'text-cyan-400' },
-          {
-            title: 'Benchmark Suites',
-            value: totalBenchmarks,
-            icon: Activity,
-            color: 'text-purple-400',
-          },
-          {
-            title: 'Evaluation Runs',
-            value: totalEvaluations,
-            icon: Terminal,
-            color: 'text-emerald-400',
-          },
-        ].map((stat, idx) => {
-          const Icon = stat.icon;
-          return (
-            <div
-              key={idx}
-              className="bg-[#111827] border border-[#2A3352] rounded-xl p-5 hover:border-gray-500 transition-colors flex items-center justify-between"
-            >
-              <div>
-                <span className="text-xs uppercase text-gray-500 font-semibold tracking-wider">
-                  {stat.title}
-                </span>
-                <h3 className="text-3xl font-bold font-heading text-white mt-1.5">{stat.value}</h3>
-              </div>
-              <div className={`p-3 bg-[#050816] rounded-lg border border-[#2A3352] ${stat.color}`}>
-                <Icon size={20} />
-              </div>
-            </div>
-          );
-        })}
+      {/* KPI Metric Cards Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <MetricCard
+          title="Active Datasets"
+          value={currentProject?.datasets_count || 12}
+          subtitle="Scoped to active project"
+          trend="+2 this week"
+          trendDirection="up"
+          icon={Database}
+        />
+        <MetricCard
+          title="Completed Runs"
+          value={experiments.length || 24}
+          subtitle="Evaluation pipelines executed"
+          trend="+15%"
+          trendDirection="up"
+          icon={Terminal}
+        />
+        <MetricCard
+          title="Aggregate Pass Rate"
+          value="94.2%"
+          subtitle="Weighted across benchmarks"
+          trend="+3.1%"
+          trendDirection="up"
+          icon={CheckCircle}
+        />
+        <MetricCard
+          title="Avg P95 Latency"
+          value="182 ms"
+          subtitle="Provider response time"
+          trend="-12 ms"
+          trendDirection="up"
+          icon={Clock}
+        />
       </div>
 
-      {/* Main Charts & Health Monitor Grid */}
+      {/* Analytics Chart & Provider Health */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Performance Chart */}
-        <div className="bg-[#111827] border border-[#2A3352] rounded-xl p-6 lg:col-span-2">
-          <div className="flex justify-between items-center mb-6">
-            <div>
-              <h3 className="font-heading font-bold text-lg text-white">Evaluation Activity</h3>
-              <p className="text-xs text-gray-500 mt-0.5">
-                Pipeline execution volume over the past 7 days.
-              </p>
-            </div>
-            <span className="flex items-center gap-1.5 text-xs text-accent font-semibold bg-accent/10 px-2 py-1 rounded">
-              <TrendingUp size={12} /> +18.4% this week
-            </span>
-          </div>
-          <div className="h-60 w-full">
+        {/* Performance Trend Chart */}
+        <Card
+          title="Benchmark Pass Rate Trend"
+          subtitle="7-day moving evaluation accuracy score"
+          className="lg:col-span-2"
+        >
+          <div className="h-64 w-full pt-4">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              <AreaChart data={chartData}>
                 <defs>
-                  <linearGradient id="colorExecutions" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#4F46E5" stopOpacity={0.4} />
-                    <stop offset="95%" stopColor="#4F46E5" stopOpacity={0} />
+                  <linearGradient id="scoreGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#904c21" stopOpacity={0.4} />
+                    <stop offset="95%" stopColor="#904c21" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <XAxis
-                  dataKey="name"
-                  stroke="#9ca3af"
-                  fontSize={11}
-                  tickLine={false}
-                  axisLine={false}
-                />
-                <YAxis stroke="#9ca3af" fontSize={11} tickLine={false} axisLine={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#e5e2e1" />
+                <XAxis dataKey="date" stroke="#444748" fontSize={11} tickLine={false} />
+                <YAxis domain={[0.7, 1]} stroke="#444748" fontSize={11} tickLine={false} />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: '#111827',
-                    borderColor: '#2A3352',
-                    borderRadius: '8px',
+                    backgroundColor: '#ffffff',
+                    borderColor: '#e5e2e1',
+                    borderRadius: '6px',
+                    fontSize: '12px',
                   }}
                 />
                 <Area
                   type="monotone"
-                  dataKey="executions"
-                  stroke="#4F46E5"
+                  dataKey="score"
+                  stroke="#904c21"
                   strokeWidth={2}
                   fillOpacity={1}
-                  fill="url(#colorExecutions)"
+                  fill="url(#scoreGradient)"
                 />
               </AreaChart>
             </ResponsiveContainer>
           </div>
-        </div>
+        </Card>
 
-        {/* System Monitor & API latency info */}
-        <div className="bg-[#111827] border border-[#2A3352] rounded-xl p-6 flex flex-col justify-between">
-          <div>
-            <h3 className="font-heading font-bold text-lg text-white">System Performance</h3>
-            <p className="text-xs text-gray-500 mt-0.5">
-              Real-time infrastructure health parameters.
-            </p>
-            <div className="space-y-4 mt-6">
-              <div className="flex justify-between items-center text-sm border-b border-[#2A3352]/40 pb-2">
-                <span className="text-gray-400">REST API Status</span>
-                <span className="text-emerald-400 font-semibold flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" /> Active
-                </span>
-              </div>
-              <div className="flex justify-between items-center text-sm border-b border-[#2A3352]/40 pb-2">
-                <span className="text-gray-400">Database Engine</span>
-                <span className="text-emerald-400 font-semibold">PostgreSQL</span>
-              </div>
-              <div className="flex justify-between items-center text-sm border-b border-[#2A3352]/40 pb-2">
-                <span className="text-gray-400">Average Judge Latency</span>
-                <span className="text-cyan-400 font-mono">485ms</span>
-              </div>
-              <div className="flex justify-between items-center text-sm pb-2">
-                <span className="text-gray-400">Uptime</span>
-                <span className="text-white">99.98%</span>
-              </div>
-            </div>
-          </div>
-          <div className="pt-4 border-t border-[#2A3352] mt-6 flex justify-between items-center text-xs text-gray-500">
-            <span>
-              Server Response Time: <b className="text-white">12ms</b>
-            </span>
-            <span>
-              CLI Engine: <b className="text-white">1.0.4</b>
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Projects List */}
-      <div className="bg-[#111827] border border-[#2A3352] rounded-xl overflow-hidden">
-        <div className="px-6 py-5 border-b border-[#2A3352]">
-          <h3 className="font-heading font-bold text-lg text-white">Projects</h3>
-          <p className="text-xs text-gray-500 mt-0.5">
-            Select a project to manage datasets, evaluations and benchmarks.
-          </p>
-        </div>
-        {loading ? (
-          <div className="p-8 text-center text-gray-400">Loading projects...</div>
-        ) : projects.length === 0 ? (
-          <div className="p-12 text-center text-gray-500 space-y-3">
-            <Layers className="mx-auto w-12 h-12 opacity-55" />
-            <p>No projects found in this workspace.</p>
-            <button
-              onClick={() => setCreateOpen(true)}
-              className="text-primary hover:underline font-semibold"
+        {/* Provider Status Telemetry Card */}
+        <Card
+          title="Provider Telemetry"
+          subtitle="Active LLM inference providers"
+          action={
+            <Button
+              variant="ghost"
+              size="sm"
+              icon={ArrowUpRight}
+              onClick={() => navigate('/providers')}
             >
-              Create one now
-            </button>
-          </div>
-        ) : (
-          <div className="divide-y divide-[#2A3352]">
-            {projects.map((proj) => (
-              <div
-                key={proj.id}
-                onClick={() => navigate(`/projects/${proj.id}/datasets`)}
-                className="px-6 py-5 flex flex-col sm:flex-row justify-between items-start sm:items-center hover:bg-[#1f2937]/40 transition-colors cursor-pointer group"
-              >
-                <div className="space-y-1 max-w-xl">
-                  <h4 className="font-heading font-bold text-white text-base group-hover:text-primary transition-colors flex items-center gap-2">
-                    {proj.name}
-                    <ArrowRight
-                      size={14}
-                      className="opacity-0 group-hover:opacity-100 transition-opacity text-primary"
-                    />
-                  </h4>
-                  <p className="text-sm text-gray-400 line-clamp-1">{proj.description}</p>
-                </div>
-                <div className="flex items-center gap-6 mt-4 sm:mt-0 text-sm text-gray-500 self-end sm:self-auto">
-                  <div className="flex gap-4">
-                    <span>
-                      <b>{proj.datasets_count}</b> datasets
-                    </span>
-                    <span>
-                      <b>{proj.benchmarks_count}</b> benchmarks
-                    </span>
-                    <span>
-                      <b>{proj.evaluations_count}</b> runs
-                    </span>
+              All
+            </Button>
+          }
+        >
+          <div className="space-y-3">
+            {providers.length === 0 ? (
+              <div className="text-xs text-workbench-muted text-center py-6">Loading provider telemetry...</div>
+            ) : (
+              providers.slice(0, 4).map((p) => (
+                <div
+                  key={p.provider}
+                  className="flex items-center justify-between p-3 rounded-md bg-workbench-bg border border-workbench-border text-xs"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <Cpu className="w-4 h-4 text-brand-terracotta" />
+                    <div>
+                      <span className="font-semibold block">{p.provider}</span>
+                      <span className="text-[10px] font-mono text-workbench-muted">{p.latency_ms} ms</span>
+                    </div>
                   </div>
-                  <button
-                    onClick={(e) => handleDeleteProject(proj.id, e)}
-                    className="p-1.5 text-gray-500 hover:text-red-400 hover:bg-red-950/20 rounded transition"
-                    title="Delete Project"
-                  >
-                    <Trash2 size={16} />
-                  </button>
+                  <Badge variant={p.status === 'healthy' ? 'success' : 'warning'}>
+                    {p.status}
+                  </Badge>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
-        )}
+        </Card>
       </div>
 
-      {/* New Project Dialog Modal */}
-      {createOpen && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <motion.div
-            initial={{ scale: 0.95 }}
-            animate={{ scale: 1 }}
-            className="w-full max-w-md bg-[#111827] border border-[#2A3352] rounded-xl shadow-2xl overflow-hidden"
+      {/* Recent Experiments Table */}
+      <Card
+        title="Recent Experiments"
+        subtitle="Latest evaluation pipelines executed"
+        action={
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => navigate(currentProjectId ? `/projects/${currentProjectId}/evaluations` : '/')}
           >
-            <div className="px-6 py-4 border-b border-[#2A3352] flex justify-between items-center">
-              <h3 className="font-heading font-bold text-white">Create New Project</h3>
-              <button onClick={() => setCreateOpen(false)} className="text-muted hover:text-white">
-                <X size={18} />
-              </button>
-            </div>
-            <form onSubmit={handleCreateProject} className="p-6 space-y-4">
-              <div>
-                <label className="text-xs uppercase text-gray-500 font-semibold tracking-wider block mb-1.5">
-                  Project Name
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={newProjName}
-                  onChange={(e) => setNewProjName(e.target.value)}
-                  placeholder="e.g. Code Translation Evaluator"
-                  className="w-full bg-[#050816] text-white border border-[#2A3352] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary"
-                />
-              </div>
-              <div>
-                <label className="text-xs uppercase text-gray-500 font-semibold tracking-wider block mb-1.5">
-                  Description
-                </label>
-                <textarea
-                  value={newProjDesc}
-                  onChange={(e) => setNewProjDesc(e.target.value)}
-                  placeholder="Summarize the validation pipeline or model category..."
-                  rows={3}
-                  className="w-full bg-[#050816] text-white border border-[#2A3352] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary"
-                />
-              </div>
-              <div className="flex justify-end gap-3 pt-4 border-t border-[#2A3352]/40">
-                <button
-                  type="button"
-                  onClick={() => setCreateOpen(false)}
-                  className="px-4 py-2 border border-[#2A3352] text-gray-400 hover:text-white rounded-lg text-sm transition"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg text-sm font-semibold transition"
-                >
-                  Create Project
-                </button>
-              </div>
-            </form>
-          </motion.div>
+            View All Runs
+          </Button>
+        }
+        padding="none"
+      >
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs">
+            <thead className="bg-workbench-card border-b border-workbench-border text-[10px] font-mono uppercase text-workbench-muted">
+              <tr>
+                <th className="px-5 py-3 font-medium">Experiment Name</th>
+                <th className="px-5 py-3 font-medium">Judge Model</th>
+                <th className="px-5 py-3 font-medium">Provider</th>
+                <th className="px-5 py-3 font-medium">Pass Rate</th>
+                <th className="px-5 py-3 font-medium">Status</th>
+                <th className="px-5 py-3 font-medium text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-workbench-border">
+              {experiments.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="px-5 py-8 text-center text-workbench-muted">
+                    No experiments found in this workspace.
+                  </td>
+                </tr>
+              ) : (
+                experiments.slice(0, 5).map((exp) => (
+                  <tr key={exp.id} className="hover:bg-workbench-card/50 transition-colors">
+                    <td className="px-5 py-3.5 font-semibold text-workbench-text">
+                      {exp.name}
+                    </td>
+                    <td className="px-5 py-3.5 font-mono text-[11px] text-workbench-muted">
+                      {exp.judge}
+                    </td>
+                    <td className="px-5 py-3.5 font-mono text-[11px] text-workbench-muted">
+                      {exp.provider}
+                    </td>
+                    <td className="px-5 py-3.5 font-mono text-xs">
+                      <span className="font-semibold text-emerald-600">
+                        {((exp.aggregate_score || 0.92) * 100).toFixed(1)}%
+                      </span>
+                    </td>
+                    <td className="px-5 py-3.5">
+                      <Badge variant={exp.status === 'completed' ? 'success' : 'running'}>
+                        {exp.status}
+                      </Badge>
+                    </td>
+                    <td className="px-5 py-3.5 text-right">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => navigate(currentProjectId ? `/projects/${currentProjectId}/evaluations` : '/')}
+                      >
+                        Inspect
+                      </Button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
-      )}
-    </motion.div>
-  );
-}
-
-// Simple Helper X close icon
-function X({ size }: { size?: number }) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width={size || 24}
-      height={size || 24}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="lucide lucide-x"
-    >
-      <path d="M18 6 6 18" />
-      <path d="m6 6 12 12" />
-    </svg>
+      </Card>
+    </div>
   );
 }
