@@ -190,3 +190,10 @@ def run_background_job(self, job_id: str) -> Any:
         return loop.run_until_complete(
             async_run_background_job(job_id, self.request.id or "eager_task")
         )
+
+
+@celery_app.task(name="app.jobs.tasks.run_evaluation_job", bind=True)
+def run_evaluation_job(self, job_id: str) -> Any:
+    """Dedicated Celery task wrapper for high-priority evaluation jobs."""
+    return run_background_job(self, job_id)
+
