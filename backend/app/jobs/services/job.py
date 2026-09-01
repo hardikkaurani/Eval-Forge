@@ -159,7 +159,7 @@ class JobService:
         workspace_id: Optional[str] = None,
     ) -> Job:
         """Restarts a failed, cancelled, or completed job by re-queueing it."""
-        job = await self.get_job(job_id, workspace_id=workspace_id)
+        await self.get_job(job_id, workspace_id=workspace_id)
 
         # Reset status to QUEUED and clear error message
         updated_job = await self.repo.update_job_status(job_id, "QUEUED", error_message=None)

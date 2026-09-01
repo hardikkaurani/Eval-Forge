@@ -1,6 +1,9 @@
+import asyncio
+import json
 from typing import Any, List, Optional
 
 from fastapi import APIRouter, Depends, Query, WebSocket, WebSocketDisconnect, status
+from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.dependencies import (
@@ -272,9 +275,6 @@ async def job_progress_sse(
     current_key: Any = Depends(get_current_api_key),
 ):
     """Provides real-time SSE stream fallback for clients that do not support WebSockets."""
-    import json
-    import asyncio
-    from fastapi.responses import StreamingResponse
     from app.database.session import SessionLocal
 
     workspace_id = _extract_workspace_id(current_key)
