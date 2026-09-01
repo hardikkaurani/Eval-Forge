@@ -1,6 +1,7 @@
-from typing import Any, List
+from typing import Any, Dict, List, Optional
 
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.dependencies import get_current_api_key, get_db
@@ -17,6 +18,7 @@ from app.evaluation.services.evaluation import (
     EvaluationCatalogService,
     EvaluationService,
 )
+from app.evaluation.services.pairwise import PairwiseComparisonResult, PairwiseService
 from app.utils.pagination import PaginatedResponse, create_pagination_meta
 from app.utils.responses import ApiResponse, create_response
 
@@ -202,4 +204,84 @@ async def list_rubrics():
         success=True,
         message="Rubrics retrieved successfully.",
         data=rubrics,
+    )
+
+
+class PairwiseCompareRequest(BaseModel):
+    project_id: str
+    model_a: str
+    model_b: str
+    winner: str  # "A", "B", or "Tie"
+    reasoning: Optional[str] = None
+    confidence: float = 1.0
+    k_factor: float = 32.0
+
+
+@router.post(
+    "/pairwise/compare",
+    response_model=ApiResponse[PairwiseComparisonResult],
+    status_code=status.HTTP_200_OK,
+    summary="Record pairwise comparison outcome and update ELO ratings",
+)
+async def record_pairwise_compare(
+    payload: PairwiseCompareRequest,
+    db: AsyncSession = Depends(get_db),
+    current_key: Any = Depends(get_current_api_key),
+):
+    workspace_id = _extract_workspace_id(current_key)
+    from app.database.repository import ProjectRepository
+
+    project_repo = ProjectRepository(db)
+    project = await project_repo.get_by_id(
+        payload.project_id, workspace_id=workspace_id
+    )
+    if not project:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Project with ID '{payload.project_id}' not found.",
+        )
+
+    result = await PairwiseService.record_pairwise_outcome(
+        db=db,
+        project_id=payload.project_id,
+        model_a=payload.model_a,
+        model_b=payload.model_b,
+        winner=payload.winner,
+        reasoning=payload.reasoning or "",
+        confidence=payload.confidence,
+        k_factor=payload.k_factor,
+    )
+    return create_response(
+        success=True,
+        message="Pairwise comparison recorded and ELO ratings updated.",
+        data=result,
+    )
+
+
+@router.get(
+    "/pairwise/elo",
+    response_model=ApiResponse[Dict[str, float]],
+    summary="Get ELO leaderboard ratings for models in project",
+)
+async def get_elo_leaderboard(
+    project_id: str,
+    db: AsyncSession = Depends(get_db),
+    current_key: Any = Depends(get_current_api_key),
+):
+    workspace_id = _extract_workspace_id(current_key)
+    from app.database.repository import ProjectRepository
+
+    project_repo = ProjectRepository(db)
+    project = await project_repo.get_by_id(project_id, workspace_id=workspace_id)
+    if not project:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Project with ID '{project_id}' not found.",
+        )
+
+    ratings = await PairwiseService.get_elo_ratings(db=db, project_id=project_id)
+    return create_response(
+        success=True,
+        message="ELO leaderboard ratings retrieved successfully.",
+        data=ratings,
     )
