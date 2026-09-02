@@ -119,8 +119,8 @@ class IdempotencyMiddleware(BaseHTTPMiddleware):
         redis_key = f"idempotency:{idempotency_key}"
 
         try:
-            if redis_manager.redis and redis_manager.redis.connection_pool:
-                cached_res = await redis_manager.get(redis_key)
+            if redis_manager.client:
+                cached_res = await redis_manager.client.get(redis_key)
                 if cached_res:
                     data = json.loads(cached_res)
                     logger.info(
@@ -140,7 +140,7 @@ class IdempotencyMiddleware(BaseHTTPMiddleware):
         # Store response details if status is success/created
         if response.status_code in (200, 201, 202, 204):
             try:
-                if redis_manager.redis and redis_manager.redis.connection_pool:
+                if redis_manager.client:
                     # Capture body if possible (only for simple text/json responses)
                     body_bytes = b""
                     # Read response body chunks safely
@@ -154,8 +154,8 @@ class IdempotencyMiddleware(BaseHTTPMiddleware):
                         "headers": dict(response.headers),
                         "body": body_bytes.decode("utf-8", errors="ignore"),
                     }
-                    await redis_manager.set(
-                        redis_key, json.dumps(payload), expire=86400
+                    await redis_manager.client.setex(
+                        redis_key, 86400, json.dumps(payload)
                     )  # 24h retention
             except Exception as e:
                 logger.warning(
