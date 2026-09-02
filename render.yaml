@@ -24,13 +24,13 @@ services:
           name: evalforge-redis
           property: connectionString
 
+  - type: redis
+    name: evalforge-redis
+    ipAllowList: []
+    plan: free
+
 databases:
   - name: evalforge-db
     databaseName: evalforge
     user: postgres
-    plan: free
-
-  - type: redis
-    name: evalforge-redis
-    ipAllowList: []
     plan: free

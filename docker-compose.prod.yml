@@ -4,7 +4,7 @@ services:
       context: .
       dockerfile: docker/backend.Dockerfile
     ports:
-      - ${PORT:-8000}:8000
+      - "${PORT:-8000}:8000"
     environment:
       - APP_NAME=EvalForge API
       - APP_ENV=production
@@ -20,12 +20,20 @@ services:
       - SECRET_KEY=${SECRET_KEY:-dev-secret-key-evalforge-placeholder}
       - CORS_ORIGINS=${CORS_ORIGINS:-["*"]}
       - ALLOWED_HOSTS=${ALLOWED_HOSTS:-["*"]}
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 2048M
+        reservations:
+          cpus: "0.25"
+          memory: 512M
     healthcheck:
       test:
         - CMD
         - python
         - -c
-        - import urllib.request; urllib.request.urlopen('http://localhost:8000/health')
+        - "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"
       interval: 10s
       timeout: 5s
       retries: 5
@@ -35,44 +43,126 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    restart: always
+    restart: unless-stopped
+    networks:
+      - evalforge_prod_net
 
   frontend:
     build:
       context: .
       dockerfile: docker/frontend.Dockerfile
     ports:
-      - 80:80
+      - "80:80"
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+        reservations:
+          cpus: "0.1"
+          memory: 128M
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - "wget --no-verbose --tries=1 --spider http://localhost:80/healthcheck || exit 1"
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
     depends_on:
-      - backend
-    restart: always
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - evalforge_prod_net
+
+  celery_worker:
+    build:
+      context: .
+      dockerfile: docker/backend.Dockerfile
+    command: celery -A app.jobs.celery_app worker -l info -Q high_priority,default,low_priority
+    environment:
+      - APP_NAME=EvalForge Worker
+      - APP_ENV=production
+      - DEBUG=False
+      - POSTGRES_SERVER=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres_password}
+      - POSTGRES_DB=${POSTGRES_DB:-evalforge}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_DB=0
+      - SECRET_KEY=${SECRET_KEY:-dev-secret-key-evalforge-placeholder}
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 2048M
+        reservations:
+          cpus: "0.25"
+          memory: 512M
+    healthcheck:
+      test:
+        - CMD
+        - celery
+        - -A
+        - app.jobs.celery_app
+        - inspect
+        - ping
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - evalforge_prod_net
 
   postgres:
     image: postgres:16-alpine
-    restart: always
+    restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres_password}
       POSTGRES_DB: ${POSTGRES_DB:-evalforge}
-    ports:
-      - 5432:5432
     volumes:
       - postgres_prod_data:/var/lib/postgresql/data
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 2048M
+        reservations:
+          cpus: "0.25"
+          memory: 512M
     healthcheck:
       test:
         - CMD-SHELL
-        - pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-evalforge}
+        - "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-evalforge}"
       interval: 5s
       timeout: 5s
       retries: 5
+    networks:
+      - evalforge_prod_net
 
   redis:
     image: redis:7-alpine
-    restart: always
-    ports:
-      - 6379:6379
+    restart: unless-stopped
     volumes:
       - redis_prod_data:/data
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 1024M
+        reservations:
+          cpus: "0.1"
+          memory: 256M
     healthcheck:
       test:
         - CMD
@@ -81,7 +171,80 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    networks:
+      - evalforge_prod_net
+
+  prometheus:
+    image: prom/prometheus:v2.51.0
+    restart: unless-stopped
+    volumes:
+      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_prod_data:/prometheus
+    ports:
+      - "9090:9090"
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 1024M
+        reservations:
+          cpus: "0.1"
+          memory: 256M
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - "wget --no-verbose --tries=1 --spider http://localhost:9090/-/healthy || exit 1"
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - evalforge_prod_net
+
+  grafana:
+    image: grafana/grafana:10.4.0
+    restart: unless-stopped
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin_password}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - ./docker/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./docker/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana_prod_data:/var/lib/grafana
+    ports:
+      - "3000:3000"
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 1024M
+        reservations:
+          cpus: "0.1"
+          memory: 256M
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - "wget --no-verbose --tries=1 --spider http://localhost:3000/api/health || exit 1"
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    depends_on:
+      prometheus:
+        condition: service_healthy
+    networks:
+      - evalforge_prod_net
+
+networks:
+  evalforge_prod_net:
+    driver: bridge
 
 volumes:
   postgres_prod_data:
   redis_prod_data:
+  prometheus_prod_data:
+  grafana_prod_data:
