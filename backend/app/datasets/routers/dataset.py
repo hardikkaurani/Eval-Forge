@@ -1,7 +1,16 @@
 import os
 from typing import Any, Dict, List, Optional
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile
+from fastapi import (
+    APIRouter,
+    Depends,
+    File,
+    Form,
+    HTTPException,
+    Query,
+    UploadFile,
+    status,
+)
 from fastapi.responses import FileResponse
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -146,7 +155,188 @@ async def delete_dataset(
         raise HTTPException(status_code=404, detail=str(e)) from e
 
 
+ALLOWED_UPLOAD_EXTENSIONS = {"csv", "json", "jsonl"}
+ALLOWED_MIME_TYPES = {
+    "text/csv",
+    "application/json",
+    "text/plain",
+    "application/x-ndjson",
+    "application/jsonlines",
+    "text/x-csv",
+    "application/csv",
+    "application/octet-stream",
+}
+DISALLOWED_SUB_EXTENSIONS = {"exe", "php", "sh", "bat", "cmd", "dll", "so", "py", "js", "vbs", "scr", "ps1", "asp", "aspx", "jsp", "cgi"}
+MAX_UPLOAD_SIZE_BYTES = 100 * 1024 * 1024  # 100 MB
+
+
+async def validate_and_read_upload_file(file: UploadFile) -> tuple[str, bytes]:
+    """Validates filename normalization, path safety, size limits, extension, MIME type, and content structure."""
+    raw_filename = file.filename or ""
+
+    # Null byte check
+    if "\x00" in raw_filename or "%00" in raw_filename:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid filename: null byte sequence detected.",
+        )
+
+    # Path traversal check (handles raw and URL-encoded sequences)
+    lowered_filename = raw_filename.lower()
+    if ".." in raw_filename or "/" in raw_filename or "\\" in raw_filename or "%2e%2e" in lowered_filename or "%2f" in lowered_filename or "%5c" in lowered_filename:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid filename: path traversal sequence detected.",
+        )
+
+    parts = [p for p in raw_filename.split(".") if p]
+    if not parts:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid filename: missing extension.",
+        )
+
+    ext = parts[-1].lower()
+
+    # Double extension / executable extension check
+    if len(parts) > 2 and any(p.lower() in DISALLOWED_SUB_EXTENSIONS for p in parts[:-1]):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Unsupported double extension format: .{ext}",
+        )
+
+    if ext not in ALLOWED_UPLOAD_EXTENSIONS:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Unsupported file extension: .{ext}. Allowed formats: .csv, .json, .jsonl",
+        )
+
+    # MIME type validation
+    if file.content_type and file.content_type.lower() not in ALLOWED_MIME_TYPES:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Unsupported MIME type: {file.content_type}.",
+        )
+
+    # Stream read with size enforcement (100 MB)
+    total_bytes = 0
+    chunk_size = 64 * 1024  # 64 KB chunks
+    chunks = []
+
+    await file.seek(0)
+    while True:
+        chunk = await file.read(chunk_size)
+        if not chunk:
+            break
+        total_bytes += len(chunk)
+        if total_bytes > MAX_UPLOAD_SIZE_BYTES:
+            raise HTTPException(
+                status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                detail="Uploaded file size exceeds maximum limit of 100 MB.",
+            )
+        chunks.append(chunk)
+
+    if total_bytes == 0:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Uploaded file is empty.",
+        )
+
+    file_content = b"".join(chunks)
+
+    import codecs
+    import csv
+    import json
+
+    # Stream validation over file.file to prevent 100MB string allocations and memory amplification
+    if ext == "jsonl":
+        await file.seek(0)
+        has_records = False
+        reader = codecs.iterdecode(file.file, "utf-8")
+        line_num = 0
+        try:
+            for line in reader:
+                line_num += 1
+                stripped = line.strip()
+                if not stripped:
+                    continue
+                has_records = True
+                if len(stripped) > 10 * 1024 * 1024:
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail=f"JSONL line {line_num} exceeds maximum line length limit.",
+                    )
+                json.loads(stripped)
+        except UnicodeDecodeError as err:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"File encoding check failed: UTF-8 required ({str(err)})",
+            ) from err
+        except json.JSONDecodeError as err:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid JSONL record at line {line_num}: {str(err)}",
+            ) from err
+
+        if not has_records:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="JSONL file contains no valid records.",
+            )
+
+    elif ext == "csv":
+        await file.seek(0)
+        has_rows = False
+        try:
+            stream = codecs.iterdecode(file.file, "utf-8")
+            csv_reader = csv.reader(stream)
+            for row in csv_reader:
+                if row:
+                    has_rows = True
+                    break
+        except UnicodeDecodeError as err:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"File encoding check failed: UTF-8 required ({str(err)})",
+            ) from err
+        except Exception as err:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid CSV format: {str(err)}",
+            ) from err
+
+        if not has_rows:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="CSV file contains no rows.",
+            )
+
+    elif ext == "json":
+        await file.seek(0)
+        try:
+            stream = codecs.iterdecode(file.file, "utf-8")
+            content_str = ""
+            for chunk in stream:
+                content_str += chunk
+            json.loads(content_str)
+        except UnicodeDecodeError as err:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"File encoding check failed: UTF-8 required ({str(err)})",
+            ) from err
+        except json.JSONDecodeError as err:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid JSON content structure: {str(err)}",
+            ) from err
+
+    return ext, file_content
+
+
+
+
 @router.post("/import", response_model=Dict[str, Any], status_code=202)
+
 async def import_dataset(
     project_id: str = Form(...),
     dataset_name: str = Form(...),
@@ -165,7 +355,15 @@ async def import_dataset(
 ):
     workspace_id = extract_workspace_id(current_key)
     import_export_service = ImportExportService(db)
-    file_format = file.filename.split(".")[-1].lower() if file.filename else "json"
+
+    # Validate file size, extension, path security, and structure
+    file_format, content = await validate_and_read_upload_file(file)
+
+    # Sanitize UI-rendered metadata strings
+    from app.core.sanitization import sanitize_xss
+
+    dataset_name = sanitize_xss(dataset_name)
+    description = sanitize_xss(description) if description else None
 
     try:
         # Start the job
@@ -173,7 +371,6 @@ async def import_dataset(
             project_id, file_format, workspace_id=workspace_id
         )
 
-        content = await file.read()
         res = await import_export_service.process_import(
             job_id=job.id,
             file_content=content,
@@ -201,6 +398,7 @@ async def import_dataset(
         raise HTTPException(status_code=400, detail=str(e)) from e
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Import failed: {str(e)}") from e
+
 
 
 @router.post("/{dataset_id}/rollback", response_model=DatasetVersionResponse)
