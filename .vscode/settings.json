@@ -1,0 +1,18 @@
+{
+  "yaml.schemas": {
+    "./.vscode/schemas/grafana-datasource-schema.json": [
+      "docker/grafana/provisioning/datasources/*.yml"
+    ]
+  },
+  "python.analysis.exclude": [
+    "**/__pyrefly_virtual__/**",
+    "C:/__pyrefly_virtual__/**"
+  ],
+  "pyrefly.exclude": [
+    "**/__pyrefly_virtual__/**",
+    "C:/__pyrefly_virtual__/**"
+  ],
+  "files.watcherExclude": {
+    "**/__pyrefly_virtual__/**": true
+  }
+}

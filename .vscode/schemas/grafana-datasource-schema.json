@@ -1,0 +1,48 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Grafana Datasource Provisioning Schema",
+  "description": "Schema for Grafana datasource provisioning configuration files.",
+  "type": "object",
+  "properties": {
+    "apiVersion": {
+      "type": "integer",
+      "description": "Provisioning API version (typically 1)."
+    },
+    "deleteDatasources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "orgId": { "type": "integer" }
+        },
+        "required": ["name"]
+      }
+    },
+    "datasources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "type": { "type": "string" },
+          "access": { "type": "string" },
+          "url": { "type": "string" },
+          "isDefault": { "type": "boolean" },
+          "editable": { "type": "boolean" },
+          "orgId": { "type": "integer" },
+          "uid": { "type": "string" },
+          "user": { "type": "string" },
+          "database": { "type": "string" },
+          "basicAuth": { "type": "boolean" },
+          "basicAuthUser": { "type": "string" },
+          "jsonData": { "type": "object" },
+          "secureJsonData": { "type": "object" }
+        },
+        "required": ["name", "type"]
+      }
+    }
+  },
+  "required": ["apiVersion", "datasources"],
+  "additionalProperties": false
+}
