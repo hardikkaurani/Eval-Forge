@@ -39,7 +39,9 @@ celery_app.conf.update(
 
 
 @task_prerun.connect
-def setup_task_logging_context(sender=None, task_id=None, task=None, args=None, kwargs=None, **kw):
+def setup_task_logging_context(
+    sender=None, task_id=None, task=None, args=None, kwargs=None, **kw
+):
     """Binds task correlation context and IDs to structlog contextvars before task execution."""
     structlog.contextvars.clear_contextvars()
 
@@ -60,6 +62,15 @@ def setup_task_logging_context(sender=None, task_id=None, task=None, args=None, 
 
 
 @task_postrun.connect
-def cleanup_task_logging_context(sender=None, task_id=None, task=None, args=None, kwargs=None, retval=None, state=None, **kw):
+def cleanup_task_logging_context(
+    sender=None,
+    task_id=None,
+    task=None,
+    args=None,
+    kwargs=None,
+    retval=None,
+    state=None,
+    **kw,
+):
     """Clears structlog contextvars after task execution to prevent worker state leakage."""
     structlog.contextvars.clear_contextvars()

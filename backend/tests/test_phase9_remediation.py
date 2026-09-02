@@ -12,10 +12,17 @@ def test_prompt_engine_jinja2_autoescape_and_ssti() -> None:
     engine = PromptEngine()
 
     # 1. Plain-text and XML tags MUST be preserved without HTML escaping
-    template_str = "Prompt: {{ prompt }} | Output: <user_prompt>{{ user_data }}</user_prompt>"
+    template_str = (
+        "Prompt: {{ prompt }} | Output: <user_prompt>{{ user_data }}</user_prompt>"
+    )
     engine.register_template("test_xml", template_str, version="v1")
 
-    rendered = engine.render("test_xml", version="v1", prompt="Analyze & test", user_data="<script>alert(1)</script>")
+    rendered = engine.render(
+        "test_xml",
+        version="v1",
+        prompt="Analyze & test",
+        user_data="<script>alert(1)</script>",
+    )
     # Notice _sanitize_value handles XML angle brackets safely while autoescape=False preserves raw template tags
     assert "<user_prompt>" in rendered
     assert "</user_prompt>" in rendered
@@ -42,4 +49,3 @@ async def test_analytics_service_psutil_error_fallback(db_session) -> None:
         assert stats["memory_usage_bytes"] == 0
         assert stats["memory_usage_percent"] == 0.0
         assert stats["disk_usage_percent"] == 0.0
-

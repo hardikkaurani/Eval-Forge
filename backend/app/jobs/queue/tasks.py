@@ -63,7 +63,6 @@ async def _execute_job_internal(job_id: str, celery_task_id: str) -> Dict[str, A
             job_id, f"Job execution started on worker task: {celery_task_id}"
         )
 
-
         # Broadcast start event
         await websocket_manager.broadcast_job_update(
             job_id,
@@ -190,7 +189,6 @@ async def _execute_job_internal(job_id: str, celery_task_id: str) -> Dict[str, A
                 await repo.add_job_log(
                     job_id, f"Job execution failed permanently: {str(e)}", "ERROR"
                 )
-
 
                 # Broadcast failure
                 await websocket_manager.broadcast_job_update(

@@ -35,7 +35,6 @@ apiClient.interceptors.response.use(
   }
 );
 
-
 // Shared domain types
 export interface Project {
   id: string;

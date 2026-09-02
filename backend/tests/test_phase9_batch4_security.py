@@ -10,6 +10,7 @@ from app.core.sanitization import sanitize_input_data, sanitize_xss
 # PART A: DISTRIBUTED RATE LIMITING & TIER TESTS
 # =============================================================================
 
+
 @pytest.mark.asyncio
 async def test_rate_limit_tier_resolution() -> None:
     """Verify tier limit mappings for Free (60), Pro (300), and Enterprise (1000)."""
@@ -24,7 +25,6 @@ async def test_rate_limit_tier_resolution() -> None:
         tier = "ENTERPRISE"
 
     assert await RateLimiter.resolve_tier(MockEntKey(), None) == ("ENTERPRISE", 1000)
-
 
 
 @pytest.mark.asyncio
@@ -101,7 +101,9 @@ def test_rate_limit_http_429_headers_and_response(client: TestClient) -> None:
     rejected_res = RateLimitResult(
         allowed=False, limit=60, remaining=0, reset_seconds=45, scope="ip"
     )
-    with patch("app.core.rate_limiter.RateLimiter.check", new_callable=AsyncMock) as mock_check:
+    with patch(
+        "app.core.rate_limiter.RateLimiter.check", new_callable=AsyncMock
+    ) as mock_check:
         mock_check.return_value = rejected_res
         res = client.get("/projects", headers={"X-Test-Enforce-Rate-Limit": "true"})
         assert res.status_code == 429
@@ -115,15 +117,21 @@ def test_rate_limit_http_429_headers_and_response(client: TestClient) -> None:
         assert "Rate limit exceeded" in body["message"]
 
 
-
 # =============================================================================
 # PART B: INPUT SECURITY & XSS HARDENING TESTS
 # =============================================================================
 
+
 def test_xss_sanitization_script_tags() -> None:
     """Verify script tags, event handlers, and javascript URIs are neutralized via HTML entity encoding."""
-    assert sanitize_xss("<script>alert(1)</script>") == "&lt;script&gt;alert(1)&lt;/script&gt;"
-    assert sanitize_xss('<img src=x onerror=alert("xss")>') == "&lt;img src=x onerror=alert(&quot;xss&quot;)&gt;"
+    assert (
+        sanitize_xss("<script>alert(1)</script>")
+        == "&lt;script&gt;alert(1)&lt;/script&gt;"
+    )
+    assert (
+        sanitize_xss('<img src=x onerror=alert("xss")>')
+        == "&lt;img src=x onerror=alert(&quot;xss&quot;)&gt;"
+    )
     assert sanitize_xss("<svg onload=alert(1)>") == "&lt;svg onload=alert(1)&gt;"
     assert sanitize_xss("javascript:alert(1)") == "javascript:alert(1)"
 
@@ -132,7 +140,10 @@ def test_xss_preserves_legitimate_prompts_and_markdown() -> None:
     """Verify code snippets, markdown, and LLM evaluation prompts remain intact."""
     prompt = "Explain if `x < 10 && y > 5` in C++ code."
     # Direct metadata string entity escapes HTML chars
-    assert sanitize_xss(prompt) == "Explain if `x &lt; 10 &amp;&amp; y &gt; 5` in C++ code."
+    assert (
+        sanitize_xss(prompt)
+        == "Explain if `x &lt; 10 &amp;&amp; y &gt; 5` in C++ code."
+    )
 
     data = {
         "name": "Dataset <script>alert(1)</script>",
@@ -146,10 +157,10 @@ def test_xss_preserves_legitimate_prompts_and_markdown() -> None:
     assert cleaned["input_prompt"] == "If x < y, then return x > 0."
 
 
-
 # =============================================================================
 # PART C: FILE UPLOAD SECURITY TESTS
 # =============================================================================
+
 
 def test_upload_extension_validation(client: TestClient) -> None:
     """Verify unsupported file extensions (.exe, .php, double extension) are rejected with 400."""
@@ -205,22 +216,25 @@ def test_upload_malformed_json_and_csv(client: TestClient) -> None:
     assert "Invalid JSON content structure" in msg_json
 
 
-
 # =============================================================================
 # PART D: SQL PARAMETER BINDING SECURITY
 # =============================================================================
+
 
 def test_sql_parameter_binding_audit() -> None:
     """Verify SQL parameter queries use bound parameters rather than string concatenation."""
     from sqlalchemy import text
 
-    safe_query = text("SELECT * FROM jobs WHERE status = :status").bindparams(status="COMPLETED")
+    safe_query = text("SELECT * FROM jobs WHERE status = :status").bindparams(
+        status="COMPLETED"
+    )
     assert "status" in safe_query.compile().params
 
 
 # =============================================================================
 # PART E: REMEDIATION TESTS FOR FINDINGS B4-01 THROUGH B4-05
 # =============================================================================
+
 
 @pytest.mark.asyncio
 async def test_remediation_b4_01_api_key_redis_cache_and_single_flight() -> None:
@@ -234,7 +248,10 @@ async def test_remediation_b4_01_api_key_redis_cache_and_single_flight() -> None
         mock_redis.get = AsyncMock(return_value=None)
         mock_redis.setex = AsyncMock(return_value=True)
 
-        with patch.object(service, "validate_key", new_callable=AsyncMock) as mock_db_val:
+        with patch.object(
+            service, "validate_key", new_callable=AsyncMock
+        ) as mock_db_val:
+
             class MockKeyRecord:
                 id = "key-uuid-101"
                 organization_id = "org-uuid-202"
@@ -255,9 +272,13 @@ async def test_remediation_b4_01_api_key_redis_cache_and_single_flight() -> None
             assert mock_redis.setex.call_count == 1
 
         # Second Call: Warm Cache -> Uses Redis cache and makes 0 DB calls
-        mock_redis.get = AsyncMock(return_value='{"id": "key-uuid-101", "organization_id": "org-uuid-202", "workspace_id": "ws-uuid-303", "name": "Test Key", "scopes": ["read:all"], "is_active": true, "tier": "PRO"}')
+        mock_redis.get = AsyncMock(
+            return_value='{"id": "key-uuid-101", "organization_id": "org-uuid-202", "workspace_id": "ws-uuid-303", "name": "Test Key", "scopes": ["read:all"], "is_active": true, "tier": "PRO"}'
+        )
 
-        with patch.object(service, "validate_key", new_callable=AsyncMock) as mock_db_val_2:
+        with patch.object(
+            service, "validate_key", new_callable=AsyncMock
+        ) as mock_db_val_2:
             res2 = await service.validate_key_cached(db=None, raw_key=raw_key)
             assert res2 is not None
             assert res2.organization_id == "org-uuid-202"
@@ -278,7 +299,9 @@ def test_remediation_b4_02_bounded_incremental_fallback_sweep() -> None:
     assert len(fallback._store) == 5000
 
     # Execute single check with 5,000 keys present
-    with patch.object(fallback._store, "items", wraps=fallback._store.items) as mock_items:
+    with patch.object(
+        fallback._store, "items", wraps=fallback._store.items
+    ) as mock_items:
 
         fallback.check("active_user", limit=5, now=now + 1.0)
         # items() must NOT be called over the full dictionary (which would be O(N))
@@ -293,7 +316,9 @@ def test_remediation_b4_02_bounded_incremental_fallback_sweep() -> None:
     assert len(fallback._store) <= 5000
 
 
-def test_remediation_b4_03_large_upload_streaming_and_memory_bounds(client: TestClient) -> None:
+def test_remediation_b4_03_large_upload_streaming_and_memory_bounds(
+    client: TestClient,
+) -> None:
     """Verify B4-03: Upload validation enforces 100MB size limit and handles missing/spoofed Content-Length."""
     # Oversized file (>100MB)
     huge_data = b"x" * (100 * 1024 * 1024 + 100)
@@ -303,9 +328,12 @@ def test_remediation_b4_03_large_upload_streaming_and_memory_bounds(client: Test
         files={"file": ("huge.jsonl", huge_data, "application/jsonlines")},
     )
     assert res_oversized.status_code == 413
-    msg = res_oversized.json().get("message") or res_oversized.json().get("detail") or str(res_oversized.json())
+    msg = (
+        res_oversized.json().get("message")
+        or res_oversized.json().get("detail")
+        or str(res_oversized.json())
+    )
     assert "exceeds maximum limit of 100 MB" in msg
-
 
 
 def test_remediation_b4_04_dangerous_uri_scheme_neutralization() -> None:
@@ -317,7 +345,9 @@ def test_remediation_b4_04_dangerous_uri_scheme_neutralization() -> None:
     assert sanitize_url("JAVASCRIPT:alert(1)") == ""
     assert sanitize_url("  javascript:alert(1)") == ""
     assert sanitize_url("vbscript:msgbox(1)") == ""
-    assert sanitize_url("data:text/html;base64,PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0Pg==") == ""
+    assert (
+        sanitize_url("data:text/html;base64,PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0Pg==") == ""
+    )
 
     # Safe URLs and relative paths
     assert sanitize_url("https://example.com/eval") == "https://example.com/eval"
@@ -331,12 +361,17 @@ def test_remediation_b4_04_dangerous_uri_scheme_neutralization() -> None:
         "website": "https://evalforge.ai",
         "input_prompt": "If x < y, call javascript:alert(1) in evaluation prompt.",
     }
-    sanitized = sanitize_input_data(payload, target_fields=("name",), url_fields=("source", "website"))
+    sanitized = sanitize_input_data(
+        payload, target_fields=("name",), url_fields=("source", "website")
+    )
     assert sanitized["name"] == "Metadata &lt;script&gt;alert(1)&lt;/script&gt;"
     assert sanitized["source"] == ""
     assert sanitized["website"] == "https://evalforge.ai"
     # Evaluation prompt MUST preserve raw text intact!
-    assert sanitized["input_prompt"] == "If x < y, call javascript:alert(1) in evaluation prompt."
+    assert (
+        sanitized["input_prompt"]
+        == "If x < y, call javascript:alert(1) in evaluation prompt."
+    )
 
 
 def test_remediation_b4_05_trusted_proxy_ip_resolution() -> None:
@@ -364,5 +399,3 @@ def test_remediation_b4_05_trusted_proxy_ip_resolution() -> None:
         }
     )
     assert RateLimiter.resolve_client_ip(req_untrusted) == "198.51.100.44"
-
-

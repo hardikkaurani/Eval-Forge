@@ -28,7 +28,9 @@ class EnterpriseAPIKeyContainer:
     def to_dict(self) -> dict:
         return {
             "id": str(self.id) if self.id else None,
-            "organization_id": str(self.organization_id) if self.organization_id else None,
+            "organization_id": (
+                str(self.organization_id) if self.organization_id else None
+            ),
             "workspace_id": str(self.workspace_id) if self.workspace_id else None,
             "name": self.name,
             "scopes": self.scopes,
@@ -146,25 +148,43 @@ class EnterpriseAPIKeyService:
             if not key_record:
                 if redis_manager.client:
                     try:
-                        await redis_manager.client.setex(cache_key, 60, json.dumps({"is_active": False}))
+                        await redis_manager.client.setex(
+                            cache_key, 60, json.dumps({"is_active": False})
+                        )
                     except Exception:
                         pass
                 return None
 
-            container = EnterpriseAPIKeyContainer({
-                "id": str(key_record.id),
-                "organization_id": str(key_record.organization_id) if key_record.organization_id else None,
-                "workspace_id": str(key_record.workspace_id) if key_record.workspace_id else None,
-                "name": key_record.name,
-                "scopes": key_record.scopes,
-                "is_active": key_record.is_active,
-                "expires_at": key_record.expires_at.isoformat() if key_record.expires_at else None,
-                "tier": getattr(key_record, "tier", "FREE"),
-            })
+            container = EnterpriseAPIKeyContainer(
+                {
+                    "id": str(key_record.id),
+                    "organization_id": (
+                        str(key_record.organization_id)
+                        if key_record.organization_id
+                        else None
+                    ),
+                    "workspace_id": (
+                        str(key_record.workspace_id)
+                        if key_record.workspace_id
+                        else None
+                    ),
+                    "name": key_record.name,
+                    "scopes": key_record.scopes,
+                    "is_active": key_record.is_active,
+                    "expires_at": (
+                        key_record.expires_at.isoformat()
+                        if key_record.expires_at
+                        else None
+                    ),
+                    "tier": getattr(key_record, "tier", "FREE"),
+                }
+            )
 
             if redis_manager.client:
                 try:
-                    await redis_manager.client.setex(cache_key, 300, json.dumps(container.to_dict()))
+                    await redis_manager.client.setex(
+                        cache_key, 300, json.dumps(container.to_dict())
+                    )
                 except Exception:
                     pass
 
@@ -188,4 +208,3 @@ class EnterpriseAPIKeyService:
                 pass
 
         return True
-

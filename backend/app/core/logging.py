@@ -92,8 +92,9 @@ def _redact_val(val: Any) -> Any:
     return val
 
 
-
-def add_logger_name(logger: Any, method_name: str, event_dict: Dict[str, Any]) -> Dict[str, Any]:
+def add_logger_name(
+    logger: Any, method_name: str, event_dict: Dict[str, Any]
+) -> Dict[str, Any]:
     """Adds logger name if not present."""
     if "logger" not in event_dict and hasattr(logger, "name"):
         event_dict["logger"] = logger.name

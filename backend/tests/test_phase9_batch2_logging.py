@@ -29,9 +29,7 @@ def test_redact_sensitive_data() -> None:
             "access_token": "tok_abcdef123456",
             "normal_field": "safe_value",
         },
-        "list_items": [
-            {"secret_key": "hidden_val", "public_val": 42}
-        ]
+        "list_items": [{"secret_key": "hidden_val", "public_val": 42}],
     }
 
     redacted = redact_sensitive_data(None, "info", sample_data)
@@ -71,7 +69,9 @@ def test_request_id_and_trace_id_headers(client: TestClient) -> None:
     # 2. Valid custom headers -> Preserved and echoed
     req_id = "req-custom-header-999"
     trace_id = "trace-custom-header-888"
-    res2 = client.get("/health", headers={"X-Request-ID": req_id, "X-Trace-ID": trace_id})
+    res2 = client.get(
+        "/health", headers={"X-Request-ID": req_id, "X-Trace-ID": trace_id}
+    )
     assert res2.status_code == 200
     assert res2.headers["X-Request-ID"] == req_id
     assert res2.headers["X-Trace-ID"] == trace_id
@@ -87,9 +87,12 @@ def test_request_id_and_trace_id_headers(client: TestClient) -> None:
 @pytest.mark.asyncio
 async def test_concurrent_request_context_isolation() -> None:
     """Verify structlog contextvars do not bleed between concurrent async tasks."""
+
     async def task_a():
         structlog.contextvars.clear_contextvars()
-        bind_correlation_context(request_id="req-A", user_id="user-A", workspace_id="ws-A")
+        bind_correlation_context(
+            request_id="req-A", user_id="user-A", workspace_id="ws-A"
+        )
         await asyncio.sleep(0.05)
         ctx = structlog.contextvars.get_contextvars()
         assert ctx.get("request_id") == "req-A"
@@ -99,7 +102,9 @@ async def test_concurrent_request_context_isolation() -> None:
 
     async def task_b():
         structlog.contextvars.clear_contextvars()
-        bind_correlation_context(request_id="req-B", user_id="user-B", workspace_id="ws-B")
+        bind_correlation_context(
+            request_id="req-B", user_id="user-B", workspace_id="ws-B"
+        )
         await asyncio.sleep(0.05)
         ctx = structlog.contextvars.get_contextvars()
         assert ctx.get("request_id") == "req-B"
@@ -175,7 +180,6 @@ def test_finding_b2_01_dsn_and_bearer_redaction() -> None:
     assert redacted_dsn["redis"] == "redis://user:[REDACTED]@redis:6379/0"
     assert redacted_dsn["mongo"] == "mongodb://admin:[REDACTED]@host/db"
 
-
     # C. Bearer tokens
     bearer_data = {
         "b1": "Bearer token_sample_abc123",
@@ -219,7 +223,6 @@ def test_finding_b2_01_dsn_and_bearer_redaction() -> None:
         == "DatabaseError: postgresql://admin:[REDACTED]@localhost:5432/evalforge"
     )
     assert redacted_exc["error"] == "Failed request with Bearer [REDACTED]"
-
 
     # F. Normal observability URLs (MUST remain intact)
     obs_data = {
@@ -274,4 +277,3 @@ def test_finding_b2_01_log_output_pipeline() -> None:
     assert "Authorization" in serialized
     assert "[REDACTED]" in serialized
     assert "https://api.example.com/v1/evaluate" in serialized
-

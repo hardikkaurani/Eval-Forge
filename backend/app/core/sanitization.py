@@ -64,7 +64,3 @@ def sanitize_input_data(
         return [sanitize_input_data(item, target_fields, url_fields) for item in data]
 
     return data
-
-
-
-

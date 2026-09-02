@@ -1,4 +1,3 @@
-
 import prometheus_client
 import structlog
 from fastapi import Request

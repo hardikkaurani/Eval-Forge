@@ -28,21 +28,32 @@ class RateLimiter:
 
 
 class RateLimitingMiddleware(BaseHTTPMiddleware):
-
     """Middleware enforcing sliding-window rate limit checks per IP or API key with tier resolution."""
 
     def __init__(self, app, requests_per_minute: int = 60):
         super().__init__(app)
 
     async def dispatch(self, request: Request, call_next) -> Response:
-        exempt = {"/health", "/ready", "/live", "/metrics", "/docs", "/openapi.json", "/redoc", "/favicon.ico"}
+        exempt = {
+            "/health",
+            "/ready",
+            "/live",
+            "/metrics",
+            "/docs",
+            "/openapi.json",
+            "/redoc",
+            "/favicon.ico",
+        }
         if request.url.path in exempt:
             return await call_next(request)
 
-        is_test_env = "pytest" in sys.modules or settings.APP_ENV == "testing" or os.getenv("TESTING") == "1"
+        is_test_env = (
+            "pytest" in sys.modules
+            or settings.APP_ENV == "testing"
+            or os.getenv("TESTING") == "1"
+        )
         if is_test_env and not request.headers.get("X-Test-Enforce-Rate-Limit"):
             return await call_next(request)
-
 
         api_key_token = request.headers.get("X-API-Key")
         if not api_key_token:
@@ -59,13 +70,13 @@ class RateLimitingMiddleware(BaseHTTPMiddleware):
                 )
 
                 key_service = EnterpriseAPIKeyService()
-                api_key_record = await key_service.validate_key_cached(None, api_key_token)
+                api_key_record = await key_service.validate_key_cached(
+                    None, api_key_token
+                )
             except Exception as exc:
                 logger.debug("Rate limit auth token resolution skipped", error=str(exc))
 
         result = await NewRateLimiter.check(request, api_key_record=api_key_record)
-
-
 
         if not result.allowed:
             from fastapi.responses import JSONResponse
@@ -92,7 +103,6 @@ class RateLimitingMiddleware(BaseHTTPMiddleware):
         response.headers["X-RateLimit-Remaining"] = str(result.remaining)
         response.headers["X-RateLimit-Reset"] = str(result.reset_seconds)
         return response
-
 
 
 class IdempotencyMiddleware(BaseHTTPMiddleware):

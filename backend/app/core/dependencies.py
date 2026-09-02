@@ -73,8 +73,22 @@ async def get_current_api_key(
         )
 
     ws_id = extract_workspace_id(api_key_record)
-    user_id = str(getattr(api_key_record, "user_id", "") or getattr(api_key_record, "created_by", "") or "") or None
-    org_id = str(getattr(api_key_record, "org_id", "") or getattr(api_key_record, "organization_id", "") or "") or None
+    user_id = (
+        str(
+            getattr(api_key_record, "user_id", "")
+            or getattr(api_key_record, "created_by", "")
+            or ""
+        )
+        or None
+    )
+    org_id = (
+        str(
+            getattr(api_key_record, "org_id", "")
+            or getattr(api_key_record, "organization_id", "")
+            or ""
+        )
+        or None
+    )
 
     bind_dict = {}
     if ws_id:

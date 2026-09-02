@@ -66,6 +66,7 @@ class RateLimitResult(NamedTuple):
 # In-Memory Local Fallback (For Redis Outages)
 # -----------------------------------------------------------------------------
 
+
 class RateLimitFallback:
     """Bounded local in-memory sliding window rate limiter fallback when Redis is offline.
 
@@ -119,10 +120,11 @@ class RateLimitFallback:
 
         if allowed:
             remaining = limit - len(valid_timestamps)
-            return RateLimitResult(True, limit, max(0, remaining), WINDOW_SECONDS, "local")
+            return RateLimitResult(
+                True, limit, max(0, remaining), WINDOW_SECONDS, "local"
+            )
         else:
             return RateLimitResult(False, limit, 0, WINDOW_SECONDS, "local")
-
 
 
 fallback_limiter = RateLimitFallback()
@@ -131,6 +133,7 @@ fallback_limiter = RateLimitFallback()
 # -----------------------------------------------------------------------------
 # Rate Limiter Engine
 # -----------------------------------------------------------------------------
+
 
 class RateLimiter:
     """Distributed Redis-backed sliding window rate limiter with local fallback."""
@@ -196,7 +199,9 @@ class RateLimiter:
             clean_tier = str(tier_name).upper().strip()
             return clean_tier, TIER_LIMITS.get(clean_tier, DEFAULT_FREE_LIMIT)
 
-        org_id = getattr(api_key_record, "organization_id", None) or getattr(api_key_record, "org_id", None)
+        org_id = getattr(api_key_record, "organization_id", None) or getattr(
+            api_key_record, "org_id", None
+        )
         if not org_id:
             return "FREE", DEFAULT_FREE_LIMIT
 
@@ -221,7 +226,10 @@ class RateLimiter:
                 stmt = (
                     select(Plan.name)
                     .join(Subscription, Subscription.plan_id == Plan.id)
-                    .where(Subscription.organization_id == org_id, Subscription.status == "active")
+                    .where(
+                        Subscription.organization_id == org_id,
+                        Subscription.status == "active",
+                    )
                 )
                 res = await db.execute(stmt)
                 plan_name = res.scalar_one_or_none()
@@ -230,12 +238,13 @@ class RateLimiter:
                     # Cache in Redis with 300s TTL
                     try:
                         if redis_manager.client:
-                            await redis_manager.client.setex(cache_key, TIER_CACHE_TTL_SECONDS, tier_name)
+                            await redis_manager.client.setex(
+                                cache_key, TIER_CACHE_TTL_SECONDS, tier_name
+                            )
                     except Exception as exc:
                         logger.debug("Redis tier cache setex skipped", error=str(exc))
             except Exception as exc:
                 logger.debug("Database tier lookup skipped", error=str(exc))
-
 
         clean_tier = str(tier_name or "FREE").upper().strip()
         limit = TIER_LIMITS.get(clean_tier, DEFAULT_FREE_LIMIT)
@@ -255,20 +264,32 @@ class RateLimiter:
         import os
         import sys
 
-        is_test_env = "pytest" in sys.modules or settings.APP_ENV == "testing" or os.getenv("TESTING") == "1"
+        is_test_env = (
+            "pytest" in sys.modules
+            or settings.APP_ENV == "testing"
+            or os.getenv("TESTING") == "1"
+        )
         if is_test_env and not request.headers.get("X-Test-Enforce-Rate-Limit"):
             return RateLimitResult(True, limit, limit - 1, WINDOW_SECONDS, "testing")
 
         # Resolve identity & scope
-        user_id = getattr(api_key_record, "user_id", None) or getattr(api_key_record, "created_by", None)
-        api_key_id = getattr(api_key_record, "id", None) or getattr(api_key_record, "key_hash", None)
+        user_id = getattr(api_key_record, "user_id", None) or getattr(
+            api_key_record, "created_by", None
+        )
+        api_key_id = getattr(api_key_record, "id", None) or getattr(
+            api_key_record, "key_hash", None
+        )
 
         if api_key_id:
             scope = "api_key"
-            identity_key = f"evalforge:ratelimit:api_key:{cls._hash_identity(str(api_key_id))}"
+            identity_key = (
+                f"evalforge:ratelimit:api_key:{cls._hash_identity(str(api_key_id))}"
+            )
         elif user_id:
             scope = "user"
-            identity_key = f"evalforge:ratelimit:user:{cls._hash_identity(str(user_id))}"
+            identity_key = (
+                f"evalforge:ratelimit:user:{cls._hash_identity(str(user_id))}"
+            )
         else:
             scope = "ip"
             client_ip = cls.resolve_client_ip(request)
@@ -288,9 +309,14 @@ class RateLimiter:
                     if not allowed:
                         record_rate_limit_rejection(scope)
 
-                    return RateLimitResult(allowed, limit, max(0, remaining), reset_sec, scope)
+                    return RateLimitResult(
+                        allowed, limit, max(0, remaining), reset_sec, scope
+                    )
         except Exception as exc:
-            logger.debug("Redis rate limit evaluation failed, falling back to local memory", error=str(exc))
+            logger.debug(
+                "Redis rate limit evaluation failed, falling back to local memory",
+                error=str(exc),
+            )
 
         # 2. Local Fallback when Redis is unavailable
         fallback_res = fallback_limiter.check(identity_key, limit, now)
@@ -298,4 +324,3 @@ class RateLimiter:
             record_rate_limit_rejection(scope)
 
         return fallback_res
-

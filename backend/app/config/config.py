@@ -54,9 +54,14 @@ class Settings(BaseSettings):
     ALLOWED_HOSTS: list[str] = ["*"]
     TRUST_PROXY_HEADERS: bool = True
     TRUSTED_PROXIES: list[str] = Field(
-        default_factory=lambda: ["127.0.0.1", "::1", "10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"]
+        default_factory=lambda: [
+            "127.0.0.1",
+            "::1",
+            "10.0.0.0/8",
+            "172.16.0.0/12",
+            "192.168.0.0/16",
+        ]
     )
-
 
     # LLM Provider API Keys
     OPENAI_API_KEY: SecretStr | None = None

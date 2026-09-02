@@ -41,7 +41,9 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
         raw_req_id = request.headers.get("X-Request-ID")
         request_id = validate_correlation_id(raw_req_id) or str(uuid.uuid4())
 
-        raw_trace_id = request.headers.get("X-Trace-ID") or request.headers.get("traceparent")
+        raw_trace_id = request.headers.get("X-Trace-ID") or request.headers.get(
+            "traceparent"
+        )
         trace_id = validate_correlation_id(raw_trace_id) or str(uuid.uuid4())
 
         structlog.contextvars.bind_contextvars(
@@ -97,8 +99,6 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
             structlog.contextvars.clear_contextvars()
 
 
-
-
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
     """Middleware to inject standard production-grade security headers."""
 
@@ -130,21 +130,31 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
 
 
 class RateLimitMiddleware(BaseHTTPMiddleware):
-
     """Middleware for enforcing distributed sliding-window rate limiting across endpoints."""
 
-    EXEMPT_PATHS = {"/health", "/ready", "/live", "/metrics", "/docs", "/openapi.json", "/redoc", "/favicon.ico"}
+    EXEMPT_PATHS = {
+        "/health",
+        "/ready",
+        "/live",
+        "/metrics",
+        "/docs",
+        "/openapi.json",
+        "/redoc",
+        "/favicon.ico",
+    }
 
     async def dispatch(self, request: Request, call_next) -> Response:
         path = request.url.path
         if path in self.EXEMPT_PATHS:
             return await call_next(request)
 
-        is_test_env = "pytest" in sys.modules or settings.APP_ENV == "testing" or os.getenv("TESTING") == "1"
+        is_test_env = (
+            "pytest" in sys.modules
+            or settings.APP_ENV == "testing"
+            or os.getenv("TESTING") == "1"
+        )
         if is_test_env and not request.headers.get("X-Test-Enforce-Rate-Limit"):
             return await call_next(request)
-
-
 
         api_key_token = request.headers.get("X-API-Key")
         if not api_key_token:
@@ -171,7 +181,9 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
 
         from app.core.rate_limiter import RateLimiter
 
-        result = await RateLimiter.check(request, api_key_record=api_key_record, db=db_session)
+        result = await RateLimiter.check(
+            request, api_key_record=api_key_record, db=db_session
+        )
 
         if not result.allowed:
             from fastapi.responses import JSONResponse

@@ -166,7 +166,24 @@ ALLOWED_MIME_TYPES = {
     "application/csv",
     "application/octet-stream",
 }
-DISALLOWED_SUB_EXTENSIONS = {"exe", "php", "sh", "bat", "cmd", "dll", "so", "py", "js", "vbs", "scr", "ps1", "asp", "aspx", "jsp", "cgi"}
+DISALLOWED_SUB_EXTENSIONS = {
+    "exe",
+    "php",
+    "sh",
+    "bat",
+    "cmd",
+    "dll",
+    "so",
+    "py",
+    "js",
+    "vbs",
+    "scr",
+    "ps1",
+    "asp",
+    "aspx",
+    "jsp",
+    "cgi",
+}
 MAX_UPLOAD_SIZE_BYTES = 100 * 1024 * 1024  # 100 MB
 
 
@@ -183,7 +200,14 @@ async def validate_and_read_upload_file(file: UploadFile) -> tuple[str, bytes]:
 
     # Path traversal check (handles raw and URL-encoded sequences)
     lowered_filename = raw_filename.lower()
-    if ".." in raw_filename or "/" in raw_filename or "\\" in raw_filename or "%2e%2e" in lowered_filename or "%2f" in lowered_filename or "%5c" in lowered_filename:
+    if (
+        ".." in raw_filename
+        or "/" in raw_filename
+        or "\\" in raw_filename
+        or "%2e%2e" in lowered_filename
+        or "%2f" in lowered_filename
+        or "%5c" in lowered_filename
+    ):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid filename: path traversal sequence detected.",
@@ -199,7 +223,9 @@ async def validate_and_read_upload_file(file: UploadFile) -> tuple[str, bytes]:
     ext = parts[-1].lower()
 
     # Double extension / executable extension check
-    if len(parts) > 2 and any(p.lower() in DISALLOWED_SUB_EXTENSIONS for p in parts[:-1]):
+    if len(parts) > 2 and any(
+        p.lower() in DISALLOWED_SUB_EXTENSIONS for p in parts[:-1]
+    ):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Unsupported double extension format: .{ext}",
@@ -333,10 +359,7 @@ async def validate_and_read_upload_file(file: UploadFile) -> tuple[str, bytes]:
     return ext, file_content
 
 
-
-
 @router.post("/import", response_model=Dict[str, Any], status_code=202)
-
 async def import_dataset(
     project_id: str = Form(...),
     dataset_name: str = Form(...),
@@ -398,7 +421,6 @@ async def import_dataset(
         raise HTTPException(status_code=400, detail=str(e)) from e
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Import failed: {str(e)}") from e
-
 
 
 @router.post("/{dataset_id}/rollback", response_model=DatasetVersionResponse)

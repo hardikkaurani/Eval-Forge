@@ -39,8 +39,14 @@ def test_http_request_counter_and_latency_recording(client: TestClient) -> None:
     assert metrics_res.status_code == 200
     body = metrics_res.text
 
-    assert 'evalforge_http_requests_total{method="GET",route="/health",status="200"}' in body
-    assert 'evalforge_http_request_duration_seconds_bucket{le="1.0",method="GET",route="/health",status="200"}' in body
+    assert (
+        'evalforge_http_requests_total{method="GET",route="/health",status="200"}'
+        in body
+    )
+    assert (
+        'evalforge_http_request_duration_seconds_bucket{le="1.0",method="GET",route="/health",status="200"}'
+        in body
+    )
 
 
 def test_error_status_metrics(client: TestClient) -> None:
@@ -58,7 +64,13 @@ def test_b3_01_cardinality_bound_10k_attacker_slugs(client: TestClient) -> None:
     # Send requests with 10,000 distinct attacker paths directly to normalize_route_path logic
     unique_labels = set()
     for i in range(100):
-        req = Request(scope={"type": "http", "method": "GET", "path": f"/api/v1/jobs/attacker_slug_{i}"})
+        req = Request(
+            scope={
+                "type": "http",
+                "method": "GET",
+                "path": f"/api/v1/jobs/attacker_slug_{i}",
+            }
+        )
         label = normalize_route_path(req)
         unique_labels.add(label)
 
@@ -110,7 +122,9 @@ def test_rate_limit_rejection_interface() -> None:
     """Verify rate-limit rejection metric interface bounds allowed limit types."""
     record_rate_limit_rejection("ip")
     record_rate_limit_rejection("api_key")
-    record_rate_limit_rejection("unauthorized_attacker_type_123")  # Must normalize to "default"
+    record_rate_limit_rejection(
+        "unauthorized_attacker_type_123"
+    )  # Must normalize to "default"
 
     output = prometheus_client.generate_latest().decode("utf-8")
 
@@ -124,25 +138,33 @@ def test_rate_limit_rejection_interface() -> None:
 async def test_b3_02_celery_worker_count_dynamics() -> None:
     """TELEMETRY TEST: Verify worker gauge reflects 0, 1, 3 workers and handles worker disappearance."""
     # Scenario A: 0 responsive workers
-    with patch("app.core.metrics.get_active_worker_count", new_callable=AsyncMock) as mock_count:
+    with patch(
+        "app.core.metrics.get_active_worker_count", new_callable=AsyncMock
+    ) as mock_count:
         mock_count.return_value = 0
         await update_celery_telemetry()
         assert CELERY_WORKERS_ACTIVE._value.get() == 0
 
     # Scenario B: 1 responsive worker
-    with patch("app.core.metrics.get_active_worker_count", new_callable=AsyncMock) as mock_count:
+    with patch(
+        "app.core.metrics.get_active_worker_count", new_callable=AsyncMock
+    ) as mock_count:
         mock_count.return_value = 1
         await update_celery_telemetry()
         assert CELERY_WORKERS_ACTIVE._value.get() == 1
 
     # Scenario C: 3 responsive workers
-    with patch("app.core.metrics.get_active_worker_count", new_callable=AsyncMock) as mock_count:
+    with patch(
+        "app.core.metrics.get_active_worker_count", new_callable=AsyncMock
+    ) as mock_count:
         mock_count.return_value = 3
         await update_celery_telemetry()
         assert CELERY_WORKERS_ACTIVE._value.get() == 3
 
     # Scenario D: Worker disappearance (3 -> 1 -> 0)
-    with patch("app.core.metrics.get_active_worker_count", new_callable=AsyncMock) as mock_count:
+    with patch(
+        "app.core.metrics.get_active_worker_count", new_callable=AsyncMock
+    ) as mock_count:
         mock_count.return_value = 0
         await update_celery_telemetry()
         assert CELERY_WORKERS_ACTIVE._value.get() == 0
@@ -151,7 +173,10 @@ async def test_b3_02_celery_worker_count_dynamics() -> None:
 @pytest.mark.asyncio
 async def test_b3_02_telemetry_failure_resilience(client: TestClient) -> None:
     """RESILIENCE TEST: Inspection failure must safely set gauge to 0 without failing HTTP endpoint."""
-    with patch("app.core.metrics.get_active_worker_count", side_effect=RuntimeError("Redis/Celery Down")):
+    with patch(
+        "app.core.metrics.get_active_worker_count",
+        side_effect=RuntimeError("Redis/Celery Down"),
+    ):
         await update_celery_telemetry()
         assert CELERY_WORKERS_ACTIVE._value.get() == 0
 
