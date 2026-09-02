@@ -1,7 +1,8 @@
 from dataclasses import dataclass
 from typing import Any
 
-from jinja2 import Environment, Template, TemplateSyntaxError
+from jinja2 import StrictUndefined, TemplateSyntaxError
+from jinja2.sandbox import SandboxedEnvironment
 
 
 @dataclass(frozen=True, slots=True)
@@ -148,7 +149,11 @@ class PromptEngine:
 
         Returns (True, None) if valid, or (False, error_description) if invalid.
         """
-        env = Environment()
+        env = SandboxedEnvironment(
+            autoescape=False,  # nosec B701 - Plain text LLM prompt templates, autoescape would corrupt XML delimiters
+            undefined=StrictUndefined,
+        )
+        env.globals.clear()
         try:
             env.parse(template_str)
             return True, None
@@ -216,7 +221,12 @@ class PromptEngine:
 
         sanitized_context = {k: self._sanitize_value(v) for k, v in context.items()}
 
-        template = Template(template_info.template)
+        env = SandboxedEnvironment(
+            autoescape=False,  # nosec B701 - Plain text LLM prompt templates, autoescape would corrupt XML delimiters
+            undefined=StrictUndefined,
+        )
+        env.globals.clear()
+        template = env.from_string(template_info.template)
         return template.render(**sanitized_context)
 
     def describe(self, name: str) -> dict[str, Any]:
