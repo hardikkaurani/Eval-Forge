@@ -35,3 +35,17 @@ ignore = ["B008", "E501", "C901"]
 [tool.ruff.lint.isort]
 known-first-party = ["app"]
 known-third-party = ["alembic"]
+
+[tool.pyright]
+include = ["app", "tests"]
+exclude = [
+    "**/__pycache__",
+    "**/__pyrefly_virtual__/**",
+    "C:/__pyrefly_virtual__/**",
+    "c:/__pyrefly_virtual__/**"
+]
+ignore = [
+    "**/__pyrefly_virtual__/**",
+    "C:/__pyrefly_virtual__/**",
+    "c:/__pyrefly_virtual__/**"
+]
