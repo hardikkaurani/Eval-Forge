@@ -10,8 +10,31 @@ from app.jobs.registry import job_registry
 logger = logging.getLogger(__name__)
 
 
-async def async_run_background_job(job_id: str, celery_task_id: str) -> Dict[str, Any]:
+async def async_run_background_job(
+    job_id: str,
+    celery_task_id: str,
+    correlation_context: Dict[str, Any] | None = None,
+) -> Dict[str, Any]:
     """Runs a background job asynchronously by locating its registered executor."""
+    import structlog
+
+    if correlation_context:
+        valid_ctx = {k: v for k, v in correlation_context.items() if v is not None}
+        if valid_ctx:
+            structlog.contextvars.bind_contextvars(**valid_ctx)
+
+    try:
+        return await _execute_job_internal(job_id, celery_task_id)
+    finally:
+        structlog.contextvars.clear_contextvars()
+
+
+async def _execute_job_internal(job_id: str, celery_task_id: str) -> Dict[str, Any]:
+    from app.core.metrics import (
+        record_evaluation_completed,
+        record_evaluation_failed,
+        record_evaluation_started,
+    )
     from app.database.session import SessionLocal
     from app.jobs.repositories.job import JobRepository
 
@@ -29,12 +52,17 @@ async def async_run_background_job(job_id: str, celery_task_id: str) -> Dict[str
             )
             return {"status": "cancelled"}
 
+        # Record evaluation start metric
+        eval_type = job.name or "standard"
+        record_evaluation_started(eval_type=eval_type)
+
         # 1. Update job to RUNNING status
         await repo.update_job_status(job_id, "RUNNING", worker_id=celery_task_id)
         execution_history = await repo.record_execution_start(job_id, celery_task_id)
         await repo.add_job_log(
             job_id, f"Job execution started on worker task: {celery_task_id}"
         )
+
 
         # Broadcast start event
         await websocket_manager.broadcast_job_update(
@@ -79,6 +107,9 @@ async def async_run_background_job(job_id: str, celery_task_id: str) -> Dict[str
 
             # Execute the job
             result = await executor.execute(job, progress_callback)
+
+            # Record evaluation completed metric
+            record_evaluation_completed(eval_type=eval_type)
 
             # 2. Update status to COMPLETED
             await repo.update_job_status(job_id, "COMPLETED", result=result)
@@ -150,12 +181,16 @@ async def async_run_background_job(job_id: str, celery_task_id: str) -> Dict[str
                 run_background_job.apply_async(args=[job_id], countdown=delay_seconds)
                 return {"status": "retrying", "error": str(e)}
             else:
+                # Record evaluation failed metric
+                record_evaluation_failed(eval_type=eval_type)
+
                 # 3. Update status to FAILED
                 await repo.update_job_status(job_id, "FAILED", error_message=str(e))
                 await repo.record_execution_end(execution_history.id, "FAILED")
                 await repo.add_job_log(
                     job_id, f"Job execution failed permanently: {str(e)}", "ERROR"
                 )
+
 
                 # Broadcast failure
                 await websocket_manager.broadcast_job_update(
@@ -172,7 +207,11 @@ async def async_run_background_job(job_id: str, celery_task_id: str) -> Dict[str
 
 
 @celery_app.task(name="app.jobs.tasks.run_background_job", bind=True)
-def run_background_job(self, job_id: str) -> Any:
+def run_background_job(
+    self,
+    job_id: str,
+    correlation_context: Dict[str, Any] | None = None,
+) -> Any:
     """Celery task wrapper around the asynchronous job executor run function."""
     try:
         loop = asyncio.get_event_loop()
@@ -183,16 +222,25 @@ def run_background_job(self, job_id: str) -> Any:
     if loop.is_running():
         # Eager mode (testing) or already running loop
         future = asyncio.run_coroutine_threadsafe(
-            async_run_background_job(job_id, self.request.id or "eager_task"), loop
+            async_run_background_job(
+                job_id, self.request.id or "eager_task", correlation_context
+            ),
+            loop,
         )
         return future.result()
     else:
         return loop.run_until_complete(
-            async_run_background_job(job_id, self.request.id or "eager_task")
+            async_run_background_job(
+                job_id, self.request.id or "eager_task", correlation_context
+            )
         )
 
 
 @celery_app.task(name="app.jobs.tasks.run_evaluation_job", bind=True)
-def run_evaluation_job(self, job_id: str) -> Any:
+def run_evaluation_job(
+    self,
+    job_id: str,
+    correlation_context: Dict[str, Any] | None = None,
+) -> Any:
     """Dedicated Celery task wrapper for high-priority evaluation jobs."""
-    return run_background_job(self, job_id)
+    return run_background_job(self, job_id, correlation_context)

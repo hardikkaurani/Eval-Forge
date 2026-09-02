@@ -1,4 +1,8 @@
+import uuid
+
+import structlog
 from celery import Celery
+from celery.signals import task_postrun, task_prerun
 from kombu import Queue
 
 from app.config.config import settings
@@ -32,3 +36,30 @@ celery_app.conf.update(
     task_always_eager=(settings.APP_ENV == "testing"),
     task_eager_propagates=True,
 )
+
+
+@task_prerun.connect
+def setup_task_logging_context(sender=None, task_id=None, task=None, args=None, kwargs=None, **kw):
+    """Binds task correlation context and IDs to structlog contextvars before task execution."""
+    structlog.contextvars.clear_contextvars()
+
+    corr_ctx = (kwargs or {}).get("correlation_context") or {}
+    req_id = corr_ctx.get("request_id") or task_id or str(uuid.uuid4())
+    trace_id = corr_ctx.get("trace_id") or str(uuid.uuid4())
+
+    bind_dict = {
+        "request_id": req_id,
+        "trace_id": trace_id,
+        "celery_task_id": task_id,
+    }
+    for field in ("user_id", "org_id", "workspace_id"):
+        if corr_ctx.get(field):
+            bind_dict[field] = corr_ctx[field]
+
+    structlog.contextvars.bind_contextvars(**bind_dict)
+
+
+@task_postrun.connect
+def cleanup_task_logging_context(sender=None, task_id=None, task=None, args=None, kwargs=None, retval=None, state=None, **kw):
+    """Clears structlog contextvars after task execution to prevent worker state leakage."""
+    structlog.contextvars.clear_contextvars()
