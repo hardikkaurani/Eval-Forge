@@ -72,4 +72,19 @@ async def get_current_api_key(
             headers={"WWW-Authenticate": "ApiKey"},
         )
 
+    ws_id = extract_workspace_id(api_key_record)
+    user_id = str(getattr(api_key_record, "user_id", "") or getattr(api_key_record, "created_by", "") or "") or None
+    org_id = str(getattr(api_key_record, "org_id", "") or getattr(api_key_record, "organization_id", "") or "") or None
+
+    bind_dict = {}
+    if ws_id:
+        bind_dict["workspace_id"] = ws_id
+    if user_id:
+        bind_dict["user_id"] = user_id
+    if org_id:
+        bind_dict["org_id"] = org_id
+
+    if bind_dict:
+        structlog.contextvars.bind_contextvars(**bind_dict)
+
     return api_key_record
