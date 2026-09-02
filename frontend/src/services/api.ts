@@ -19,6 +19,23 @@ apiClient.interceptors.request.use((config) => {
   return config;
 });
 
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 429) {
+      const retryAfter = error.response.headers['retry-after'] || '60';
+      const customMessage =
+        error.response.data?.message ||
+        error.response.data?.data?.error ||
+        `Rate limit exceeded. Please retry after ${retryAfter} seconds.`;
+      console.warn(`[RateLimit 429] ${customMessage} (Retry-After: ${retryAfter}s)`);
+      error.message = customMessage;
+    }
+    return Promise.reject(error);
+  }
+);
+
+
 // Shared domain types
 export interface Project {
   id: string;
