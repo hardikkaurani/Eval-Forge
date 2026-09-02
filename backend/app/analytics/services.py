@@ -1,4 +1,5 @@
 import csv
+import logging
 import math
 import os
 import statistics
@@ -34,6 +35,8 @@ try:
     import psutil
 except ImportError:
     psutil = None
+
+logger = logging.getLogger(__name__)
 
 
 def calculate_percentile(data: List[float], pct: float) -> float:
@@ -1045,8 +1048,8 @@ class ObservabilityService:
                 mem_bytes = vm.used
                 mem_pct = vm.percent
                 disk_pct = psutil.disk_usage("/").percent
-            except Exception:
-                pass
+            except Exception as err:
+                logger.warning("Failed to collect psutil system stats: %s", err)
         else:
             cpu = 0.0
             mem_bytes = 0

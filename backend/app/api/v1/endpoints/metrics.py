@@ -1,25 +1,15 @@
 import prometheus_client
 from fastapi import APIRouter, Response
 
+from app.core.metrics import update_celery_telemetry
+
 router = APIRouter(prefix="/metrics", tags=["System"])
 
 
-# Define basic Prometheus metric collectors
-REQUEST_COUNT = prometheus_client.Counter(
-    "evalforge_http_requests_total",
-    "Total HTTP Requests",
-    ["method", "endpoint", "http_status"],
-)
-REQUEST_LATENCY = prometheus_client.Histogram(
-    "evalforge_http_request_latency_seconds",
-    "HTTP Request Latency in seconds",
-    ["method", "endpoint"],
-)
-
-
 @router.get("", summary="Expose Prometheus metrics")
-def get_metrics():
+async def get_metrics():
     """Generates and returns system and HTTP performance metrics for Prometheus scraping."""
+    await update_celery_telemetry()
     return Response(
         content=prometheus_client.generate_latest(),
         media_type=prometheus_client.CONTENT_TYPE_LATEST,
