@@ -1,3 +1,4 @@
+# trunk-ignore-all(trufflehog, gitleaks, secrets): Synthetic unit test file validating secret redaction
 import asyncio
 
 import pytest

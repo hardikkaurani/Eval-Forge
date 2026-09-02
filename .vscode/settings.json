@@ -6,13 +6,32 @@
   },
   "python.analysis.exclude": [
     "**/__pyrefly_virtual__/**",
-    "C:/__pyrefly_virtual__/**"
+    "C:/__pyrefly_virtual__/**",
+    "c:/__pyrefly_virtual__/**"
+  ],
+  "python.analysis.ignore": [
+    "**/__pyrefly_virtual__/**",
+    "C:/__pyrefly_virtual__/**",
+    "c:/__pyrefly_virtual__/**"
   ],
   "pyrefly.exclude": [
     "**/__pyrefly_virtual__/**",
-    "C:/__pyrefly_virtual__/**"
+    "C:/__pyrefly_virtual__/**",
+    "c:/__pyrefly_virtual__/**"
+  ],
+  "pyrefly.ignore": [
+    "**/__pyrefly_virtual__/**",
+    "C:/__pyrefly_virtual__/**",
+    "c:/__pyrefly_virtual__/**"
   ],
   "files.watcherExclude": {
-    "**/__pyrefly_virtual__/**": true
+    "**/__pyrefly_virtual__/**": true,
+    "C:/__pyrefly_virtual__/**": true,
+    "c:/__pyrefly_virtual__/**": true
+  },
+  "files.exclude": {
+    "**/__pyrefly_virtual__/**": true,
+    "C:/__pyrefly_virtual__/**": true,
+    "c:/__pyrefly_virtual__/**": true
   }
 }
