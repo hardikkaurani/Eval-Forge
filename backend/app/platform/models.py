@@ -92,7 +92,9 @@ class PluginDescriptor(Base):
     __tablename__ = "plugin_descriptors"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    workspace_id = Column(String(36), nullable=True, index=True)  # Nullable for system/global plugins
+    workspace_id = Column(
+        String(36), nullable=True, index=True
+    )  # Nullable for system/global plugins
     is_global = Column(Boolean, default=False, nullable=False)
     name = Column(String(128), nullable=False)
     identifier = Column(

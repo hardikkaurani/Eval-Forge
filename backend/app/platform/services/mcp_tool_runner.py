@@ -48,7 +48,10 @@ class MCPToolRunner:
                 input_schema={
                     "type": "object",
                     "properties": {
-                        "run_id": {"type": "string", "description": "Evaluation run UUID"},
+                        "run_id": {
+                            "type": "string",
+                            "description": "Evaluation run UUID",
+                        },
                     },
                     "required": ["run_id"],
                 },
@@ -59,7 +62,10 @@ class MCPToolRunner:
                 input_schema={
                     "type": "object",
                     "properties": {
-                        "run_id": {"type": "string", "description": "Evaluation run UUID"},
+                        "run_id": {
+                            "type": "string",
+                            "description": "Evaluation run UUID",
+                        },
                         "limit": {"type": "integer", "default": 50},
                     },
                     "required": ["run_id"],
@@ -94,7 +100,11 @@ class MCPToolRunner:
                             "data": {
                                 "total": count,
                                 "projects": [
-                                    {"id": str(p.id), "name": p.name, "description": p.description}
+                                    {
+                                        "id": str(p.id),
+                                        "name": p.name,
+                                        "description": p.description,
+                                    }
                                     for p in projects
                                 ],
                             },
@@ -109,11 +119,18 @@ class MCPToolRunner:
                     raise ValueError("project_id argument is required.")
 
                 project_repo = ProjectRepository(db)
-                project = await project_repo.get_by_id(str(project_id), workspace_id=workspace_id)
+                project = await project_repo.get_by_id(
+                    str(project_id), workspace_id=workspace_id
+                )
 
                 if not project:
                     return {
-                        "content": [{"type": "text", "text": f"Project '{project_id}' not found."}],
+                        "content": [
+                            {
+                                "type": "text",
+                                "text": f"Project '{project_id}' not found.",
+                            }
+                        ],
                         "is_error": True,
                     }
 
@@ -130,7 +147,11 @@ class MCPToolRunner:
                             "data": {
                                 "total": count,
                                 "datasets": [
-                                    {"id": str(d.id), "name": d.name, "description": d.description}
+                                    {
+                                        "id": str(d.id),
+                                        "name": d.name,
+                                        "description": d.description,
+                                    }
                                     for d in datasets
                                 ],
                             },
@@ -147,7 +168,12 @@ class MCPToolRunner:
                 run = await EvaluationRepository.get_run(db, str(run_id))
                 if not run:
                     return {
-                        "content": [{"type": "text", "text": f"Evaluation run '{run_id}' not found."}],
+                        "content": [
+                            {
+                                "type": "text",
+                                "text": f"Evaluation run '{run_id}' not found.",
+                            }
+                        ],
                         "is_error": True,
                     }
 
@@ -156,7 +182,12 @@ class MCPToolRunner:
                 )
                 if not evaluation:
                     return {
-                        "content": [{"type": "text", "text": f"Evaluation run '{run_id}' not found."}],
+                        "content": [
+                            {
+                                "type": "text",
+                                "text": f"Evaluation run '{run_id}' not found.",
+                            }
+                        ],
                         "is_error": True,
                     }
 
@@ -185,7 +216,12 @@ class MCPToolRunner:
                 run = await EvaluationRepository.get_run(db, str(run_id))
                 if not run:
                     return {
-                        "content": [{"type": "text", "text": f"Evaluation run '{run_id}' not found."}],
+                        "content": [
+                            {
+                                "type": "text",
+                                "text": f"Evaluation run '{run_id}' not found.",
+                            }
+                        ],
                         "is_error": True,
                     }
 
@@ -194,7 +230,12 @@ class MCPToolRunner:
                 )
                 if not evaluation:
                     return {
-                        "content": [{"type": "text", "text": f"Evaluation run '{run_id}' not found."}],
+                        "content": [
+                            {
+                                "type": "text",
+                                "text": f"Evaluation run '{run_id}' not found.",
+                            }
+                        ],
                         "is_error": True,
                     }
 
@@ -233,7 +274,9 @@ class MCPToolRunner:
         except Exception as e:
             logger.exception("MCP tool execution failed", tool=name, error=str(e))
             return {
-                "content": [{"type": "text", "text": f"Tool execution failed: {str(e)}"}],
+                "content": [
+                    {"type": "text", "text": f"Tool execution failed: {str(e)}"}
+                ],
                 "is_error": True,
             }
 

@@ -25,22 +25,24 @@ from app.platform.models import (
 logger = structlog.get_logger()
 
 PROHIBITED_IP_NETWORKS = [
-    ipaddress.ip_network("127.0.0.0/8"),      # Loopback
-    ipaddress.ip_network("0.0.0.0/8"),        # Current network
-    ipaddress.ip_network("10.0.0.0/8"),       # RFC 1918 Private
-    ipaddress.ip_network("172.16.0.0/12"),    # RFC 1918 Private
-    ipaddress.ip_network("192.168.0.0/16"),   # RFC 1918 Private
-    ipaddress.ip_network("169.254.0.0/16"),   # Link-local / Cloud Metadata
-    ipaddress.ip_network("100.64.0.0/10"),    # Carrier-grade NAT
-    ipaddress.ip_network("198.18.0.0/15"),    # Benchmark testing
-    ipaddress.ip_network("::1/128"),          # IPv6 Loopback
-    ipaddress.ip_network("fe80::/10"),        # IPv6 Link-local
-    ipaddress.ip_network("fc00::/7"),         # IPv6 Unique-local private
-    ipaddress.ip_network("::/128"),           # IPv6 Unspecified
+    ipaddress.ip_network("127.0.0.0/8"),  # Loopback
+    ipaddress.ip_network("0.0.0.0/8"),  # Current network
+    ipaddress.ip_network("10.0.0.0/8"),  # RFC 1918 Private
+    ipaddress.ip_network("172.16.0.0/12"),  # RFC 1918 Private
+    ipaddress.ip_network("192.168.0.0/16"),  # RFC 1918 Private
+    ipaddress.ip_network("169.254.0.0/16"),  # Link-local / Cloud Metadata
+    ipaddress.ip_network("100.64.0.0/10"),  # Carrier-grade NAT
+    ipaddress.ip_network("198.18.0.0/15"),  # Benchmark testing
+    ipaddress.ip_network("::1/128"),  # IPv6 Loopback
+    ipaddress.ip_network("fe80::/10"),  # IPv6 Link-local
+    ipaddress.ip_network("fc00::/7"),  # IPv6 Unique-local private
+    ipaddress.ip_network("::/128"),  # IPv6 Unspecified
 ]
 
 
-def validate_webhook_destination(url: str, allow_http: bool = False) -> tuple[bool, str]:
+def validate_webhook_destination(
+    url: str, allow_http: bool = False
+) -> tuple[bool, str]:
     """Validates destination webhook URL against SSRF, private CIDRs, and prohibited schemes."""
     if not url or not isinstance(url, str):
         return False, "Target URL is missing or invalid."
@@ -57,7 +59,10 @@ def validate_webhook_destination(url: str, allow_http: bool = False) -> tuple[bo
         if not allow_http and settings.APP_ENV == "production":
             return False, "HTTP scheme is prohibited in production; HTTPS is required."
     else:
-        return False, f"Unsupported URL scheme '{scheme}'. Only HTTPS/HTTP are permitted."
+        return (
+            False,
+            f"Unsupported URL scheme '{scheme}'. Only HTTPS/HTTP are permitted.",
+        )
 
     if parsed.username or parsed.password:
         return False, "Embedding credentials in webhook URL is prohibited."
@@ -67,7 +72,12 @@ def validate_webhook_destination(url: str, allow_http: bool = False) -> tuple[bo
         return False, "Missing hostname in target URL."
 
     # Check for direct localhost hostname
-    if hostname.lower() in ("localhost", "127.0.0.1", "::1", "metadata.google.internal"):
+    if hostname.lower() in (
+        "localhost",
+        "127.0.0.1",
+        "::1",
+        "metadata.google.internal",
+    ):
         return False, "Prohibited loopback or metadata hostname."
 
     # Resolve IP addresses for hostname
@@ -96,11 +106,17 @@ def validate_webhook_destination(url: str, allow_http: bool = False) -> tuple[bo
                 or ip_obj.is_reserved
                 or ip_obj.is_unspecified
             ):
-                return False, f"Resolved IP '{ip_str}' belongs to a private, loopback, or reserved network."
+                return (
+                    False,
+                    f"Resolved IP '{ip_str}' belongs to a private, loopback, or reserved network.",
+                )
 
             for net in PROHIBITED_IP_NETWORKS:
                 if ip_obj in net:
-                    return False, f"Resolved IP '{ip_str}' is within prohibited CIDR {net}."
+                    return (
+                        False,
+                        f"Resolved IP '{ip_str}' is within prohibited CIDR {net}.",
+                    )
         except ValueError:
             return False, f"Invalid IP address representation: '{ip_str}'."
 
@@ -128,7 +144,11 @@ def verify_webhook_signature(
     tolerance_seconds: int = 300,
 ) -> bool:
     """Verifies HMAC-SHA256 signature header and validates that the timestamp is within tolerance."""
-    if not signature_header or "t=" not in signature_header or "v1=" not in signature_header:
+    if (
+        not signature_header
+        or "t=" not in signature_header
+        or "v1=" not in signature_header
+    ):
         return False
 
     try:
@@ -138,7 +158,10 @@ def verify_webhook_signature(
 
         current_time = int(time.time())
         if abs(current_time - timestamp) > tolerance_seconds:
-            logger.warning("Webhook signature timestamp expired or out of tolerance", diff=abs(current_time - timestamp))
+            logger.warning(
+                "Webhook signature timestamp expired or out of tolerance",
+                diff=abs(current_time - timestamp),
+            )
             return False
 
         expected_sig = generate_webhook_signature(payload_str, secret, timestamp)
@@ -204,7 +227,9 @@ class WebhookOutboxService:
 
         deliveries: List[WebhookDelivery] = []
         for sub in matching_subs:
-            delivery = await self._deliver_to_subscription(db, sub, event.event_type, event.payload)
+            delivery = await self._deliver_to_subscription(
+                db, sub, event.event_type, event.payload
+            )
             deliveries.append(delivery)
 
         event.status = "PROCESSED"
@@ -232,7 +257,9 @@ class WebhookOutboxService:
             "data": payload,
         }
         payload_str = json.dumps(payload_body, sort_keys=True)
-        signature = generate_webhook_signature(payload_str, str(subscription.secret_token))
+        signature = generate_webhook_signature(
+            payload_str, str(subscription.secret_token)
+        )
 
         headers = {
             "Content-Type": "application/json",
@@ -259,7 +286,9 @@ class WebhookOutboxService:
             for attempt in range(self.max_retries):
                 attempt_count += 1
                 try:
-                    async with httpx.AsyncClient(timeout=self.timeout_seconds) as client:
+                    async with httpx.AsyncClient(
+                        timeout=self.timeout_seconds
+                    ) as client:
                         response = await client.post(
                             target_url,
                             content=payload_str,

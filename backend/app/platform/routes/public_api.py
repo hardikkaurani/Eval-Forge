@@ -11,7 +11,9 @@ from app.platform.models import DeveloperProfile
 from app.platform.schemas import DeveloperProfileCreate, DeveloperProfileResponse
 from app.utils.responses import ApiResponse, create_response
 
-router = APIRouter(prefix="/platform", tags=["Developer Platform - Public Specification & Keys"])
+router = APIRouter(
+    prefix="/platform", tags=["Developer Platform - Public Specification & Keys"]
+)
 
 
 @router.get("/spec")
@@ -26,14 +28,16 @@ async def list_public_routes(request: Request):
     catalog = []
     openapi_spec = request.app.openapi()
     for path, methods in openapi_spec.get("paths", {}).items():
-        catalog.append({
-            "path": path,
-            "methods": [m.upper() for m in methods.keys()],
-            "summary": (
-                methods.get("get", {}).get("summary")
-                or methods.get("post", {}).get("summary", "")
-            ),
-        })
+        catalog.append(
+            {
+                "path": path,
+                "methods": [m.upper() for m in methods.keys()],
+                "summary": (
+                    methods.get("get", {}).get("summary")
+                    or methods.get("post", {}).get("summary", "")
+                ),
+            }
+        )
     return create_response(True, "Route catalog retrieved.", catalog)
 
 

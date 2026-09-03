@@ -25,7 +25,9 @@ def upgrade() -> None:
         sa.Column("project_id", sa.String(length=36), nullable=False),
         sa.Column("event_type", sa.String(length=100), nullable=False),
         sa.Column("payload", sa.JSON(), nullable=False),
-        sa.Column("status", sa.String(length=32), nullable=False, server_default="PENDING"),
+        sa.Column(
+            "status", sa.String(length=32), nullable=False, server_default="PENDING"
+        ),
         sa.Column("retry_count", sa.Integer(), nullable=False, server_default="0"),
         sa.Column("max_retries", sa.Integer(), nullable=False, server_default="3"),
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),

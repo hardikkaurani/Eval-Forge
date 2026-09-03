@@ -36,7 +36,9 @@ async def register_plugin(
         )
         return create_response(True, "Plugin registered successfully.", plugin)
     except ValueError as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)) from e
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
+        ) from e
 
 
 @router.get("", response_model=ApiResponse[List[PluginDescriptorResponse]])
@@ -66,4 +68,6 @@ async def execute_plugin(
         )
         return create_response(True, "Plugin executed successfully.", res)
     except ValueError as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)) from e
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
+        ) from e

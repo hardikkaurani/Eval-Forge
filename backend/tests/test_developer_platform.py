@@ -121,7 +121,9 @@ def test_db_plugin_registry_and_capability_execution(client: TestClient):
     assert dup_res.status_code == 400
 
     # 3. Invalid capability rejected
-    bad_payload = dict(payload, identifier="com.evalforge.bad", capabilities=["unrestricted:exec"])
+    bad_payload = dict(
+        payload, identifier="com.evalforge.bad", capabilities=["unrestricted:exec"]
+    )
     bad_res = client.post("/api/v1/plugins", json=bad_payload)
     assert bad_res.status_code == 400
 
@@ -133,7 +135,10 @@ def test_db_plugin_registry_and_capability_execution(client: TestClient):
     # 5. Execute real metric scoring
     exec_response = client.post(
         f"/api/v1/plugins/{identifier}/execute",
-        json={"output": "The quick brown fox", "reference": "The quick brown fox jumps"},
+        json={
+            "output": "The quick brown fox",
+            "reference": "The quick brown fox jumps",
+        },
     )
     assert exec_response.status_code == 200
     exec_data = exec_response.json()
@@ -225,6 +230,7 @@ def test_cli_parser_actions(capsys):
 
 def test_webhooks_tenant_isolation(db_session) -> None:
     """Verifies that webhook subscription creation, listing, and delivery logs enforce strict workspace isolation."""
+
     async def override_get_db():
         yield db_session
 
@@ -272,8 +278,14 @@ def test_webhooks_tenant_isolation(db_session) -> None:
         app.dependency_overrides[get_current_api_key] = lambda: key_tenant_b
         app.dependency_overrides[get_optional_api_key] = lambda: key_tenant_b
         with TestClient(app) as client_b:
-            assert client_b.get(f"/api/v1/webhooks?project_id={proj_a_id}").status_code == 404
-            assert client_b.get(f"/api/v1/webhooks/{sub_a_id}/deliveries").status_code == 404
+            assert (
+                client_b.get(f"/api/v1/webhooks?project_id={proj_a_id}").status_code
+                == 404
+            )
+            assert (
+                client_b.get(f"/api/v1/webhooks/{sub_a_id}/deliveries").status_code
+                == 404
+            )
             create_cross = client_b.post(
                 "/api/v1/webhooks",
                 json={
@@ -290,6 +302,7 @@ def test_webhooks_tenant_isolation(db_session) -> None:
 @pytest.mark.asyncio
 async def test_mcp_adversarial_tenant_isolation(db_session) -> None:
     """Verifies that MCP tools strictly enforce workspace isolation and reject cross-tenant IDOR access."""
+
     async def override_get_db():
         yield db_session
 
@@ -311,7 +324,9 @@ async def test_mcp_adversarial_tenant_isolation(db_session) -> None:
         app.dependency_overrides[get_current_api_key] = lambda: key_tenant_a
         app.dependency_overrides[get_optional_api_key] = lambda: key_tenant_a
         with TestClient(app) as client_a:
-            res_proj_a = client_a.post("/api/v1/projects", json={"name": "MCP Project A"})
+            res_proj_a = client_a.post(
+                "/api/v1/projects", json={"name": "MCP Project A"}
+            )
             assert res_proj_a.status_code == 201
             proj_a_id = res_proj_a.json()["data"]["id"]
 
@@ -342,7 +357,10 @@ async def test_mcp_adversarial_tenant_isolation(db_session) -> None:
             # Tenant A positive MCP tool checks
             mcp_res = client_a.post(
                 "/api/v1/mcp/tools/call",
-                json={"name": "get_evaluation_status", "arguments": {"run_id": run_a_id}},
+                json={
+                    "name": "get_evaluation_status",
+                    "arguments": {"run_id": run_a_id},
+                },
             )
             assert mcp_res.status_code == 200
             assert mcp_res.json()["is_error"] is False
@@ -362,7 +380,10 @@ async def test_mcp_adversarial_tenant_isolation(db_session) -> None:
             # Get status for Run A -> is_error: True (Not found)
             call_status = client_b.post(
                 "/api/v1/mcp/tools/call",
-                json={"name": "get_evaluation_status", "arguments": {"run_id": run_a_id}},
+                json={
+                    "name": "get_evaluation_status",
+                    "arguments": {"run_id": run_a_id},
+                },
             ).json()
             assert call_status["is_error"] is True
             assert "not found" in call_status["content"][0]["text"].lower()
@@ -370,7 +391,10 @@ async def test_mcp_adversarial_tenant_isolation(db_session) -> None:
             # Get results for Run A -> is_error: True (Not found)
             call_results = client_b.post(
                 "/api/v1/mcp/tools/call",
-                json={"name": "get_evaluation_results", "arguments": {"run_id": run_a_id}},
+                json={
+                    "name": "get_evaluation_results",
+                    "arguments": {"run_id": run_a_id},
+                },
             ).json()
             assert call_results["is_error"] is True
             assert "not found" in call_results["content"][0]["text"].lower()
@@ -383,21 +407,29 @@ def test_webhook_dispatcher_ssrf_blocking():
     # Blocked URLs
     assert validate_webhook_destination("http://127.0.0.1:8000")[0] is False
     assert validate_webhook_destination("http://localhost:5000")[0] is False
-    assert validate_webhook_destination("http://169.254.169.254/latest/meta-data")[0] is False
+    assert (
+        validate_webhook_destination("http://169.254.169.254/latest/meta-data")[0]
+        is False
+    )
     assert validate_webhook_destination("http://10.0.0.1/webhook")[0] is False
     assert validate_webhook_destination("http://192.168.1.1/hook")[0] is False
     assert validate_webhook_destination("http://172.16.0.1/hook")[0] is False
-    assert validate_webhook_destination("https://user:pass@example.com/hook")[0] is False
+    assert (
+        validate_webhook_destination("https://user:pass@example.com/hook")[0] is False
+    )
     assert validate_webhook_destination("ftp://example.com/hook")[0] is False
     assert validate_webhook_destination("http://[::1]:8080/hook")[0] is False
 
     # Permitted Public URLs
-    is_safe, _ = validate_webhook_destination("https://httpbin.org/post", allow_http=True)
+    is_safe, _ = validate_webhook_destination(
+        "https://httpbin.org/post", allow_http=True
+    )
     assert is_safe is True
 
 
 def test_plugin_workspace_scoping(db_session) -> None:
     """Verifies that custom plugin descriptors are scoped to tenant workspace."""
+
     async def override_get_db():
         yield db_session
 
@@ -450,4 +482,3 @@ def test_plugin_workspace_scoping(db_session) -> None:
             assert exec_cross.status_code == 400
     finally:
         app.dependency_overrides.clear()
-

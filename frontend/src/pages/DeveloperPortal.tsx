@@ -1,14 +1,5 @@
 import { useState } from 'react';
-import {
-  Code2,
-  Cpu,
-  Globe,
-  Layers,
-  Play,
-  Plug,
-  Terminal,
-  Webhook,
-} from 'lucide-react';
+import { Code2, Cpu, Globe, Layers, Play, Plug, Terminal, Webhook } from 'lucide-react';
 import { Card } from '../components/common/Card';
 import { CodeBlock } from '../components/common/CodeBlock';
 
@@ -42,8 +33,8 @@ export default function DeveloperPortal() {
             },
           },
           null,
-          2,
-        ),
+          2
+        )
       );
       setLoadingPlayground(false);
     }, 400);
@@ -172,7 +163,8 @@ evalforge evaluations run --project-id <PROJECT_UUID> --config ./eval_config.jso
             Developer Platform & Ecosystem
           </h1>
           <p className="text-xs text-workbench-muted mt-1">
-            Build, test, and integrate automated AI evaluations using official SDKs, CLI, MCP tools, and Webhooks.
+            Build, test, and integrate automated AI evaluations using official SDKs, CLI, MCP tools,
+            and Webhooks.
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -274,13 +266,25 @@ evalforge evaluations run --project-id <PROJECT_UUID> --config ./eval_config.jso
 
           <Card padding="none">
             {sdkLang === 'python' && (
-              <CodeBlock title="Python SDK (pip install evalforge)" code={pythonSnippet} language="python" />
+              <CodeBlock
+                title="Python SDK (pip install evalforge)"
+                code={pythonSnippet}
+                language="python"
+              />
             )}
             {sdkLang === 'typescript' && (
-              <CodeBlock title="TypeScript SDK (npm i @evalforge/sdk)" code={tsSnippet} language="typescript" />
+              <CodeBlock
+                title="TypeScript SDK (npm i @evalforge/sdk)"
+                code={tsSnippet}
+                language="typescript"
+              />
             )}
             {sdkLang === 'go' && (
-              <CodeBlock title="Go SDK (go get github.com/evalforge/evalforge-go)" code={goSnippet} language="go" />
+              <CodeBlock
+                title="Go SDK (go get github.com/evalforge/evalforge-go)"
+                code={goSnippet}
+                language="go"
+              />
             )}
             {sdkLang === 'java' && (
               <CodeBlock title="Java SDK (Maven pom.xml)" code={javaSnippet} language="java" />
@@ -298,7 +302,8 @@ evalforge evaluations run --project-id <PROJECT_UUID> --config ./eval_config.jso
               Eval-Forge Command Line Interface
             </h3>
             <p className="text-xs text-workbench-muted mb-4">
-              Use the official <code className="text-brand-terracotta">evalforge</code> CLI in CI/CD pipelines (GitHub Actions, GitLab CI) to gate PRs on evaluation regression tests.
+              Use the official <code className="text-brand-terracotta">evalforge</code> CLI in CI/CD
+              pipelines (GitHub Actions, GitLab CI) to gate PRs on evaluation regression tests.
             </p>
             <CodeBlock title="Terminal Quickstart" code={cliSnippet} language="bash" />
           </Card>
@@ -334,7 +339,9 @@ evalforge evaluations run --project-id <PROJECT_UUID> --config ./eval_config.jso
 
               {httpMethod === 'POST' && (
                 <div>
-                  <label className="block text-xs font-mono text-workbench-muted mb-1">JSON Payload</label>
+                  <label className="block text-xs font-mono text-workbench-muted mb-1">
+                    JSON Payload
+                  </label>
                   <textarea
                     rows={4}
                     value={reqPayload}
@@ -378,7 +385,8 @@ evalforge evaluations run --project-id <PROJECT_UUID> --config ./eval_config.jso
               Webhook Outbox & HMAC-SHA256 Signatures
             </h3>
             <p className="text-xs text-workbench-muted mb-4">
-              All webhooks are signed using HMAC-SHA256 in the <code className="text-brand-terracotta">X-EvalForge-Signature</code> header:
+              All webhooks are signed using HMAC-SHA256 in the{' '}
+              <code className="text-brand-terracotta">X-EvalForge-Signature</code> header:
               <code className="block bg-workbench-background p-2 rounded mt-2 border border-workbench-border">
                 X-EvalForge-Signature: t=1712000000,v1=9f83...
               </code>
@@ -396,9 +404,14 @@ evalforge evaluations run --project-id <PROJECT_UUID> --config ./eval_config.jso
               Model Context Protocol (MCP) Integration
             </h3>
             <p className="text-xs text-workbench-muted mb-4">
-              Connect Claude Desktop, Cursor, or your AI agents directly to Eval-Forge via standardized MCP tool calls.
+              Connect Claude Desktop, Cursor, or your AI agents directly to Eval-Forge via
+              standardized MCP tool calls.
             </p>
-            <CodeBlock title="Claude Desktop / Agent Configuration" code={mcpConfigSnippet} language="json" />
+            <CodeBlock
+              title="Claude Desktop / Agent Configuration"
+              code={mcpConfigSnippet}
+              language="json"
+            />
           </Card>
         </div>
       )}
@@ -413,7 +426,9 @@ evalforge evaluations run --project-id <PROJECT_UUID> --config ./eval_config.jso
             </h3>
             <p className="text-xs text-workbench-muted">
               Register custom scoring algorithms and sinks adhering strictly to capabilities:
-              <code className="text-brand-terracotta font-mono ml-1">metric:compute</code>, <code className="text-brand-terracotta font-mono">dataset:filter</code>, <code className="text-brand-terracotta font-mono">export:sink</code>.
+              <code className="text-brand-terracotta font-mono ml-1">metric:compute</code>,{' '}
+              <code className="text-brand-terracotta font-mono">dataset:filter</code>,{' '}
+              <code className="text-brand-terracotta font-mono">export:sink</code>.
             </p>
           </Card>
         </div>

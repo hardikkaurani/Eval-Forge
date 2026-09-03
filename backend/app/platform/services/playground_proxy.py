@@ -22,7 +22,9 @@ def validate_playground_target(endpoint: str) -> str:
     endpoint = endpoint.strip()
     parsed = urlparse(endpoint)
     if parsed.scheme or parsed.netloc:
-        raise ValueError("Arbitrary external URLs and schemes are not permitted in the playground.")
+        raise ValueError(
+            "Arbitrary external URLs and schemes are not permitted in the playground."
+        )
 
     if not endpoint.startswith("/"):
         endpoint = f"/{endpoint}"
@@ -65,7 +67,9 @@ class PlaygroundProxyService:
             if method == "GET":
                 response = client.get(clean_endpoint, headers=req_headers)
             elif method == "POST":
-                response = client.post(clean_endpoint, json=payload, headers=req_headers)
+                response = client.post(
+                    clean_endpoint, json=payload, headers=req_headers
+                )
             elif method == "PUT":
                 response = client.put(clean_endpoint, json=payload, headers=req_headers)
             elif method == "DELETE":

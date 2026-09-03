@@ -6,7 +6,11 @@ from unittest.mock import AsyncMock, patch
 
 # Ensure root, cli, and sdk/python are in sys.path
 ROOT_DIR = Path(__file__).resolve().parents[2]
-for path_entry in [str(ROOT_DIR), str(ROOT_DIR / "cli"), str(ROOT_DIR / "sdk" / "python")]:
+for path_entry in [
+    str(ROOT_DIR),
+    str(ROOT_DIR / "cli"),
+    str(ROOT_DIR / "sdk" / "python"),
+]:
     if path_entry not in sys.path:
         sys.path.insert(0, path_entry)
 

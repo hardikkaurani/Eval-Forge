@@ -27,7 +27,9 @@ class PluginRegistryService:
     def validate_manifest(self, manifest: Dict[str, Any]) -> None:
         """Validates plugin manifest identifier, version, and declared capabilities."""
         identifier = manifest.get("identifier", "")
-        if not identifier or not re.match(r"^[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$", identifier):
+        if not identifier or not re.match(
+            r"^[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$", identifier
+        ):
             raise ValueError(
                 f"Invalid plugin identifier '{identifier}'. Must follow reverse-DNS notation (e.g. 'com.evalforge.bleu-metric')."
             )
@@ -62,15 +64,19 @@ class PluginRegistryService:
         is_global: bool = False,
     ) -> PluginDescriptor:
         """Registers a new plugin in the PostgreSQL registry after validation with workspace scoping."""
-        self.validate_manifest({
-            "name": name,
-            "identifier": identifier,
-            "version": version,
-            "capabilities": capabilities,
-        })
+        self.validate_manifest(
+            {
+                "name": name,
+                "identifier": identifier,
+                "version": version,
+                "capabilities": capabilities,
+            }
+        )
 
         ws_str = str(workspace_id) if workspace_id else None
-        query = select(PluginDescriptor).where(PluginDescriptor.identifier == identifier)
+        query = select(PluginDescriptor).where(
+            PluginDescriptor.identifier == identifier
+        )
         if ws_str:
             query = query.where(PluginDescriptor.workspace_id == ws_str)
         else:
@@ -81,7 +87,9 @@ class PluginRegistryService:
 
         existing_res = await db.execute(query)
         if existing_res.scalar_one_or_none():
-            raise ValueError(f"Plugin with identifier '{identifier}' already registered in this scope.")
+            raise ValueError(
+                f"Plugin with identifier '{identifier}' already registered in this scope."
+            )
 
         plugin = PluginDescriptor(
             id=uuid.uuid4(),
@@ -140,7 +148,9 @@ class PluginRegistryService:
         is_enabled: bool,
         workspace_id: Optional[str] = None,
     ) -> PluginDescriptor:
-        query = select(PluginDescriptor).where(PluginDescriptor.identifier == identifier)
+        query = select(PluginDescriptor).where(
+            PluginDescriptor.identifier == identifier
+        )
         if workspace_id:
             query = query.where(PluginDescriptor.workspace_id == str(workspace_id))
         res = await db.execute(query)
@@ -194,9 +204,13 @@ class PluginRegistryService:
         elif "export:sink" in capabilities:
             return self._execute_export_sink(plugin, payload)
         else:
-            raise ValueError(f"No executable capability found for plugin '{identifier}'.")
+            raise ValueError(
+                f"No executable capability found for plugin '{identifier}'."
+            )
 
-    def _execute_metric_compute(self, plugin: PluginDescriptor, payload: Dict[str, Any]) -> Dict[str, Any]:
+    def _execute_metric_compute(
+        self, plugin: PluginDescriptor, payload: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """Computes real text/token metrics (BLEU n-gram overlap, exact match, length ratio)."""
         candidate = str(payload.get("output", "")).strip().lower()
         reference = str(payload.get("reference", "")).strip().lower()
@@ -218,7 +232,11 @@ class PluginRegistryService:
         overlap = set(cand_tokens).intersection(set(ref_tokens))
         precision = len(overlap) / max(len(cand_tokens), 1)
         recall = len(overlap) / max(len(ref_tokens), 1)
-        f1_score = (2 * precision * recall / (precision + recall)) if (precision + recall) > 0 else 0.0
+        f1_score = (
+            (2 * precision * recall / (precision + recall))
+            if (precision + recall) > 0
+            else 0.0
+        )
 
         # 3. Length Ratio
         length_ratio = min(len(cand_tokens) / max(len(ref_tokens), 1), 1.0)
@@ -238,7 +256,9 @@ class PluginRegistryService:
             "reasoning": f"Evaluated with plugin '{plugin.name}' (F1 overlap: {f1_score:.2f}, Exact: {exact_match}).",
         }
 
-    def _execute_dataset_filter(self, plugin: PluginDescriptor, payload: Dict[str, Any]) -> Dict[str, Any]:
+    def _execute_dataset_filter(
+        self, plugin: PluginDescriptor, payload: Dict[str, Any]
+    ) -> Dict[str, Any]:
         records = payload.get("records", [])
         min_length = int(plugin.settings.get("min_length", 5)) if plugin.settings else 5
         filtered = [
@@ -251,7 +271,9 @@ class PluginRegistryService:
             "records": filtered,
         }
 
-    def _execute_export_sink(self, plugin: PluginDescriptor, payload: Dict[str, Any]) -> Dict[str, Any]:
+    def _execute_export_sink(
+        self, plugin: PluginDescriptor, payload: Dict[str, Any]
+    ) -> Dict[str, Any]:
         return {
             "plugin": plugin.identifier,
             "sink_status": "ACCEPTED",
