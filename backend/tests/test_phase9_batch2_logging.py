@@ -1,4 +1,4 @@
-# trunk-ignore-all(trufflehog,gitleaks,secrets): Synthetic unit test file validating secret redaction
+# trunk-ignore-all(trufflehog): Synthetic unit test file validating secret redaction
 import asyncio
 
 import pytest
@@ -16,7 +16,6 @@ from app.jobs.queue.celery_app import (
 )
 
 
-# trunk-ignore(trufflehog,gitleaks): Synthetic test fixture for redaction unit test
 def test_redact_sensitive_data() -> None:
     """Verify recursive redaction of sensitive keys and tokens."""
     bearer_token = "Bearer " + "secret_token_xyz"
@@ -116,7 +115,6 @@ async def test_concurrent_request_context_isolation() -> None:
     await asyncio.gather(task_a(), task_b())
 
 
-# trunk-ignore(trufflehog,gitleaks): Synthetic test fixture for celery correlation test
 @pytest.mark.asyncio
 async def test_celery_task_correlation_and_cleanup() -> None:
     """Verify Celery task correlation propagation and signal cleanup."""
@@ -148,7 +146,6 @@ async def test_celery_task_correlation_and_cleanup() -> None:
     assert len(ctx_after) == 0
 
 
-# trunk-ignore(trufflehog,gitleaks): Synthetic test fixture for DSN and Bearer token redaction test
 def test_finding_b2_01_dsn_and_bearer_redaction() -> None:
     """Verify DSN passwords, Bearer tokens, tuples, exception strings, and false-positive resistance."""
     # A. Sensitive keys
@@ -248,7 +245,6 @@ def test_finding_b2_01_dsn_and_bearer_redaction() -> None:
     assert redacted_fp["word4"] == "bearer status active"
 
 
-# trunk-ignore(trufflehog,gitleaks): Synthetic test fixture for log output pipeline test
 def test_finding_b2_01_log_output_pipeline() -> None:
     """Verify end-to-end structlog processor pipeline serialization without secret leakage."""
     from app.core.logging import setup_logging
