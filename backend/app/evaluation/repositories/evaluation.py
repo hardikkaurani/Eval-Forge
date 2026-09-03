@@ -231,3 +231,16 @@ class EvaluationRepository:
         db.add(metadata)
         await db.flush()
         return metadata
+
+    @staticmethod
+    async def list_results(
+        db: AsyncSession, run_id: str, limit: int = 50
+    ) -> tuple[List[EvaluationResult], int]:
+        stmt = (
+            select(EvaluationResult)
+            .where(EvaluationResult.run_id == run_id)
+            .limit(limit)
+        )
+        result = await db.execute(stmt)
+        items = list(result.scalars().all())
+        return items, len(items)

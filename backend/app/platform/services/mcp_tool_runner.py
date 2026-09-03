@@ -253,9 +253,10 @@ class MCPToolRunner:
                                         "id": str(r.id),
                                         "input_prompt": r.input_prompt,
                                         "model_output": r.model_output,
-                                        "metrics": r.metrics,
+                                        "score": r.score,
                                         "passed": r.passed,
-                                        "latency_ms": r.latency_ms,
+                                        "reasoning": r.reasoning,
+                                        "status": r.status,
                                     }
                                     for r in results
                                 ],
