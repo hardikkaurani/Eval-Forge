@@ -74,12 +74,17 @@ class PDFReportGenerator(FPDF):
         self.cell(
             0,
             5,
-            f"EVALFORGE ENTERPRISE REPORT  |  PROJECT: {self.project_name.upper()}",
-            0,
-            0,
-            "L",
+            text=f"EVALFORGE ENTERPRISE REPORT  |  PROJECT: {self.project_name.upper()}",
+            align="L",
         )
-        self.cell(0, 5, datetime.utcnow().strftime("%Y-%m-%d UTC"), 0, 1, "R")
+        self.cell(
+            0,
+            5,
+            text=datetime.utcnow().strftime("%Y-%m-%d UTC"),
+            align="R",
+            new_x="LMARGIN",
+            new_y="NEXT",
+        )
         self.ln(5)
 
     def footer(self):
@@ -89,7 +94,7 @@ class PDFReportGenerator(FPDF):
 
         self.set_font("Helvetica", "I", 8)
         self.set_text_color(156, 163, 175)
-        self.cell(0, 10, f"Page {self.page_no()}", 0, 0, "C")
+        self.cell(0, 10, text=f"Page {self.page_no()}", align="C")
 
     def build_cover_page(self, subtitle: str, summary_text: str):
         self.add_page()
@@ -102,24 +107,24 @@ class PDFReportGenerator(FPDF):
         self.set_xy(28, 60)
         self.set_font("Helvetica", "B", 32)
         self.set_text_color(31, 41, 55)
-        self.cell(0, 15, "EvalForge", 0, 1)
+        self.cell(0, 15, text="EvalForge", new_x="LMARGIN", new_y="NEXT")
 
         self.set_x(28)
         self.set_font("Helvetica", "", 18)
         self.set_text_color(75, 85, 99)
-        self.cell(0, 10, self.title_text, 0, 1)
+        self.cell(0, 10, text=self.title_text, new_x="LMARGIN", new_y="NEXT")
 
         self.ln(10)
         self.set_x(15)
         self.set_font("Helvetica", "I", 12)
         self.set_text_color(107, 114, 128)
-        self.cell(0, 10, subtitle, 0, 1)
+        self.cell(0, 10, text=subtitle, new_x="LMARGIN", new_y="NEXT")
 
         self.ln(25)
         self.set_x(15)
         self.set_font("Helvetica", "B", 14)
         self.set_text_color(31, 41, 55)
-        self.cell(0, 8, "Report Overview", 0, 1)
+        self.cell(0, 8, text="Report Overview", new_x="LMARGIN", new_y="NEXT")
 
         self.set_x(15)
         self.set_font("Helvetica", "", 10)
@@ -131,19 +136,25 @@ class PDFReportGenerator(FPDF):
         self.set_x(15)
         self.set_font("Helvetica", "B", 9)
         self.set_text_color(79, 70, 229)
-        self.cell(0, 5, "CONFIDENTIAL & PROPRIETARY", 0, 1)
+        self.cell(
+            0, 5, text="CONFIDENTIAL & PROPRIETARY", new_x="LMARGIN", new_y="NEXT"
+        )
         self.set_x(15)
         self.set_font("Helvetica", "", 8)
         self.set_text_color(156, 163, 175)
         self.cell(
-            0, 5, "Generated automatically by the EvalForge Enterprise Engine.", 0, 1
+            0,
+            5,
+            text="Generated automatically by the EvalForge Enterprise Engine.",
+            new_x="LMARGIN",
+            new_y="NEXT",
         )
 
     def write_section_header(self, title: str):
         self.ln(8)
         self.set_font("Helvetica", "B", 16)
         self.set_text_color(31, 41, 55)
-        self.cell(0, 10, title, 0, 1)
+        self.cell(0, 10, text=title, new_x="LMARGIN", new_y="NEXT")
 
         # underline
         self.set_fill_color(79, 70, 229)
@@ -171,13 +182,27 @@ class PDFReportGenerator(FPDF):
             self.set_xy(x + 2, y + 2)
             self.set_font("Helvetica", "B", 12)
             self.set_text_color(79, 70, 229)
-            self.cell(col_width - 4, 5, str(val), 0, 1, "L")
+            self.cell(
+                col_width - 4,
+                5,
+                text=str(val),
+                align="L",
+                new_x="LMARGIN",
+                new_y="NEXT",
+            )
 
             # Label
             self.set_x(x + 2)
             self.set_font("Helvetica", "", 7)
             self.set_text_color(107, 114, 128)
-            self.cell(col_width - 4, 4, label.upper(), 0, 1, "L")
+            self.cell(
+                col_width - 4,
+                4,
+                text=label.upper(),
+                align="L",
+                new_x="LMARGIN",
+                new_y="NEXT",
+            )
 
             # Reposition
             self.set_xy(x + col_width + 2, y)
@@ -197,7 +222,7 @@ class PDFReportGenerator(FPDF):
 
         # Headers
         for h in headers:
-            self.cell(col_width, 8, h, 1, 0, "C", True)
+            self.cell(col_width, 8, text=h, border=1, align="C", fill=True)
         self.ln()
 
         # Rows
@@ -211,7 +236,7 @@ class PDFReportGenerator(FPDF):
             else:
                 self.set_fill_color(255, 255, 255)
             for item in row:
-                self.cell(col_width, 7, str(item), 1, 0, "C", True)
+                self.cell(col_width, 7, text=str(item), border=1, align="C", fill=True)
             self.ln()
             fill = not fill
         self.ln(5)
@@ -290,7 +315,9 @@ class AnalyticsService:
         meta_res = await self.db.execute(meta_stmt)
         metadata = meta_res.scalars().all()
 
-        latencies = [m.latency_ms for m in metadata if m.latency_ms is not None]
+        latencies: List[float] = [
+            float(m.latency_ms) for m in metadata if m.latency_ms is not None
+        ]
         avg_latency = statistics.mean(latencies) if latencies else 0.0
         p95_latency = calculate_percentile(latencies, 0.95) if latencies else 0.0
         p99_latency = calculate_percentile(latencies, 0.99) if latencies else 0.0
@@ -374,7 +401,9 @@ class AnalyticsService:
 
         # Re-generate leaderboards on project level snapshot creation
         if scope == "project":
-            await self._update_leaderboards(project_id, runs, metadata, results)
+            await self._update_leaderboards(
+                project_id, list(runs), list(metadata), list(results)
+            )
             # Invoke Insights engine
             await self._run_insights_engine(project_id, snapshot)
 

@@ -125,7 +125,7 @@ def test_phase8_safety_and_toxicity(client: TestClient) -> None:
 
 def test_phase8_tenant_isolation(db_session) -> None:
     """Verify multi-tenant workspace security on Phase 8 endpoints."""
-    from app.core.dependencies import get_current_api_key
+    from app.core.dependencies import get_current_api_key, get_db
     from app.enterprise.models import EnterpriseAPIKey
     from app.main import app
     from app.models.project import Project
@@ -152,38 +152,43 @@ def test_phase8_tenant_isolation(db_session) -> None:
     )
     db_session.add_all([key_a, key_b])
 
+    async def override_get_db():
+        yield db_session
+
+    app.dependency_overrides[get_db] = override_get_db
     app.dependency_overrides[get_current_api_key] = lambda: key_b
     client_b = TestClient(app)
 
-    # 3. Cross-Tenant Pairwise compare -> 404
-    assert (
-        client_b.post(
-            "/api/v1/evaluations/pairwise/compare",
-            json={
-                "project_id": proj_a.id,
-                "model_a": "gpt-4o",
-                "model_b": "claude-3-5-sonnet",
-                "winner": "A",
-            },
-        ).status_code
-        == 404
-    )
+    try:
+        # 3. Cross-Tenant Pairwise compare -> 404
+        assert (
+            client_b.post(
+                "/api/v1/evaluations/pairwise/compare",
+                json={
+                    "project_id": proj_a.id,
+                    "model_a": "gpt-4o",
+                    "model_b": "claude-3-5-sonnet",
+                    "winner": "A",
+                },
+            ).status_code
+            == 404
+        )
 
-    # 4. Cross-Tenant Pairwise ELO -> 404
-    assert (
-        client_b.get(
-            f"/api/v1/evaluations/pairwise/elo?project_id={proj_a.id}"
-        ).status_code
-        == 404
-    )
+        # 4. Cross-Tenant Pairwise ELO -> 404
+        assert (
+            client_b.get(
+                f"/api/v1/evaluations/pairwise/elo?project_id={proj_a.id}"
+            ).status_code
+            == 404
+        )
 
-    # 5. Cross-Tenant RAG List -> 404
-    assert client_b.get(f"/api/v1/rag?project_id={proj_a.id}").status_code == 404
+        # 5. Cross-Tenant RAG List -> 404
+        assert client_b.get(f"/api/v1/rag?project_id={proj_a.id}").status_code == 404
 
-    # 6. Cross-Tenant Safety List -> 404
-    assert client_b.get(f"/api/v1/safety?project_id={proj_a.id}").status_code == 404
-
-    app.dependency_overrides.clear()
+        # 6. Cross-Tenant Safety List -> 404
+        assert client_b.get(f"/api/v1/safety?project_id={proj_a.id}").status_code == 404
+    finally:
+        app.dependency_overrides.clear()
 
 
 def test_phase8_jinja2_ssti_and_sandbox_security() -> None:

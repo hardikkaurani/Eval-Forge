@@ -1,6 +1,6 @@
 import html
 import re
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, overload
 
 DANGEROUS_SCHEMES_PATTERN = re.compile(
     r"^\s*(javascript|vbscript|data)\s*:", re.IGNORECASE
@@ -35,11 +35,43 @@ def sanitize_url(url: str) -> str:
     return html.escape(cleaned, quote=True)
 
 
+@overload
 def sanitize_input_data(
-    data: Union[Dict[str, Any], List[Any], str],
+    data: Dict[str, Any],
     target_fields: tuple[str, ...] = ("name", "description", "title", "owner"),
     url_fields: tuple[str, ...] = ("source", "url", "website", "link"),
-) -> Union[Dict[str, Any], List[Any], str]:
+) -> Dict[str, Any]: ...
+
+
+@overload
+def sanitize_input_data(
+    data: List[Any],
+    target_fields: tuple[str, ...] = ("name", "description", "title", "owner"),
+    url_fields: tuple[str, ...] = ("source", "url", "website", "link"),
+) -> List[Any]: ...
+
+
+@overload
+def sanitize_input_data(
+    data: str,
+    target_fields: tuple[str, ...] = ("name", "description", "title", "owner"),
+    url_fields: tuple[str, ...] = ("source", "url", "website", "link"),
+) -> str: ...
+
+
+@overload
+def sanitize_input_data(
+    data: Any,
+    target_fields: tuple[str, ...] = ("name", "description", "title", "owner"),
+    url_fields: tuple[str, ...] = ("source", "url", "website", "link"),
+) -> Any: ...
+
+
+def sanitize_input_data(
+    data: Any,
+    target_fields: tuple[str, ...] = ("name", "description", "title", "owner"),
+    url_fields: tuple[str, ...] = ("source", "url", "website", "link"),
+) -> Any:
     """Recursively sanitizes specified UI-rendered string fields and URL fields in a payload.
 
     Leaves evaluation prompts, dataset records, and code fields intact.
@@ -48,7 +80,7 @@ def sanitize_input_data(
         return sanitize_xss(data)
 
     if isinstance(data, dict):
-        sanitized = {}
+        sanitized: Dict[str, Any] = {}
         for key, value in data.items():
             if key in target_fields and isinstance(value, str):
                 sanitized[key] = sanitize_xss(value)

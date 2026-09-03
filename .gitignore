@@ -220,3 +220,5 @@ __marimo__/
 # EvalForge Test Artifacts
 backend/artifacts/
 backend/datasets/
+artifacts/
+datasets/

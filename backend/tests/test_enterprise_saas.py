@@ -163,7 +163,7 @@ async def test_rbac_and_quota_exceptions(db_session: AsyncSession):
 
     # 1. Verify custom role creation
     role = await rbac.create_custom_role(db_session, org_id, "Tester", ["test:run"])
-    assert role.name == "Tester"
+    assert str(role.name) == "Tester"
     assert "test:run" in role.permissions
 
     # 2. Trigger quota exceed exception manually

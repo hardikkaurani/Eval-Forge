@@ -4,22 +4,24 @@
       "docker/grafana/provisioning/datasources/*.yml"
     ]
   },
+  "python.analysis.extraPaths": [
+    "${workspaceFolder}/backend"
+  ],
+  "python.autoComplete.extraPaths": [
+    "${workspaceFolder}/backend"
+  ],
+  "pyrefly.extraSearchPaths": [
+    "${workspaceFolder}/backend"
+  ],
+  "python.analysis.include": [
+    "backend"
+  ],
   "python.analysis.exclude": [
     "**/__pyrefly_virtual__/**",
     "C:/__pyrefly_virtual__/**",
     "c:/__pyrefly_virtual__/**"
   ],
   "python.analysis.ignore": [
-    "**/__pyrefly_virtual__/**",
-    "C:/__pyrefly_virtual__/**",
-    "c:/__pyrefly_virtual__/**"
-  ],
-  "pyrefly.exclude": [
-    "**/__pyrefly_virtual__/**",
-    "C:/__pyrefly_virtual__/**",
-    "c:/__pyrefly_virtual__/**"
-  ],
-  "pyrefly.ignore": [
     "**/__pyrefly_virtual__/**",
     "C:/__pyrefly_virtual__/**",
     "c:/__pyrefly_virtual__/**"

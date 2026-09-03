@@ -99,7 +99,12 @@ class EvaluationPipeline:
 
         await db.commit()
 
-        run = await EvaluationRepository.update_run(db, run.id, status="RUNNING")
+        run_id = run.id
+        updated_run = await EvaluationRepository.update_run(
+            db, run_id, status="RUNNING"
+        )
+        if updated_run is not None:
+            run = updated_run
         await db.commit()
 
         threshold = request.configuration.get(
@@ -219,7 +224,7 @@ class EvaluationPipeline:
                 judge_result = res["judge_result"]
                 result_record = await EvaluationRepository.create_result(
                     db=db,
-                    run_id=run.id,
+                    run_id=run_id,
                     input_prompt=case.input_prompt,
                     model_output=case.model_output,
                     reference=case.reference,
@@ -271,7 +276,7 @@ class EvaluationPipeline:
                 failed_count += 1
                 await EvaluationRepository.create_result(
                     db=db,
-                    run_id=run.id,
+                    run_id=run_id,
                     input_prompt=case.input_prompt,
                     model_output=case.model_output,
                     reference=case.reference,
@@ -288,7 +293,7 @@ class EvaluationPipeline:
                 )
 
             await EvaluationRepository.update_run(
-                db, run.id, completed_cases=completed_count, failed_cases=failed_count
+                db, run_id, completed_cases=completed_count, failed_cases=failed_count
             )
             await db.commit()
 
@@ -311,7 +316,7 @@ class EvaluationPipeline:
 
         run = await EvaluationRepository.update_run(
             db=db,
-            run_id=run.id,
+            run_id=run_id,
             status=status,
             completed_cases=completed_count,
             failed_cases=failed_count,

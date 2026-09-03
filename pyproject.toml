@@ -1,0 +1,21 @@
+[tool.pyright]
+include = ["backend"]
+extraPaths = ["backend"]
+exclude = [
+    "**/node_modules",
+    "**/__pycache__",
+    "**/.venv",
+    "**/__pyrefly_virtual__/**",
+    "**/inmemory/**"
+]
+
+[tool.pyrefly]
+project-includes = ["backend"]
+search-path = ["backend"]
+project-excludes = [
+    "**/node_modules",
+    "**/__pycache__",
+    "**/.venv",
+    "**/__pyrefly_virtual__/**",
+    "**/inmemory/**"
+]

@@ -619,10 +619,10 @@ def test_non_export_file_download_tenant_isolation(
     from app.core.dependencies import get_current_api_key, get_db
     from app.main import app
 
-    async def override_get_db():
+    async def _override_get_db_non_export():
         yield db_session
 
-    app.dependency_overrides[get_db] = override_get_db
+    app.dependency_overrides[get_db] = _override_get_db_non_export
 
     ws_a_id = "aaaaaaaa-1111-4111-a111-aaaaaaaaaaaa"
     ws_b_id = "bbbbbbbb-2222-4222-b222-bbbbbbbbbbbb"
@@ -1194,7 +1194,7 @@ async def test_dataset_resource_limits_and_dos_protection(
         await service.create_records(version_1.id, records_data, workspace_id=ws_id)
 
         # 3. VERIFY NO EAGER LOADING ON get_version
-        from sqlalchemy.orm.attributes import NO_VALUE
+        from sqlalchemy.orm.base import NO_VALUE
 
         v_fetched = await repo.get_version(version_1.id)
         assert v_fetched is not None
@@ -1645,6 +1645,7 @@ async def test_experiment_and_import_export_isolation(
                 "name": "Updated Exp B Name",
             },
         )
+        assert exp_updated is not None
         assert exp_updated.id == exp_b.id
         assert exp_updated.project_id == proj_b_id
         assert exp_updated.dataset_version_id == version_b.id
