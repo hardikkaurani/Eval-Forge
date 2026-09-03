@@ -101,7 +101,7 @@ class MCPToolRunner:
                                 "total": count,
                                 "projects": [
                                     {
-                                        "id": str(p.id),
+                                        "id": p.id,
                                         "name": p.name,
                                         "description": p.description,
                                     }
@@ -136,7 +136,7 @@ class MCPToolRunner:
 
                 dataset_repo = DatasetRepository(db)
                 datasets, count = await dataset_repo.list_datasets(
-                    project_id=str(project.id),
+                    project_id=project.id,
                     skip=0,
                     limit=50,
                 )
@@ -148,7 +148,7 @@ class MCPToolRunner:
                                 "total": count,
                                 "datasets": [
                                     {
-                                        "id": str(d.id),
+                                        "id": d.id,
                                         "name": d.name,
                                         "description": d.description,
                                     }
@@ -178,7 +178,7 @@ class MCPToolRunner:
                     }
 
                 evaluation = await EvaluationRepository.get_evaluation(
-                    db, str(run.evaluation_id), workspace_id=workspace_id
+                    db, run.evaluation_id, workspace_id=workspace_id
                 )
                 if not evaluation:
                     return {
@@ -196,7 +196,7 @@ class MCPToolRunner:
                         {
                             "type": "json",
                             "data": {
-                                "run_id": str(run.id),
+                                "run_id": run.id,
                                 "status": run.status,
                                 "total_cases": run.total_cases,
                                 "completed_cases": run.completed_cases,
@@ -226,7 +226,7 @@ class MCPToolRunner:
                     }
 
                 evaluation = await EvaluationRepository.get_evaluation(
-                    db, str(run.evaluation_id), workspace_id=workspace_id
+                    db, run.evaluation_id, workspace_id=workspace_id
                 )
                 if not evaluation:
                     return {
@@ -250,7 +250,7 @@ class MCPToolRunner:
                                 "total": count,
                                 "results": [
                                     {
-                                        "id": str(r.id),
+                                        "id": r.id,
                                         "input_prompt": r.input_prompt,
                                         "model_output": r.model_output,
                                         "score": r.score,
