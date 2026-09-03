@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Optional
 
-from sqlalchemy import delete, desc, select, update
+from sqlalchemy import desc, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.advanced_ai import (
@@ -187,9 +187,14 @@ class AdvancedAIRepository:
         return res.scalar_one_or_none()
 
     async def delete_policy(self, policy_id: str) -> bool:
-        stmt = delete(Policy).where(Policy.id == policy_id)
+        stmt = select(Policy).where(Policy.id == policy_id)
         res = await self.db.execute(stmt)
-        return (res.rowcount or 0) > 0
+        policy = res.scalar_one_or_none()
+        if not policy:
+            return False
+        await self.db.delete(policy)
+        await self.db.flush()
+        return True
 
     # Regression Run
     async def create_regression_run(self, regression: RegressionRun) -> RegressionRun:
