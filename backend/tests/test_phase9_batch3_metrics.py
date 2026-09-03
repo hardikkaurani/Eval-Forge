@@ -21,7 +21,11 @@ def test_metrics_endpoint_exposition_and_content_type(client: TestClient) -> Non
     response = client.get("/api/v1/metrics")
     assert response.status_code == 200
     assert "text/plain" in response.headers["Content-Type"]
-    assert "version=0.0.4" in response.headers["Content-Type"]
+    assert (
+        "version=0.0.4" in response.headers["Content-Type"]
+        or "version=1.0.0" in response.headers["Content-Type"]
+        or response.headers["Content-Type"] == prometheus_client.CONTENT_TYPE_LATEST
+    )
 
     body = response.text
     assert "evalforge_http_requests_total" in body

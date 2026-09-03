@@ -1,4 +1,4 @@
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 from jinja2.exceptions import SecurityError, UndefinedError
@@ -43,7 +43,9 @@ async def test_analytics_service_psutil_error_fallback(db_session) -> None:
     """Verify system stats collection logs warning and returns fallback zero metrics on psutil error."""
     service = ObservabilityService(db_session)
 
-    with patch("psutil.cpu_percent", side_effect=RuntimeError("OS access error")):
+    mock_psutil = MagicMock()
+    mock_psutil.cpu_percent.side_effect = RuntimeError("OS access error")
+    with patch("app.analytics.services.psutil", mock_psutil):
         stats = await service.collect_health_metrics()
         assert stats["cpu_usage_percent"] == 0.0
         assert stats["memory_usage_bytes"] == 0
