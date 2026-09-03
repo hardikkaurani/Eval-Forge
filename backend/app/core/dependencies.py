@@ -102,3 +102,16 @@ async def get_current_api_key(
         structlog.contextvars.bind_contextvars(**bind_dict)
 
     return api_key_record
+
+
+async def get_optional_api_key(
+    x_api_key: Optional[str] = Header(None, alias="X-API-Key"),
+    db: AsyncSession = Depends(get_db),
+) -> Optional[Any]:
+    """Optionally validate API key from X-API-Key header if provided, returning None otherwise."""
+    if not x_api_key:
+        return None
+    try:
+        return await get_current_api_key(x_api_key, db)
+    except HTTPException:
+        return None

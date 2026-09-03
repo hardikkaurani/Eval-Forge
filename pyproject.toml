@@ -1,6 +1,6 @@
 [tool.pyright]
 include = ["backend"]
-extraPaths = ["backend"]
+extraPaths = ["backend", "cli", "sdk/python"]
 exclude = [
     "**/node_modules",
     "**/__pycache__",
@@ -11,7 +11,7 @@ exclude = [
 
 [tool.pyrefly]
 project-includes = ["backend"]
-search-path = ["backend"]
+search-path = ["backend", "cli", "sdk/python"]
 project-excludes = [
     "**/node_modules",
     "**/__pycache__",

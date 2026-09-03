@@ -1,24 +1,36 @@
 import asyncio
+import sys
 from collections.abc import Generator
+from pathlib import Path
 from unittest.mock import AsyncMock, patch
 
-import pytest
-from fastapi.testclient import TestClient
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+# Ensure root, cli, and sdk/python are in sys.path
+ROOT_DIR = Path(__file__).resolve().parents[2]
+for path_entry in [str(ROOT_DIR), str(ROOT_DIR / "cli"), str(ROOT_DIR / "sdk" / "python")]:
+    if path_entry not in sys.path:
+        sys.path.insert(0, path_entry)
 
-import app.enterprise.models  # noqa: F401
-import app.jobs.models.job  # noqa: F401
-import app.models.advanced_ai  # noqa: F401
-import app.models.analytics  # noqa: F401
-import app.models.dataset  # noqa: F401
-import app.models.evaluation  # noqa: F401
+import pytest  # noqa: E402
+from fastapi.testclient import TestClient  # noqa: E402
+from sqlalchemy.ext.asyncio import (  # noqa: E402
+    AsyncSession,
+    async_sessionmaker,
+    create_async_engine,
+)
+
+import app.enterprise.models  # noqa: F401, E402
+import app.jobs.models.job  # noqa: F401, E402
+import app.models.advanced_ai  # noqa: F401, E402
+import app.models.analytics  # noqa: F401, E402
+import app.models.dataset  # noqa: F401, E402
+import app.models.evaluation  # noqa: F401, E402
 
 # Import all models to ensure complete SQLAlchemy metadata registration
-import app.models.project  # noqa: F401
-import app.platform.models  # noqa: F401
-from app.core.redis import redis_manager
-from app.database.session import Base
-from app.main import app
+import app.models.project  # noqa: F401, E402
+import app.platform.models  # noqa: F401, E402
+from app.core.redis import redis_manager  # noqa: E402
+from app.database.session import Base  # noqa: E402
+from app.main import app  # noqa: E402
 
 # SQLite in-memory database URL for testing async sessions
 TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"

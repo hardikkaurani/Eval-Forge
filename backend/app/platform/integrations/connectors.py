@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 import httpx
 import structlog
@@ -9,7 +9,11 @@ logger = structlog.get_logger()
 class ConnectorManager:
     """Manages outgoing integrations and alert notifications to third-party endpoints."""
 
-    def __init__(self, slack_webhook: str = None, discord_webhook: str = None):
+    def __init__(
+        self,
+        slack_webhook: Optional[str] = None,
+        discord_webhook: Optional[str] = None,
+    ):
         self.slack_webhook = slack_webhook
         self.discord_webhook = discord_webhook
 

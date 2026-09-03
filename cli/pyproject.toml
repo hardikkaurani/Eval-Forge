@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "evalforge-cli"
+version = "1.0.0"
+description = "Official CLI for the Eval-Forge AI Evaluation Platform"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "httpx>=0.24.0",
+]
+
+[project.scripts]
+evalforge = "evalforge_cli.main:main"
