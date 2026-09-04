@@ -43,6 +43,7 @@ EvalForge is maintained by developers, for developers. We foster an inclusive, w
 ## 2. Project Vision
 
 Our vision is to build the definitive open-source infrastructure for LLM quality assurance:
+
 - **100% Data Privacy & Self-Hostable:** Developers should be able to run benchmarks locally without sending data to third-party SaaS vendors.
 - **Framework Agnostic:** First-class support for G-Eval, DeepEval, RAG metrics, and custom Jinja2 rubrics.
 - **Reproducible Evaluation:** Immutable dataset versioning and snapshot-pinned evaluation runs.
@@ -82,12 +83,14 @@ Eval-Forge/
 ## 4. Local Development Setup
 
 ### Prerequisites
+
 - **Python 3.12+**
 - **Node.js 20+ & npm 10+**
 - **Docker & Docker Compose** (optional but recommended for full stack container testing)
 - **Git 2.40+**
 
 ### Automated Setup Script
+
 Run our developer onboarding script to configure your environment automatically:
 
 ```bash
@@ -106,6 +109,7 @@ chmod +x scripts/setup-dev-env.sh
 EvalForge uses strict environment variable validation via Pydantic (`BaseSettings`) and Vite `import.meta.env`.
 
 Copy the sample environment files:
+
 ```bash
 # Root & Backend
 cp .env.example .env
@@ -116,19 +120,21 @@ cp frontend/.env.example frontend/.env
 ```
 
 Key environment variables:
-| Variable | Default Value | Description |
-|---|---|---|
-| `APP_ENV` | `development` | Application runtime environment (`development`, `production`, `testing`) |
-| `DATABASE_URL` | `postgresql+asyncpg://evalforge:evalforge_pass@localhost:5432/evalforge_db` | Async SQLAlchemy PostgreSQL connection string |
-| `REDIS_URL` | `redis://localhost:6379/0` | Redis caching & Celery message broker URL |
-| `VITE_API_URL` | `http://localhost:8000/api/v1` | Frontend API gateway base endpoint |
-| `OPENAI_API_KEY` | `sk-placeholder` | Optional OpenAI API key for LLM judge evaluation |
+
+| Variable         | Default Value                                                               | Description                                                              |
+| ---------------- | --------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| `APP_ENV`        | `development`                                                               | Application runtime environment (`development`, `production`, `testing`) |
+| `DATABASE_URL`   | `postgresql+asyncpg://evalforge:evalforge_pass@localhost:5432/evalforge_db` | Async SQLAlchemy PostgreSQL connection string                            |
+| `REDIS_URL`      | `redis://localhost:6379/0`                                                  | Redis caching & Celery message broker URL                                |
+| `VITE_API_URL`   | `http://localhost:8000/api/v1`                                              | Frontend API gateway base endpoint                                       |
+| `OPENAI_API_KEY` | `sk-placeholder`                                                            | Optional OpenAI API key for LLM judge evaluation                         |
 
 ---
 
 ## 6. Installation
 
 ### Backend Dependencies
+
 ```bash
 cd backend
 python -m venv .venv
@@ -137,6 +143,7 @@ pip install -r requirements.txt
 ```
 
 ### Frontend Dependencies
+
 ```bash
 cd frontend
 npm install --legacy-peer-deps
@@ -147,10 +154,13 @@ npm install --legacy-peer-deps
 ## 7. Running Locally
 
 ### Option A: Docker Compose (Full Stack)
+
 To launch all services (FastAPI, React UI, PostgreSQL, Redis, Celery Worker, Cron Scheduler):
+
 ```bash
 docker compose up --build
 ```
+
 - **Web UI:** `http://localhost:5173` (or `http://localhost:3000`)
 - **API Swagger Docs:** `http://localhost:8000/docs`
 - **API Health Probe:** `http://localhost:8000/health`
@@ -158,6 +168,7 @@ docker compose up --build
 ### Option B: Local Microservices (Manual)
 
 1. **Start FastAPI Backend:**
+
    ```bash
    cd backend
    uvicorn app.main:app --reload --port 8000
@@ -176,16 +187,20 @@ docker compose up --build
 We require test coverage for all bug fixes and new features.
 
 ### Backend Pytest Suite
+
 ```bash
 cd backend
 pytest
 ```
+
 To run tests with verbosity and print statements:
+
 ```bash
 pytest -v -s
 ```
 
 ### Frontend Typecheck & Build Validation
+
 ```bash
 cd frontend
 npm run typecheck
@@ -199,12 +214,14 @@ npm run build
 We enforce strict static analysis to maintain production quality.
 
 ### Backend Linting (Ruff)
+
 ```bash
 cd backend
 ruff check .
 ```
 
 ### Frontend Linting (ESLint)
+
 ```bash
 cd frontend
 npm run lint
@@ -215,22 +232,28 @@ npm run lint
 ## 10. Formatting
 
 ### Python Formatting (Black & Ruff)
+
 ```bash
 cd backend
 black --check .
 ruff check --fix .
 ```
+
 To auto-format python code:
+
 ```bash
 black .
 ```
 
 ### Frontend Formatting (Prettier)
+
 ```bash
 cd frontend
 npx prettier --check "src/**/*.{ts,tsx,css,json,md}"
 ```
+
 To auto-format frontend code:
+
 ```bash
 npx prettier --write "src/**/*.{ts,tsx,css,json,md}"
 ```
@@ -248,6 +271,7 @@ We use descriptive, prefix-based branch names:
 - `test/<short-description>`: Adding or modifying test suites
 
 ### Real Examples:
+
 - `feature/api-auth`
 - `feature/g-eval-engine`
 - `fix/windows-path`
@@ -263,6 +287,7 @@ Commits must follow the [Conventional Commits](https://www.conventionalcommits.o
 Format: `<type>(<scope>): <description>`
 
 ### Standard Types:
+
 - `feat`: A new feature for the user or system
 - `fix`: A bug fix
 - `docs`: Documentation only changes
@@ -273,6 +298,7 @@ Format: `<type>(<scope>): <description>`
 - `chore`: Updating build tasks, package manager configs, or dependencies
 
 ### Examples:
+
 - `feat(eval): add DeepSeek-V3 LLM judge provider`
 - `fix(ws): resolve WebSocket reconnection exponential backoff memory leak`
 - `docs(api): add OpenAPI parameter descriptions for dataset version upload`
@@ -359,6 +385,7 @@ backend/app/
 ## 20. Communication Channels
 
 Stay connected with the EvalForge core team and community:
+
 - **GitHub Discussions:** Ask questions, share ideas, and present RFC proposals in [GitHub Discussions](https://github.com/hardikkaurani/Eval-Forge/discussions).
 - **Issue Tracker:** Report verified bugs or suggest features via [GitHub Issues](https://github.com/hardikkaurani/Eval-Forge/issues).
 - **Security Inquiries:** Contact security maintainers privately via `security@evalforge.dev`.
@@ -414,6 +441,7 @@ git push origin fix/websocket-reconnect-badge
 ## 23. Contributor Recognition
 
 We believe in celebrating our community! All contributors are recognized in:
+
 - The **EvalForge Leaderboard & README** section.
 - GitHub's native contributor graph.
 - Our quarterly **Release Notes** (`docs/RELEASE_NOTES_v1.0.0.md`).

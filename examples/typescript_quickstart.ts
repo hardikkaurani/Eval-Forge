@@ -8,7 +8,9 @@
  * 4. Inspecting scored evaluation outputs.
  */
 
-import { EvalForge } from '@evalforge/sdk';
+import { EvalForge, TestCase } from '@evalforge/sdk';
+
+declare const process: { env: Record<string, string | undefined> };
 
 async function runQuickstart() {
   const apiKey = process.env.EVALFORGE_API_KEY || 'ef_live_example_key';
@@ -34,11 +36,11 @@ async function runQuickstart() {
 
     // 2. Dispatch evaluation run
     console.log('\n[2/3] Submitting evaluation test cases...');
-    const testCases = [
+    const testCases: TestCase[] = [
       {
-        input: 'Summarize the return policy for international orders.',
-        actual_output: 'International orders are eligible for return within 30 days. Shipping fees apply.',
-        expected_output: '30-day return window for international orders with customer covering return shipping.',
+        input_prompt: 'Summarize the return policy for international orders.',
+        model_output: 'International orders are eligible for return within 30 days. Shipping fees apply.',
+        reference: '30-day return window for international orders with customer covering return shipping.',
       },
     ];
 

@@ -8,11 +8,11 @@ At **EvalForge**, security is a top priority. As an open-source evaluation platf
 
 We release security patches for the following versions of EvalForge:
 
-| Version | Supported | Security Patch Status |
-|---|---|---|
-| 1.0.x (Current `main`) | ✅ Yes | Actively supported with high-priority patches |
-| 0.9.x | ⚠️ Critical Only | Critical security fixes only |
-| < 0.9.0 | ❌ No | Deprecated — Please upgrade to v1.0+ |
+| Version                | Supported        | Security Patch Status                         |
+| ---------------------- | ---------------- | --------------------------------------------- |
+| 1.0.x (Current `main`) | ✅ Yes           | Actively supported with high-priority patches |
+| 0.9.x                  | ⚠️ Critical Only | Critical security fixes only                  |
+| < 0.9.0                | ❌ No            | Deprecated — Please upgrade to v1.0+          |
 
 ---
 
@@ -26,7 +26,9 @@ If you discover a security vulnerability, credential leak, authentication flaw, 
 2. **Security Team Email:** Contact our security response team directly at `security@evalforge.dev`.
 
 ### What to Include in Your Report
+
 To help us triage and resolve the issue quickly, please include:
+
 - A description of the vulnerability and potential security impact.
 - Step-by-step reproduction instructions or proof-of-concept (PoC) exploit script.
 - Affected components (e.g., FastAPI route, JWT authentication middleware, Celery worker, dependencies).
@@ -48,6 +50,7 @@ Our security team adheres to the following response timeline:
 ## Security Hardening Best Practices
 
 EvalForge incorporates built-in security features:
+
 - **API Key Hashing:** API keys are stored in PostgreSQL using salted SHA-256 hashes (`app/core/security.py`).
 - **Secret Masking:** Logger filters automatically mask API tokens (`sk-****`) in logs and response bodies.
 - **Security Headers:** Strict Transport Security (HSTS), Content Security Policy (CSP), and `X-Frame-Options` middleware.

@@ -2,7 +2,7 @@
 
 **Document Version:** 1.1.0  
 **Status:** Active Roadmap  
-**Target Community Goals:** 10,000+ Stars, 100+ Active Contributors, Global AI QA Standard  
+**Target Community Goals:** 10,000+ Stars, 100+ Active Contributors, Global AI QA Standard
 
 ---
 
@@ -39,6 +39,7 @@ EvalForge is building the definitive open-source platform for continuous LLM eva
 ## 🎯 Upcoming Releases & Contributor Opportunities
 
 ### Q3 2026 — Release 1.2: Community & Developer Experience
+
 - [ ] **EvalForge PyPI CLI Package (`evalforge-cli`):** Standalone Python CLI for triggering benchmark runs from local terminals.
 - [ ] **GitHub Actions Custom Action (`evalforge/eval-action@v1`):** Drop-in GitHub Action for automated CI/CD PR regression checks.
 - [ ] **DeepSeek-V3 & DeepSeek-R1 Driver:** First-class provider integration for DeepSeek models.
@@ -46,12 +47,14 @@ EvalForge is building the definitive open-source platform for continuous LLM eva
 - [ ] **OpenTelemetry Export:** Exporting evaluation metrics and judge traces to Jaeger, Zipkin, and Datadog.
 
 ### Q4 2026 — Release 1.5: Advanced Leaderboards & Fine-Tuning
+
 - [ ] **AlpacaEval Pairwise Leaderboards:** Interactive side-by-side model comparison views.
 - [ ] **Export to HuggingFace Datasets:** One-click export of red-team dataset versions to HuggingFace.
 - [ ] **Automated Dataset Synthesizer:** Synthetic dataset record generation powered by LLMs.
 - [ ] **Multi-Tenant SSO & SAML 2.0:** Enterprise Okta / Auth0 single sign-on integration.
 
 ### Q1 2027 — Release 2.0: Distributed Scale & Multi-Region Execution
+
 - [ ] **Distributed Ray / Celery Cluster Scaling:** Support for 50,000+ concurrent judge evaluations.
 - [ ] **On-Device Local Judge Execution:** Direct integration with vLLM and llama.cpp local inferencing.
 - [ ] **Real-time Guardrails Middleware:** Sub-10ms response filtering proxy for production LLM calls.
@@ -61,6 +64,7 @@ EvalForge is building the definitive open-source platform for continuous LLM eva
 ## 🤝 How to Contribute to the Roadmap
 
 Want to help us reach these milestones?
+
 - Check out open tasks in [`docs/CONTRIBUTOR_ISSUES_CATALOG.md`](docs/CONTRIBUTOR_ISSUES_CATALOG.md).
 - Search issues labeled [`good first issue`](https://github.com/hardikkaurani/Eval-Forge/issues?q=is%3Aissue+is%3Aopen+label%3A"good+first+issue").
 - Submit an RFC in [GitHub Discussions](https://github.com/hardikkaurani/Eval-Forge/discussions) to propose a new feature on the roadmap!

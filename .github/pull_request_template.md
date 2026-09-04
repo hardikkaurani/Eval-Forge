@@ -45,9 +45,9 @@ Describe the test coverage and steps taken to verify changes:
 
 ## Screenshots / Visual Demonstrations (If Applicable)
 
-| Before | After |
-|---|---|
-| *Attach screenshot / recording* | *Attach screenshot / recording* |
+| Before                          | After                           |
+| ------------------------------- | ------------------------------- |
+| _Attach screenshot / recording_ | _Attach screenshot / recording_ |
 
 ---
 

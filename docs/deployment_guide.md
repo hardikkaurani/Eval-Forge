@@ -34,17 +34,17 @@ This document provides step-by-step instructions for deploying EvalForge to prod
 
 Before deploying, configure your production environment variables. Refer to [.env.example](file:///.env.example) at the project root.
 
-| Variable Name | Required | Default Value | Description |
-|---|---|---|---|
-| `APP_ENV` | Yes | `production` | Enables production security checks & disables public docs |
-| `DEBUG` | Yes | `False` | Disables verbose debug logging |
-| `PORT` | Auto | `8000` | Dynamic port provided by Render / cloud host |
-| `DATABASE_URL` | Yes | Auto-provided | PostgreSQL connection string (`postgresql://` or `postgres://` auto-converts to `postgresql+asyncpg://`) |
-| `REDIS_URL` | Yes | Auto-provided | Redis connection string (`redis://...`) |
-| `SECRET_KEY` | Yes | Secure Hex | 64-character random string for cryptography |
-| `CORS_ORIGINS` | Yes | `["https://..."]` | JSON array of trusted frontend domains allowed by CORS |
-| `ALLOWED_HOSTS` | Yes | `["*"]` | Trusted host headers allowed by proxy middleware |
-| `VITE_API_URL` | Yes | `https://...` | Base API URL configured on Vercel frontend |
+| Variable Name   | Required | Default Value     | Description                                                                                              |
+| --------------- | -------- | ----------------- | -------------------------------------------------------------------------------------------------------- |
+| `APP_ENV`       | Yes      | `production`      | Enables production security checks & disables public docs                                                |
+| `DEBUG`         | Yes      | `False`           | Disables verbose debug logging                                                                           |
+| `PORT`          | Auto     | `8000`            | Dynamic port provided by Render / cloud host                                                             |
+| `DATABASE_URL`  | Yes      | Auto-provided     | PostgreSQL connection string (`postgresql://` or `postgres://` auto-converts to `postgresql+asyncpg://`) |
+| `REDIS_URL`     | Yes      | Auto-provided     | Redis connection string (`redis://...`)                                                                  |
+| `SECRET_KEY`    | Yes      | Secure Hex        | 64-character random string for cryptography                                                              |
+| `CORS_ORIGINS`  | Yes      | `["https://..."]` | JSON array of trusted frontend domains allowed by CORS                                                   |
+| `ALLOWED_HOSTS` | Yes      | `["*"]`           | Trusted host headers allowed by proxy middleware                                                         |
+| `VITE_API_URL`  | Yes      | `https://...`     | Base API URL configured on Vercel frontend                                                               |
 
 ---
 
@@ -53,6 +53,7 @@ Before deploying, configure your production environment variables. Refer to [.en
 ### Option A: Cloud Deployment (Vercel & Render)
 
 #### Step A1: Backend & Database Deployment on Render
+
 1. Sign in to [Render.com](https://render.com).
 2. Create a **New PostgreSQL** database and a **New Redis** instance.
 3. Create a **New Web Service** pointing to `hardikkaurani/Eval-Forge`.
@@ -68,6 +69,7 @@ Before deploying, configure your production environment variables. Refer to [.en
 7. Copy your deployed Render backend URL (e.g. `https://evalforge-backend.onrender.com`).
 
 #### Step A2: Frontend Deployment on Vercel
+
 1. Sign in to [Vercel.com](https://vercel.com).
 2. Click **Add New Project** and import `hardikkaurani/Eval-Forge`.
 3. Set **Framework Preset** to **Vite**.
@@ -83,22 +85,26 @@ Before deploying, configure your production environment variables. Refer to [.en
 For self-hosted virtual machines or on-premise servers:
 
 1. Clone the repository and navigate to root:
+
    ```bash
    git clone https://github.com/hardikkaurani/Eval-Forge.git
    cd Eval-Forge
    ```
 
 2. Copy `.env.example` to `.env` and fill in production secrets:
+
    ```bash
    cp .env.example .env
    ```
 
 3. Build and launch services using the production compose stack:
+
    ```bash
    docker compose -f docker-compose.prod.yml up -d --build
    ```
 
 4. Verify health status of all containers:
+
    ```bash
    docker compose -f docker-compose.prod.yml ps
    ```
@@ -126,6 +132,7 @@ After deploying EvalForge, run through this verification checklist:
 ## 5. Rollback Procedure
 
 If a deployment fails:
+
 1. Revert to the previous git release tag:
    ```bash
    git checkout tags/v0.9.0

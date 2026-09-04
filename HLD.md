@@ -1,10 +1,11 @@
 # High-Level Design (HLD) Document
 
 ## Project Name: EvalForge
+
 **Document Version:** 1.0.0  
 **Status:** Released / Active  
 **Author:** Software Architecture Team  
-**Target Audience:** Software Architects, DevOps Engineers, Senior Developers  
+**Target Audience:** Software Architects, DevOps Engineers, Senior Developers
 
 ---
 
@@ -117,6 +118,7 @@ graph TB
 ## 3. Component Architecture & Responsibilities
 
 ### 3.1 Frontend Subsystem (`frontend/`)
+
 - **Technology Stack:** React 18, Vite, TypeScript, Tailwind CSS, Recharts, Lucide Icons.
 - **Responsibilities:**
   - Responsive Single-Page Application (SPA) rendering.
@@ -125,6 +127,7 @@ graph TB
   - Authentication management (JWT storage in memory / httpOnly cookie).
 
 ### 3.2 Backend API Subsystem (`backend/`)
+
 - **Technology Stack:** Python 3.12, FastAPI, Pydantic v2, Async SQLAlchemy 2.0.
 - **Responsibilities:**
   - Ingress request validation and authentication (JWT validation, API Key hashing checks).
@@ -133,6 +136,7 @@ graph TB
   - REST endpoint routers (`/auth`, `/projects`, `/datasets`, `/runs`, `/metrics`).
 
 ### 3.3 Evaluation Engine Core (`backend/app/engine/`)
+
 - **Design Pattern:** Strategy Pattern via `JudgeBase` Abstract Base Class.
 - **Responsibilities:**
   - Normalizing input datasets, prompt definitions, and LLM output targets.
@@ -140,6 +144,7 @@ graph TB
   - Standardizing scoring metrics to normalized floating-point scales (0.0 to 1.0 or 1.0 to 10.0).
 
 ### 3.4 Asynchronous Worker Subsystem (`backend/app/tasks/`)
+
 - **Technology Stack:** Celery, Redis Broker.
 - **Responsibilities:**
   - Processing long-running evaluation benchmarks across distributed worker instances.
@@ -148,6 +153,7 @@ graph TB
   - Atomic persistence of run state transitions (`PENDING` $\rightarrow$ `RUNNING` $\rightarrow$ `COMPLETED`).
 
 ### 3.5 Scheduled Jobs & Periodic Cron Subsystem (`backend/app/jobs/scheduler/`)
+
 - **Technology Stack:** Asyncio Periodic Loop, Celery Beat.
 - **Responsibilities:**
   - Managing automated background schedules (`CronSchedulerManager`).
@@ -157,6 +163,7 @@ graph TB
   - Exposing REST management endpoints (`/api/v1/jobs/scheduler/`) and React UI panel.
 
 ### 3.6 Storage & Persistence Layer
+
 - **PostgreSQL 16:** Relational storage for organizations, workspaces, users, projects, dataset versions, run metadata, and metric results.
 - **Redis 7:** Celery task broker, endpoint response cache engine (`X-Cache: HIT/MISS`), rate limiter counter storage, real-time pub/sub.
 - **File Storage:** Local filesystem or Amazon S3 compatible object storage for dataset uploads and raw test artifacts.
@@ -213,21 +220,23 @@ sequenceDiagram
 ## 5. Security & Multi-Tenancy Architecture
 
 ### 5.1 Multi-Tenant Isolation Model
+
 EvalForge uses an **Organization-Workspace Hierarchy**:
+
 - **Organization (Top Level):** Boundary for billing, subscription plans, usage quotas, and administrative permissions.
 - **Workspace (Mid Level):** Logical partition within an organization (e.g., "Staging", "Production", "Team-Alpha").
 - **Tenant Context Injection:** FastAPI middleware extracts `org_id` and `workspace_id` from claims/API keys and injects them into the SQLAlchemy session context. Every database query is automatically scoped:
-$$\text{SELECT } * \text{ FROM dataset WHERE org\_id} = :context\_org\_id$$
+  $$\text{SELECT } * \text{ FROM dataset WHERE org\_id} = :context\_org\_id$$
 
 ### 5.2 Role-Based Access Control (RBAC) Matrix
 
-| Action | Viewer | Member | Team Admin | Org Admin |
-|---|:---:|:---:|:---:|:---:|
-| View Dashboard & Leaderboard | ✅ | ✅ | ✅ | ✅ |
-| Execute Evaluation Runs | ❌ | ✅ | ✅ | ✅ |
-| Upload & Version Datasets | ❌ | ✅ | ✅ | ✅ |
-| Manage Workspace API Keys | ❌ | ❌ | ✅ | ✅ |
-| Manage Org Billing & Members | ❌ | ❌ | ❌ | ✅ |
+| Action                       | Viewer | Member | Team Admin | Org Admin |
+| ---------------------------- | :----: | :----: | :--------: | :-------: |
+| View Dashboard & Leaderboard |   ✅   |   ✅   |     ✅     |    ✅     |
+| Execute Evaluation Runs      |   ❌   |   ✅   |     ✅     |    ✅     |
+| Upload & Version Datasets    |   ❌   |   ✅   |     ✅     |    ✅     |
+| Manage Workspace API Keys    |   ❌   |   ❌   |     ✅     |    ✅     |
+| Manage Org Billing & Members |   ❌   |   ❌   |     ❌     |    ✅     |
 
 ---
 
@@ -247,7 +256,7 @@ graph TB
         FE_APP[Frontend React Container - Port 80]
         API_APP[Backend FastAPI Container - Port 8000]
         CELERY_W[Celery Worker Container - app.jobs.queue.celery_app]
-        
+
         subgraph Data Tier
             PG_DB[(PostgreSQL Container - Port 5432)]
             REDIS_APP[(Redis Container - Port 6379)]

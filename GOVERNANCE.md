@@ -7,6 +7,7 @@ This document describes the governance structure, decision-making processes, and
 ## 1. Governance Model
 
 EvalForge operates under a **Benevolent Meritocracy** model:
+
 - **Merit-based Progression:** Anyone who contributes consistently to code, documentation, triage, or community support can progress to maintainer roles.
 - **Open Consensus:** Strategic architectural decisions, RFCs, and breaking API changes are discussed publicly in [GitHub Discussions](https://github.com/hardikkaurani/Eval-Forge/discussions) and issue threads.
 
@@ -15,18 +16,22 @@ EvalForge operates under a **Benevolent Meritocracy** model:
 ## 2. Roles & Responsibilities
 
 ### Contributors
+
 - **Role:** Anyone who submits code, documentation, bug reports, or participates in discussions.
 - **Privileges:** Submit PRs, participate in RFCs, request issue assignment.
 
 ### Triage Team
+
 - **Role:** Contributors who actively review issues, reproduce bugs, organize labels, and guide new contributors.
 - **Privileges:** Issue triage, label management, issue assignment.
 
 ### Core Maintainers
+
 - **Role:** Experienced contributors responsible for repository health, architectural direction, code reviews, and releases.
 - **Privileges:** Push access to `main`, PR approval and merging, release tagging, security advisory triage.
 
 ### Steering Committee / Lead Architects
+
 - **Role:** Project founders and principal architects responsible for strategic vision, governance changes, security escalation, and financial oversight.
 
 ---
@@ -42,5 +47,6 @@ EvalForge operates under a **Benevolent Meritocracy** model:
 ## 4. Becoming a Maintainer
 
 We actively invite contributors to join the maintainer team!
+
 - **Path to Maintainership:** Maintain a record of high-quality PRs, helpful code reviews, and community participation for 3+ months.
 - **Nomination:** Existing maintainers nominate candidates, followed by a maintainer vote.

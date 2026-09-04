@@ -7,12 +7,14 @@ Welcome to your first contribution to **EvalForge**! This guide is tailored to h
 ## ⚡ Quick 3-Step Setup
 
 1. **Fork and Clone the Repository:**
+
    ```bash
    git clone https://github.com/YOUR_USERNAME/Eval-Forge.git
    cd Eval-Forge
    ```
 
 2. **Run the Automatic Developer Setup Script:**
+
    ```bash
    # macOS / Linux
    chmod +x scripts/setup-dev-env.sh
@@ -30,6 +32,7 @@ Welcome to your first contribution to **EvalForge**! This guide is tailored to h
 ## 🛠️ Making Changes & Testing
 
 Create a new topic branch:
+
 ```bash
 git checkout -b fix/my-first-contribution
 ```
@@ -53,6 +56,7 @@ npx prettier --check "src/**/*.{ts,tsx,css,json,md}"
 ## 📩 Submitting Your First PR
 
 Commit your changes using [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/):
+
 ```bash
 git add .
 git commit -m "fix(ui): resolve status badge contrast ratio on dark background"

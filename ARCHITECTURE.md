@@ -55,6 +55,7 @@ graph TB
 ## 2. Multi-Tenant SaaS Isolation Model
 
 EvalForge implements organization-level multitenancy:
+
 - **Organizations**: The top-level administrative boundary. Subscriptions and usage quotas are tracked at the organization level.
 - **Workspaces / Teams**: Mid-level groupings. Projects, datasets, and runs belong to a workspace.
 - **Role-Based Access Control (RBAC)**: Custom middleware inspects authentication context and permits execution based on role hierarchy:
@@ -95,6 +96,7 @@ classDiagram
 ```
 
 ### 3.1 Judicative Pipelines
+
 1. **G-Eval (Chain-of-Thought)**: First constructs step-by-step criteria instructions dynamically from the metric definition, and then executes step-level evaluation and weight averaging.
 2. **DeepEval Wrapper**: Wraps domain-specific evaluators (hallucination scoring, factual recall, and contextual relevance).
 3. **Custom Rubric Judicature**: Compiles Jinja2 prompt layouts, letting developers write personalized judge templates.
@@ -104,6 +106,7 @@ classDiagram
 ## 4. Asynchronous Task Orchestration
 
 LLM evaluation is inherently high-latency due to remote inference. EvalForge handles this asynchronously:
+
 1. **API Handshake**: The API receives the run submission, verifies quotas, creates a DB record with a `PENDING` state, and returns a `202 Accepted` response with a polling URL.
 2. **Task Enqueuing**: The task is dispatched to Redis via Celery, categorized into priority queues:
    - `high`: CI/CD automation pipelines.

@@ -1,16 +1,18 @@
 # Low-Level Design (LLD) Document
 
 ## Project Name: EvalForge
+
 **Document Version:** 1.0.0  
 **Status:** Released / Active  
 **Author:** Technical Design & Core Engineering Team  
-**Target Audience:** Core Developers, Maintainers, Code Reviewers  
+**Target Audience:** Core Developers, Maintainers, Code Reviewers
 
 ---
 
 ## 1. Class & Object Design
 
 ### 1.1 Evaluation Engine Class Hierarchy
+
 The core evaluation engine is designed around an extensible interface using the Strategy design pattern.
 
 ```mermaid
@@ -181,27 +183,29 @@ erDiagram
 ### 2.2 Table Specifications
 
 #### Table: `organisations`
-| Column | Type | Constraints | Description |
-|---|---|---|---|
-| `id` | UUID | Primary Key, default `gen_random_uuid()` | Unique org identifier |
-| `name` | VARCHAR(255) | NOT NULL | Organization name |
-| `slug` | VARCHAR(255) | UNIQUE, NOT NULL | URL-friendly unique slug |
-| `plan_tier` | VARCHAR(50) | NOT NULL, DEFAULT `'free'` | Subscription level (`free`, `pro`, `enterprise`) |
-| `created_at` | TIMESTAMPTZ | NOT NULL, DEFAULT `now()` | Timestamp created |
+
+| Column       | Type         | Constraints                              | Description                                      |
+| ------------ | ------------ | ---------------------------------------- | ------------------------------------------------ |
+| `id`         | UUID         | Primary Key, default `gen_random_uuid()` | Unique org identifier                            |
+| `name`       | VARCHAR(255) | NOT NULL                                 | Organization name                                |
+| `slug`       | VARCHAR(255) | UNIQUE, NOT NULL                         | URL-friendly unique slug                         |
+| `plan_tier`  | VARCHAR(50)  | NOT NULL, DEFAULT `'free'`               | Subscription level (`free`, `pro`, `enterprise`) |
+| `created_at` | TIMESTAMPTZ  | NOT NULL, DEFAULT `now()`                | Timestamp created                                |
 
 #### Table: `eval_runs`
-| Column | Type | Constraints | Description |
-|---|---|---|---|
-| `id` | UUID | Primary Key | Unique evaluation run ID |
-| `project_id` | UUID | Foreign Key $\rightarrow$ `projects.id` | Target project |
-| `dataset_version_id` | UUID | Foreign Key $\rightarrow$ `dataset_versions.id` | Target dataset version |
-| `status` | VARCHAR(50) | NOT NULL, DEFAULT `'PENDING'` | State (`PENDING`, `RUNNING`, `COMPLETED`, `FAILED`) |
-| `judge_type` | VARCHAR(100) | NOT NULL | Evaluator type (`g_eval`, `deepeval`, `custom`) |
-| `judge_config` | JSONB | NOT NULL, DEFAULT `'{}'` | Evaluator hyperparameters |
-| `pass_rate` | FLOAT | NULLABLE | Overall percentage of test cases passed (0.0 – 1.0) |
-| `average_score` | FLOAT | NULLABLE | Mean score across all evaluated samples |
-| `started_at` | TIMESTAMPTZ | NULLABLE | Execution start timestamp |
-| `completed_at` | TIMESTAMPTZ | NULLABLE | Execution completion timestamp |
+
+| Column               | Type         | Constraints                                     | Description                                         |
+| -------------------- | ------------ | ----------------------------------------------- | --------------------------------------------------- |
+| `id`                 | UUID         | Primary Key                                     | Unique evaluation run ID                            |
+| `project_id`         | UUID         | Foreign Key $\rightarrow$ `projects.id`         | Target project                                      |
+| `dataset_version_id` | UUID         | Foreign Key $\rightarrow$ `dataset_versions.id` | Target dataset version                              |
+| `status`             | VARCHAR(50)  | NOT NULL, DEFAULT `'PENDING'`                   | State (`PENDING`, `RUNNING`, `COMPLETED`, `FAILED`) |
+| `judge_type`         | VARCHAR(100) | NOT NULL                                        | Evaluator type (`g_eval`, `deepeval`, `custom`)     |
+| `judge_config`       | JSONB        | NOT NULL, DEFAULT `'{}'`                        | Evaluator hyperparameters                           |
+| `pass_rate`          | FLOAT        | NULLABLE                                        | Overall percentage of test cases passed (0.0 – 1.0) |
+| `average_score`      | FLOAT        | NULLABLE                                        | Mean score across all evaluated samples             |
+| `started_at`         | TIMESTAMPTZ  | NULLABLE                                        | Execution start timestamp                           |
+| `completed_at`       | TIMESTAMPTZ  | NULLABLE                                        | Execution completion timestamp                      |
 
 ---
 
@@ -209,23 +213,24 @@ erDiagram
 
 ### 3.1 Endpoint Summary Table
 
-| Method | Endpoint Path | Auth Required | Description |
-|---|---|:---:|---|
-| `POST` | `/api/v1/auth/register` | No | Register new user and organization |
-| `POST` | `/api/v1/auth/login` | No | Authenticate user & issue JWT bearer token |
-| `POST` | `/api/v1/projects` | JWT | Create a new project workspace |
-| `GET` | `/api/v1/projects/{id}` | JWT | Fetch project metadata & run history |
-| `POST` | `/api/v1/datasets/upload` | JWT / API Key | Upload dataset file and create immutable version |
-| `POST` | `/api/v1/runs` | JWT / API Key | Trigger an asynchronous evaluation run |
-| `GET` | `/api/v1/runs/{id}` | JWT / API Key | Poll run execution status and summary metrics |
-| `GET` | `/api/v1/runs/{id}/results` | JWT / API Key | Paginated result details for individual test items |
-| `GET` | `/api/v1/metrics/leaderboard` | JWT | Aggregated model performance leaderboard |
+| Method | Endpoint Path                 | Auth Required | Description                                        |
+| ------ | ----------------------------- | :-----------: | -------------------------------------------------- |
+| `POST` | `/api/v1/auth/register`       |      No       | Register new user and organization                 |
+| `POST` | `/api/v1/auth/login`          |      No       | Authenticate user & issue JWT bearer token         |
+| `POST` | `/api/v1/projects`            |      JWT      | Create a new project workspace                     |
+| `GET`  | `/api/v1/projects/{id}`       |      JWT      | Fetch project metadata & run history               |
+| `POST` | `/api/v1/datasets/upload`     | JWT / API Key | Upload dataset file and create immutable version   |
+| `POST` | `/api/v1/runs`                | JWT / API Key | Trigger an asynchronous evaluation run             |
+| `GET`  | `/api/v1/runs/{id}`           | JWT / API Key | Poll run execution status and summary metrics      |
+| `GET`  | `/api/v1/runs/{id}/results`   | JWT / API Key | Paginated result details for individual test items |
+| `GET`  | `/api/v1/metrics/leaderboard` |      JWT      | Aggregated model performance leaderboard           |
 
 ---
 
 ### 3.2 Key API Contract Examples
 
 #### Trigger Evaluation Run: `POST /api/v1/runs`
+
 - **Request Headers:**
   ```http
   Authorization: Bearer <JWT_TOKEN>
@@ -261,6 +266,7 @@ erDiagram
 ## 4. Algorithms & Core Mechanics
 
 ### 4.1 G-Eval Chain-of-Thought (CoT) Algorithm
+
 The G-Eval scoring pipeline operates in two main phases:
 
 ```
@@ -284,6 +290,7 @@ Phase 2: Step-by-Step Scoring
 ---
 
 ### 4.2 Rate Limit Backoff Algorithm
+
 Worker nodes handle LLM provider rate limits (HTTP 429) using exponential backoff with jitter:
 
 $$\text{Backoff Delay (seconds)} = \min\left(\text{max\_delay}, \text{base\_delay} \times 2^{\text{attempt}} + \text{uniform}(0, 1)\right)$$
@@ -400,4 +407,3 @@ Events: `started` | `progress` | `completed` | `failed` | `retrying` | `cancelle
 - `POST /api/v1/jobs/scheduler/jobs/{job_id}/trigger`: Trigger immediate manual execution.
 - `POST /api/v1/jobs/scheduler/jobs/{job_id}/toggle`: Toggle enabled/disabled state.
 - `GET /api/v1/jobs/scheduler/history`: View execution log history.
-

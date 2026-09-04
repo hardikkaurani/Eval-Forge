@@ -81,15 +81,15 @@ Key design decisions:
 
 ## Why EvalForge
 
-| Comparison | Ad-hoc scripts | Commercial eval platforms | EvalForge |
-|---|---|---|---|
-| Reproducibility | No versioning | Vendor-controlled | Immutable dataset versions, run snapshots |
-| Judge flexibility | Single method | Fixed metric sets | G-Eval, DeepEval, AlpacaEval, custom — same interface |
-| CI/CD integration | Manual copy-paste | Often paywalled | REST API first, GitHub Actions examples included |
-| Data privacy | Scripts run locally | Data sent to vendor | 100% self-hosted, no external calls required |
-| Cost | Engineering time | Per-evaluation pricing | Open source, infra cost only |
-| Observability | Print statements | Vendor dashboard | Prometheus metrics, Grafana dashboards, structured logs |
-| Multi-tenancy | Not applicable | Usually included | Orgs, teams, usage limits — built into Phase 11 |
+| Comparison        | Ad-hoc scripts      | Commercial eval platforms | EvalForge                                               |
+| ----------------- | ------------------- | ------------------------- | ------------------------------------------------------- |
+| Reproducibility   | No versioning       | Vendor-controlled         | Immutable dataset versions, run snapshots               |
+| Judge flexibility | Single method       | Fixed metric sets         | G-Eval, DeepEval, AlpacaEval, custom — same interface   |
+| CI/CD integration | Manual copy-paste   | Often paywalled           | REST API first, GitHub Actions examples included        |
+| Data privacy      | Scripts run locally | Data sent to vendor       | 100% self-hosted, no external calls required            |
+| Cost              | Engineering time    | Per-evaluation pricing    | Open source, infra cost only                            |
+| Observability     | Print statements    | Vendor dashboard          | Prometheus metrics, Grafana dashboards, structured logs |
+| Multi-tenancy     | Not applicable      | Usually included          | Orgs, teams, usage limits — built into Phase 11         |
 
 ---
 
@@ -561,18 +561,18 @@ flowchart TD
 
 EvalForge applies defence-in-depth at every layer. The following table maps each threat to its mitigation.
 
-| Threat | Mitigation |
-|---|---|
-| Unauthenticated API access | JWT Bearer tokens on all protected routes, short-lived access tokens with refresh token rotation |
-| Brute-force login | Rate limiting per IP on `/auth/login`, exponential backoff on repeated failures |
-| Cross-tenant data access | `org_id` scope injected into every database query by tenant middleware — no route handler can bypass it |
-| SQL injection | SQLAlchemy parameterised queries throughout — no raw string concatenation |
-| Privilege escalation | RBAC middleware enforces role hierarchy per operation before any controller logic runs |
-| API key compromise | Keys are stored as bcrypt hashes — compromise of the database does not expose raw keys |
-| Malicious file upload | Dataset uploads are validated for format, size, and schema before any content is parsed or stored |
-| Secrets in environment | All secrets via environment variables, never hardcoded, `.env` excluded from Git and Docker layers |
-| Container escape | Docker containers run as non-root users with no unnecessary capabilities |
-| Insecure HTTP | HTTPS enforced at the reverse proxy layer (Nginx / Caddy) in all production deployments |
+| Threat                     | Mitigation                                                                                              |
+| -------------------------- | ------------------------------------------------------------------------------------------------------- |
+| Unauthenticated API access | JWT Bearer tokens on all protected routes, short-lived access tokens with refresh token rotation        |
+| Brute-force login          | Rate limiting per IP on `/auth/login`, exponential backoff on repeated failures                         |
+| Cross-tenant data access   | `org_id` scope injected into every database query by tenant middleware — no route handler can bypass it |
+| SQL injection              | SQLAlchemy parameterised queries throughout — no raw string concatenation                               |
+| Privilege escalation       | RBAC middleware enforces role hierarchy per operation before any controller logic runs                  |
+| API key compromise         | Keys are stored as bcrypt hashes — compromise of the database does not expose raw keys                  |
+| Malicious file upload      | Dataset uploads are validated for format, size, and schema before any content is parsed or stored       |
+| Secrets in environment     | All secrets via environment variables, never hardcoded, `.env` excluded from Git and Docker layers      |
+| Container escape           | Docker containers run as non-root users with no unnecessary capabilities                                |
+| Insecure HTTP              | HTTPS enforced at the reverse proxy layer (Nginx / Caddy) in all production deployments                 |
 
 ---
 
@@ -614,164 +614,164 @@ gantt
 
 ### Phase 1 — Foundation (2–3 days)
 
-| Task | Details |
-|---|---|
-| Repository setup | GitHub repo, branch protection rules, required status checks, issue and PR templates |
-| README | Architecture overview, contributing guide, security policy, changelog, roadmap |
+| Task             | Details                                                                                     |
+| ---------------- | ------------------------------------------------------------------------------------------- |
+| Repository setup | GitHub repo, branch protection rules, required status checks, issue and PR templates        |
+| README           | Architecture overview, contributing guide, security policy, changelog, roadmap              |
 | Folder structure | `backend/`, `frontend/`, `docker/`, `datasets/`, `tests/`, `scripts/`, `examples/`, `docs/` |
-| Docker | Multi-stage Dockerfiles for backend and frontend, base compose with healthchecks |
-| CI setup | GitHub Actions — lint, type-check, and pytest on every PR to main |
-| Editor config | `.editorconfig`, `.gitignore`, pre-commit hooks for formatting and import sorting |
+| Docker           | Multi-stage Dockerfiles for backend and frontend, base compose with healthchecks            |
+| CI setup         | GitHub Actions — lint, type-check, and pytest on every PR to main                           |
+| Editor config    | `.editorconfig`, `.gitignore`, pre-commit hooks for formatting and import sorting           |
 
 ---
 
 ### Phase 2 — Backend Core (5–7 days)
 
-| Task | Details |
-|---|---|
-| FastAPI app factory | Lifespan management, router registration, CORS, trusted host middleware |
-| PostgreSQL | Async SQLAlchemy engine, session factory, base declarative model, connection pool config |
-| Alembic | Migration environment setup, initial schema migration, auto-generation workflow |
-| Core models | User, Organisation, Team, Project, Dataset, Run, TestCaseResult, APIKey ORM models |
-| REST APIs | CRUD endpoints for all core resources under `/api/v1`, response model separation |
-| Authentication | JWT access and refresh token pair, bcrypt password hashing, `/auth/register`, `/auth/login`, `/auth/refresh` |
-| RBAC | Role enum, permission matrix, RBAC middleware applied per route |
-| Settings | Pydantic `BaseSettings` with `.env` loading, per-environment config classes |
+| Task                | Details                                                                                                      |
+| ------------------- | ------------------------------------------------------------------------------------------------------------ |
+| FastAPI app factory | Lifespan management, router registration, CORS, trusted host middleware                                      |
+| PostgreSQL          | Async SQLAlchemy engine, session factory, base declarative model, connection pool config                     |
+| Alembic             | Migration environment setup, initial schema migration, auto-generation workflow                              |
+| Core models         | User, Organisation, Team, Project, Dataset, Run, TestCaseResult, APIKey ORM models                           |
+| REST APIs           | CRUD endpoints for all core resources under `/api/v1`, response model separation                             |
+| Authentication      | JWT access and refresh token pair, bcrypt password hashing, `/auth/register`, `/auth/login`, `/auth/refresh` |
+| RBAC                | Role enum, permission matrix, RBAC middleware applied per route                                              |
+| Settings            | Pydantic `BaseSettings` with `.env` loading, per-environment config classes                                  |
 
 ---
 
 ### Phase 3 — Evaluation Engine (6–8 days)
 
-| Task | Details |
-|---|---|
-| JudgeBase | Abstract base class with `evaluate(output, reference, metric, config) -> EvalResult` contract |
-| Metric registry | `MetricRegistry` maps metric names to judge classes, supports runtime registration |
-| G-Eval | Two-call pipeline — step generation then step-level scoring, configurable step weights |
-| DeepEval integration | Faithfulness, answer relevancy, contextual recall, contextual precision, hallucination modules |
-| Prompt templates | Jinja2 template system, per-metric and per-judge-model template variants, version-controlled |
-| Score normalisation | Per-metric calibration curves mapping raw judge outputs to 0.0–1.0 range |
-| Unit tests | Per-metric test suite with fixture outputs, mock LLM responses, expected score tolerance ranges |
+| Task                 | Details                                                                                         |
+| -------------------- | ----------------------------------------------------------------------------------------------- |
+| JudgeBase            | Abstract base class with `evaluate(output, reference, metric, config) -> EvalResult` contract   |
+| Metric registry      | `MetricRegistry` maps metric names to judge classes, supports runtime registration              |
+| G-Eval               | Two-call pipeline — step generation then step-level scoring, configurable step weights          |
+| DeepEval integration | Faithfulness, answer relevancy, contextual recall, contextual precision, hallucination modules  |
+| Prompt templates     | Jinja2 template system, per-metric and per-judge-model template variants, version-controlled    |
+| Score normalisation  | Per-metric calibration curves mapping raw judge outputs to 0.0–1.0 range                        |
+| Unit tests           | Per-metric test suite with fixture outputs, mock LLM responses, expected score tolerance ranges |
 
 ---
 
 ### Phase 4 — Dataset Management (4–5 days)
 
-| Task | Details |
-|---|---|
-| AlpacaEval format | Native parsing of AlpacaEval JSON instruction sets with schema validation |
-| CSV upload | Column mapping interface, type inference, null handling, preview before commit |
-| JSON upload | Schema validation, nested field flattening, custom field mapping |
-| Dataset versioning | Each upload creates immutable version; runs reference a specific `dataset_id` + `version` |
-| Storage layer | File metadata in PostgreSQL, raw files in local filesystem or S3-compatible object store |
-| Dataset preview API | `/datasets/:id/preview?version=N&limit=20` for sampling rows without full download |
+| Task                | Details                                                                                   |
+| ------------------- | ----------------------------------------------------------------------------------------- |
+| AlpacaEval format   | Native parsing of AlpacaEval JSON instruction sets with schema validation                 |
+| CSV upload          | Column mapping interface, type inference, null handling, preview before commit            |
+| JSON upload         | Schema validation, nested field flattening, custom field mapping                          |
+| Dataset versioning  | Each upload creates immutable version; runs reference a specific `dataset_id` + `version` |
+| Storage layer       | File metadata in PostgreSQL, raw files in local filesystem or S3-compatible object store  |
+| Dataset preview API | `/datasets/:id/preview?version=N&limit=20` for sampling rows without full download        |
 
 ---
 
 ### Phase 5 — Frontend Dashboard (7–10 days)
 
-| Task | Details |
-|---|---|
-| Auth pages | Login, register, forgot password, JWT refresh handling, protected route guard HOC |
-| Dashboard | Run history table with status badges, aggregate score trend sparkline, recent activity feed |
-| Projects page | Create and list projects, project-level run summary, member list |
-| Dataset pages | Upload wizard (drag-drop + column mapping), version history list, row preview table |
+| Task            | Details                                                                                            |
+| --------------- | -------------------------------------------------------------------------------------------------- |
+| Auth pages      | Login, register, forgot password, JWT refresh handling, protected route guard HOC                  |
+| Dashboard       | Run history table with status badges, aggregate score trend sparkline, recent activity feed        |
+| Projects page   | Create and list projects, project-level run summary, member list                                   |
+| Dataset pages   | Upload wizard (drag-drop + column mapping), version history list, row preview table                |
 | Run detail page | Per-test-case score breakdown, chain-of-thought reasoning expandable, score distribution histogram |
-| Leaderboard | Model ranking table sortable by metric, run-over-run score delta column |
-| Compare view | Side-by-side model output comparison with score diff highlighting |
+| Leaderboard     | Model ranking table sortable by metric, run-over-run score delta column                            |
+| Compare view    | Side-by-side model output comparison with score diff highlighting                                  |
 
 ---
 
 ### Phase 6 — Evaluation Jobs (5–6 days)
 
-| Task | Details |
-|---|---|
-| Celery setup | Celery app with Redis broker, result backend, worker concurrency config |
-| Task definition | `run_evaluation_job` task with run_id, dataset fetch, progress callback |
-| Priority queuing | High, default, and low priority queues — CI jobs on high, manual runs on default |
-| Retry logic | Per-test-case retry with exponential backoff, max 3 attempts, dead-letter on exhaustion |
-| Progress tracking | WebSocket channel per run_id, SSE fallback for clients that don't support WS |
-| Job management API | `DELETE /runs/:id` to cancel, `POST /runs/:id/retry` to restart failed cases |
-| Worker health | `/workers/status` endpoint exposing active, reserved, and scheduled task counts |
+| Task               | Details                                                                                 |
+| ------------------ | --------------------------------------------------------------------------------------- |
+| Celery setup       | Celery app with Redis broker, result backend, worker concurrency config                 |
+| Task definition    | `run_evaluation_job` task with run_id, dataset fetch, progress callback                 |
+| Priority queuing   | High, default, and low priority queues — CI jobs on high, manual runs on default        |
+| Retry logic        | Per-test-case retry with exponential backoff, max 3 attempts, dead-letter on exhaustion |
+| Progress tracking  | WebSocket channel per run_id, SSE fallback for clients that don't support WS            |
+| Job management API | `DELETE /runs/:id` to cancel, `POST /runs/:id/retry` to restart failed cases            |
+| Worker health      | `/workers/status` endpoint exposing active, reserved, and scheduled task counts         |
 
 ---
 
 ### Phase 7 — Analytics and Reports (5–6 days)
 
-| Task | Details |
-|---|---|
-| Score distribution | Histogram of per-test-case scores per metric per run |
-| Run comparison | Line chart of aggregate score across multiple runs on the same dataset |
-| Metric radar chart | Per-run multi-metric spider chart for holistic quality view |
-| Leaderboard | Global ranking of models by metric, filterable by project and date range |
-| PDF report | Auto-generated PDF with run summary, charts, aggregate table, per-case samples |
-| CSV and JSON export | Full test case result export with scores and reasoning, paginated download |
+| Task                | Details                                                                        |
+| ------------------- | ------------------------------------------------------------------------------ |
+| Score distribution  | Histogram of per-test-case scores per metric per run                           |
+| Run comparison      | Line chart of aggregate score across multiple runs on the same dataset         |
+| Metric radar chart  | Per-run multi-metric spider chart for holistic quality view                    |
+| Leaderboard         | Global ranking of models by metric, filterable by project and date range       |
+| PDF report          | Auto-generated PDF with run summary, charts, aggregate table, per-case samples |
+| CSV and JSON export | Full test case result export with scores and reasoning, paginated download     |
 
 ---
 
 ### Phase 8 — Advanced Evaluations (7–8 days)
 
-| Task | Details |
-|---|---|
-| Hallucination detection | Claim extraction from output, fact-checking each claim against reference context |
-| Faithfulness | Source attribution — every statement in the answer traced to a retrieved chunk |
-| Toxicity | Content safety scoring via configurable classifier (Perspective API or local model) |
-| RAG evaluation | Full pipeline: contextual precision, contextual recall, answer relevancy, faithfulness in sequence |
-| Pairwise comparison | A vs B comparison via LLM judge, ELO rating update, tournament bracket support |
-| Custom metrics | User-defined metric with Jinja2 rubric, scoring scale, and weight configuration via API |
+| Task                    | Details                                                                                            |
+| ----------------------- | -------------------------------------------------------------------------------------------------- |
+| Hallucination detection | Claim extraction from output, fact-checking each claim against reference context                   |
+| Faithfulness            | Source attribution — every statement in the answer traced to a retrieved chunk                     |
+| Toxicity                | Content safety scoring via configurable classifier (Perspective API or local model)                |
+| RAG evaluation          | Full pipeline: contextual precision, contextual recall, answer relevancy, faithfulness in sequence |
+| Pairwise comparison     | A vs B comparison via LLM judge, ELO rating update, tournament bracket support                     |
+| Custom metrics          | User-defined metric with Jinja2 rubric, scoring scale, and weight configuration via API            |
 
 ---
 
 ### Phase 9 — Production Engineering (5–6 days)
 
-| Task | Details |
-|---|---|
-| Production compose | Separate `docker-compose.prod.yml` with resource limits, restart policies, healthchecks |
-| Structured logging | `structlog` JSON output with request ID, trace context, user ID, severity |
-| Prometheus | `/metrics` endpoint exposing request rate, error rate, job queue depth, worker utilisation |
-| Grafana | Pre-provisioned dashboard for API latency, evaluation throughput, error rate, queue depth |
-| Rate limiting | Per-user and per-API-key limits, plan-aware limits, 429 responses with Retry-After header |
+| Task               | Details                                                                                                 |
+| ------------------ | ------------------------------------------------------------------------------------------------------- |
+| Production compose | Separate `docker-compose.prod.yml` with resource limits, restart policies, healthchecks                 |
+| Structured logging | `structlog` JSON output with request ID, trace context, user ID, severity                               |
+| Prometheus         | `/metrics` endpoint exposing request rate, error rate, job queue depth, worker utilisation              |
+| Grafana            | Pre-provisioned dashboard for API latency, evaluation throughput, error rate, queue depth               |
+| Rate limiting      | Per-user and per-API-key limits, plan-aware limits, 429 responses with Retry-After header               |
 | Security hardening | Input sanitisation on all endpoints, file upload size and type enforcement, SQL parameter binding audit |
-| Nginx config | Reverse proxy config with SSL termination, gzip, static file serving for frontend build |
+| Nginx config       | Reverse proxy config with SSL termination, gzip, static file serving for frontend build                 |
 
 ---
 
 ### Phase 10 — API Platform (4–5 days)
 
-| Task | Details |
-|---|---|
-| Public REST API | Separate versioned namespace `/api/v1/public/` for external consumers |
-| API key management | Create, list, rotate, and revoke API keys, scoped to read or write or admin |
-| Usage tracking | Per-key request count, token usage estimate, rate limit state exposed in response headers |
-| Python SDK | `evalforge-python` package with `EvalForgeClient`, typed run submission and result polling |
-| JS SDK example | Minimal JavaScript fetch wrapper with TypeScript types for CI/CD integration |
-| OpenAPI spec | Auto-generated from FastAPI, published at `/docs` and `/redoc`, downloadable as JSON |
+| Task               | Details                                                                                    |
+| ------------------ | ------------------------------------------------------------------------------------------ |
+| Public REST API    | Separate versioned namespace `/api/v1/public/` for external consumers                      |
+| API key management | Create, list, rotate, and revoke API keys, scoped to read or write or admin                |
+| Usage tracking     | Per-key request count, token usage estimate, rate limit state exposed in response headers  |
+| Python SDK         | `evalforge-python` package with `EvalForgeClient`, typed run submission and result polling |
+| JS SDK example     | Minimal JavaScript fetch wrapper with TypeScript types for CI/CD integration               |
+| OpenAPI spec       | Auto-generated from FastAPI, published at `/docs` and `/redoc`, downloadable as JSON       |
 
 ---
 
 ### Phase 11 — SaaS Features (6–8 days)
 
-| Task | Details |
-|---|---|
-| Organisations | Org creation, slug-based routing, org admin role, member invite via email token |
-| Teams | Team creation within org, team-scoped project access, team-level API keys |
-| Usage metering | Per-org run counter, token usage estimator, usage history endpoint |
-| Plan limits | Free, Pro, and Enterprise plan model, feature gating middleware, limit enforcement |
-| Subscription hooks | Webhook receiver for billing events, plan upgrade and downgrade handling |
-| Billing-ready schema | `subscription_plan`, `usage_event`, `invoice` tables ready for Stripe integration |
+| Task                 | Details                                                                            |
+| -------------------- | ---------------------------------------------------------------------------------- |
+| Organisations        | Org creation, slug-based routing, org admin role, member invite via email token    |
+| Teams                | Team creation within org, team-scoped project access, team-level API keys          |
+| Usage metering       | Per-org run counter, token usage estimator, usage history endpoint                 |
+| Plan limits          | Free, Pro, and Enterprise plan model, feature gating middleware, limit enforcement |
+| Subscription hooks   | Webhook receiver for billing events, plan upgrade and downgrade handling           |
+| Billing-ready schema | `subscription_plan`, `usage_event`, `invoice` tables ready for Stripe integration  |
 
 ---
 
 ### Phase 12 — Launch (5–7 days)
 
-| Task | Details |
-|---|---|
-| Production deployment | Cloud VM or managed Kubernetes, domain, SSL via Let's Encrypt or Caddy |
-| Full documentation | User guide, self-hosting guide, API reference, SDK docs, CI integration cookbook |
-| GitHub polishing | Final README pass, repository topics, social preview image, v1.0.0 release tag |
-| Demo video | Screencast walkthrough covering run submission, live progress, results, and leaderboard |
-| Product Hunt | Launch page, tagline, assets, community coordination, scheduled launch day |
-| Hacker News | Show HN post with technical depth and architecture rationale |
-| Portfolio update | Resume and portfolio updated with EvalForge as a featured production project |
+| Task                  | Details                                                                                 |
+| --------------------- | --------------------------------------------------------------------------------------- |
+| Production deployment | Cloud VM or managed Kubernetes, domain, SSL via Let's Encrypt or Caddy                  |
+| Full documentation    | User guide, self-hosting guide, API reference, SDK docs, CI integration cookbook        |
+| GitHub polishing      | Final README pass, repository topics, social preview image, v1.0.0 release tag          |
+| Demo video            | Screencast walkthrough covering run submission, live progress, results, and leaderboard |
+| Product Hunt          | Launch page, tagline, assets, community coordination, scheduled launch day              |
+| Hacker News           | Show HN post with technical depth and architecture rationale                            |
+| Portfolio update      | Resume and portfolio updated with EvalForge as a featured production project            |
 
 ---
 
@@ -779,49 +779,49 @@ gantt
 
 ### Backend
 
-| Technology | Version | Purpose |
-|---|---|---|
-| Python | 3.12 | Runtime |
-| FastAPI | Latest | REST API framework, async-native, auto OpenAPI |
-| SQLAlchemy (Async) | Latest | ORM and query layer, async session management |
-| Alembic | Latest | Database migration management, auto-generation |
-| Pydantic v2 | Latest | Request and response validation, settings management |
-| Celery | Latest | Distributed task queue, background job execution |
-| Redis | Latest | Celery broker, result backend, response cache |
-| Structlog | Latest | Structured JSON logging with async support |
-| bcrypt | Latest | Password hashing, API key storage |
-| Jinja2 | Latest | Judge prompt template rendering |
+| Technology         | Version | Purpose                                              |
+| ------------------ | ------- | ---------------------------------------------------- |
+| Python             | 3.12    | Runtime                                              |
+| FastAPI            | Latest  | REST API framework, async-native, auto OpenAPI       |
+| SQLAlchemy (Async) | Latest  | ORM and query layer, async session management        |
+| Alembic            | Latest  | Database migration management, auto-generation       |
+| Pydantic v2        | Latest  | Request and response validation, settings management |
+| Celery             | Latest  | Distributed task queue, background job execution     |
+| Redis              | Latest  | Celery broker, result backend, response cache        |
+| Structlog          | Latest  | Structured JSON logging with async support           |
+| bcrypt             | Latest  | Password hashing, API key storage                    |
+| Jinja2             | Latest  | Judge prompt template rendering                      |
 
 ### Frontend
 
-| Technology | Version | Purpose |
-|---|---|---|
-| React | 18 | UI component library, concurrent rendering |
-| TypeScript | Latest | Type-safe frontend code, API response typing |
-| Vite | Latest | Build tool, HMR dev server, optimised production bundle |
-| Vanilla CSS | — | Premium styling without library overhead or bundle bloat |
+| Technology  | Version | Purpose                                                  |
+| ----------- | ------- | -------------------------------------------------------- |
+| React       | 18      | UI component library, concurrent rendering               |
+| TypeScript  | Latest  | Type-safe frontend code, API response typing             |
+| Vite        | Latest  | Build tool, HMR dev server, optimised production bundle  |
+| Vanilla CSS | —       | Premium styling without library overhead or bundle bloat |
 
 ### Infrastructure
 
-| Technology | Purpose |
-|---|---|
-| Docker + Docker Compose | Full stack containerisation, dev and prod variants |
-| PostgreSQL | Primary relational database, ACID transactions |
-| Redis | Celery task broker, caching, WebSocket pub/sub |
-| GitHub Actions | CI — lint, type-check, pytest, type-coverage on every PR |
-| Prometheus | Metrics scraping from API and workers |
-| Grafana | Pre-provisioned observability dashboards |
-| Nginx | Reverse proxy, SSL termination, static file serving |
+| Technology              | Purpose                                                  |
+| ----------------------- | -------------------------------------------------------- |
+| Docker + Docker Compose | Full stack containerisation, dev and prod variants       |
+| PostgreSQL              | Primary relational database, ACID transactions           |
+| Redis                   | Celery task broker, caching, WebSocket pub/sub           |
+| GitHub Actions          | CI — lint, type-check, pytest, type-coverage on every PR |
+| Prometheus              | Metrics scraping from API and workers                    |
+| Grafana                 | Pre-provisioned observability dashboards                 |
+| Nginx                   | Reverse proxy, SSL termination, static file serving      |
 
 ### Evaluation Frameworks
 
-| Framework | Metrics Supported |
-|---|---|
-| G-Eval | Coherence, relevance, correctness, fluency — any rubric via chain-of-thought |
-| DeepEval | Faithfulness, answer relevancy, contextual recall, contextual precision, hallucination |
-| AlpacaEval | Instruction following, pairwise winrate against reference model |
-| Custom LLM Judge | Any user-defined scoring rubric via Jinja2 prompt template |
-| Pairwise Comparator | A/B model comparison with ELO rating and tournament bracket |
+| Framework           | Metrics Supported                                                                      |
+| ------------------- | -------------------------------------------------------------------------------------- |
+| G-Eval              | Coherence, relevance, correctness, fluency — any rubric via chain-of-thought           |
+| DeepEval            | Faithfulness, answer relevancy, contextual recall, contextual precision, hallucination |
+| AlpacaEval          | Instruction following, pairwise winrate against reference model                        |
+| Custom LLM Judge    | Any user-defined scoring rubric via Jinja2 prompt template                             |
+| Pairwise Comparator | A/B model comparison with ELO rating and tournament bracket                            |
 
 ---
 
@@ -993,13 +993,13 @@ LOG_FORMAT=json
 
 ## Prerequisites
 
-| Requirement | Version | Notes |
-|---|---|---|
-| Docker | v20+ | [docs.docker.com](https://docs.docker.com/get-docker/) |
-| Docker Compose | v2+ | Bundled with Docker Desktop |
-| Node.js | v20+ | Required for frontend development without Docker |
-| Python | 3.11+ | Required for backend development without Docker |
-| Judge LLM API key | — | OpenAI, Anthropic, or a local Ollama instance |
+| Requirement       | Version | Notes                                                  |
+| ----------------- | ------- | ------------------------------------------------------ |
+| Docker            | v20+    | [docs.docker.com](https://docs.docker.com/get-docker/) |
+| Docker Compose    | v2+     | Bundled with Docker Desktop                            |
+| Node.js           | v20+    | Required for frontend development without Docker       |
+| Python            | 3.11+   | Required for backend development without Docker        |
+| Judge LLM API key | —       | OpenAI, Anthropic, or a local Ollama instance          |
 
 ---
 
@@ -1015,14 +1015,14 @@ cp backend/.env.example backend/.env
 docker compose up --build -d
 ```
 
-| Service | URL |
-|---|---|
-| Frontend | http://localhost |
-| Backend API | http://localhost:8000 |
-| API Docs - Swagger | http://localhost:8000/docs |
-| API Docs - ReDoc | http://localhost:8000/redoc |
-| Grafana | http://localhost:3001 |
-| Prometheus | http://localhost:9090 |
+| Service            | URL                         |
+| ------------------ | --------------------------- |
+| Frontend           | http://localhost            |
+| Backend API        | http://localhost:8000       |
+| API Docs - Swagger | http://localhost:8000/docs  |
+| API Docs - ReDoc   | http://localhost:8000/redoc |
+| Grafana            | http://localhost:3001       |
+| Prometheus         | http://localhost:9090       |
 
 ### Option B — Manual Development Setup
 
@@ -1063,60 +1063,60 @@ Authorization: Bearer <access_token>
 
 ### Authentication
 
-| Method | Endpoint | Auth | Description |
-|---|---|---|---|
-| `POST` | `/api/v1/auth/register` | No | Create user account |
-| `POST` | `/api/v1/auth/login` | No | Authenticate, returns access and refresh token pair |
-| `POST` | `/api/v1/auth/refresh` | No | Exchange refresh token for new access token |
-| `POST` | `/api/v1/auth/logout` | Yes | Revoke refresh token |
+| Method | Endpoint                | Auth | Description                                         |
+| ------ | ----------------------- | ---- | --------------------------------------------------- |
+| `POST` | `/api/v1/auth/register` | No   | Create user account                                 |
+| `POST` | `/api/v1/auth/login`    | No   | Authenticate, returns access and refresh token pair |
+| `POST` | `/api/v1/auth/refresh`  | No   | Exchange refresh token for new access token         |
+| `POST` | `/api/v1/auth/logout`   | Yes  | Revoke refresh token                                |
 
 ### Projects
 
-| Method | Endpoint | Auth | Description |
-|---|---|---|---|
-| `GET` | `/api/v1/projects` | Yes | List all projects in authenticated user's org |
-| `POST` | `/api/v1/projects` | Yes | Create a new project |
-| `GET` | `/api/v1/projects/:id` | Yes | Get project details and run summary |
-| `PUT` | `/api/v1/projects/:id` | Yes | Update project metadata |
-| `DELETE` | `/api/v1/projects/:id` | Yes | Delete project and all associated runs |
+| Method   | Endpoint               | Auth | Description                                   |
+| -------- | ---------------------- | ---- | --------------------------------------------- |
+| `GET`    | `/api/v1/projects`     | Yes  | List all projects in authenticated user's org |
+| `POST`   | `/api/v1/projects`     | Yes  | Create a new project                          |
+| `GET`    | `/api/v1/projects/:id` | Yes  | Get project details and run summary           |
+| `PUT`    | `/api/v1/projects/:id` | Yes  | Update project metadata                       |
+| `DELETE` | `/api/v1/projects/:id` | Yes  | Delete project and all associated runs        |
 
 ### Datasets
 
-| Method | Endpoint | Auth | Description |
-|---|---|---|---|
-| `POST` | `/api/v1/datasets` | Yes | Upload new dataset (CSV or JSON), creates version 1 |
-| `GET` | `/api/v1/datasets` | Yes | List all datasets in project |
-| `GET` | `/api/v1/datasets/:id/versions` | Yes | List all immutable versions of a dataset |
-| `GET` | `/api/v1/datasets/:id/preview` | Yes | Preview rows from a specific dataset version |
+| Method | Endpoint                        | Auth | Description                                         |
+| ------ | ------------------------------- | ---- | --------------------------------------------------- |
+| `POST` | `/api/v1/datasets`              | Yes  | Upload new dataset (CSV or JSON), creates version 1 |
+| `GET`  | `/api/v1/datasets`              | Yes  | List all datasets in project                        |
+| `GET`  | `/api/v1/datasets/:id/versions` | Yes  | List all immutable versions of a dataset            |
+| `GET`  | `/api/v1/datasets/:id/preview`  | Yes  | Preview rows from a specific dataset version        |
 
 ### Runs
 
-| Method | Endpoint | Auth | Description |
-|---|---|---|---|
-| `POST` | `/api/v1/runs` | Yes | Submit a new evaluation job |
-| `GET` | `/api/v1/runs` | Yes | List all runs with optional project and status filter |
-| `GET` | `/api/v1/runs/:id` | Yes | Full run results with per-test-case scores and reasoning |
-| `GET` | `/api/v1/runs/:id/progress` | Yes | Current completion percentage and status |
-| `DELETE` | `/api/v1/runs/:id` | Yes | Cancel a pending or running job |
-| `POST` | `/api/v1/runs/:id/retry` | Yes | Retry failed test cases in a completed run |
+| Method   | Endpoint                    | Auth | Description                                              |
+| -------- | --------------------------- | ---- | -------------------------------------------------------- |
+| `POST`   | `/api/v1/runs`              | Yes  | Submit a new evaluation job                              |
+| `GET`    | `/api/v1/runs`              | Yes  | List all runs with optional project and status filter    |
+| `GET`    | `/api/v1/runs/:id`          | Yes  | Full run results with per-test-case scores and reasoning |
+| `GET`    | `/api/v1/runs/:id/progress` | Yes  | Current completion percentage and status                 |
+| `DELETE` | `/api/v1/runs/:id`          | Yes  | Cancel a pending or running job                          |
+| `POST`   | `/api/v1/runs/:id/retry`    | Yes  | Retry failed test cases in a completed run               |
 
 ### Leaderboard and Reports
 
-| Method | Endpoint | Auth | Description |
-|---|---|---|---|
-| `GET` | `/api/v1/leaderboard` | Yes | Global model ranking by metric |
-| `GET` | `/api/v1/runs/:id/report` | Yes | Download auto-generated PDF report |
-| `GET` | `/api/v1/runs/:id/export` | Yes | Download full result CSV or JSON |
+| Method | Endpoint                  | Auth | Description                        |
+| ------ | ------------------------- | ---- | ---------------------------------- |
+| `GET`  | `/api/v1/leaderboard`     | Yes  | Global model ranking by metric     |
+| `GET`  | `/api/v1/runs/:id/report` | Yes  | Download auto-generated PDF report |
+| `GET`  | `/api/v1/runs/:id/export` | Yes  | Download full result CSV or JSON   |
 
 ### Platform
 
-| Method | Endpoint | Auth | Description |
-|---|---|---|---|
-| `GET` | `/api/v1/keys` | Yes | List API keys for authenticated user |
-| `POST` | `/api/v1/keys` | Yes | Create new API key with scope |
-| `DELETE` | `/api/v1/keys/:id` | Yes | Revoke an API key |
-| `GET` | `/api/v1/health` | No | API, DB, and Redis status |
-| `GET` | `/metrics` | No | Prometheus metrics endpoint |
+| Method   | Endpoint           | Auth | Description                          |
+| -------- | ------------------ | ---- | ------------------------------------ |
+| `GET`    | `/api/v1/keys`     | Yes  | List API keys for authenticated user |
+| `POST`   | `/api/v1/keys`     | Yes  | Create new API key with scope        |
+| `DELETE` | `/api/v1/keys/:id` | Yes  | Revoke an API key                    |
+| `GET`    | `/api/v1/health`   | No   | API, DB, and Redis status            |
+| `GET`    | `/metrics`         | No   | Prometheus metrics endpoint          |
 
 ---
 
@@ -1136,16 +1136,16 @@ All errors follow a consistent JSON envelope:
 }
 ```
 
-| HTTP Code | Error Code | Meaning |
-|---|---|---|
-| 400 | `VALIDATION_ERROR` | Request body or query param failed Pydantic validation |
-| 401 | `UNAUTHENTICATED` | Missing or expired JWT |
-| 403 | `FORBIDDEN` | Authenticated but insufficient role for this operation |
-| 404 | `NOT_FOUND` | Resource does not exist or belongs to a different org |
-| 409 | `CONFLICT` | Duplicate resource (e.g. dataset name already exists in project) |
-| 422 | `UNPROCESSABLE` | Semantically invalid input (e.g. dataset has no rows) |
-| 429 | `RATE_LIMITED` | Per-user or per-plan limit exceeded, check `Retry-After` header |
-| 500 | `INTERNAL_ERROR` | Unhandled server error, `request_id` included for support |
+| HTTP Code | Error Code         | Meaning                                                          |
+| --------- | ------------------ | ---------------------------------------------------------------- |
+| 400       | `VALIDATION_ERROR` | Request body or query param failed Pydantic validation           |
+| 401       | `UNAUTHENTICATED`  | Missing or expired JWT                                           |
+| 403       | `FORBIDDEN`        | Authenticated but insufficient role for this operation           |
+| 404       | `NOT_FOUND`        | Resource does not exist or belongs to a different org            |
+| 409       | `CONFLICT`         | Duplicate resource (e.g. dataset name already exists in project) |
+| 422       | `UNPROCESSABLE`    | Semantically invalid input (e.g. dataset has no rows)            |
+| 429       | `RATE_LIMITED`     | Per-user or per-plan limit exceeded, check `Retry-After` header  |
+| 500       | `INTERNAL_ERROR`   | Unhandled server error, `request_id` included for support        |
 
 ---
 
@@ -1153,16 +1153,16 @@ All errors follow a consistent JSON envelope:
 
 EvalForge exposes a Prometheus-compatible `/metrics` endpoint from the API. The following metrics are tracked:
 
-| Metric | Type | Description |
-|---|---|---|
-| `evalforge_http_requests_total` | Counter | Total HTTP requests by method, route, and status code |
-| `evalforge_http_request_duration_seconds` | Histogram | Request latency with p50, p95, p99 buckets |
-| `evalforge_runs_total` | Counter | Total evaluation runs submitted by status |
-| `evalforge_run_duration_seconds` | Histogram | End-to-end evaluation job duration |
-| `evalforge_queue_depth` | Gauge | Current number of jobs in the Celery queue |
-| `evalforge_worker_active_tasks` | Gauge | Currently executing Celery tasks across all workers |
-| `evalforge_test_cases_evaluated_total` | Counter | Total test cases evaluated across all runs |
-| `evalforge_judge_latency_seconds` | Histogram | Per-LLM-call latency for each judge type |
+| Metric                                    | Type      | Description                                           |
+| ----------------------------------------- | --------- | ----------------------------------------------------- |
+| `evalforge_http_requests_total`           | Counter   | Total HTTP requests by method, route, and status code |
+| `evalforge_http_request_duration_seconds` | Histogram | Request latency with p50, p95, p99 buckets            |
+| `evalforge_runs_total`                    | Counter   | Total evaluation runs submitted by status             |
+| `evalforge_run_duration_seconds`          | Histogram | End-to-end evaluation job duration                    |
+| `evalforge_queue_depth`                   | Gauge     | Current number of jobs in the Celery queue            |
+| `evalforge_worker_active_tasks`           | Gauge     | Currently executing Celery tasks across all workers   |
+| `evalforge_test_cases_evaluated_total`    | Counter   | Total test cases evaluated across all runs            |
+| `evalforge_judge_latency_seconds`         | Histogram | Per-LLM-call latency for each judge type              |
 
 The Grafana dashboard is auto-provisioned at `http://localhost:3001` when running via Docker Compose.
 
@@ -1226,6 +1226,7 @@ npm run lint
 4. Open a Pull Request against `main` with a description, motivation, and screenshots or test output where relevant.
 
 See our full guides:
+
 - **[CONTRIBUTING.md](CONTRIBUTING.md):** Comprehensive 23-section maintainer & contributor handbook.
 - **[FIRST_CONTRIBUTOR_GUIDE.md](.github/FIRST_CONTRIBUTOR_GUIDE.md):** 10-minute quickstart guide for first-time open source contributors.
 - **[CONTRIBUTOR_ISSUES_CATALOG.md](docs/CONTRIBUTOR_ISSUES_CATALOG.md):** 30 real, curated engineering issues ready for assignment.
@@ -1245,6 +1246,7 @@ We love and appreciate our open-source contributors! EvalForge is built by devel
 </a>
 
 ### How to Join the Contributor Hall of Fame:
+
 1. Pick an unassigned issue from our [`good first issue`](https://github.com/hardikkaurani/Eval-Forge/issues?q=is%3Aissue+is%3Aopen+label%3A"good+first+issue") list.
 2. Run `./scripts/setup-dev-env.sh` (or `.\scripts\setup-dev-env.ps1`) to initialize your local stack.
 3. Submit your PR — once merged, your avatar will appear above automatically!
@@ -1281,7 +1283,7 @@ Distributed under the **MIT License**. See [LICENSE](LICENSE) for details.
 
 <div align="center">
 
-*EvalForge — built for AI engineers who refuse to ship LLMs they cannot measure!*
+_EvalForge — built for AI engineers who refuse to ship LLMs they cannot measure!_
 
 <br/>
 
