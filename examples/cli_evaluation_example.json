@@ -1,0 +1,28 @@
+{
+  "name": "CLI Production Readiness Benchmark",
+  "metrics": [
+    "accuracy",
+    "semantic_similarity",
+    "faithfulness"
+  ],
+  "test_cases": [
+    {
+      "input": "Explain the difference between synchronous and asynchronous database drivers in Python.",
+      "actual_output": "Synchronous drivers block the event loop while waiting for database queries to complete, whereas asynchronous drivers yield execution during I/O operations, allowing concurrent request processing.",
+      "expected_output": "Async drivers do not block the thread during I/O operations, enabling high-concurrency throughput compared to blocking sync drivers.",
+      "metadata": {
+        "domain": "backend_engineering",
+        "difficulty": "medium"
+      }
+    },
+    {
+      "input": "What HTTP status code is used for rate limiting?",
+      "actual_output": "HTTP 429 Too Many Requests.",
+      "expected_output": "429 Too Many Requests.",
+      "metadata": {
+        "domain": "http_standards",
+        "difficulty": "easy"
+      }
+    }
+  ]
+}

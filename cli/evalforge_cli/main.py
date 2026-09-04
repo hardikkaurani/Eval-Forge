@@ -129,64 +129,67 @@ def cmd_config(args: argparse.Namespace) -> None:
 
 
 def main(argv: Optional[List[str]] = None) -> None:
+    common_parser = argparse.ArgumentParser(add_help=False)
+    common_parser.add_argument("--json", action="store_true", help="Format output as JSON")
+
     parser = argparse.ArgumentParser(
         prog="evalforge",
         description="Official CLI for the Eval-Forge AI Evaluation Platform",
+        parents=[common_parser],
     )
-    parser.add_argument("--json", action="store_true", help="Format output as JSON")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     # Auth
-    p_auth = subparsers.add_parser("auth", help="Authentication commands")
+    p_auth = subparsers.add_parser("auth", help="Authentication commands", parents=[common_parser])
     sub_auth = p_auth.add_subparsers(dest="auth_action", required=True)
-    p_login = sub_auth.add_parser("login", help="Log in with an API key")
+    p_login = sub_auth.add_parser("login", help="Log in with an API key", parents=[common_parser])
     p_login.add_argument("--key", required=True, help="Eval-Forge API Key")
-    sub_auth.add_parser("status", help="Check authentication status")
+    sub_auth.add_parser("status", help="Check authentication status", parents=[common_parser])
 
     # Projects
-    p_proj = subparsers.add_parser("projects", help="Manage evaluation projects")
+    p_proj = subparsers.add_parser("projects", help="Manage evaluation projects", parents=[common_parser])
     sub_proj = p_proj.add_subparsers(dest="project_action", required=True)
-    p_proj_list = sub_proj.add_parser("list", help="List projects")
+    p_proj_list = sub_proj.add_parser("list", help="List projects", parents=[common_parser])
     p_proj_list.add_argument("--page", type=int, default=1)
     p_proj_list.add_argument("--page-size", type=int, default=20)
-    p_proj_create = sub_proj.add_parser("create", help="Create a project")
+    p_proj_create = sub_proj.add_parser("create", help="Create a project", parents=[common_parser])
     p_proj_create.add_argument("--name", required=True, help="Project name")
     p_proj_create.add_argument("--description", help="Project description")
 
     # Datasets
-    p_data = subparsers.add_parser("datasets", help="Manage datasets")
+    p_data = subparsers.add_parser("datasets", help="Manage datasets", parents=[common_parser])
     sub_data = p_data.add_subparsers(dest="dataset_action", required=True)
-    p_data_list = sub_data.add_parser("list", help="List datasets")
+    p_data_list = sub_data.add_parser("list", help="List datasets", parents=[common_parser])
     p_data_list.add_argument("--project-id", required=True, help="Project UUID")
 
     # Evaluations
-    p_eval = subparsers.add_parser("evaluations", help="Run and manage evaluations")
+    p_eval = subparsers.add_parser("evaluations", help="Run and manage evaluations", parents=[common_parser])
     sub_eval = p_eval.add_subparsers(dest="eval_action", required=True)
-    p_eval_run = sub_eval.add_parser("run", help="Launch an evaluation run")
+    p_eval_run = sub_eval.add_parser("run", help="Launch an evaluation run", parents=[common_parser])
     p_eval_run.add_argument("--project-id", required=True, help="Project UUID")
     p_eval_run.add_argument(
         "--config", required=True, help="Path to JSON evaluation config"
     )
 
     # Jobs
-    p_jobs = subparsers.add_parser("jobs", help="Inspect background evaluation jobs")
+    p_jobs = subparsers.add_parser("jobs", help="Inspect background evaluation jobs", parents=[common_parser])
     sub_jobs = p_jobs.add_subparsers(dest="job_action", required=True)
-    p_jobs_get = sub_jobs.add_parser("get", help="Get job details")
+    p_jobs_get = sub_jobs.add_parser("get", help="Get job details", parents=[common_parser])
     p_jobs_get.add_argument("--id", required=True, help="Job UUID")
 
     # Results
-    p_res = subparsers.add_parser("results", help="Inspect evaluation results")
+    p_res = subparsers.add_parser("results", help="Inspect evaluation results", parents=[common_parser])
     sub_res = p_res.add_subparsers(dest="result_action", required=True)
-    p_res_get = sub_res.add_parser("get", help="Get evaluation run results")
+    p_res_get = sub_res.add_parser("get", help="Get evaluation run results", parents=[common_parser])
     p_res_get.add_argument("--run-id", required=True, help="Run UUID")
     p_res_get.add_argument("--limit", type=int, default=50)
 
     # Config
-    p_cfg = subparsers.add_parser("config", help="Manage CLI configuration")
+    p_cfg = subparsers.add_parser("config", help="Manage CLI configuration", parents=[common_parser])
     sub_cfg = p_cfg.add_subparsers(dest="config_action", required=True)
-    p_cfg_set = sub_cfg.add_parser("set", help="Set configuration value")
+    p_cfg_set = sub_cfg.add_parser("set", help="Set configuration value", parents=[common_parser])
     p_cfg_set.add_argument("--base-url", help="API Base URL")
-    sub_cfg.add_parser("get", help="View current configuration")
+    sub_cfg.add_parser("get", help="View current configuration", parents=[common_parser])
 
     parsed = parser.parse_args(argv)
 

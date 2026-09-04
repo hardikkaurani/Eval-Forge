@@ -98,7 +98,8 @@ class Settings(BaseSettings):
     @field_validator("POSTGRES_PASSWORD")
     @classmethod
     def check_postgres_password(cls, v: SecretStr, info):
-        if APP_ENV == "production":
+        env = (info.data.get("APP_ENV") or APP_ENV or "development").lower()
+        if env == "production":
             default = "postgres_password"
             if v.get_secret_value() == default:
                 raise ValueError(
@@ -111,7 +112,8 @@ class Settings(BaseSettings):
     @classmethod
     def check_secret_key(cls, v: SecretStr, info):
         # In production, ensure the secret key is not the default placeholder
-        if APP_ENV == "production":
+        env = (info.data.get("APP_ENV") or APP_ENV or "development").lower()
+        if env == "production":
             default = "dev-secret-key-evalforge-placeholder"
             if v.get_secret_value() == default:
                 raise ValueError(
@@ -123,7 +125,8 @@ class Settings(BaseSettings):
     @field_validator("CORS_ORIGINS")
     @classmethod
     def check_cors_origins(cls, v: list[str], info):
-        if APP_ENV == "production":
+        env = (info.data.get("APP_ENV") or APP_ENV or "development").lower()
+        if env == "production":
             # In production, CORS should not allow all origins by default
             if v == ["*"]:
                 raise ValueError(
@@ -135,7 +138,8 @@ class Settings(BaseSettings):
     @field_validator("DEBUG")
     @classmethod
     def check_debug(cls, v: bool, info):
-        if APP_ENV == "production" and v:
+        env = (info.data.get("APP_ENV") or APP_ENV or "development").lower()
+        if env == "production" and v:
             raise ValueError("DEBUG must be False in production environment")
         return v
 

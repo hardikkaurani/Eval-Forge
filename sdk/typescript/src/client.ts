@@ -18,6 +18,8 @@ import {
 
 const DEFAULT_BASE_URL = 'http://localhost:8000';
 
+declare const process: { env?: Record<string, string | undefined> } | undefined;
+
 export class EvalForge {
   private readonly apiKey: string;
   private readonly baseUrl: string;
@@ -25,12 +27,14 @@ export class EvalForge {
   private readonly maxRetries: number;
 
   constructor(config: EvalForgeConfig = {}) {
-    const key = config.apiKey ?? (typeof process !== 'undefined' ? process.env.EVALFORGE_API_KEY : undefined);
+    const envKey = typeof process !== 'undefined' ? process?.env?.EVALFORGE_API_KEY : undefined;
+    const key = config.apiKey ?? envKey;
     if (!key) {
       throw new AuthenticationError('API key must be provided or configured via EVALFORGE_API_KEY.');
     }
     this.apiKey = key;
-    this.baseUrl = (config.baseUrl ?? (typeof process !== 'undefined' ? process.env.EVALFORGE_BASE_URL : undefined) ?? DEFAULT_BASE_URL).replace(/\/$/, '');
+    const envBaseUrl = typeof process !== 'undefined' ? process?.env?.EVALFORGE_BASE_URL : undefined;
+    this.baseUrl = (config.baseUrl ?? envBaseUrl ?? DEFAULT_BASE_URL).replace(/\/$/, '');
     this.timeoutMs = config.timeoutMs ?? 30000;
     this.maxRetries = config.maxRetries ?? 3;
   }

@@ -27,21 +27,19 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r backend/requirements.txt
+          pip install -e ./sdk/python -e ./cli
 
       - name: Lint with Ruff
         run: |
-          cd backend
-          ruff check .
+          ruff check backend/
 
       - name: Verify Formatting with Black
         run: |
-          cd backend
-          black --check .
+          black --check backend/
 
       - name: Run Tests with Pytest
         run: |
-          cd backend
-          pytest
+          pytest backend/tests sdk/python/tests cli/tests
 
   frontend-lint-build:
     runs-on: ubuntu-latest
