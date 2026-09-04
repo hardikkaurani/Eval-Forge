@@ -13,7 +13,12 @@ const TIERS = [
     price: '$0',
     period: '/month',
     description: 'For individual developers testing basic LLM evals',
-    features: ['1,000 API Requests/mo', '100 Evaluations/mo', '100 MB Storage', 'Community Support'],
+    features: [
+      '1,000 API Requests/mo',
+      '100 Evaluations/mo',
+      '100 MB Storage',
+      'Community Support',
+    ],
     isCurrent: false,
   },
   {
@@ -21,7 +26,13 @@ const TIERS = [
     price: '$49',
     period: '/month',
     description: 'For growing AI teams running continuous benchmarks',
-    features: ['10,000 API Requests/mo', '1,000 Evaluations/mo', '1,000 MB Storage', 'Custom Rubric Judges', 'Priority Workers'],
+    features: [
+      '10,000 API Requests/mo',
+      '1,000 Evaluations/mo',
+      '1,000 MB Storage',
+      'Custom Rubric Judges',
+      'Priority Workers',
+    ],
     highlight: true,
   },
   {
@@ -29,14 +40,26 @@ const TIERS = [
     price: '$149',
     period: '/month',
     description: 'For production organizations evaluating multiple agents',
-    features: ['50,000 API Requests/mo', '5,000 Evaluations/mo', '5,000 MB Storage', 'Team RBAC & Invitations', 'Full Webhook Outbox'],
+    features: [
+      '50,000 API Requests/mo',
+      '5,000 Evaluations/mo',
+      '5,000 MB Storage',
+      'Team RBAC & Invitations',
+      'Full Webhook Outbox',
+    ],
   },
   {
     name: 'Enterprise',
     price: '$499',
     period: '/month',
     description: 'For mission-critical LLM evaluation infrastructure',
-    features: ['250,000+ API Requests/mo', '25,000+ Evaluations/mo', 'Dedicated VPC Workers', 'SAML SSO Integration', 'Custom SLA'],
+    features: [
+      '250,000+ API Requests/mo',
+      '25,000+ Evaluations/mo',
+      'Dedicated VPC Workers',
+      'SAML SSO Integration',
+      'Custom SLA',
+    ],
   },
 ];
 
@@ -56,14 +79,22 @@ export default function BillingUsage() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   // Fetch subscription
-  const { data: subData, isLoading: subLoading, refetch: refetchSub } = useQuery({
+  const {
+    data: subData,
+    isLoading: subLoading,
+    refetch: refetchSub,
+  } = useQuery({
     queryKey: ['subscription', orgId],
     queryFn: () => api.enterprise.getSubscription(orgId),
     retry: false,
   });
 
   // Fetch evaluations quota
-  const { data: quotaData, isLoading: quotaLoading, refetch: refetchQuota } = useQuery({
+  const {
+    data: quotaData,
+    isLoading: quotaLoading,
+    refetch: refetchQuota,
+  } = useQuery({
     queryKey: ['quota', wsId, orgId, 'evaluations'],
     queryFn: () => api.enterprise.getWorkspaceQuota(wsId, orgId, 'evaluations'),
     retry: false,
@@ -78,7 +109,8 @@ export default function BillingUsage() {
         window.location.href = url;
       }
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Failed to initialize Stripe checkout session.';
+      const msg =
+        err instanceof Error ? err.message : 'Failed to initialize Stripe checkout session.';
       setErrorMsg(msg);
     } finally {
       setCheckoutLoading(null);
@@ -103,10 +135,12 @@ export default function BillingUsage() {
 
   const currentPlanName = (subData as { plan_name?: string } | undefined)?.plan_name || 'Pro';
   const subStatus = (subData as { status?: string } | undefined)?.status || 'Active';
-  const quotaTyped = quotaData as { current?: number; limit?: number; percentage_used?: number } | undefined;
+  const quotaTyped = quotaData as
+    { current?: number; limit?: number; percentage_used?: number } | undefined;
   const usageCurrent = quotaTyped?.current || 420;
   const usageLimit = quotaTyped?.limit || 1000;
-  const usagePct = quotaTyped?.percentage_used || Math.min(100, Math.round((usageCurrent / usageLimit) * 100));
+  const usagePct =
+    quotaTyped?.percentage_used || Math.min(100, Math.round((usageCurrent / usageLimit) * 100));
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
@@ -118,7 +152,8 @@ export default function BillingUsage() {
             Enterprise Subscription & Quota Usage
           </h1>
           <p className="text-xs text-workbench-muted mt-1">
-            Manage organization subscription tier, Stripe customer portal billing, and evaluation usage quotas.
+            Manage organization subscription tier, Stripe customer portal billing, and evaluation
+            usage quotas.
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -177,14 +212,20 @@ export default function BillingUsage() {
           <div className="space-y-3 mt-2">
             <div className="flex items-center justify-between text-xs font-mono">
               <span className="text-workbench-text font-semibold">
-                {quotaLoading ? '...' : `${usageCurrent.toLocaleString()} / ${usageLimit.toLocaleString()} Evals`}
+                {quotaLoading
+                  ? '...'
+                  : `${usageCurrent.toLocaleString()} / ${usageLimit.toLocaleString()} Evals`}
               </span>
               <span className="text-brand-terracotta font-bold">{usagePct}% Used</span>
             </div>
             <div className="w-full bg-workbench-bg h-3 rounded-full overflow-hidden border border-workbench-border">
               <div
                 className={`h-full rounded-full transition-all duration-500 ${
-                  usagePct > 90 ? 'bg-rose-500' : usagePct > 75 ? 'bg-amber-500' : 'bg-brand-terracotta'
+                  usagePct > 90
+                    ? 'bg-rose-500'
+                    : usagePct > 75
+                      ? 'bg-amber-500'
+                      : 'bg-brand-terracotta'
                 }`}
                 style={{ width: `${Math.min(100, usagePct)}%` }}
               />
@@ -229,7 +270,10 @@ export default function BillingUsage() {
 
                   <div className="mt-4 pt-4 border-t border-workbench-border space-y-2">
                     {tier.features.map((f, i) => (
-                      <div key={i} className="flex items-start gap-2 text-[11px] text-workbench-text">
+                      <div
+                        key={i}
+                        className="flex items-start gap-2 text-[11px] text-workbench-text"
+                      >
                         <Check className="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" />
                         <span>{f}</span>
                       </div>

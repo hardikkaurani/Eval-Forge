@@ -770,7 +770,12 @@ export const api = {
       const res = await apiClient.get(`/billing/subscription?org_id=${orgId}`);
       return res.data.data;
     },
-    createCheckout: async (orgId: string, planName: string, successUrl?: string, cancelUrl?: string) => {
+    createCheckout: async (
+      orgId: string,
+      planName: string,
+      successUrl?: string,
+      cancelUrl?: string
+    ) => {
       const params = new URLSearchParams({ org_id: orgId, plan_name: planName });
       if (successUrl) params.append('success_url', successUrl);
       if (cancelUrl) params.append('cancel_url', cancelUrl);
@@ -804,7 +809,9 @@ export const api = {
       return res.data.data;
     },
     resendInvitation: async (orgId: string, invitationId: string) => {
-      const res = await apiClient.post(`/organizations/${orgId}/invitations/${invitationId}/resend`);
+      const res = await apiClient.post(
+        `/organizations/${orgId}/invitations/${invitationId}/resend`
+      );
       return res.data.data;
     },
     acceptInvitation: async (token: string) => {

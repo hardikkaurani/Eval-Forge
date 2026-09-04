@@ -35,7 +35,11 @@ export default function MembersAccess() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   // Fetch real organization members
-  const { data: members, isLoading, refetch } = useQuery({
+  const {
+    data: members,
+    isLoading,
+    refetch,
+  } = useQuery({
     queryKey: ['members', orgId],
     queryFn: () => api.enterprise.listMembers(orgId),
     retry: false,
@@ -76,17 +80,18 @@ export default function MembersAccess() {
     }
   };
 
-  const memberList: MemberItem[] = Array.isArray(members) && members.length > 0
-    ? (members as MemberItem[])
-    : [
-        {
-          id: 'mem-1',
-          user_id: 'usr-admin-default',
-          role: 'Owner',
-          is_active: true,
-          created_at: '2026-09-01T00:00:00Z',
-        },
-      ];
+  const memberList: MemberItem[] =
+    Array.isArray(members) && members.length > 0
+      ? (members as MemberItem[])
+      : [
+          {
+            id: 'mem-1',
+            user_id: 'usr-admin-default',
+            role: 'Owner',
+            is_active: true,
+            created_at: '2026-09-01T00:00:00Z',
+          },
+        ];
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
@@ -183,7 +188,11 @@ export default function MembersAccess() {
       </Card>
 
       {/* Invite Member Dialog */}
-      <Dialog isOpen={isInviteOpen} onClose={() => setIsInviteOpen(false)} title="Invite Team Member">
+      <Dialog
+        isOpen={isInviteOpen}
+        onClose={() => setIsInviteOpen(false)}
+        title="Invite Team Member"
+      >
         <form onSubmit={handleSendInvite} className="space-y-4">
           <p className="text-xs text-workbench-muted">
             Send an organization membership invitation. An invitation token will be generated.
@@ -220,7 +229,12 @@ export default function MembersAccess() {
           )}
 
           <div className="flex justify-end gap-2 pt-2">
-            <Button variant="outline" size="sm" type="button" onClick={() => setIsInviteOpen(false)}>
+            <Button
+              variant="outline"
+              size="sm"
+              type="button"
+              onClick={() => setIsInviteOpen(false)}
+            >
               Cancel
             </Button>
             <Button variant="primary" size="sm" type="submit" isLoading={inviteLoading}>
