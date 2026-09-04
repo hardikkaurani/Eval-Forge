@@ -54,17 +54,27 @@ def cmd_auth(args: argparse.Namespace) -> None:
 def cmd_projects(args: argparse.Namespace) -> None:
     client = CLIClient()
     if args.project_action == "list":
-        res = client.request("GET", "/api/v1/projects", params={"page": args.page, "page_size": args.page_size})
+        res = client.request(
+            "GET",
+            "/api/v1/projects",
+            params={"page": args.page, "page_size": args.page_size},
+        )
         print_output(res.get("data", res), args.json)
     elif args.project_action == "create":
-        res = client.request("POST", "/api/v1/projects", json_data={"name": args.name, "description": args.description})
+        res = client.request(
+            "POST",
+            "/api/v1/projects",
+            json_data={"name": args.name, "description": args.description},
+        )
         print_output(res.get("data", res), args.json)
 
 
 def cmd_datasets(args: argparse.Namespace) -> None:
     client = CLIClient()
     if args.dataset_action == "list":
-        res = client.request("GET", "/api/v1/datasets", params={"project_id": args.project_id})
+        res = client.request(
+            "GET", "/api/v1/datasets", params={"project_id": args.project_id}
+        )
         print_output(res.get("data", res), args.json)
 
 
@@ -98,7 +108,11 @@ def cmd_jobs(args: argparse.Namespace) -> None:
 def cmd_results(args: argparse.Namespace) -> None:
     client = CLIClient()
     if args.result_action == "get":
-        res = client.request("GET", f"/api/v1/evaluations/{args.run_id}/results", params={"limit": args.limit})
+        res = client.request(
+            "GET",
+            f"/api/v1/evaluations/{args.run_id}/results",
+            params={"limit": args.limit},
+        )
         print_output(res.get("data", res), args.json)
 
 
@@ -150,7 +164,9 @@ def main(argv: Optional[List[str]] = None) -> None:
     sub_eval = p_eval.add_subparsers(dest="eval_action", required=True)
     p_eval_run = sub_eval.add_parser("run", help="Launch an evaluation run")
     p_eval_run.add_argument("--project-id", required=True, help="Project UUID")
-    p_eval_run.add_argument("--config", required=True, help="Path to JSON evaluation config")
+    p_eval_run.add_argument(
+        "--config", required=True, help="Path to JSON evaluation config"
+    )
 
     # Jobs
     p_jobs = subparsers.add_parser("jobs", help="Inspect background evaluation jobs")

@@ -766,6 +766,59 @@ export const api = {
         return res.data;
       },
     },
+    getSubscription: async (orgId: string) => {
+      const res = await apiClient.get(`/billing/subscription?org_id=${orgId}`);
+      return res.data.data;
+    },
+    createCheckout: async (orgId: string, planName: string, successUrl?: string, cancelUrl?: string) => {
+      const params = new URLSearchParams({ org_id: orgId, plan_name: planName });
+      if (successUrl) params.append('success_url', successUrl);
+      if (cancelUrl) params.append('cancel_url', cancelUrl);
+      const res = await apiClient.post(`/billing/checkout?${params.toString()}`);
+      return res.data.data;
+    },
+    createPortalSession: async (orgId: string, returnUrl?: string) => {
+      const params = new URLSearchParams({ org_id: orgId });
+      if (returnUrl) params.append('return_url', returnUrl);
+      const res = await apiClient.post(`/billing/customer-portal?${params.toString()}`);
+      return res.data.data;
+    },
+    getInvoices: async (orgId: string) => {
+      const res = await apiClient.get(`/billing/invoices?org_id=${orgId}`);
+      return res.data.data;
+    },
+    listMembers: async (orgId: string) => {
+      const res = await apiClient.get(`/organizations/${orgId}/members`);
+      return res.data.data;
+    },
+    listInvitations: async (orgId: string) => {
+      const res = await apiClient.get(`/organizations/${orgId}/invitations`);
+      return res.data.data;
+    },
+    inviteMember: async (orgId: string, email: string, role: string = 'Member') => {
+      const res = await apiClient.post(`/organizations/${orgId}/invitations`, { email, role });
+      return res.data.data;
+    },
+    revokeInvitation: async (orgId: string, invitationId: string) => {
+      const res = await apiClient.delete(`/organizations/${orgId}/invitations/${invitationId}`);
+      return res.data.data;
+    },
+    resendInvitation: async (orgId: string, invitationId: string) => {
+      const res = await apiClient.post(`/organizations/${orgId}/invitations/${invitationId}/resend`);
+      return res.data.data;
+    },
+    acceptInvitation: async (token: string) => {
+      const res = await apiClient.post(`/organizations/invitations/${token}/accept`);
+      return res.data.data;
+    },
+    removeMember: async (orgId: string, membershipId: string) => {
+      const res = await apiClient.delete(`/organizations/${orgId}/members/${membershipId}`);
+      return res.data.data;
+    },
+    getWorkspaceQuota: async (wsId: string, orgId: string, metric: string) => {
+      const res = await apiClient.get(`/workspaces/${wsId}/quotas/${metric}?org_id=${orgId}`);
+      return res.data.data;
+    },
   },
   health: async () => {
     try {

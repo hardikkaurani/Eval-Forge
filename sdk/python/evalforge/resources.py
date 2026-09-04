@@ -27,7 +27,10 @@ class ProjectsResource:
             params={"page": page, "page_size": page_size},
         )
         items = data.get("data", data)
-        return [Project.model_validate(i) for i in (items if isinstance(items, list) else [])]
+        return [
+            Project.model_validate(i)
+            for i in (items if isinstance(items, list) else [])
+        ]
 
     def get(self, project_id: UUID | str) -> Project:
         data = self._client._request("GET", f"/api/v1/projects/{project_id}")
@@ -39,18 +42,29 @@ class DatasetsResource:
     def __init__(self, client: "EvalForge"):
         self._client = client
 
-    def create(self, project_id: UUID | str, name: str, description: Optional[str] = None) -> Dataset:
+    def create(
+        self, project_id: UUID | str, name: str, description: Optional[str] = None
+    ) -> Dataset:
         data = self._client._request(
             "POST",
             "/api/v1/datasets",
-            json={"project_id": str(project_id), "name": name, "description": description},
+            json={
+                "project_id": str(project_id),
+                "name": name,
+                "description": description,
+            },
         )
         return Dataset.model_validate(data.get("data", data))
 
     def list(self, project_id: UUID | str) -> List[Dataset]:
-        data = self._client._request("GET", "/api/v1/datasets", params={"project_id": str(project_id)})
+        data = self._client._request(
+            "GET", "/api/v1/datasets", params={"project_id": str(project_id)}
+        )
         items = data.get("data", data)
-        return [Dataset.model_validate(i) for i in (items if isinstance(items, list) else [])]
+        return [
+            Dataset.model_validate(i)
+            for i in (items if isinstance(items, list) else [])
+        ]
 
 
 class EvaluationsResource:
@@ -78,10 +92,17 @@ class EvaluationsResource:
         data = self._client._request("GET", f"/api/v1/evaluations/{run_id}")
         return EvaluationRun.model_validate(data.get("data", data))
 
-    def list_results(self, run_id: UUID | str, limit: int = 50) -> List[EvaluationResult]:
-        data = self._client._request("GET", f"/api/v1/evaluations/{run_id}/results", params={"limit": limit})
+    def list_results(
+        self, run_id: UUID | str, limit: int = 50
+    ) -> List[EvaluationResult]:
+        data = self._client._request(
+            "GET", f"/api/v1/evaluations/{run_id}/results", params={"limit": limit}
+        )
         items = data.get("data", data)
-        return [EvaluationResult.model_validate(i) for i in (items if isinstance(items, list) else [])]
+        return [
+            EvaluationResult.model_validate(i)
+            for i in (items if isinstance(items, list) else [])
+        ]
 
 
 class JobsResource:
@@ -114,7 +135,10 @@ class AsyncProjectsResource:
             params={"page": page, "page_size": page_size},
         )
         items = data.get("data", data)
-        return [Project.model_validate(i) for i in (items if isinstance(items, list) else [])]
+        return [
+            Project.model_validate(i)
+            for i in (items if isinstance(items, list) else [])
+        ]
 
     async def get(self, project_id: UUID | str) -> Project:
         data = await self._client._request("GET", f"/api/v1/projects/{project_id}")
@@ -126,18 +150,29 @@ class AsyncDatasetsResource:
     def __init__(self, client: "AsyncEvalForge"):
         self._client = client
 
-    async def create(self, project_id: UUID | str, name: str, description: Optional[str] = None) -> Dataset:
+    async def create(
+        self, project_id: UUID | str, name: str, description: Optional[str] = None
+    ) -> Dataset:
         data = await self._client._request(
             "POST",
             "/api/v1/datasets",
-            json={"project_id": str(project_id), "name": name, "description": description},
+            json={
+                "project_id": str(project_id),
+                "name": name,
+                "description": description,
+            },
         )
         return Dataset.model_validate(data.get("data", data))
 
     async def list(self, project_id: UUID | str) -> List[Dataset]:
-        data = await self._client._request("GET", "/api/v1/datasets", params={"project_id": str(project_id)})
+        data = await self._client._request(
+            "GET", "/api/v1/datasets", params={"project_id": str(project_id)}
+        )
         items = data.get("data", data)
-        return [Dataset.model_validate(i) for i in (items if isinstance(items, list) else [])]
+        return [
+            Dataset.model_validate(i)
+            for i in (items if isinstance(items, list) else [])
+        ]
 
 
 class AsyncEvaluationsResource:
@@ -165,10 +200,17 @@ class AsyncEvaluationsResource:
         data = await self._client._request("GET", f"/api/v1/evaluations/{run_id}")
         return EvaluationRun.model_validate(data.get("data", data))
 
-    async def list_results(self, run_id: UUID | str, limit: int = 50) -> List[EvaluationResult]:
-        data = await self._client._request("GET", f"/api/v1/evaluations/{run_id}/results", params={"limit": limit})
+    async def list_results(
+        self, run_id: UUID | str, limit: int = 50
+    ) -> List[EvaluationResult]:
+        data = await self._client._request(
+            "GET", f"/api/v1/evaluations/{run_id}/results", params={"limit": limit}
+        )
         items = data.get("data", data)
-        return [EvaluationResult.model_validate(i) for i in (items if isinstance(items, list) else [])]
+        return [
+            EvaluationResult.model_validate(i)
+            for i in (items if isinstance(items, list) else [])
+        ]
 
 
 class AsyncJobsResource:

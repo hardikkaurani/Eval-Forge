@@ -73,6 +73,11 @@ class Settings(BaseSettings):
     NVIDIA_API_KEY: SecretStr | None = None
     OLLAMA_BASE_URL: str = "http://localhost:11434"
 
+    # Stripe SaaS Billing Configuration
+    STRIPE_SECRET_KEY: SecretStr | None = None
+    STRIPE_PUBLISHABLE_KEY: str | None = None
+    STRIPE_WEBHOOK_SECRET: SecretStr | None = None
+
     # Evaluation Engine Defaults
     DEFAULT_EVALUATION_PROVIDER: str = "openai"
     DEFAULT_EVALUATION_JUDGE: str = "rubric"

@@ -9,6 +9,7 @@ from sqlalchemy import (
     Float,
     ForeignKey,
     String,
+    UniqueConstraint,
 )
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
@@ -23,6 +24,7 @@ class Organization(Base):
     name = Column(String(255), nullable=False)
     logo_url = Column(String(512), nullable=True)
     custom_domain = Column(String(255), nullable=True, unique=True)
+    stripe_customer_id = Column(String(255), nullable=True, unique=True, index=True)
     branding_settings = Column(JSON, nullable=True)
     security_policies = Column(JSON, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
@@ -97,6 +99,9 @@ class Workspace(Base):
 
 class Membership(Base):
     __tablename__ = "memberships"
+    __table_args__ = (
+        UniqueConstraint("organization_id", "user_id", name="uq_memberships_org_user"),
+    )
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     organization_id = Column(
@@ -168,6 +173,7 @@ class Plan(Base):
         String(100), nullable=False, unique=True
     )  # Starter, Pro, Team, Business, Enterprise
     price_monthly = Column(Float, nullable=False)
+    stripe_price_id = Column(String(255), nullable=True)
     limits = Column(
         JSON, nullable=False
     )  # limits: api, storage, evaluation, concurrency, retention, etc.
@@ -186,6 +192,9 @@ class Subscription(Base):
         nullable=False,
     )
     plan_id = Column(UUID(as_uuid=True), ForeignKey("plans.id"), nullable=False)
+    stripe_subscription_id = Column(String(255), nullable=True, unique=True, index=True)
+    stripe_price_id = Column(String(255), nullable=True)
+    cancel_at_period_end = Column(Boolean, default=False)
     status = Column(
         String(50), default="active"
     )  # active, past_due, canceled, trialing
@@ -331,3 +340,12 @@ class EnterpriseAPIKey(Base):
 
     organization = relationship("Organization", back_populates="api_keys")
     workspace = relationship("Workspace", back_populates="api_keys")
+
+
+class StripeWebhookEvent(Base):
+    __tablename__ = "stripe_webhook_events"
+
+    id = Column(String(255), primary_key=True)  # Stripe event ID e.g. evt_12345
+    event_type = Column(String(100), nullable=False)
+    payload = Column(JSON, nullable=False)
+    processed_at = Column(DateTime, default=datetime.utcnow)

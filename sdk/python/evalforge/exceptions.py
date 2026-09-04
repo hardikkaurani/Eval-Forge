@@ -71,9 +71,11 @@ class RateLimitError(APIError):
 
 class APIConnectionError(EvalForgeError):
     """Raised when a network or transport connection failure occurs."""
+
     pass
 
 
 class APIResponseValidationError(EvalForgeError):
     """Raised when the response payload does not match the expected schema."""
+
     pass

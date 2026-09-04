@@ -42,7 +42,9 @@ class EvalForge:
                 "Eval-Forge API key must be provided or set via EVALFORGE_API_KEY environment variable."
             )
 
-        self.base_url = (base_url or os.environ.get("EVALFORGE_BASE_URL") or DEFAULT_BASE_URL).rstrip("/")
+        self.base_url = (
+            base_url or os.environ.get("EVALFORGE_BASE_URL") or DEFAULT_BASE_URL
+        ).rstrip("/")
         self.timeout = timeout
         self.max_retries = max_retries
 
@@ -77,9 +79,13 @@ class EvalForge:
                 request_id = response.headers.get("X-Request-ID")
 
                 if response.status_code == 401:
-                    raise AuthenticationError("Invalid or missing API key.", request_id=request_id)
+                    raise AuthenticationError(
+                        "Invalid or missing API key.", request_id=request_id
+                    )
                 elif response.status_code == 404:
-                    raise NotFoundError(f"Resource not found: {path}", request_id=request_id)
+                    raise NotFoundError(
+                        f"Resource not found: {path}", request_id=request_id
+                    )
                 elif response.status_code == 429:
                     if attempt < self.max_retries - 1:
                         time.sleep(1.0 * (2**attempt))
@@ -102,8 +108,12 @@ class EvalForge:
                 raise APIConnectionError(f"Connection failed: {str(e)}") from e
 
         if last_exception:
-            raise APIConnectionError(f"Request failed after {self.max_retries} retries.") from last_exception
-        raise APIError("Unknown error occurred during request execution.", status_code=500)
+            raise APIConnectionError(
+                f"Request failed after {self.max_retries} retries."
+            ) from last_exception
+        raise APIError(
+            "Unknown error occurred during request execution.", status_code=500
+        )
 
     def close(self):
         self._http.close()
@@ -130,7 +140,9 @@ class AsyncEvalForge:
             raise AuthenticationError(
                 "Eval-Forge API key must be provided or set via EVALFORGE_API_KEY environment variable."
             )
-        self.base_url = (base_url or os.environ.get("EVALFORGE_BASE_URL") or DEFAULT_BASE_URL).rstrip("/")
+        self.base_url = (
+            base_url or os.environ.get("EVALFORGE_BASE_URL") or DEFAULT_BASE_URL
+        ).rstrip("/")
         self.timeout = timeout
         self.max_retries = max_retries
 
@@ -161,13 +173,19 @@ class AsyncEvalForge:
 
         for attempt in range(self.max_retries):
             try:
-                response = await self._http.request(method, path, params=params, json=json)
+                response = await self._http.request(
+                    method, path, params=params, json=json
+                )
                 request_id = response.headers.get("X-Request-ID")
 
                 if response.status_code == 401:
-                    raise AuthenticationError("Invalid or missing API key.", request_id=request_id)
+                    raise AuthenticationError(
+                        "Invalid or missing API key.", request_id=request_id
+                    )
                 elif response.status_code == 404:
-                    raise NotFoundError(f"Resource not found: {path}", request_id=request_id)
+                    raise NotFoundError(
+                        f"Resource not found: {path}", request_id=request_id
+                    )
                 elif response.status_code == 429:
                     if attempt < self.max_retries - 1:
                         await asyncio.sleep(1.0 * (2**attempt))
@@ -190,8 +208,12 @@ class AsyncEvalForge:
                 raise APIConnectionError(f"Connection failed: {str(e)}") from e
 
         if last_exception:
-            raise APIConnectionError(f"Request failed after {self.max_retries} retries.") from last_exception
-        raise APIError("Unknown error occurred during request execution.", status_code=500)
+            raise APIConnectionError(
+                f"Request failed after {self.max_retries} retries."
+            ) from last_exception
+        raise APIError(
+            "Unknown error occurred during request execution.", status_code=500
+        )
 
     async def aclose(self):
         await self._http.aclose()

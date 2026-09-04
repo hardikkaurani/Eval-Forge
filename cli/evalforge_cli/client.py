@@ -20,7 +20,10 @@ class CLIClient:
         json_data: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
         if not self.api_key:
-            print("Error: Authentication required. Run 'evalforge auth login --key <API_KEY>' or set EVALFORGE_API_KEY.", file=sys.stderr)
+            print(
+                "Error: Authentication required. Run 'evalforge auth login --key <API_KEY>' or set EVALFORGE_API_KEY.",
+                file=sys.stderr,
+            )
             sys.exit(1)
 
         url = f"{self.base_url}{path}"
@@ -32,7 +35,9 @@ class CLIClient:
 
         try:
             with httpx.Client(timeout=30.0) as client:
-                response = client.request(method, url, headers=headers, params=params, json=json_data)
+                response = client.request(
+                    method, url, headers=headers, params=params, json=json_data
+                )
                 if response.status_code == 401:
                     print("Error: Invalid or expired API key.", file=sys.stderr)
                     sys.exit(1)
@@ -40,12 +45,18 @@ class CLIClient:
                     print(f"Error: Resource not found at {path}.", file=sys.stderr)
                     sys.exit(1)
                 elif response.status_code >= 400:
-                    print(f"API Error ({response.status_code}): {response.text}", file=sys.stderr)
+                    print(
+                        f"API Error ({response.status_code}): {response.text}",
+                        file=sys.stderr,
+                    )
                     sys.exit(1)
 
                 return response.json()
         except httpx.ConnectError as e:
-            print(f"Error: Could not connect to Eval-Forge server at {self.base_url}: {str(e)}", file=sys.stderr)
+            print(
+                f"Error: Could not connect to Eval-Forge server at {self.base_url}: {str(e)}",
+                file=sys.stderr,
+            )
             sys.exit(1)
         except Exception as e:
             print(f"Error: {str(e)}", file=sys.stderr)
