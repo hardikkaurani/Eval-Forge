@@ -3,6 +3,11 @@
     "app",
     "tests"
   ],
+  "extraPaths": [
+    ".",
+    "../sdk/python",
+    "../cli"
+  ],
   "exclude": [
     "**/__pycache__",
     "**/__pyrefly_virtual__/**",

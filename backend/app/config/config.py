@@ -1,23 +1,68 @@
 import os
 from typing import Literal
+from urllib.parse import unquote, urlparse
 
-from pydantic import Field, SecretStr, field_validator
+from pydantic import Field, SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # Determine environment to load corresponding .env file
-# Order of precedence: environment variables > .env.{APP_ENV} > .env > .env.example
+# Order of precedence: environment variables > .env.{APP_ENV} > .env
 APP_ENV = os.getenv("APP_ENV", "development").lower()
 
-env_files = [".env.example"]
+env_files: list[str] = []
 if os.path.exists(".env"):
     env_files.append(".env")
 if os.path.exists(f".env.{APP_ENV}"):
     env_files.append(f".env.{APP_ENV}")
 
+INSECURE_CREDENTIALS: frozenset[str] = frozenset(
+    {
+        "postgres_password",
+        "password",
+        "p@ssword",
+        "p@ssw0rd",
+        "p4ssw0rd",
+        "changeme",
+        "secret",
+        "admin",
+        "admin123",
+        "admin_password",
+        "123456",
+        "12345678",
+        "123456789",
+        "evalforge",
+        "dev",
+        "placeholder",
+        "root",
+        "test",
+        "dev-secret-key-evalforge-placeholder",
+    }
+)
+
+
+def _is_insecure_credential(val: str | None) -> bool:
+    """Checks whether a credential matches known insecure defaults or common leet-speak patterns."""
+    if not val:
+        return True
+    lowered = val.lower().strip()
+    if lowered in INSECURE_CREDENTIALS:
+        return True
+    normalized = (
+        lowered.replace("@", "a")
+        .replace("0", "o")
+        .replace("$", "s")
+        .replace("3", "e")
+        .replace("1", "i")
+        .replace("!", "i")
+    )
+    if normalized in INSECURE_CREDENTIALS:
+        return True
+    return False
+
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
-        env_file=tuple(env_files),
+        env_file=tuple(env_files) if env_files else None,
         env_file_encoding="utf-8",
         case_sensitive=True,
         extra="ignore",
@@ -95,53 +140,72 @@ class Settings(BaseSettings):
             return v.lower()
         return v
 
-    @field_validator("POSTGRES_PASSWORD")
-    @classmethod
-    def check_postgres_password(cls, v: SecretStr, info):
-        env = (info.data.get("APP_ENV") or APP_ENV or "development").lower()
+    @model_validator(mode="after")
+    def validate_production_security(self) -> "Settings":
+        env = (self.APP_ENV or "development").lower()
         if env == "production":
-            default = "postgres_password"
-            if v.get_secret_value() == default:
-                raise ValueError(
-                    "POSTGRES_PASSWORD must be set to a secure value in production environment. "
-                    "The default value is insecure."
-                )
-        return v
+            # 1. DEBUG must be False in production
+            if self.DEBUG:
+                raise ValueError("DEBUG must be False in production environment")
 
-    @field_validator("SECRET_KEY")
-    @classmethod
-    def check_secret_key(cls, v: SecretStr, info):
-        # In production, ensure the secret key is not the default placeholder
-        env = (info.data.get("APP_ENV") or APP_ENV or "development").lower()
-        if env == "production":
-            default = "dev-secret-key-evalforge-placeholder"
-            if v.get_secret_value() == default:
+            # 2. SECRET_KEY must be set to a secure value
+            secret_val = self.SECRET_KEY.get_secret_value()
+            if (
+                not secret_val
+                or _is_insecure_credential(secret_val)
+                or secret_val == "dev-secret-key-evalforge-placeholder"
+                or len(secret_val) < 16
+            ):
                 raise ValueError(
                     "SECRET_KEY must be set to a secure value in production environment. "
                     "The default value is insecure."
                 )
-        return v
 
-    @field_validator("CORS_ORIGINS")
-    @classmethod
-    def check_cors_origins(cls, v: list[str], info):
-        env = (info.data.get("APP_ENV") or APP_ENV or "development").lower()
-        if env == "production":
-            # In production, CORS should not allow all origins by default
-            if v == ["*"]:
+            # 3. CORS_ORIGINS must not be wildcard in production
+            if self.CORS_ORIGINS == ["*"]:
                 raise ValueError(
                     "CORS_ORIGINS must be set to a specific list of origins in production. "
                     "Allowing all origins is insecure."
                 )
-        return v
 
-    @field_validator("DEBUG")
-    @classmethod
-    def check_debug(cls, v: bool, info):
-        env = (info.data.get("APP_ENV") or APP_ENV or "development").lower()
-        if env == "production" and v:
-            raise ValueError("DEBUG must be False in production environment")
-        return v
+            # 4. Database configuration validation
+            if self.DATABASE_URL:
+                # If DATABASE_URL contains template variables, validate discrete credentials
+                if "${" in self.DATABASE_URL:
+                    pg_pass = self.POSTGRES_PASSWORD.get_secret_value()
+                    if _is_insecure_credential(pg_pass):
+                        raise ValueError(
+                            "POSTGRES_PASSWORD must be set to a secure value in production environment. "
+                            "The default value is insecure."
+                        )
+                else:
+                    parsed = urlparse(self.DATABASE_URL)
+                    if parsed.password:
+                        raw_pass = unquote(parsed.password)
+                        if _is_insecure_credential(raw_pass):
+                            raise ValueError(
+                                "DATABASE_URL must be set to a secure value in production environment. "
+                                "The database password provided is insecure."
+                            )
+                    elif parsed.scheme in (
+                        "postgresql",
+                        "postgres",
+                        "postgresql+asyncpg",
+                        "postgresql+psycopg2",
+                    ):
+                        raise ValueError(
+                            "DATABASE_URL must include a secure password in production environment."
+                        )
+            else:
+                # DATABASE_URL is not provided, validate discrete POSTGRES_PASSWORD
+                pg_pass = self.POSTGRES_PASSWORD.get_secret_value()
+                if _is_insecure_credential(pg_pass):
+                    raise ValueError(
+                        "POSTGRES_PASSWORD must be set to a secure value in production environment. "
+                        "The default value is insecure."
+                    )
+
+        return self
 
     @property
     def get_database_url(self) -> str:

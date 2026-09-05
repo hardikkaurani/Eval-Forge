@@ -1,9 +1,13 @@
 {
   "include": [
-    "backend"
+    "backend",
+    "sdk/python",
+    "cli"
   ],
   "extraPaths": [
-    "backend"
+    "backend",
+    "sdk/python",
+    "cli"
   ],
   "exclude": [
     "**/node_modules",

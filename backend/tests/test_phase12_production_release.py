@@ -101,7 +101,7 @@ async def test_phase12_security_headers_middleware():
 @pytest.mark.asyncio
 async def test_phase12_production_settings_validation():
     """Verify Settings fail-closed validator in production mode."""
-    # Production with default password must raise ValueError
+    # 1. Production with default password (no DATABASE_URL) must raise ValueError
     with pytest.raises(
         ValueError, match="POSTGRES_PASSWORD must be set to a secure value"
     ):
@@ -113,7 +113,20 @@ async def test_phase12_production_settings_validation():
             DEBUG=False,
         )
 
-    # Production with default secret key must raise ValueError
+    # 2. Production with known insecure passwords must raise ValueError
+    for insecure_pw in ["password", "changeme", "secret", "admin", "123456"]:
+        with pytest.raises(
+            ValueError, match="POSTGRES_PASSWORD must be set to a secure value"
+        ):
+            Settings(
+                APP_ENV="production",
+                POSTGRES_PASSWORD=insecure_pw,
+                SECRET_KEY="secure-production-key-example-12345",
+                CORS_ORIGINS=["https://app.evalforge.dev"],
+                DEBUG=False,
+            )
+
+    # 3. Production with default secret key must raise ValueError
     with pytest.raises(ValueError, match="SECRET_KEY must be set to a secure value"):
         Settings(
             APP_ENV="production",
@@ -123,7 +136,7 @@ async def test_phase12_production_settings_validation():
             DEBUG=False,
         )
 
-    # Production with wildcard CORS must raise ValueError
+    # 4. Production with wildcard CORS must raise ValueError
     with pytest.raises(ValueError, match="CORS_ORIGINS must be set to a specific list"):
         Settings(
             APP_ENV="production",
@@ -132,6 +145,62 @@ async def test_phase12_production_settings_validation():
             CORS_ORIGINS=["*"],
             DEBUG=False,
         )
+
+    # 5. Production with DEBUG=True must raise ValueError
+    with pytest.raises(ValueError, match="DEBUG must be False in production"):
+        Settings(
+            APP_ENV="production",
+            POSTGRES_PASSWORD="secure_postgres_pass",
+            SECRET_KEY="secure-production-key-example-12345",
+            CORS_ORIGINS=["https://app.evalforge.dev"],
+            DEBUG=True,
+        )
+
+    # 6. Production with insecure DATABASE_URL password must raise ValueError
+    with pytest.raises(ValueError, match="DATABASE_URL must be set to a secure value"):
+        Settings(
+            APP_ENV="production",
+            DATABASE_URL="postgresql://postgres:postgres_password@dpg-host-123:5432/evalforge",
+            SECRET_KEY="secure-production-key-example-12345",
+            CORS_ORIGINS=["https://app.evalforge.dev"],
+            DEBUG=False,
+        )
+
+    with pytest.raises(ValueError, match="DATABASE_URL must be set to a secure value"):
+        Settings(
+            APP_ENV="production",
+            DATABASE_URL="postgresql://postgres:password@dpg-host-123:5432/evalforge",
+            SECRET_KEY="secure-production-key-example-12345",
+            CORS_ORIGINS=["https://app.evalforge.dev"],
+            DEBUG=False,
+        )
+
+    # 7. Production with valid DATABASE_URL (e.g. Render managed Postgres) and default POSTGRES_PASSWORD is valid
+    render_prod_settings = Settings(
+        APP_ENV="production",
+        DATABASE_URL="postgresql://postgres:secure_render_db_pass_998877@dpg-host-123.render.com:5432/evalforge",
+        SECRET_KEY="secure-production-key-example-12345",
+        CORS_ORIGINS=["https://evalforge.onrender.com", "https://app.evalforge.dev"],
+        DEBUG=False,
+    )
+    assert "secure_render_db_pass_998877" in render_prod_settings.get_database_url
+    assert render_prod_settings.get_database_url.startswith("postgresql+asyncpg://")
+
+    # 8. Production with valid discrete POSTGRES_PASSWORD is valid
+    discrete_prod_settings = Settings(
+        APP_ENV="production",
+        POSTGRES_PASSWORD="my_secure_prod_password_xyz",
+        SECRET_KEY="secure-production-key-example-12345",
+        CORS_ORIGINS=["https://app.evalforge.dev"],
+        DEBUG=False,
+    )
+    assert "my_secure_prod_password_xyz" in discrete_prod_settings.get_database_url
+
+    # 9. Development mode works with default non-production settings
+    dev_settings = Settings(APP_ENV="development")
+    assert dev_settings.APP_ENV == "development"
+    assert dev_settings.DEBUG is True
+    assert "postgres_password" in dev_settings.get_database_url
 
 
 @pytest.mark.asyncio

@@ -1,5 +1,7 @@
 project-includes = [
     "backend",
+    "sdk/python",
+    "cli",
 ]
 project-excludes = [
     "**/node_modules",
@@ -10,4 +12,6 @@ project-excludes = [
 ]
 search-path = [
     "backend",
+    "sdk/python",
+    "cli",
 ]

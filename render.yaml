@@ -10,8 +10,10 @@ services:
         value: production
       - key: DEBUG
         value: "False"
+      - key: SECRET_KEY
+        generateValue: true
       - key: CORS_ORIGINS
-        value: '["*"]'
+        value: '["https://evalforge.onrender.com", "https://app.evalforge.dev"]'
       - key: ALLOWED_HOSTS
         value: '["*"]'
       - key: DATABASE_URL
