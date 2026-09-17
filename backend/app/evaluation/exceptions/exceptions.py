@@ -22,7 +22,8 @@ class ProviderAuthenticationException(EvaluationException):
         message = (
             f"Authentication failed for provider '{provider}'. Missing or invalid API key credential. {details}"
         ).strip()
-        super().__init__(message=message, status_code=401)
+        # This is a server provider configuration failure, not an invalid workspace key.
+        super().__init__(message=message, status_code=503)
 
 
 class TimeoutException(EvaluationException):

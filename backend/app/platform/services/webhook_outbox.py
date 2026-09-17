@@ -123,6 +123,39 @@ def validate_webhook_destination(
     return True, ""
 
 
+def pin_webhook_destination(url: str) -> tuple[str, str, str]:
+    """Pin delivery to a validated public address; preserve HTTP Host and TLS SNI.
+
+    Resolving the original hostname again inside the HTTP client would reopen a
+    DNS-rebinding window after validation. The transport receives a literal IP.
+    """
+    safe, reason = validate_webhook_destination(
+        url, allow_http=settings.APP_ENV != "production"
+    )
+    if not safe:
+        raise ValueError(reason)
+    original = httpx.URL(url)
+    addresses = socket.getaddrinfo(
+        original.host,
+        original.port or (443 if original.scheme == "https" else 80),
+        type=socket.SOCK_STREAM,
+    )
+    if not addresses:
+        raise ValueError("No destination address")
+    # Check every address in the final DNS answer, then pin one of them.
+    pinned_urls = []
+    for address in addresses:
+        ip = str(ipaddress.ip_address(address[4][0]))
+        pinned = str(original.copy_with(host=ip))
+        safe, reason = validate_webhook_destination(
+            pinned, allow_http=settings.APP_ENV != "production"
+        )
+        if not safe:
+            raise ValueError(reason)
+        pinned_urls.append(pinned)
+    return pinned_urls[0], original.host, original.netloc.decode("ascii")
+
+
 def generate_webhook_signature(
     payload_str: str, secret: str, timestamp: Optional[int] = None
 ) -> str:
@@ -249,6 +282,15 @@ class WebhookOutboxService:
             target_url, allow_http=(settings.APP_ENV != "production")
         )
 
+        pinned_url, server_hostname, host_header = target_url, "", ""
+        if is_safe:
+            try:
+                pinned_url, server_hostname, host_header = pin_webhook_destination(
+                    target_url
+                )
+            except (ValueError, OSError) as exc:
+                is_safe, error_reason = False, str(exc)
+
         payload_body = {
             "event": event_type,
             "subscription_id": str(subscription.id),
@@ -266,6 +308,7 @@ class WebhookOutboxService:
             "X-EvalForge-Signature": signature,
             "X-EvalForge-Event": event_type,
             "User-Agent": "EvalForge-Webhook-Outbox/1.0",
+            "Host": host_header,
         }
 
         success = False
@@ -287,12 +330,15 @@ class WebhookOutboxService:
                 attempt_count += 1
                 try:
                     async with httpx.AsyncClient(
-                        timeout=self.timeout_seconds
+                        timeout=self.timeout_seconds,
+                        follow_redirects=False,
+                        trust_env=False,
                     ) as client:
                         response = await client.post(
-                            target_url,
+                            pinned_url,
                             content=payload_str,
                             headers=headers,
+                            extensions={"sni_hostname": server_hostname},
                         )
                         status_code = response.status_code
                         response_body = response.text

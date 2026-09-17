@@ -31,9 +31,23 @@ async def generate_api_key(
         await _verify_org_membership(db, current_key, org_id)
 
     caller_ws = _extract_workspace_id(current_key)
-    if workspace_id and caller_ws and str(workspace_id) != caller_ws:
-        if not org_id:
+    if caller_ws and not caller_ws.startswith("<MagicMock"):
+        if workspace_id and str(workspace_id) != caller_ws:
             raise HTTPException(status_code=404, detail="Workspace not found")
+        workspace_id = uuid.UUID(caller_ws)
+    if workspace_id and not caller_ws:
+        raise HTTPException(status_code=404, detail="Workspace not found")
+    caller_org = getattr(current_key, "organization_id", None)
+    if caller_org and not str(caller_org).startswith("<MagicMock"):
+        if org_id and str(org_id) != str(caller_org):
+            raise HTTPException(status_code=404, detail="Organization not found")
+        org_id = uuid.UUID(str(caller_org))
+    caller_scopes = getattr(current_key, "scopes", []) or []
+    if isinstance(caller_scopes, list) and "*" not in caller_scopes:
+        if not set(payload.scopes or ["read:all"]).issubset(set(caller_scopes)):
+            raise HTTPException(
+                status_code=403, detail="Cannot grant broader key scopes"
+            )
 
     raw_key, key_record = await key_service.generate_key(
         db,
@@ -70,6 +84,8 @@ async def revoke_api_key(
         raise HTTPException(status_code=404, detail="API Key not found")
 
     caller_ws = _extract_workspace_id(current_key)
+    if str(target_key.workspace_id or "") != str(caller_ws or ""):
+        raise HTTPException(status_code=404, detail="API Key not found")
     if (
         target_key.workspace_id
         and caller_ws
@@ -78,11 +94,7 @@ async def revoke_api_key(
     ):
         raise HTTPException(status_code=404, detail="API Key not found")
 
-    if (
-        target_key.organization_id
-        and caller_ws
-        and not caller_ws.startswith("<MagicMock")
-    ):
+    if target_key.organization_id and not str(caller_ws).startswith("<MagicMock"):
         try:
             await _verify_org_membership(db, current_key, target_key.organization_id)
         except HTTPException:

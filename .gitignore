@@ -222,3 +222,8 @@ backend/artifacts/
 backend/datasets/
 artifacts/
 datasets/
+
+# Local environments and browser validation artifacts
+.venv/
+frontend/test-results/
+frontend/playwright-report/

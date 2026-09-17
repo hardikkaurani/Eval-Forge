@@ -1,3 +1,4 @@
+import hashlib
 import json
 import os
 import sys
@@ -116,12 +117,49 @@ class IdempotencyMiddleware(BaseHTTPMiddleware):
         if not idempotency_key:
             return await call_next(request)
 
-        redis_key = f"idempotency:{idempotency_key}"
+        # Never retain newly generated credentials or buffer file uploads.
+        if (
+            "/api-keys" in request.url.path
+            or "application/json" not in request.headers.get("content-type", "")
+        ):
+            return await call_next(request)
+
+        # Scope cached responses to the credential, endpoint, and exact payload.
+        # A caller-provided idempotency key must never retrieve another tenant's response.
+        credential = request.headers.get("X-API-Key") or request.headers.get(
+            "Authorization", ""
+        )
+        if not credential:
+            return await call_next(request)
+        body = await request.body()
+        fingerprint = hashlib.sha256(
+            credential.encode()
+            + b"\0"
+            + request.method.encode()
+            + b"\0"
+            + str(request.url).encode()
+            + b"\0"
+            + body
+        ).hexdigest()
+        redis_key = f"idempotency:{fingerprint}:{idempotency_key}"
 
         try:
             if redis_manager.client:
                 cached_res = await redis_manager.client.get(redis_key)
                 if cached_res:
+                    # Revoked, expired, or reduced-scope keys cannot replay a cached success.
+                    from fastapi import HTTPException
+
+                    from app.core.dependencies import get_current_api_key
+                    from app.database.session import SessionLocal
+
+                    async with SessionLocal() as db:
+                        try:
+                            await get_current_api_key(
+                                request.headers.get("X-API-Key"), db, request
+                            )
+                        except HTTPException:
+                            return await call_next(request)
                     data = json.loads(cached_res)
                     logger.info(
                         "Duplicate request prevented by Idempotency Key",

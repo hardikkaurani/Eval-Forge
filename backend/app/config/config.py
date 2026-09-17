@@ -162,7 +162,7 @@ class Settings(BaseSettings):
                 )
 
             # 3. CORS_ORIGINS must not be wildcard in production
-            if self.CORS_ORIGINS == ["*"]:
+            if "*" in self.CORS_ORIGINS:
                 raise ValueError(
                     "CORS_ORIGINS must be set to a specific list of origins in production. "
                     "Allowing all origins is insecure."

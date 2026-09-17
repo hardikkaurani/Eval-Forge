@@ -1290,3 +1290,7 @@ _EvalForge — built for AI engineers who refuse to ship LLMs they cannot measur
 **[hardikkaurani](https://github.com/hardikkaurani)** &nbsp;·&nbsp; [Issues](https://github.com/hardikkaurani/Eval-Forge/issues) &nbsp;·&nbsp; [Discussions](https://github.com/hardikkaurani/Eval-Forge/discussions) &nbsp;·&nbsp; [ROADMAP.md](ROADMAP.md) &nbsp;·&nbsp; [CONTRIBUTING.md](CONTRIBUTING.md)
 
 </div>
+
+## Workspace interface
+
+See [UI setup and API-key provisioning](docs/ui-setup.md) for the redesigned interface, local browser validation, and production configuration. [Release evidence](docs/ui-release-review.md) records tested workflows and remaining deployment checks.

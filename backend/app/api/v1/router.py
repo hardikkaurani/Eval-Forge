@@ -18,6 +18,7 @@ from app.analytics.routes import (
     trends_router,
 )
 from app.api.v1.endpoints import (
+    connection,
     evaluation,
     health,
     judges,
@@ -61,6 +62,7 @@ public_router.include_router(stripe_webhook_router, tags=["Enterprise SaaS - Web
 
 # Private router (requires API key authentication)
 private_router = APIRouter(dependencies=[Depends(get_current_api_key)])
+private_router.include_router(connection.router, tags=["Connection"])
 
 # Projects
 private_router.include_router(project.router, prefix="/projects", tags=["Projects"])

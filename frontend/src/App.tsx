@@ -1,326 +1,139 @@
-import { useEffect, lazy, Suspense } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Component, Suspense, lazy, type ReactNode } from 'react';
+import { BrowserRouter, Navigate, Outlet, Route, Routes } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import DashboardLayout from './layouts/DashboardLayout';
-import { AuthProvider } from './context/AuthContext';
-import { WorkspaceProvider } from './context/WorkspaceContext';
-import { seedMockData } from './services/api';
-import { ProtectedRoute } from './components/common/ProtectedRoute';
-
-// 23 Production Page Views corresponding to all 23 Stitch product screens
-const Dashboard = lazy(() => import('./pages/Dashboard'));
-const Datasets = lazy(() => import('./pages/Datasets'));
-const DatasetDetail = lazy(() => import('./pages/DatasetDetail'));
-const NewExperiment = lazy(() => import('./pages/NewExperiment'));
-const Evaluations = lazy(() => import('./pages/Evaluations'));
-const Benchmarks = lazy(() => import('./pages/Benchmarks'));
-const RagEvaluation = lazy(() => import('./pages/RagEvaluation'));
-const Providers = lazy(() => import('./pages/Providers'));
-const JobsDashboard = lazy(() => import('./pages/JobsDashboard'));
-const JobDetail = lazy(() => import('./pages/JobDetail'));
-const LogViewer = lazy(() => import('./pages/LogViewer'));
-const ScheduledJobs = lazy(() => import('./pages/ScheduledJobs'));
-const MembersAccess = lazy(() => import('./pages/MembersAccess'));
-const ApiWebhooks = lazy(() => import('./pages/ApiWebhooks'));
-const AuditLogs = lazy(() => import('./pages/AuditLogs'));
-const WorkspaceSettings = lazy(() => import('./pages/WorkspaceSettings'));
-const DeveloperPortal = lazy(() => import('./pages/DeveloperPortal'));
-const AiSafety = lazy(() => import('./pages/AiSafety'));
-const PolicyEvaluation = lazy(() => import('./pages/PolicyEvaluation'));
-const ReportGenerator = lazy(() => import('./pages/ReportGenerator'));
-const BillingUsage = lazy(() => import('./pages/BillingUsage'));
-const SystemSettings = lazy(() => import('./pages/SystemSettings'));
-
-// Auth Views (Public)
-const Login = lazy(() => import('./pages/AuthPages').then((m) => ({ default: m.Login })));
-const Register = lazy(() => import('./pages/AuthPages').then((m) => ({ default: m.Register })));
-const ForgotPassword = lazy(() =>
-  import('./pages/AuthPages').then((m) => ({ default: m.ForgotPassword }))
+import { ConnectionProvider, useConnection } from './context/ConnectionContext';
+import { ThemeProvider } from './context/ThemeContext';
+import { Button, Empty, Loading } from './components/ui';
+const Shell = lazy(() => import('./layouts/WorkspaceShell'));
+const Connect = lazy(() => import('./pages/Connect'));
+const Overview = lazy(() => import('./pages/Overview'));
+const ResourcePage = lazy(() => import('./pages/ResourcePage'));
+const ImportDataset = lazy(() =>
+  import('./pages/EvaluationFlow').then((m) => ({ default: m.ImportDataset }))
 );
-const Profile = lazy(() => import('./pages/AuthPages').then((m) => ({ default: m.Profile })));
-
-const PageLoader = () => (
-  <div className="flex items-center justify-center min-h-[400px]">
-    <div className="w-8 h-8 border-4 border-brand-terracotta border-t-transparent rounded-full animate-spin font-mono text-xs"></div>
-  </div>
+const NewEvaluation = lazy(() =>
+  import('./pages/EvaluationFlow').then((m) => ({ default: m.NewEvaluation }))
 );
-
-const queryClient = new QueryClient({
+const DatasetView = lazy(() =>
+  import('./pages/EvaluationFlow').then((m) => ({ default: m.DatasetView }))
+);
+const EvaluationView = lazy(() =>
+  import('./pages/EvaluationFlow').then((m) => ({ default: m.EvaluationView }))
+);
+const JobView = lazy(() => import('./pages/JobView'));
+const Settings = lazy(() =>
+  import('./pages/SettingsPages').then((m) => ({ default: m.WorkspaceSettingsPage }))
+);
+const Connection = lazy(() =>
+  import('./pages/SettingsPages').then((m) => ({ default: m.ConnectionPage }))
+);
+const System = lazy(() => import('./pages/SettingsPages').then((m) => ({ default: m.SystemPage })));
+const Guide = lazy(() =>
+  import('./pages/SettingsPages').then((m) => ({ default: m.DeveloperGuide }))
+);
+const cache = new QueryClient({
   defaultOptions: {
-    queries: {
-      refetchOnWindowFocus: false,
-      retry: false,
-    },
+    queries: { retry: false, refetchOnWindowFocus: false, staleTime: 15000 },
+    mutations: { retry: false },
   },
 });
-
-function App() {
-  // Initialize Mock Data Seed on boot
-  useEffect(() => {
-    seedMockData();
-  }, []);
-
+function Protected() {
+  const { connected, checking } = useConnection();
+  return checking ? <Loading /> : connected ? <Outlet /> : <Navigate to="/login" replace />;
+}
+class ErrorBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
+  state = { failed: false };
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+  render() {
+    return this.state.failed ? (
+      <Empty
+        title="This page could not be displayed"
+        description="Reload to recover your workspace. If the problem persists, contact your administrator."
+        action={<Button onClick={() => location.reload()}>Reload workspace</Button>}
+      />
+    ) : (
+      this.props.children
+    );
+  }
+}
+export default function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <WorkspaceProvider>
-          <Router>
-            <Suspense fallback={<PageLoader />}>
-              <Routes>
-                {/* Public Auth Routes */}
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-                <Route path="/forgot-password" element={<ForgotPassword />} />
-
-                {/* Protected Dashboard & Profile */}
-                <Route
-                  path="/"
-                  element={
-                    <ProtectedRoute>
-                      <DashboardLayout>
-                        <Dashboard />
-                      </DashboardLayout>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/profile"
-                  element={
-                    <ProtectedRoute>
-                      <DashboardLayout>
-                        <Profile />
-                      </DashboardLayout>
-                    </ProtectedRoute>
-                  }
-                />
-
-                {/* Protected Infrastructure */}
-                <Route
-                  path="/providers"
-                  element={
-                    <ProtectedRoute>
-                      <DashboardLayout>
-                        <Providers />
-                      </DashboardLayout>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/scheduled-jobs"
-                  element={
-                    <ProtectedRoute>
-                      <DashboardLayout>
-                        <ScheduledJobs />
-                      </DashboardLayout>
-                    </ProtectedRoute>
-                  }
-                />
-
-                {/* Protected Project Scoped Routes */}
-                <Route
-                  path="/projects/:projectId/datasets"
-                  element={
-                    <ProtectedRoute>
-                      <DashboardLayout>
-                        <Datasets />
-                      </DashboardLayout>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/projects/:projectId/datasets/:datasetId"
-                  element={
-                    <ProtectedRoute>
-                      <DashboardLayout>
-                        <DatasetDetail />
-                      </DashboardLayout>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/projects/:projectId/evaluations"
-                  element={
-                    <ProtectedRoute>
-                      <DashboardLayout>
-                        <Evaluations />
-                      </DashboardLayout>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/projects/:projectId/evaluations/new"
-                  element={
-                    <ProtectedRoute>
-                      <DashboardLayout>
-                        <NewExperiment />
-                      </DashboardLayout>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/projects/:projectId/benchmarks"
-                  element={
-                    <ProtectedRoute>
-                      <DashboardLayout>
-                        <Benchmarks />
-                      </DashboardLayout>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/projects/:projectId/rag"
-                  element={
-                    <ProtectedRoute>
-                      <DashboardLayout>
-                        <RagEvaluation />
-                      </DashboardLayout>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/projects/:projectId/policy"
-                  element={
-                    <ProtectedRoute>
-                      <DashboardLayout>
-                        <PolicyEvaluation />
-                      </DashboardLayout>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/projects/:projectId/safety"
-                  element={
-                    <ProtectedRoute>
-                      <DashboardLayout>
-                        <AiSafety />
-                      </DashboardLayout>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/projects/:projectId/jobs"
-                  element={
-                    <ProtectedRoute>
-                      <DashboardLayout>
-                        <JobsDashboard />
-                      </DashboardLayout>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/projects/:projectId/jobs/:jobId"
-                  element={
-                    <ProtectedRoute>
-                      <DashboardLayout>
-                        <JobDetail />
-                      </DashboardLayout>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/projects/:projectId/logs"
-                  element={
-                    <ProtectedRoute>
-                      <DashboardLayout>
-                        <LogViewer />
-                      </DashboardLayout>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/projects/:projectId/reports"
-                  element={
-                    <ProtectedRoute>
-                      <DashboardLayout>
-                        <ReportGenerator />
-                      </DashboardLayout>
-                    </ProtectedRoute>
-                  }
-                />
-
-                {/* Protected Settings & Admin Routes */}
-                <Route
-                  path="/settings/workspace"
-                  element={
-                    <ProtectedRoute>
-                      <DashboardLayout>
-                        <WorkspaceSettings />
-                      </DashboardLayout>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/settings/members"
-                  element={
-                    <ProtectedRoute>
-                      <DashboardLayout>
-                        <MembersAccess />
-                      </DashboardLayout>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/settings/keys"
-                  element={
-                    <ProtectedRoute>
-                      <DashboardLayout>
-                        <ApiWebhooks />
-                      </DashboardLayout>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/settings/audit"
-                  element={
-                    <ProtectedRoute>
-                      <DashboardLayout>
-                        <AuditLogs />
-                      </DashboardLayout>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/settings/billing"
-                  element={
-                    <ProtectedRoute>
-                      <DashboardLayout>
-                        <BillingUsage />
-                      </DashboardLayout>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/settings/system"
-                  element={
-                    <ProtectedRoute>
-                      <DashboardLayout>
-                        <SystemSettings />
-                      </DashboardLayout>
-                    </ProtectedRoute>
-                  }
-                />
-
-                {/* Protected Developer Portal */}
-                <Route
-                  path="/developer"
-                  element={
-                    <ProtectedRoute>
-                      <DashboardLayout>
-                        <DeveloperPortal />
-                      </DashboardLayout>
-                    </ProtectedRoute>
-                  }
-                />
-
-                {/* Fallback Catch-all */}
-                <Route path="*" element={<Navigate to="/" replace />} />
-              </Routes>
-            </Suspense>
-          </Router>
-        </WorkspaceProvider>
-      </AuthProvider>
-    </QueryClientProvider>
+    <ErrorBoundary>
+      <QueryClientProvider client={cache}>
+        <ThemeProvider>
+          <ConnectionProvider>
+            <BrowserRouter>
+              <Suspense fallback={<Loading />}>
+                <Routes>
+                  {['/login', '/register', '/forgot-password'].map((path) => (
+                    <Route key={path} path={path} element={<Connect />} />
+                  ))}
+                  <Route element={<Protected />}>
+                    <Route element={<Shell />}>
+                      <Route index element={<Overview />} />
+                      <Route path="projects" element={<ResourcePage kind="projects" />} />
+                      <Route path="projects/:projectId">
+                        <Route path="datasets/import" element={<ImportDataset />} />
+                        <Route path="datasets/:datasetId" element={<DatasetView />} />
+                        <Route path="evaluations/new" element={<NewEvaluation />} />
+                        <Route path="evaluations/:evaluationId" element={<EvaluationView />} />
+                        <Route path="jobs/:jobId" element={<JobView />} />
+                        {[
+                          'datasets',
+                          'evaluations',
+                          'benchmarks',
+                          'rag',
+                          'safety',
+                          'policy',
+                          'reports',
+                          'jobs',
+                          'logs',
+                        ].map((kind) => (
+                          <Route key={kind} path={kind} element={<ResourcePage kind={kind} />} />
+                        ))}
+                      </Route>
+                      <Route path="providers" element={<ResourcePage kind="providers" />} />
+                      <Route path="scheduled-jobs" element={<ResourcePage kind="schedules" />} />
+                      <Route path="developer" element={<Guide />} />
+                      <Route path="profile" element={<Connection />} />
+                      <Route path="settings/workspace" element={<Settings />} />
+                      <Route path="settings/system" element={<System />} />
+                      {[
+                        ['keys', 'webhooks'],
+                        ['members', 'members'],
+                        ['audit', 'audit'],
+                        ['billing', 'billing'],
+                      ].map(([path, kind]) => (
+                        <Route
+                          key={path}
+                          path={`settings/${path}`}
+                          element={<ResourcePage kind={kind} />}
+                        />
+                      ))}
+                      <Route
+                        path="*"
+                        element={
+                          <Empty
+                            title="Page not found"
+                            description="The requested page does not exist."
+                            action={
+                              <a className="button" href="/">
+                                Return to overview
+                              </a>
+                            }
+                          />
+                        }
+                      />
+                    </Route>
+                  </Route>
+                </Routes>
+              </Suspense>
+            </BrowserRouter>
+          </ConnectionProvider>
+        </ThemeProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 }
-
-export default App;

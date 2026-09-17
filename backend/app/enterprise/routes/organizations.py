@@ -35,6 +35,8 @@ async def _verify_org_membership(
         )
 
     direct_org_id = getattr(current_key, "organization_id", None)
+    if not direct_org_id and not _extract_workspace_id(current_key):
+        raise HTTPException(status_code=404, detail="Organization not found")
     if direct_org_id and not str(direct_org_id).startswith("<MagicMock"):
         try:
             d_org_uuid = (
