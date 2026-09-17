@@ -266,3 +266,46 @@ def test_webhook_rebinding_to_private_address_is_blocked(monkeypatch):
     monkeypatch.setattr(socket, "getaddrinfo", resolve)
     with pytest.raises(ValueError):
         pin_webhook_destination("https://attacker.example/events")
+
+
+def test_bootstrap_provisions_an_authenticated_workspace_owner(
+    client, db_session, capsys
+):
+    import importlib.util
+    from pathlib import Path
+
+    script = Path(__file__).resolve().parents[1] / "scripts" / "bootstrap_workspace.py"
+    spec = importlib.util.spec_from_file_location("bootstrap_workspace", script)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    asyncio.run(module.provision("Bootstrap regression", 30))
+    output = capsys.readouterr().out
+    raw = output.split("days): ")[1].splitlines()[0]
+    authenticate(client, raw)
+    connection = client.get("/api/v1/connection")
+    assert connection.status_code == 200
+    scope = connection.json()["data"]
+    assert scope["workspace_id"]
+    members = client.get(f"/api/v1/organizations/{scope['organization_id']}/members")
+    assert members.status_code == 200
+    assert len(members.json()["data"]) == 1
+
+
+def test_job_is_queued_before_worker_dispatch(db_session, monkeypatch):
+    from app.jobs.schemas.job import JobCreate
+    from app.jobs.services.job import JobService, run_background_job
+
+    _, project = seed(db_session)
+    observed = []
+
+    def dispatch(*args, **kwargs):
+        jobs = [obj for obj in db_session.identity_map.values() if isinstance(obj, Job)]
+        observed.extend(job.status for job in jobs)
+        assert observed == ["QUEUED"]
+
+    monkeypatch.setattr(run_background_job, "apply_async", dispatch)
+    result = asyncio.run(
+        JobService(db_session).create_job(project, JobCreate(name="Dispatch ordering"))
+    )
+    assert result.status == "QUEUED"
+    assert observed == ["QUEUED"]

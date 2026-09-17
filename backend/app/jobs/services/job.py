@@ -61,6 +61,9 @@ class JobService:
         # Ensure target queue exists in DB config
         await self.repo.create_queue(request.queue_name)
 
+        # Persist QUEUED before a fast worker can begin its RUNNING transition.
+        await self.repo.update_job_status(job.id, "QUEUED")
+
         # Dispatch task to Celery
         if request.scheduled_at:
             # Delayed execution
@@ -79,8 +82,6 @@ class JobService:
             # Immediate dispatch
             run_background_job.apply_async(args=[job.id], queue=request.queue_name)
 
-        # Transition job status to QUEUED in DB
-        await self.repo.update_job_status(job.id, "QUEUED")
         return job
 
     async def get_job(self, job_id: str, workspace_id: Optional[str] = None) -> Job:
