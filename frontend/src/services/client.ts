@@ -49,15 +49,19 @@ export function unwrap(value: unknown): unknown {
 
 export function pageData(value: unknown): PageData {
   const body = unwrap(value);
-  if (Array.isArray(body)) return { items: body, total: body.length };
+  if (Array.isArray(body)) {
+    validateRecords(body);
+    return { items: body, total: body.length };
+  }
   if (body && typeof body === 'object') {
     const data = body as RecordData;
     const items =
       data.items ?? data.datasets ?? data.experiments ?? data.benchmark_suites ?? data.records;
     if (Array.isArray(items)) {
+      validateRecords(items);
       const meta = data.meta as RecordData | undefined;
       const total = data.total ?? meta?.total_items ?? items.length;
-      if (typeof total !== 'number' || !Number.isFinite(total))
+      if (typeof total !== 'number' || !Number.isInteger(total) || total < 0)
         throw new Error('The server returned an invalid record count.');
       return { items, total };
     }
@@ -115,4 +119,9 @@ export function redactText(value: string): string {
     /\b(?:ef_ent_|sk-)[A-Za-z0-9_-]{8,}/g,
     '[redacted]'
   );
+}
+
+function validateRecords(items: unknown[]): void {
+  if (items.some((item) => !item || typeof item !== 'object' || Array.isArray(item)))
+    throw new Error('The server returned an unexpected list format.');
 }

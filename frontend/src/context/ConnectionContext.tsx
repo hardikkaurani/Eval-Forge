@@ -34,10 +34,10 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
       .get('/projects?page_size=1', { signal: controller.signal })
       .then((res) => {
         pageData(res.data);
-        setConnected(true);
+        if (storedKey() === key) setConnected(true);
       })
       .catch(() => {
-        if (!controller.signal.aborted) disconnect();
+        if (!controller.signal.aborted && storedKey() === key) disconnect();
       })
       .finally(() => {
         if (!controller.signal.aborted) setChecking(false);
@@ -50,7 +50,9 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
     const res = await client.get('/projects?page_size=1', { headers: { 'X-API-Key': cleaned } });
     pageData(res.data);
     cache.clear();
+    sessionStorage.removeItem('evalforge_project');
     sessionStorage.setItem(SESSION_KEY, cleaned);
+    setChecking(false);
     setConnected(true);
   };
   return (
