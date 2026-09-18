@@ -5,6 +5,7 @@ import { ConnectionProvider, useConnection } from './context/ConnectionContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { Button, Empty, Loading } from './components/ui';
 const Shell = lazy(() => import('./layouts/WorkspaceShell'));
+const Landing = lazy(() => import('./pages/Landing'));
 const Connect = lazy(() => import('./pages/Connect'));
 const Overview = lazy(() => import('./pages/Overview'));
 const ResourcePage = lazy(() => import('./pages/ResourcePage'));
@@ -67,12 +68,14 @@ export default function App() {
             <BrowserRouter>
               <Suspense fallback={<Loading />}>
                 <Routes>
+                  <Route path="/" element={<Landing />} />
                   {['/login', '/register', '/forgot-password'].map((path) => (
                     <Route key={path} path={path} element={<Connect />} />
                   ))}
                   <Route element={<Protected />}>
                     <Route element={<Shell />}>
-                      <Route index element={<Overview />} />
+                      <Route path="overview" element={<Overview />} />
+                      <Route path="app" element={<Overview />} />
                       <Route path="projects" element={<ResourcePage kind="projects" />} />
                       <Route path="projects/:projectId">
                         <Route path="datasets/import" element={<ImportDataset />} />
@@ -119,7 +122,7 @@ export default function App() {
                             title="Page not found"
                             description="The requested page does not exist."
                             action={
-                              <a className="button" href="/">
+                              <a className="button" href="/overview">
                                 Return to overview
                               </a>
                             }
