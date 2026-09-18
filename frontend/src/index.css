@@ -241,9 +241,14 @@ pre {
   color: var(--text);
 }
 .nav-link.active {
+  color: #0369a1;
+  background: var(--accent-soft);
+  font-weight: 600;
+}
+:root[data-theme='dark'] .nav-link.active,
+:root[data-theme='onyx'] .nav-link.active {
   color: var(--accent);
   background: var(--accent-soft);
-  font-weight: 550;
 }
 .nav-scroll {
   overflow: auto;
