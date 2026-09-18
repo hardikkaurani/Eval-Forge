@@ -16,9 +16,9 @@
   --accent: #0284c7;
   --accent-soft: #ebf5fa;
   --on-accent: #ffffff;
-  --danger: #dc2626;
-  --success: #0d9488;
-  --warning: #d97706;
+  --danger: #b91c1c;
+  --success: #0f766e;
+  --warning: #b45309;
   --shadow: 0 8px 30px rgba(46, 58, 68, 0.06);
 }
 
@@ -52,7 +52,7 @@
   --accent: #a6633d;
   --accent-soft: #f9ede6;
   --on-accent: #ffffff;
-  --danger: #dc2626;
+  --danger: #b91c1c;
   --success: #15803d;
   --warning: #b45309;
   --shadow: 0 8px 30px rgba(43, 35, 31, 0.07);
@@ -70,9 +70,9 @@
   --accent: #0284c7;
   --accent-soft: #e3eff8;
   --on-accent: #ffffff;
-  --danger: #dc2626;
-  --success: #0d9488;
-  --warning: #d97706;
+  --danger: #b91c1c;
+  --success: #0f766e;
+  --warning: #b45309;
   --shadow: 0 8px 30px rgba(24, 38, 53, 0.06);
 }
 
@@ -478,7 +478,7 @@ tbody tr:hover {
   border-radius: 5px;
   padding: 3px 8px;
   font-size: 11px;
-  font-weight: 500;
+  font-weight: 600;
   white-space: nowrap;
 }
 .badge::before {
