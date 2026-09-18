@@ -34,5 +34,4 @@ services:
 databases:
   - name: evalforge-db
     databaseName: evalforge
-    user: postgres
     plan: free
