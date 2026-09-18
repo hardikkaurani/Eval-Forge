@@ -910,6 +910,10 @@ Eval-Forge/
 |   +-- backend.Dockerfile           # Multi-stage Python build
 |   +-- frontend.Dockerfile          # Multi-stage Node.js build, nginx serving
 +-- docs/
+|   +-- ARCHITECTURE.md              # System architecture design
+|   +-- HLD.md                       # High-level system design
+|   +-- LLD.md                       # Low-level component design
+|   +-- PRD.md                       # Product requirements document
 |   +-- api.md                       # Full API reference
 |   +-- architecture.md              # Detailed architecture decisions
 |   +-- self-hosting.md              # Production deployment guide
@@ -927,7 +931,6 @@ Eval-Forge/
 |   +-- fixtures/                    # Shared test fixtures and mock LLM responses
 +-- docker-compose.yml               # Development stack
 +-- docker-compose.prod.yml          # Production stack with resource limits
-+-- ARCHITECTURE.md
 +-- CONTRIBUTING.md
 +-- CHANGELOG.md
 +-- ROADMAP.md

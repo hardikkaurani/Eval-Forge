@@ -361,7 +361,7 @@ backend/app/
 
 - If your PR introduces a new API endpoint, update `docs/` and add docstrings to the route function.
 - If your PR adds a new feature or environment variable, update `README.md` and `.env.example`.
-- Keep architectural diagrams in `ARCHITECTURE.md`, `HLD.md`, and `LLD.md` up to date when changing core abstractions.
+- Keep architectural diagrams in `docs/ARCHITECTURE.md`, `docs/HLD.md`, and `docs/LLD.md` up to date when changing core abstractions.
 
 ---
 

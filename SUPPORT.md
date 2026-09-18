@@ -23,9 +23,9 @@ Please use the appropriate channel based on your inquiry:
 Before asking for help, check our self-service documentation:
 
 1. **[README.md](README.md):** Quick start guide, architecture overview, and Docker setup.
-2. **[PRD.md](PRD.md):** Detailed product requirements and feature matrices.
-3. **[HLD.md](HLD.md) & [LLD.md](LLD.md):** High-level and low-level system design specifications.
-4. **[ARCHITECTURE.md](ARCHITECTURE.md):** Monorepo design patterns and data flows.
+2. **[PRD.md](docs/PRD.md):** Detailed product requirements and feature matrices.
+3. **[HLD.md](docs/HLD.md) & [LLD.md](docs/LLD.md):** High-level and low-level system design specifications.
+4. **[ARCHITECTURE.md](docs/ARCHITECTURE.md):** Monorepo design patterns and data flows.
 5. **[CONTRIBUTING.md](CONTRIBUTING.md):** Developer onboarding, setup scripts, and testing guides.
 
 ---
