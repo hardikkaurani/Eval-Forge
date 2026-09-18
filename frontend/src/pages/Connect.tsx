@@ -29,14 +29,19 @@ export default function Connect() {
     <div className="login-page bg-[#F6F4EE] dark:bg-[#182026]">
       <section className="login-story bg-white dark:bg-[#202A32] border-r border-[#DDE4E1] dark:border-[#2E3A44]">
         <div className="flex items-center justify-between">
-          <Link to="/" className="inline-flex items-center gap-2 text-xs font-mono text-[#7E939C] hover:text-[#0284C7] transition-colors">
+          <Link
+            to="/"
+            className="inline-flex items-center gap-2 text-xs font-mono text-[#7E939C] hover:text-[#0284C7] transition-colors"
+          >
             <span>← Back to Overview</span>
           </Link>
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg overflow-hidden bg-[#2E3A44] p-1 border border-[#DDE4E1] dark:border-[#2E3A44]">
               <img src="/logo.png" alt="EvalForge" className="w-full h-full object-contain" />
             </div>
-            <span className="font-serif text-lg font-bold text-[#2E3A44] dark:text-[#F6F4EE]">EvalForge</span>
+            <span className="font-serif text-lg font-bold text-[#2E3A44] dark:text-[#F6F4EE]">
+              EvalForge
+            </span>
           </div>
         </div>
         <div className="login-story-content">

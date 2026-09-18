@@ -75,19 +75,34 @@ export default function Landing() {
 
           {/* Desktop Minimal Nav */}
           <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-[#4C5F6B] dark:text-[#B0C2C6]">
-            <a href="#platform" className="hover:text-[#0284C7] dark:hover:text-[#38BDF8] transition-colors">
+            <a
+              href="#platform"
+              className="hover:text-[#0284C7] dark:hover:text-[#38BDF8] transition-colors"
+            >
               Platform
             </a>
-            <a href="#capabilities" className="hover:text-[#0284C7] dark:hover:text-[#38BDF8] transition-colors">
+            <a
+              href="#capabilities"
+              className="hover:text-[#0284C7] dark:hover:text-[#38BDF8] transition-colors"
+            >
               Capabilities
             </a>
-            <a href="#workflow" className="hover:text-[#0284C7] dark:hover:text-[#38BDF8] transition-colors">
+            <a
+              href="#workflow"
+              className="hover:text-[#0284C7] dark:hover:text-[#38BDF8] transition-colors"
+            >
               Workflow
             </a>
-            <a href="#code" className="hover:text-[#0284C7] dark:hover:text-[#38BDF8] transition-colors">
+            <a
+              href="#code"
+              className="hover:text-[#0284C7] dark:hover:text-[#38BDF8] transition-colors"
+            >
               Developer SDK
             </a>
-            <a href="#architecture" className="hover:text-[#0284C7] dark:hover:text-[#38BDF8] transition-colors">
+            <a
+              href="#architecture"
+              className="hover:text-[#0284C7] dark:hover:text-[#38BDF8] transition-colors"
+            >
               Architecture
             </a>
           </nav>
@@ -203,8 +218,9 @@ export default function Landing() {
               </h1>
 
               <p className="text-lg sm:text-xl text-[#4C5F6B] dark:text-[#B0C2C6] font-normal leading-relaxed max-w-2xl">
-                Production-grade infrastructure for evaluating LLMs, RAG pipelines, and agentic systems.
-                Benchmark reasoning, measure grounding, and enforce safety across reproducible datasets.
+                Production-grade infrastructure for evaluating LLMs, RAG pipelines, and agentic
+                systems. Benchmark reasoning, measure grounding, and enforce safety across
+                reproducible datasets.
               </p>
 
               <div className="pt-2 flex flex-wrap items-center gap-4">
@@ -213,7 +229,10 @@ export default function Landing() {
                   className="inline-flex items-center gap-3 px-8 py-4 rounded-full bg-[#2E3A44] hover:bg-[#1C252C] dark:bg-[#F6F4EE] dark:hover:bg-[#EFECE4] text-[#F6F4EE] dark:text-[#2E3A44] text-sm font-semibold uppercase tracking-wider transition-all duration-200 shadow-md group"
                 >
                   <span>{connected ? 'Open Workspace' : 'Get Started with Workspace'}</span>
-                  <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
+                  <ArrowRight
+                    size={16}
+                    className="transition-transform group-hover:translate-x-1"
+                  />
                 </Link>
 
                 <a
@@ -231,16 +250,24 @@ export default function Landing() {
               {/* Technical Credibility Strip */}
               <div className="pt-6 border-t border-[#DDE4E1] dark:border-[#2E3A44] grid grid-cols-3 gap-6 font-mono text-xs text-[#7E939C] dark:text-[#B0C2C6]">
                 <div>
-                  <div className="text-xl sm:text-2xl font-serif text-[#2E3A44] dark:text-[#F6F4EE]">180+</div>
+                  <div className="text-xl sm:text-2xl font-serif text-[#2E3A44] dark:text-[#F6F4EE]">
+                    180+
+                  </div>
                   <div className="text-[11px] uppercase tracking-wider mt-0.5">Automated Tests</div>
                 </div>
                 <div>
-                  <div className="text-xl sm:text-2xl font-serif text-[#2E3A44] dark:text-[#F6F4EE]">114</div>
+                  <div className="text-xl sm:text-2xl font-serif text-[#2E3A44] dark:text-[#F6F4EE]">
+                    114
+                  </div>
                   <div className="text-[11px] uppercase tracking-wider mt-0.5">REST Endpoints</div>
                 </div>
                 <div>
-                  <div className="text-xl sm:text-2xl font-serif text-[#2E3A44] dark:text-[#F6F4EE]">v1.0.0</div>
-                  <div className="text-[11px] uppercase tracking-wider mt-0.5">Production Ready</div>
+                  <div className="text-xl sm:text-2xl font-serif text-[#2E3A44] dark:text-[#F6F4EE]">
+                    v1.0.0
+                  </div>
+                  <div className="text-[11px] uppercase tracking-wider mt-0.5">
+                    Production Ready
+                  </div>
                 </div>
               </div>
             </div>
@@ -252,13 +279,19 @@ export default function Landing() {
                 <div className="flex items-center justify-between border-b border-[#DDE4E1] dark:border-[#2E3A44] pb-4">
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-md bg-[#2E3A44] flex items-center justify-center p-1 border border-[#DDE4E1]">
-                      <img src="/logo.png" alt="EvalForge" className="w-full h-full object-contain" />
+                      <img
+                        src="/logo.png"
+                        alt="EvalForge"
+                        className="w-full h-full object-contain"
+                      />
                     </div>
                     <div>
                       <div className="text-xs font-semibold text-[#2E3A44] dark:text-[#F6F4EE]">
                         Live Evaluation Dashboard
                       </div>
-                      <div className="text-[10px] font-mono text-[#7E939C]">Project: Chatbot Alignment</div>
+                      <div className="text-[10px] font-mono text-[#7E939C]">
+                        Project: Chatbot Alignment
+                      </div>
                     </div>
                   </div>
                   <span className="px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[11px] font-mono font-medium flex items-center gap-1">
@@ -274,14 +307,20 @@ export default function Landing() {
                     <div className="text-3xl font-serif font-bold text-[#0284C7] dark:text-[#38BDF8] mt-1">
                       94.2%
                     </div>
-                    <div className="text-[10px] text-[#4C5F6B] dark:text-[#B0C2C6] mt-1">48 of 51 test criteria passed</div>
+                    <div className="text-[10px] text-[#4C5F6B] dark:text-[#B0C2C6] mt-1">
+                      48 of 51 test criteria passed
+                    </div>
                   </div>
                   <div className="p-4 rounded-xl border border-[#DDE4E1] dark:border-[#2E3A44] bg-[#F6F4EE] dark:bg-[#182026]">
-                    <div className="text-[11px] font-mono uppercase text-[#7E939C]">Mean Latency</div>
+                    <div className="text-[11px] font-mono uppercase text-[#7E939C]">
+                      Mean Latency
+                    </div>
                     <div className="text-3xl font-serif font-bold text-[#2E3A44] dark:text-[#F6F4EE] mt-1">
                       342ms
                     </div>
-                    <div className="text-[10px] text-[#4C5F6B] dark:text-[#B0C2C6] mt-1">p95 @ 610ms across runs</div>
+                    <div className="text-[10px] text-[#4C5F6B] dark:text-[#B0C2C6] mt-1">
+                      p95 @ 610ms across runs
+                    </div>
                   </div>
                 </div>
 
@@ -342,13 +381,15 @@ export default function Landing() {
           </div>
           <h2 className="font-serif text-3xl sm:text-5xl font-light text-[#2E3A44] dark:text-[#F6F4EE] leading-snug">
             “AI systems look impressive in isolation. <br />
-            <span className="italic font-normal">Production systems demand empirical evidence.”</span>
+            <span className="italic font-normal">
+              Production systems demand empirical evidence.”
+            </span>
           </h2>
           <div className="w-16 h-[1px] bg-[#0284C7] mx-auto" />
           <p className="text-base sm:text-lg text-[#4C5F6B] dark:text-[#B0C2C6] leading-relaxed max-w-3xl mx-auto font-normal">
-            Without structured benchmarks and automated evaluation pipelines, teams deploy updates into the dark.
-            EvalForge introduces continuous statistical verification across reasoning quality, retrieval faithfulness,
-            hallucination detection, and safety policies.
+            Without structured benchmarks and automated evaluation pipelines, teams deploy updates
+            into the dark. EvalForge introduces continuous statistical verification across reasoning
+            quality, retrieval faithfulness, hallucination detection, and safety policies.
           </p>
         </div>
       </section>
@@ -434,7 +475,10 @@ export default function Landing() {
       </section>
 
       {/* ─── Workflow Section: Connected Journey ─── */}
-      <section id="workflow" className="py-24 border-b border-[#DDE4E1] dark:border-[#2E3A44] bg-[#EFECE4]/50 dark:bg-[#1C252C]/40">
+      <section
+        id="workflow"
+        className="py-24 border-b border-[#DDE4E1] dark:border-[#2E3A44] bg-[#EFECE4]/50 dark:bg-[#1C252C]/40"
+      >
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center max-w-2xl mx-auto mb-16 space-y-3">
             <div className="text-xs font-mono uppercase tracking-widest text-[#7E939C]">
@@ -492,8 +536,9 @@ export default function Landing() {
                 </span>
               </h2>
               <p className="text-sm sm:text-base text-[#4C5F6B] dark:text-[#B0C2C6] leading-relaxed">
-                Integrate evaluation steps directly into your unit tests, regression pipelines, or agent loops.
-                Use our lightweight Python SDK, TypeScript client, or CLI to trigger runs in one line.
+                Integrate evaluation steps directly into your unit tests, regression pipelines, or
+                agent loops. Use our lightweight Python SDK, TypeScript client, or CLI to trigger
+                runs in one line.
               </p>
 
               <div className="space-y-3 pt-2">
@@ -560,7 +605,10 @@ export default function Landing() {
                       <span className="text-emerald-400">&quot;proj_chatbot_v1&quot;</span>,<br />
                       &nbsp;&nbsp;dataset_id=
                       <span className="text-emerald-400">&quot;ds_qa_golden&quot;</span>,<br />
-                      &nbsp;&nbsp;metrics=[<span className="text-emerald-400">&quot;g_eval_faithfulness&quot;</span>,{' '}
+                      &nbsp;&nbsp;metrics=[
+                      <span className="text-emerald-400">
+                        &quot;g_eval_faithfulness&quot;
+                      </span>,{' '}
                       <span className="text-emerald-400">&quot;context_precision&quot;</span>],
                       <br />
                       &nbsp;&nbsp;judge_model=
@@ -572,7 +620,10 @@ export default function Landing() {
                       results = job.wait_for_completion()
                       <br />
                       <span className="text-[#38BDF8]">print</span>(f
-                      <span className="text-emerald-400">&quot;Pass rate: &#123;results.pass_rate&#125;%&quot;</span>)
+                      <span className="text-emerald-400">
+                        &quot;Pass rate: &#123;results.pass_rate&#125;%&quot;
+                      </span>
+                      )
                     </pre>
                   )}
 
@@ -606,17 +657,31 @@ export default function Landing() {
                     <pre className="text-[#DDE4E1]">
                       curl -X POST https://evalforge-backend.onrender.com/api/v1/evaluations/run \
                       <br />
-                      &nbsp;&nbsp;-H <span className="text-emerald-400">&quot;Authorization: Bearer ef_live_...&quot;</span> \
+                      &nbsp;&nbsp;-H{' '}
+                      <span className="text-emerald-400">
+                        &quot;Authorization: Bearer ef_live_...&quot;
+                      </span>{' '}
+                      \
                       <br />
-                      &nbsp;&nbsp;-H <span className="text-emerald-400">&quot;Content-Type: application/json&quot;</span> \
+                      &nbsp;&nbsp;-H{' '}
+                      <span className="text-emerald-400">
+                        &quot;Content-Type: application/json&quot;
+                      </span>{' '}
+                      \
                       <br />
                       &nbsp;&nbsp;-d &apos;&#123;
                       <br />
-                      &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-[#38BDF8]">&quot;project_id&quot;</span>: <span className="text-emerald-400">&quot;proj_chatbot_v1&quot;</span>,
+                      &nbsp;&nbsp;&nbsp;&nbsp;
+                      <span className="text-[#38BDF8]">&quot;project_id&quot;</span>:{' '}
+                      <span className="text-emerald-400">&quot;proj_chatbot_v1&quot;</span>,
                       <br />
-                      &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-[#38BDF8]">&quot;dataset_id&quot;</span>: <span className="text-emerald-400">&quot;ds_qa_golden&quot;</span>,
+                      &nbsp;&nbsp;&nbsp;&nbsp;
+                      <span className="text-[#38BDF8]">&quot;dataset_id&quot;</span>:{' '}
+                      <span className="text-emerald-400">&quot;ds_qa_golden&quot;</span>,
                       <br />
-                      &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-[#38BDF8]">&quot;judge_model&quot;</span>: <span className="text-emerald-400">&quot;claude-3-5-sonnet&quot;</span>
+                      &nbsp;&nbsp;&nbsp;&nbsp;
+                      <span className="text-[#38BDF8]">&quot;judge_model&quot;</span>:{' '}
+                      <span className="text-emerald-400">&quot;claude-3-5-sonnet&quot;</span>
                       <br />
                       &nbsp;&nbsp;&#125;&apos;
                     </pre>
@@ -629,7 +694,10 @@ export default function Landing() {
       </section>
 
       {/* ─── Architecture & Open Source ─── */}
-      <section id="architecture" className="py-24 border-b border-[#DDE4E1] dark:border-[#2E3A44] bg-[#EFECE4]/30 dark:bg-[#1C252C]/20">
+      <section
+        id="architecture"
+        className="py-24 border-b border-[#DDE4E1] dark:border-[#2E3A44] bg-[#EFECE4]/30 dark:bg-[#1C252C]/20"
+      >
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center max-w-2xl mx-auto mb-16 space-y-3">
             <div className="text-xs font-mono uppercase tracking-widest text-[#7E939C]">

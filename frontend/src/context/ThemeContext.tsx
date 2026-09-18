@@ -22,9 +22,12 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     return VALID_THEMES.includes(value) ? value : 'system';
   });
 
-  const [effectiveTheme, setEffectiveTheme] = useState<'light' | 'dark' | 'aura' | 'nordic' | 'onyx'>(() => {
+  const [effectiveTheme, setEffectiveTheme] = useState<
+    'light' | 'dark' | 'aura' | 'nordic' | 'onyx'
+  >(() => {
     if (theme === 'system') {
-      return typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches
+      return typeof window !== 'undefined' &&
+        window.matchMedia('(prefers-color-scheme: dark)').matches
         ? 'dark'
         : 'light';
     }
@@ -62,9 +65,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   }, [theme]);
 
   return (
-    <Context.Provider value={{ theme, effectiveTheme, setTheme }}>
-      {children}
-    </Context.Provider>
+    <Context.Provider value={{ theme, effectiveTheme, setTheme }}>{children}</Context.Provider>
   );
 }
 
