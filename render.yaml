@@ -13,7 +13,7 @@ services:
       - key: SECRET_KEY
         generateValue: true
       - key: CORS_ORIGINS
-        value: '["https://evalforge.onrender.com", "https://evalforge.vercel.app", "https://app.evalforge.dev"]'
+        value: '["https://evalforge.onrender.com", "https://eval-forge-sandy.vercel.app", "https://evalforge.vercel.app", "https://app.evalforge.dev"]'
       - key: ALLOWED_HOSTS
         value: '["*"]'
       - key: DATABASE_URL

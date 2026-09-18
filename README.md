@@ -6,7 +6,7 @@
 
 <br/>
 
-<a href="https://evalforge.vercel.app"><img src="https://img.shields.io/badge/Live%20Demo-evalforge.vercel.app-blueviolet?logo=vercel&logoColor=white" height="28" /></a>
+<a href="https://eval-forge-sandy.vercel.app"><img src="https://img.shields.io/badge/Live%20Demo-eval--forge--sandy.vercel.app-blueviolet?logo=vercel&logoColor=white" height="28" /></a>
 &nbsp;
 <a href="#getting-started"><img src="https://img.shields.io/badge/Quick%20Start-Docker-2496ED?logo=docker&logoColor=white" height="28" /></a>
 &nbsp;
