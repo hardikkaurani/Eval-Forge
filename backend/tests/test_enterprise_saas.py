@@ -133,6 +133,16 @@ def test_enterprise_api_keys_and_audit(client):
     )
     ws_id = ws_res.json()["data"]["id"]
 
+    # Exercise key management as a principal belonging to the target workspace.
+    from types import SimpleNamespace
+
+    from app.core.dependencies import get_current_api_key
+
+    scoped_principal = SimpleNamespace(
+        id=str(uuid.uuid4()), organization_id=org_id, workspace_id=ws_id, scopes=["*"]
+    )
+    client.app.dependency_overrides[get_current_api_key] = lambda: scoped_principal
+
     # 1. Generate API Key
     key_payload = {
         "organization_id": org_id,

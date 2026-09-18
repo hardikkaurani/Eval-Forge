@@ -9,6 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.config.config import settings
 from app.evaluation.exceptions.exceptions import (
     EvaluationFailureException,
+    InvalidConfigException,
     ProviderUnavailableException,
     RateLimitException,
     TimeoutException,
@@ -38,9 +39,13 @@ class EvaluationPipeline:
             kwargs["model"] = model_name
 
         if request.provider == "ollama":
-            kwargs["base_url"] = request.configuration.get(
-                "base_url", settings.OLLAMA_BASE_URL
-            )
+            # Network destinations are server configuration, never evaluation input.
+            requested_url = request.configuration.get("base_url")
+            if requested_url and requested_url != settings.OLLAMA_BASE_URL:
+                raise InvalidConfigException(
+                    "Ollama URL overrides are not permitted; ask your server administrator."
+                )
+            kwargs["base_url"] = settings.OLLAMA_BASE_URL
 
         return provider_cls(**kwargs)
 

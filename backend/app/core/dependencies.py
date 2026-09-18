@@ -1,7 +1,7 @@
 from typing import Any, AsyncGenerator, Optional
 
 import structlog
-from fastapi import Depends, Header, HTTPException, status
+from fastapi import Depends, Header, HTTPException, Request, status
 from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -55,6 +55,7 @@ _extract_workspace_id = extract_workspace_id
 async def get_current_api_key(
     x_api_key: Optional[str] = Header(None, alias="X-API-Key"),
     db: AsyncSession = Depends(get_db),
+    request: Request = None,
 ):
     """Validate API key from X-API-Key header and return the associated API key record."""
     if not x_api_key:
@@ -71,6 +72,23 @@ async def get_current_api_key(
             detail="Invalid or inactive API key.",
             headers={"WWW-Authenticate": "ApiKey"},
         )
+
+    if request is not None:
+        action = "read" if request.method in ("GET", "HEAD", "OPTIONS") else "write"
+        parts = request.url.path.strip("/").split("/")
+        resource = parts[2] if len(parts) > 2 else "all"
+        resource = {"experiments": "evaluations"}.get(resource, resource)
+        scopes = set(api_key_record.scopes or [])
+        if "/jobs/scheduler" in request.url.path and not scopes.intersection(
+            {"*", "admin:scheduler"}
+        ):
+            raise HTTPException(
+                status_code=403, detail="Server administration scope required"
+            )
+        if not scopes.intersection({"*", f"{action}:all", f"{action}:{resource}"}):
+            raise HTTPException(
+                status_code=403, detail="API key scope does not permit this action"
+            )
 
     ws_id = extract_workspace_id(api_key_record)
     user_id = (

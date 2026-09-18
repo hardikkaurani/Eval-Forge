@@ -22,16 +22,12 @@ class JobService:
         self.db = db
         self.repo = JobRepository(db)
 
-    async def _verify_job_workspace(self, job: Job, workspace_id: str) -> None:
-        job_ws = job.payload.get("workspace_id")
-        if job_ws and job_ws == workspace_id:
-            return
+    async def _verify_job_workspace(
+        self, job: Job, workspace_id: Optional[str]
+    ) -> None:
         project_id = job.payload.get("project_id")
         if project_id:
-            from app.database.repository import ProjectRepository
-
-            project_repo = ProjectRepository(self.db)
-            project = await project_repo.get_by_id(
+            project = await ProjectRepository(self.db).get_by_id(
                 project_id, workspace_id=workspace_id
             )
             if project:
@@ -41,15 +37,11 @@ class JobService:
     async def create_job(
         self, project_id: str, request: JobCreate, workspace_id: Optional[str] = None
     ) -> Job:
-        if workspace_id is not None:
-            from app.database.repository import ProjectRepository
-
-            project_repo = ProjectRepository(self.db)
-            project = await project_repo.get_by_id(
-                project_id, workspace_id=workspace_id
-            )
-            if not project:
-                raise NotFoundException(f"Project with ID '{project_id}' not found.")
+        project = await ProjectRepository(self.db).get_by_id(
+            project_id, workspace_id=workspace_id
+        )
+        if not project:
+            raise NotFoundException(f"Project with ID '{project_id}' not found.")
 
         # Create DB record in CREATED state
         job = await self.repo.create_job(
@@ -69,6 +61,9 @@ class JobService:
         # Ensure target queue exists in DB config
         await self.repo.create_queue(request.queue_name)
 
+        # Persist QUEUED before a fast worker can begin its RUNNING transition.
+        await self.repo.update_job_status(job.id, "QUEUED")
+
         # Dispatch task to Celery
         if request.scheduled_at:
             # Delayed execution
@@ -87,16 +82,13 @@ class JobService:
             # Immediate dispatch
             run_background_job.apply_async(args=[job.id], queue=request.queue_name)
 
-        # Transition job status to QUEUED in DB
-        await self.repo.update_job_status(job.id, "QUEUED")
         return job
 
     async def get_job(self, job_id: str, workspace_id: Optional[str] = None) -> Job:
         job = await self.repo.get_job(job_id, include_details=True)
         if not job:
             raise NotFoundException(f"Job with ID '{job_id}' not found.")
-        if workspace_id is not None:
-            await self._verify_job_workspace(job, workspace_id)
+        await self._verify_job_workspace(job, workspace_id)
         return job
 
     async def list_jobs(
@@ -109,35 +101,25 @@ class JobService:
         sort_by: str = "created_at",
         sort_order: str = "desc",
         workspace_id: Optional[str] = None,
+        project_id: Optional[str] = None,
     ) -> Tuple[List[Job], int]:
-        skip = (page - 1) * page_size
-        items, total = await self.repo.list_jobs(
+        if project_id is not None:
+            project = await ProjectRepository(self.db).get_by_id(
+                project_id, workspace_id=workspace_id
+            )
+            if not project:
+                raise NotFoundException(f"Project with ID '{project_id}' not found.")
+        return await self.repo.list_jobs(
             queue_name=queue_name,
             status=status,
             search=search,
-            skip=0,
-            limit=1000,
+            skip=(page - 1) * page_size,
+            limit=page_size,
             sort_by=sort_by,
             sort_order=sort_order,
+            workspace_id=workspace_id,
+            project_id=project_id,
         )
-        if workspace_id is not None:
-            project_repo = ProjectRepository(self.db)
-            projects, _ = await project_repo.list(workspace_id=workspace_id, limit=1000)
-            valid_project_ids = {p.id for p in projects}
-
-            filtered = []
-            for job in items:
-                job_ws = job.payload.get("workspace_id")
-                job_proj = job.payload.get("project_id")
-                if (job_ws and job_ws == workspace_id) or (
-                    job_proj and job_proj in valid_project_ids
-                ):
-                    filtered.append(job)
-            items = filtered
-            total = len(filtered)
-            items = items[skip : skip + page_size]
-
-        return items, total
 
     async def cancel_job(
         self,

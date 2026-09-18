@@ -59,6 +59,7 @@ async def create_job(
     tags=["Jobs"],
 )
 async def list_jobs(
+    project_id: Optional[str] = Query(None, description="Project UUID"),
     queue_name: Optional[str] = Query(None, description="Filter by queue name"),
     status: Optional[str] = Query(None, description="Filter by job status"),
     search: Optional[str] = Query(None, description="Search term"),
@@ -81,6 +82,7 @@ async def list_jobs(
         sort_by=sort_by,
         sort_order=sort_order,
         workspace_id=workspace_id,
+        project_id=project_id,
     )
     meta = create_pagination_meta(page=page, page_size=page_size, total_items=total)
     paginated_data = PaginatedResponse(

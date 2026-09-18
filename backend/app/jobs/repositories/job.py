@@ -19,6 +19,7 @@ from app.jobs.models.job import (
     RetryHistory,
     Worker,
 )
+from app.models.project import Project
 from app.utils.time import get_utc_now
 
 VALID_TRANSITIONS = {
@@ -95,6 +96,8 @@ class JobRepository:
         limit: int = 10,
         sort_by: str = "created_at",
         sort_order: str = "desc",
+        workspace_id: Optional[str] = None,
+        project_id: Optional[str] = None,
     ) -> Tuple[List[Job], int]:
         """Lists jobs with sorting, filtering, and page pagination."""
         query = select(Job)
@@ -102,6 +105,18 @@ class JobRepository:
 
         # Filtering
         conditions = []
+        # Scope before counting and paginating. Missing workspace means only
+        # unscoped projects, never access to every tenant's jobs.
+        visible_projects = select(Project.id).where(Project.deleted_at.is_(None))
+        if workspace_id is None:
+            visible_projects = visible_projects.where(Project.workspace_id.is_(None))
+        else:
+            visible_projects = visible_projects.where(
+                Project.workspace_id == workspace_id
+            )
+        conditions.append(Job.payload["project_id"].as_string().in_(visible_projects))
+        if project_id is not None:
+            conditions.append(Job.payload["project_id"].as_string() == project_id)
         if queue_name:
             conditions.append(Job.queue_name == queue_name)
         if status:

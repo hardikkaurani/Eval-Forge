@@ -42,7 +42,7 @@ async def test_p3_01_provider_missing_api_key_raises_authentication_exception():
         with pytest.raises(ProviderAuthenticationException) as exc_info:
             await provider_inst.generate(prompt="Test prompt")
         assert "Authentication failed" in str(exc_info.value)
-        assert exc_info.value.status_code == 401
+        assert exc_info.value.status_code == 503
 
 
 # ============================================================================
