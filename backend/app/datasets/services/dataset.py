@@ -29,7 +29,7 @@ class DatasetService:
         source: Optional[str] = None,
         language: Optional[str] = "en",
         license: Optional[str] = None,
-        tags: List[str] = None,
+        tags: Optional[List[str]] = None,
         workspace_id: Optional[str] = None,
     ) -> Dataset:
         project = await self.project_repo.get_by_id(

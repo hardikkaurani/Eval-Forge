@@ -20,7 +20,7 @@ router = APIRouter(prefix="/webhooks", tags=["Developer Platform - Webhooks"])
 
 
 async def _verify_project_ws(
-    db: AsyncSession, project_id: UUID | str, workspace_id: str
+    db: AsyncSession, project_id: UUID | str, workspace_id: str | None = None
 ) -> None:
     project_repo = ProjectRepository(db)
     project = await project_repo.get_by_id(str(project_id), workspace_id=workspace_id)

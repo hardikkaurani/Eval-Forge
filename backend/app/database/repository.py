@@ -58,7 +58,7 @@ class ProjectRepository:
             if not include_deleted:
                 stmt = stmt.where(Project.deleted_at.is_(None))
             if workspace_id is not None:
-                stmt = stmt.where(Project.workspace_id == str(workspace_id))
+                stmt = stmt.where(Project.workspace_id == workspace_id)
             else:
                 stmt = stmt.where(Project.workspace_id.is_(None))
             result = await self.db.execute(stmt)
@@ -93,7 +93,7 @@ class ProjectRepository:
                 filters.append(Project.deleted_at.is_(None))
 
             if workspace_id is not None:
-                filters.append(Project.workspace_id == str(workspace_id))
+                filters.append(Project.workspace_id == workspace_id)
             else:
                 filters.append(Project.workspace_id.is_(None))
 

@@ -34,7 +34,7 @@ system_router = APIRouter(prefix="/system", tags=["System"])
 
 
 async def _verify_project_workspace(
-    db: AsyncSession, project_id: str, workspace_id: str
+    db: AsyncSession, project_id: str, workspace_id: Optional[str] = None
 ) -> None:
     project_repo = ProjectRepository(db)
     project = await project_repo.get_by_id(project_id, workspace_id=workspace_id)

@@ -1,0 +1,59 @@
+# This file controls the behavior of Trunk: https://docs.trunk.io/cli
+# To learn more about the format of this file, see https://docs.trunk.io/reference/trunk-yaml
+version: 0.1
+cli:
+  version: 1.25.0
+# Trunk provides extensibility via plugins. (https://docs.trunk.io/plugins)
+plugins:
+  sources:
+    - id: trunk
+      ref: v1.11.0
+      uri: https://github.com/trunk-io/plugins
+# Many linters and tools depend on runtimes - configure them here. (https://docs.trunk.io/runtimes)
+runtimes:
+  enabled:
+    - node@22.16.0
+    - python@3.14.4
+lint:
+  ignore:
+    - linters: [bandit, trufflehog]
+      paths:
+        - "backend/tests/**"
+        - "sdk/python/tests/**"
+        - "cli/tests/**"
+        - "tests/**"
+    - linters: [prettier, markdownlint]
+      paths:
+        - "**/*.md"
+    - linters: [checkov]
+      paths:
+        - "docker/**"
+    - linters: [ALL]
+      paths:
+        - "**/__pyrefly_virtual__/**"
+        - "C:/__pyrefly_virtual__/**"
+  enabled:
+    - actionlint@1.7.12
+    - bandit@1.9.4
+    - black@26.5.1
+    - checkov@3.3.19
+    - git-diff-check
+    - grype@0.118.0
+    - hadolint@2.15.1
+    - isort@9.0.1
+    - markdownlint@0.49.1
+    - osv-scanner@2.5.1
+    - oxipng@10.2.1
+    - prettier@3.9.8
+    - ruff@0.16.8
+    - svgo@4.1.0
+    - taplo@0.10.0
+    - trufflehog@3.97.4
+    - yamllint@1.38.0
+actions:
+  disabled:
+    - trunk-announce
+    - trunk-check-pre-push
+    - trunk-fmt-pre-commit
+  enabled:
+    - trunk-upgrade-available

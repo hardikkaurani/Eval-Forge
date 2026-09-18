@@ -65,7 +65,7 @@ class ImportExportService:
         source: Optional[str] = None,
         language: Optional[str] = "en",
         license: Optional[str] = None,
-        tags: List[str] = None,
+        tags: Optional[List[str]] = None,
         existing_dataset_id: Optional[str] = None,
         version_label: str = "v1",
         workspace_id: Optional[str] = None,

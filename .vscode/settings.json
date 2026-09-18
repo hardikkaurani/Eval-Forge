@@ -4,6 +4,7 @@
       "docker/grafana/provisioning/datasources/*.yml"
     ]
   },
+  "python.defaultInterpreterPath": "C:\\Users\\hardi\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
   "python.analysis.extraPaths": [
     "${workspaceFolder}/backend"
   ],

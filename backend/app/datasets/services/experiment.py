@@ -38,7 +38,7 @@ class ExperimentService:
         judge: str = "rubric",
         provider: str = "openai",
         model: Optional[str] = None,
-        configuration: Dict[str, Any] = None,
+        configuration: Optional[Dict[str, Any]] = None,
         workspace_id: Optional[str] = None,
     ) -> Experiment:
         project = await self.project_repo.get_by_id(

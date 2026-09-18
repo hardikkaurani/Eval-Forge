@@ -19,3 +19,7 @@ project-excludes = [
     "**/__pyrefly_virtual__/**",
     "**/inmemory/**"
 ]
+
+[tool.isort]
+profile = "black"
+

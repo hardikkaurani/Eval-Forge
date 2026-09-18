@@ -12,7 +12,11 @@ class WorkspaceService:
     """Manages workspaces (e.g. staging, prod, dev) under organizations with custom configuration."""
 
     async def create_workspace(
-        self, db: AsyncSession, org_id: uuid.UUID, name: str, description: str = None
+        self,
+        db: AsyncSession,
+        org_id: uuid.UUID,
+        name: str,
+        description: str | None = None,
     ) -> Workspace:
         # Check if organization exists
         stmt = select(Organization).where(Organization.id == org_id)

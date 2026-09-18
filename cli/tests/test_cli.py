@@ -1,9 +1,9 @@
 import json
-import pytest
-from unittest.mock import patch, MagicMock
-from evalforge_cli.main import main, print_output
-from evalforge_cli.config import load_config, save_config, get_api_key, get_base_url
+from unittest.mock import MagicMock
+
 from evalforge_cli.client import CLIClient
+from evalforge_cli.config import get_api_key, get_base_url, load_config, save_config
+from evalforge_cli.main import main, print_output
 
 
 def test_cli_config_management(tmp_path, monkeypatch):
@@ -45,36 +45,66 @@ def test_cli_auth_login_and_status(tmp_path, monkeypatch, capsys):
 
 
 def test_cli_projects_list_and_create(monkeypatch, capsys):
-    mock_request = MagicMock(return_value={"data": [{"id": "p1", "name": "Test Project"}]})
+    mock_request = MagicMock(
+        return_value={"data": [{"id": "p1", "name": "Test Project"}]}
+    )
     monkeypatch.setattr(CLIClient, "request", mock_request)
 
     main(["projects", "list", "--page", "1", "--page-size", "10", "--json"])
     captured = capsys.readouterr()
     assert "Test Project" in captured.out
-    mock_request.assert_called_with("GET", "/api/v1/projects", params={"page": 1, "page_size": 10})
+    mock_request.assert_called_with(
+        "GET", "/api/v1/projects", params={"page": 1, "page_size": 10}
+    )
 
-    main(["projects", "create", "--name", "New Project", "--description", "Desc", "--json"])
+    main(
+        [
+            "projects",
+            "create",
+            "--name",
+            "New Project",
+            "--description",
+            "Desc",
+            "--json",
+        ]
+    )
     captured = capsys.readouterr()
     mock_request.assert_called_with(
-        "POST", "/api/v1/projects", json_data={"name": "New Project", "description": "Desc"}
+        "POST",
+        "/api/v1/projects",
+        json_data={"name": "New Project", "description": "Desc"},
     )
 
 
 def test_cli_evaluations_run(tmp_path, monkeypatch, capsys):
-    mock_request = MagicMock(return_value={"data": {"id": "eval-1", "status": "pending"}})
+    mock_request = MagicMock(
+        return_value={"data": {"id": "eval-1", "status": "pending"}}
+    )
     monkeypatch.setattr(CLIClient, "request", mock_request)
 
     config_file = tmp_path / "eval_config.json"
     config_file.write_text(
-        json.dumps({
-            "name": "Test Run",
-            "test_cases": [{"input": "hi", "actual_output": "hello"}],
-            "metrics": ["accuracy"]
-        }),
+        json.dumps(
+            {
+                "name": "Test Run",
+                "test_cases": [{"input": "hi", "actual_output": "hello"}],
+                "metrics": ["accuracy"],
+            }
+        ),
         encoding="utf-8",
     )
 
-    main(["evaluations", "run", "--project-id", "p1", "--config", str(config_file), "--json"])
+    main(
+        [
+            "evaluations",
+            "run",
+            "--project-id",
+            "p1",
+            "--config",
+            str(config_file),
+            "--json",
+        ]
+    )
     captured = capsys.readouterr()
     assert "eval-1" in captured.out
 

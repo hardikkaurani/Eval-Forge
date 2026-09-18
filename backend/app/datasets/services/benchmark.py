@@ -26,8 +26,8 @@ class BenchmarkService:
         project_id: str,
         name: str,
         description: Optional[str] = None,
-        tags: List[str] = None,
-        dataset_ids: List[str] = None,
+        tags: Optional[List[str]] = None,
+        dataset_ids: Optional[List[str]] = None,
         workspace_id: Optional[str] = None,
     ) -> BenchmarkSuite:
         project = await self.project_repo.get_by_id(
