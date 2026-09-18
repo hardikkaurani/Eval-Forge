@@ -31,7 +31,7 @@ export default function Connect() {
         <div className="flex items-center justify-between">
           <Link
             to="/"
-            className="inline-flex items-center gap-2 text-xs font-mono text-[#7E939C] hover:text-[#0284C7] transition-colors"
+            className="inline-flex items-center gap-2 text-xs font-mono text-[#4C5F6B] dark:text-[#B0C2C6] hover:text-[#0284C7] transition-colors"
           >
             <span>← Back to Overview</span>
           </Link>

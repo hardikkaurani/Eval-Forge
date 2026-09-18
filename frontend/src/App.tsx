@@ -1,13 +1,13 @@
 import { Component, Suspense, lazy, type ReactNode } from 'react';
-import { BrowserRouter, Navigate, Outlet, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ConnectionProvider, useConnection } from './context/ConnectionContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { Button, Empty, Loading } from './components/ui';
 const Shell = lazy(() => import('./layouts/WorkspaceShell'));
-const Landing = lazy(() => import('./pages/Landing'));
 const Connect = lazy(() => import('./pages/Connect'));
 const Overview = lazy(() => import('./pages/Overview'));
+const Landing = lazy(() => import('./pages/Landing'));
 const ResourcePage = lazy(() => import('./pages/ResourcePage'));
 const ImportDataset = lazy(() =>
   import('./pages/EvaluationFlow').then((m) => ({ default: m.ImportDataset }))
@@ -38,9 +38,18 @@ const cache = new QueryClient({
     mutations: { retry: false },
   },
 });
-function Protected() {
+function RootLayout() {
   const { connected, checking } = useConnection();
-  return checking ? <Loading /> : connected ? <Outlet /> : <Navigate to="/login" replace />;
+  const location = useLocation();
+
+  if (checking) return <Loading />;
+  if (!connected) {
+    if (location.pathname === '/' || location.pathname === '/landing') {
+      return <Landing />;
+    }
+    return <Navigate to="/login" replace />;
+  }
+  return <Shell />;
 }
 class ErrorBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
   state = { failed: false };
@@ -68,68 +77,67 @@ export default function App() {
             <BrowserRouter>
               <Suspense fallback={<Loading />}>
                 <Routes>
-                  <Route path="/" element={<Landing />} />
                   {['/login', '/register', '/forgot-password'].map((path) => (
                     <Route key={path} path={path} element={<Connect />} />
                   ))}
-                  <Route element={<Protected />}>
-                    <Route element={<Shell />}>
-                      <Route path="overview" element={<Overview />} />
-                      <Route path="app" element={<Overview />} />
-                      <Route path="projects" element={<ResourcePage kind="projects" />} />
-                      <Route path="projects/:projectId">
-                        <Route path="datasets/import" element={<ImportDataset />} />
-                        <Route path="datasets/:datasetId" element={<DatasetView />} />
-                        <Route path="evaluations/new" element={<NewEvaluation />} />
-                        <Route path="evaluations/:evaluationId" element={<EvaluationView />} />
-                        <Route path="jobs/:jobId" element={<JobView />} />
-                        {[
-                          'datasets',
-                          'evaluations',
-                          'benchmarks',
-                          'rag',
-                          'safety',
-                          'policy',
-                          'reports',
-                          'jobs',
-                          'logs',
-                        ].map((kind) => (
-                          <Route key={kind} path={kind} element={<ResourcePage kind={kind} />} />
-                        ))}
-                      </Route>
-                      <Route path="providers" element={<ResourcePage kind="providers" />} />
-                      <Route path="scheduled-jobs" element={<ResourcePage kind="schedules" />} />
-                      <Route path="developer" element={<Guide />} />
-                      <Route path="profile" element={<Connection />} />
-                      <Route path="settings/workspace" element={<Settings />} />
-                      <Route path="settings/system" element={<System />} />
+                  <Route element={<RootLayout />}>
+                    <Route index element={<Overview />} />
+                    <Route path="overview" element={<Overview />} />
+                    <Route path="app" element={<Overview />} />
+                    <Route path="landing" element={<Landing />} />
+                    <Route path="projects" element={<ResourcePage kind="projects" />} />
+                    <Route path="projects/:projectId">
+                      <Route path="datasets/import" element={<ImportDataset />} />
+                      <Route path="datasets/:datasetId" element={<DatasetView />} />
+                      <Route path="evaluations/new" element={<NewEvaluation />} />
+                      <Route path="evaluations/:evaluationId" element={<EvaluationView />} />
+                      <Route path="jobs/:jobId" element={<JobView />} />
                       {[
-                        ['keys', 'webhooks'],
-                        ['members', 'members'],
-                        ['audit', 'audit'],
-                        ['billing', 'billing'],
-                      ].map(([path, kind]) => (
-                        <Route
-                          key={path}
-                          path={`settings/${path}`}
-                          element={<ResourcePage kind={kind} />}
-                        />
+                        'datasets',
+                        'evaluations',
+                        'benchmarks',
+                        'rag',
+                        'safety',
+                        'policy',
+                        'reports',
+                        'jobs',
+                        'logs',
+                      ].map((kind) => (
+                        <Route key={kind} path={kind} element={<ResourcePage kind={kind} />} />
                       ))}
-                      <Route
-                        path="*"
-                        element={
-                          <Empty
-                            title="Page not found"
-                            description="The requested page does not exist."
-                            action={
-                              <a className="button" href="/overview">
-                                Return to overview
-                              </a>
-                            }
-                          />
-                        }
-                      />
                     </Route>
+                    <Route path="providers" element={<ResourcePage kind="providers" />} />
+                    <Route path="scheduled-jobs" element={<ResourcePage kind="schedules" />} />
+                    <Route path="developer" element={<Guide />} />
+                    <Route path="profile" element={<Connection />} />
+                    <Route path="settings/workspace" element={<Settings />} />
+                    <Route path="settings/system" element={<System />} />
+                    {[
+                      ['keys', 'webhooks'],
+                      ['members', 'members'],
+                      ['audit', 'audit'],
+                      ['billing', 'billing'],
+                    ].map(([path, kind]) => (
+                      <Route
+                        key={path}
+                        path={`settings/${path}`}
+                        element={<ResourcePage kind={kind} />}
+                      />
+                    ))}
+                    <Route
+                      path="*"
+                      element={
+                        <Empty
+                          title="Page not found"
+                          description="The requested page does not exist."
+                          action={
+                            <a className="button" href="/overview">
+                              Return to overview
+                            </a>
+                          }
+                        />
+                      }
+                    />
                   </Route>
                 </Routes>
               </Suspense>
