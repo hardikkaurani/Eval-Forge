@@ -6,6 +6,8 @@
 
 <br/>
 
+<a href="https://evalforge.vercel.app"><img src="https://img.shields.io/badge/Live%20Demo-evalforge.vercel.app-blueviolet?logo=vercel&logoColor=white" height="28" /></a>
+&nbsp;
 <a href="#getting-started"><img src="https://img.shields.io/badge/Quick%20Start-Docker-2496ED?logo=docker&logoColor=white" height="28" /></a>
 &nbsp;
 <a href="https://github.com/hardikkaurani/Eval-Forge/blob/main/docs/api.md"><img src="https://img.shields.io/badge/API%20Docs-OpenAPI-85EA2D?logo=swagger&logoColor=black" height="28" /></a>
