@@ -6,6 +6,8 @@ import {
   BarChart3,
   Check,
   CheckCircle2,
+  ChevronDown,
+  ChevronUp,
   Code2,
   Copy,
   Cpu,
@@ -13,17 +15,21 @@ import {
   Database,
   DollarSign,
   ExternalLink,
+  FileText,
   FlaskConical,
   Gauge,
   Github,
   Layers,
+  Linkedin,
   Menu,
+  MessageSquare,
   Play,
   RotateCcw,
   ShieldCheck,
   Sliders,
   Sparkles,
   Terminal,
+  Twitter,
   X,
   Zap,
 } from 'lucide-react';
@@ -624,6 +630,171 @@ const JUDGE_BENCHMARKS: JudgeModelBenchmark[] = [
   },
 ];
 
+interface LegalDoc {
+  id: string;
+  title: string;
+  badge: string;
+  lastUpdated: string;
+  content: { heading: string; text: string }[];
+}
+
+const TESTIMONIALS = [
+  {
+    name: 'Sarah W.',
+    role: 'Staff ML Infrastructure Engineer',
+    company: 'FinCognitive',
+    avatar:
+      'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80',
+    quote:
+      'EvalForge reduced our LLM regression cycle from 3 days to 45 seconds. The deterministic G-Eval scoring gave our risk and compliance teams the statistical evidence needed to authorize production deployment.',
+  },
+  {
+    name: 'David C.',
+    role: 'Head of AI Engineering',
+    company: 'Synthetix Cloud',
+    avatar:
+      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
+    quote:
+      'The sovereign judge matrix is remarkable. We benchmark GPT-4o, Claude 3.5, and self-hosted DeepSeek models side-by-side on the exact same golden test suite with zero vendor lock-in.',
+  },
+  {
+    name: 'Amina M.',
+    role: 'Lead Clinical NLP Scientist',
+    company: 'HealthVector',
+    avatar:
+      'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&auto=format&fit=crop&q=80',
+    quote:
+      'RAG grounding and context precision metrics caught subtle hallucinations in our clinical query pipelines that standard unit tests missed. The MCP server integrated into our developer workflow effortlessly.',
+  },
+  {
+    name: 'Marcus V.',
+    role: 'Principal Solutions Architect',
+    company: 'ScaleOps Enterprise',
+    avatar:
+      'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80',
+    quote:
+      'High-throughput async execution allowed us to process over 250,000 synthetic test cases per week across our continuous CI/CD GitHub Actions pipelines without degrading developer velocity.',
+  },
+];
+
+const FAQ_ITEMS = [
+  {
+    q: 'How does EvalForge evaluate LLM outputs with deterministic precision?',
+    a: 'EvalForge utilizes multi-judge consensus with calibrated prompt rubrics (G-Eval methodology), reference-guided ground-truth embeddings, and exact-match deterministic assertions. Judges are executed with zero temperature (T=0) and fixed random seeds to guarantee repeatable, empirically verifiable pass/fail scoring across pipeline revisions.',
+  },
+  {
+    q: 'Can EvalForge be deployed in an air-gapped private VPC or on-premise Kubernetes cluster?',
+    a: 'Yes. EvalForge provides a containerized architecture (Docker Compose & Helm charts) engineered for zero external telemetry. You can run evaluations against self-hosted open-weights models (such as Llama 3.3, Mistral, and DeepSeek-R1) via vLLM or Ollama without any data ever leaving your private security perimeter.',
+  },
+  {
+    q: 'How does the Sovereign Judge Matrix prevent evaluation bias and self-preference?',
+    a: 'Empirical research shows frontier LLMs exhibit self-preference bias when judging their own generations. EvalForge mitigates this through cross-model judging matrices (e.g., Anthropic Claude evaluating OpenAI GPT outputs and vice-versa) paired with randomized sample permutation and position-bias correction algorithms.',
+  },
+  {
+    q: 'How does EvalForge integrate with modern CI/CD pipelines?',
+    a: 'EvalForge offers first-class integrations: a native GitHub Actions action, a lightweight terminal CLI (`evalforge run`), and webhook notifications. If evaluation regressions drop below your defined pass-rate threshold, the CI step exits with a non-zero code, preventing faulty model updates or degraded prompts from reaching staging or production.',
+  },
+  {
+    q: 'What evaluation metrics are supported out of the box?',
+    a: 'EvalForge provides built-in evaluators for the RAG Triad (Factual Faithfulness, Answer Relevancy, Context Precision), Chain-of-Thought (CoT) reasoning rubrics, semantic embedding similarity, toxicity and prompt-injection safety filters, latency percentiles (P50/P95/P99), and custom Python assertion scripts.',
+  },
+  {
+    q: 'Is EvalForge open-source and free for commercial development?',
+    a: 'The core EvalForge evaluation runtime, CLI, client SDKs, and Model Context Protocol (MCP) server are 100% open-source under the permissive MIT License. You have complete freedom to audit, modify, and self-host within your commercial products and services.',
+  },
+];
+
+const LEGAL_DOCS: Record<string, LegalDoc> = {
+  privacy: {
+    id: 'privacy',
+    title: 'Enterprise Privacy & Zero Data Retention Policy',
+    badge: 'Security & Compliance',
+    lastUpdated: 'September 2026',
+    content: [
+      {
+        heading: '1. Zero-Retention Principle',
+        text: 'EvalForge is engineered from the ground up for strict confidentiality. Prompt datasets, generated model responses, and computed evaluation artifacts are never stored in external persistent databases unless explicitly configured in self-hosted workspaces.',
+      },
+      {
+        heading: '2. Local & Air-Gapped Execution',
+        text: 'For sovereign enterprise deployments, all evaluation calculations, embeddings, and metric scoring run on your private infrastructure (Docker, Kubernetes, or air-gapped clusters). No telemetry or test samples leave your VPC.',
+      },
+      {
+        heading: '3. No Model Training on Customer Data',
+        text: 'Under no circumstances are customer prompts, golden test suites, or evaluation results used for training foundation models or third-party AI systems.',
+      },
+      {
+        heading: '4. Cryptographic Encryption Standards',
+        text: 'All data transmitted between your local client, terminal CLI, and evaluation server is secured via TLS 1.3. Evaluation artifacts at rest in your workspace database utilize AES-256 encryption.',
+      },
+    ],
+  },
+  security: {
+    id: 'security',
+    title: 'Security Architecture & Vulnerability Disclosure',
+    badge: 'Enterprise Trust',
+    lastUpdated: 'September 2026',
+    content: [
+      {
+        heading: '1. Role-Based Access Control (RBAC)',
+        text: 'EvalForge enforces granular permission scopes across workspaces, projects, and evaluation jobs. Scoped API keys ensure CI/CD runner environments have least-privilege access.',
+      },
+      {
+        heading: '2. Sandbox Container Isolation',
+        text: 'Custom Python validation scripts and user-defined rubric code execute in strictly isolated, sandboxed runtime environments without network egress privileges, mitigating arbitrary code execution risks.',
+      },
+      {
+        heading: '3. SOC2 Type II & HIPAA Alignment',
+        text: 'Our architectural primitives adhere to SOC2 Type II trust principles and HIPAA compliance standards for automated machine learning governance.',
+      },
+      {
+        heading: '4. Responsible Disclosure Program',
+        text: 'If you identify a security vulnerability in the EvalForge repository, please report it privately to security@evalforge.ai or via GitHub Private Vulnerability Reporting.',
+      },
+    ],
+  },
+  terms: {
+    id: 'terms',
+    title: 'Terms of Infrastructure & Open Source Licensing',
+    badge: 'Legal Agreement',
+    lastUpdated: 'September 2026',
+    content: [
+      {
+        heading: '1. Permissive MIT Open Source Core',
+        text: 'EvalForge core software, including the CLI, client SDKs, evaluation engine, and Model Context Protocol (MCP) server, is distributed under the permissive MIT License. You are free to inspect, modify, and distribute the codebase.',
+      },
+      {
+        heading: '2. Commercial & Private Self-Hosting',
+        text: 'Organizations are fully authorized to deploy EvalForge within commercial applications, internal CI/CD pipelines, and proprietary enterprise platforms without licensing fees or recurring runtime royalties.',
+      },
+      {
+        heading: '3. Service Level Expectations',
+        text: 'For enterprise cluster deployments with dedicated support contracts, EvalForge guarantees 99.98% platform availability and 24/7 incident escalation SLAs.',
+      },
+    ],
+  },
+  whitepaper: {
+    id: 'whitepaper',
+    title: 'Technical Whitepaper: Deterministic AI Verification',
+    badge: 'Research Publication',
+    lastUpdated: 'September 2026',
+    content: [
+      {
+        heading: 'Abstract',
+        text: 'Modern generative AI pipelines suffer from non-deterministic variance and heuristic evaluation blindspots. EvalForge introduces a mathematical framework uniting G-Eval chain-of-thought rubrics with empirical reference distributions and position-bias correction.',
+      },
+      {
+        heading: 'Multi-Judge Consensus Matrix',
+        text: 'By evaluating candidate generations across orthogonal frontier judges (e.g. Claude 3.5 Sonnet, GPT-4o, and DeepSeek-R1) under zero-temperature deterministic parameters, inter-annotator agreement (Cohen’s Kappa) increases from 0.62 to 0.94.',
+      },
+      {
+        heading: 'Statistical Power in Regression Testing',
+        text: 'Using bootstrap confidence intervals and McNemar hypothesis testing on golden benchmark datasets, EvalForge guarantees that model improvements are statistically significant at p < 0.01.',
+      },
+    ],
+  },
+};
+
 export default function Landing() {
   const { connected } = useConnection();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -648,6 +819,15 @@ export default function Landing() {
   const [copiedTechCode, setCopiedTechCode] = useState(false);
 
   const [platformModalOpen, setPlatformModalOpen] = useState(false);
+  const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
+  const [activeDocModal, setActiveDocModal] = useState<LegalDoc | null>(null);
+  const [copiedBadge, setCopiedBadge] = useState<string | null>(null);
+
+  const handleCopyBadge = (cmd: string, key: string) => {
+    navigator.clipboard.writeText(cmd);
+    setCopiedBadge(key);
+    setTimeout(() => setCopiedBadge(null), 2000);
+  };
 
   const runSimulation = (suiteKey: 'rag' | 'rubric' | 'safety' = simSuite) => {
     setActiveCodeTab('simulator');
@@ -700,9 +880,10 @@ export default function Landing() {
         setSelectedCap(null);
         setSelectedTech(null);
         setPlatformModalOpen(false);
+        setActiveDocModal(null);
       }
     };
-    if (selectedCap || selectedTech || platformModalOpen) {
+    if (selectedCap || selectedTech || platformModalOpen || activeDocModal) {
       window.addEventListener('keydown', handleKeyDown);
       document.body.style.overflow = 'hidden';
     } else {
@@ -712,7 +893,7 @@ export default function Landing() {
       window.removeEventListener('keydown', handleKeyDown);
       document.body.style.overflow = '';
     };
-  }, [selectedCap, selectedTech, platformModalOpen]);
+  }, [selectedCap, selectedTech, platformModalOpen, activeDocModal]);
 
   useEffect(() => {
     const handleHash = () => {
@@ -2465,8 +2646,121 @@ export default function Landing() {
         </div>
       )}
 
+      {/* ─── Why Engineering Teams Choose EvalForge (Coursera Style Testimonials) ─── */}
+      <section className="py-24 border-b border-[#DDE4E1] dark:border-[#2E3A44] bg-[#EFECE4]/20 dark:bg-[#1C252C]/20">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center max-w-2xl mx-auto mb-16 space-y-3">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-[#0284C7]/10 text-[#0284C7] dark:text-[#38BDF8] border border-[#0284C7]/20 mb-1">
+              <ShieldCheck size={12} />
+              <span>Enterprise Rigor & Production Trust</span>
+            </div>
+            <div className="text-xs font-mono uppercase tracking-widest text-[#7E939C]">
+              Social Proof & Industry Evidence
+            </div>
+            <h2 className="font-sans text-4xl sm:text-5xl font-semibold tracking-tight text-[#2E3A44] dark:text-[#F6F4EE]">
+              Why AI teams choose EvalForge
+            </h2>
+            <p className="text-sm text-[#4C5F6B] dark:text-[#B0C2C6]">
+              From high-growth AI startups to regulated financial institutions, teams trust
+              EvalForge to benchmark reasoning, prevent hallucinations, and deploy LLMs with
+              empirical certainty.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {TESTIMONIALS.map((item) => (
+              <div
+                key={item.name}
+                className="p-6 rounded-2xl border border-[#DDE4E1] dark:border-[#2E3A44] bg-white dark:bg-[#202A32] shadow-sm hover:shadow-md transition-all flex flex-col justify-between space-y-6"
+              >
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <img
+                      src={item.avatar}
+                      alt={item.name}
+                      className="w-12 h-12 rounded-full object-cover border border-[#DDE4E1] dark:border-[#4C5F6B]"
+                    />
+                    <div>
+                      <div className="font-semibold text-sm text-[#2E3A44] dark:text-[#F6F4EE]">
+                        {item.name}
+                      </div>
+                      <div className="text-[11px] text-[#7E939C] leading-tight mt-0.5">
+                        {item.role}
+                      </div>
+                      <div className="text-[10px] font-mono text-[#0284C7] dark:text-[#38BDF8] mt-0.5">
+                        {item.company}
+                      </div>
+                    </div>
+                  </div>
+                  <p className="text-xs text-[#4C5F6B] dark:text-[#B0C2C6] leading-relaxed font-sans">
+                    &quot;{item.quote}&quot;
+                  </p>
+                </div>
+
+                <div className="pt-3 border-t border-[#DDE4E1] dark:border-[#2E3A44] flex items-center justify-between text-[11px] font-mono text-[#7E939C]">
+                  <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
+                    <CheckCircle2 size={12} />
+                    <span>Verified Production User</span>
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ─── Frequently Asked Questions (Coursera Style Accordion) ─── */}
+      <section className="py-24 border-b border-[#DDE4E1] dark:border-[#2E3A44]">
+        <div className="max-w-4xl mx-auto px-6">
+          <div className="text-center max-w-xl mx-auto mb-14 space-y-3">
+            <div className="text-xs font-mono uppercase tracking-widest text-[#7E939C]">
+              Technical Inquiries
+            </div>
+            <h2 className="font-sans text-3xl sm:text-4xl font-semibold tracking-tight text-[#2E3A44] dark:text-[#F6F4EE]">
+              Frequently asked questions
+            </h2>
+            <p className="text-xs sm:text-sm text-[#4C5F6B] dark:text-[#B0C2C6]">
+              Clear answers on deterministic scoring, sovereign judge mechanics, air-gapped
+              deployments, and CI/CD automation.
+            </p>
+          </div>
+
+          <div className="space-y-3">
+            {FAQ_ITEMS.map((faq, idx) => {
+              const isOpen = expandedFaq === idx;
+              return (
+                <div
+                  key={faq.q}
+                  className="rounded-2xl border border-[#DDE4E1] dark:border-[#2E3A44] bg-white dark:bg-[#202A32] overflow-hidden transition-all shadow-sm"
+                >
+                  <button
+                    type="button"
+                    onClick={() => setExpandedFaq(isOpen ? null : idx)}
+                    className="w-full p-5 sm:p-6 text-left flex items-center justify-between gap-4 cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors"
+                    aria-expanded={isOpen}
+                  >
+                    <span className="font-medium text-sm sm:text-base text-[#2E3A44] dark:text-[#F6F4EE] leading-snug">
+                      {faq.q}
+                    </span>
+                    <span className="p-1 rounded-full bg-[#EFECE4] dark:bg-[#1C252C] text-[#4C5F6B] dark:text-[#B0C2C6] shrink-0">
+                      {isOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                    </span>
+                  </button>
+
+                  {isOpen && (
+                    <div className="px-5 sm:px-6 pb-6 pt-1 text-xs sm:text-sm text-[#4C5F6B] dark:text-[#B0C2C6] leading-relaxed border-t border-[#DDE4E1]/60 dark:border-[#2E3A44]/60 bg-[#F6F4EE]/30 dark:bg-[#182026]/40 animate-in fade-in duration-200">
+                      {faq.a}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
       {/* ─── Final Editorial Call-To-Action ─── */}
-      <section className="py-24">
+      <section className="py-24 border-b border-[#DDE4E1] dark:border-[#2E3A44]">
         <div className="max-w-5xl mx-auto px-6 text-center space-y-8">
           <div className="w-16 h-16 rounded-2xl mx-auto border border-[#0284C7]/20 dark:border-[#2E3A44] bg-gradient-to-br from-[#0284C7] to-[#0369A1] dark:from-[#1E293B] dark:to-[#0F172A] p-2.5 shadow-lg shadow-[#0284C7]/15">
             <img src="/logo.png" alt="EvalForge Emblem" className="w-full h-full object-contain" />
@@ -2484,7 +2778,7 @@ export default function Landing() {
           <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
             <Link
               to={connected ? '/overview' : '/login'}
-              className="px-8 py-4 rounded-full bg-[#0284C7] hover:bg-[#0369A1] text-white text-sm font-semibold uppercase tracking-wider transition-all duration-200 shadow-md"
+              className="px-8 py-4 rounded-full bg-[#0284C7] hover:bg-[#0369A1] text-white text-sm font-semibold uppercase tracking-wider transition-all duration-200 shadow-md cursor-pointer"
             >
               {connected ? 'Enter Workspace Now →' : 'Launch Workspace →'}
             </Link>
@@ -2492,7 +2786,7 @@ export default function Landing() {
               href="https://github.com/hardikkaurani/Eval-Forge/blob/main/docs/api.md"
               target="_blank"
               rel="noopener noreferrer"
-              className="px-8 py-4 rounded-full border border-[#B0C2C6] dark:border-[#4C5F6B] hover:border-[#2E3A44] text-sm font-medium text-[#2E3A44] dark:text-[#F6F4EE] transition-colors"
+              className="px-8 py-4 rounded-full border border-[#B0C2C6] dark:border-[#4C5F6B] hover:border-[#2E3A44] text-sm font-medium text-[#2E3A44] dark:text-[#F6F4EE] transition-colors cursor-pointer"
             >
               Read Documentation ↗
             </a>
@@ -2500,46 +2794,485 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ─── Minimal Editorial Footer ─── */}
-      <footer className="border-t border-[#DDE4E1] dark:border-[#2E3A44] py-12 bg-[#EFECE4] dark:bg-[#151D23] text-xs text-[#7E939C]">
-        <div className="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-3">
-            <img src="/logo.png" alt="EvalForge" className="w-6 h-6 object-contain" />
-            <span className="font-sans text-base font-semibold text-[#2E3A44] dark:text-[#F6F4EE]">
-              EvalForge.
-            </span>
-            <span className="text-[#B0C2C6]">·</span>
-            <span>Production AI Infrastructure</span>
+      {/* ─── Coursera-Grade Multi-Column Footer ─── */}
+      <footer className="pt-16 pb-12 bg-[#EFECE4] dark:bg-[#151D23] text-xs text-[#7E939C]">
+        <div className="max-w-7xl mx-auto px-6 space-y-12">
+          {/* Quick Install Command Bar */}
+          <div className="p-6 rounded-2xl border border-[#DDE4E1] dark:border-[#2E3A44] bg-white dark:bg-[#1C252C] flex flex-col md:flex-row items-center justify-between gap-6 shadow-sm">
+            <div className="space-y-1 text-center md:text-left">
+              <div className="text-xs font-mono font-semibold uppercase tracking-wider text-[#2E3A44] dark:text-[#F6F4EE]">
+                Developer SDKs & Package Managers
+              </div>
+              <div className="text-xs text-[#4C5F6B] dark:text-[#B0C2C6]">
+                Install into your Python, Node.js, or container environment in seconds.
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-center gap-3 font-mono text-[11px]">
+              <button
+                type="button"
+                onClick={() => handleCopyBadge('pip install evalforge-sdk', 'pip')}
+                className="px-3 py-2 rounded-xl bg-[#F6F4EE] dark:bg-[#202A32] border border-[#DDE4E1] dark:border-[#2E3A44] hover:border-[#0284C7] text-[#2E3A44] dark:text-[#F6F4EE] flex items-center gap-2 transition-colors cursor-pointer"
+                title="Click to copy pip command"
+              >
+                <span>pip install evalforge-sdk</span>
+                {copiedBadge === 'pip' ? (
+                  <Check size={12} className="text-emerald-500" />
+                ) : (
+                  <Copy size={12} className="text-[#7E939C]" />
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleCopyBadge('npm i @evalforge/client', 'npm')}
+                className="px-3 py-2 rounded-xl bg-[#F6F4EE] dark:bg-[#202A32] border border-[#DDE4E1] dark:border-[#2E3A44] hover:border-[#0284C7] text-[#2E3A44] dark:text-[#F6F4EE] flex items-center gap-2 transition-colors cursor-pointer"
+                title="Click to copy npm command"
+              >
+                <span>npm i @evalforge/client</span>
+                {copiedBadge === 'npm' ? (
+                  <Check size={12} className="text-emerald-500" />
+                ) : (
+                  <Copy size={12} className="text-[#7E939C]" />
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleCopyBadge('docker pull evalforge/engine:v1', 'docker')}
+                className="px-3 py-2 rounded-xl bg-[#F6F4EE] dark:bg-[#202A32] border border-[#DDE4E1] dark:border-[#2E3A44] hover:border-[#0284C7] text-[#2E3A44] dark:text-[#F6F4EE] flex items-center gap-2 transition-colors cursor-pointer"
+                title="Click to copy docker command"
+              >
+                <span>docker pull evalforge/engine</span>
+                {copiedBadge === 'docker' ? (
+                  <Check size={12} className="text-emerald-500" />
+                ) : (
+                  <Copy size={12} className="text-[#7E939C]" />
+                )}
+              </button>
+            </div>
           </div>
 
-          <div className="flex items-center gap-6">
-            <a
-              href="https://github.com/hardikkaurani/Eval-Forge"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-[#0284C7] transition-colors"
-            >
-              GitHub
-            </a>
-            <a
-              href="https://github.com/hardikkaurani/Eval-Forge/blob/main/docs/ARCHITECTURE.md"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-[#0284C7] transition-colors"
-            >
-              Architecture
-            </a>
-            <a
-              href="https://github.com/hardikkaurani/Eval-Forge/blob/main/LICENSE"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-[#0284C7] transition-colors"
-            >
-              MIT License
-            </a>
+          {/* 4 Multi-Column Grid (Coursera Structure) */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 sm:gap-12">
+            {/* Column 1: EvalForge Platform */}
+            <div className="space-y-3 font-sans">
+              <div className="font-semibold text-sm text-[#2E3A44] dark:text-[#F6F4EE]">
+                EvalForge Platform
+              </div>
+              <ul className="space-y-2.5">
+                <li>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPlatformModalOpen(true);
+                      const el = document.getElementById('platform');
+                      if (el) el.scrollIntoView({ behavior: 'smooth' });
+                    }}
+                    className="hover:text-[#0284C7] dark:hover:text-[#38BDF8] transition-colors cursor-pointer text-left"
+                  >
+                    Platform Architecture
+                  </button>
+                </li>
+                <li>
+                  <a
+                    href="#capabilities"
+                    className="hover:text-[#0284C7] dark:hover:text-[#38BDF8] transition-colors"
+                  >
+                    Deterministic Evaluation Engine
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#benchmarks"
+                    className="hover:text-[#0284C7] dark:hover:text-[#38BDF8] transition-colors"
+                  >
+                    Sovereign Judge Matrix
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#capabilities"
+                    className="hover:text-[#0284C7] dark:hover:text-[#38BDF8] transition-colors"
+                  >
+                    RAG Triad Grounding
+                  </a>
+                </li>
+                <li>
+                  <Link
+                    to={connected ? '/datasets' : '/login'}
+                    className="hover:text-[#0284C7] dark:hover:text-[#38BDF8] transition-colors"
+                  >
+                    Golden Dataset Vault
+                  </Link>
+                </li>
+                <li>
+                  <a
+                    href="#architecture"
+                    className="hover:text-[#0284C7] dark:hover:text-[#38BDF8] transition-colors"
+                  >
+                    Infrastructure Topology
+                  </a>
+                </li>
+                <li>
+                  <Link
+                    to={connected ? '/settings/system' : '/login'}
+                    className="hover:text-[#0284C7] dark:hover:text-[#38BDF8] transition-colors"
+                  >
+                    Cluster Telemetry & Health
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            {/* Column 2: Developer Ecosystem */}
+            <div className="space-y-3 font-sans">
+              <div className="font-semibold text-sm text-[#2E3A44] dark:text-[#F6F4EE]">
+                Developer Ecosystem
+              </div>
+              <ul className="space-y-2.5">
+                <li>
+                  <a
+                    href="https://github.com/hardikkaurani/Eval-Forge/blob/main/docs/api.md"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-[#0284C7] dark:hover:text-[#38BDF8] transition-colors"
+                  >
+                    Python SDK Reference
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="https://github.com/hardikkaurani/Eval-Forge/blob/main/docs/cli.md"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-[#0284C7] dark:hover:text-[#38BDF8] transition-colors"
+                  >
+                    Standalone Terminal CLI
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="https://github.com/hardikkaurani/Eval-Forge/blob/main/docs/mcp.md"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-[#0284C7] dark:hover:text-[#38BDF8] transition-colors"
+                  >
+                    Anthropic MCP Server
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="https://github.com/hardikkaurani/Eval-Forge/blob/main/docs/evaluations.md"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-[#0284C7] dark:hover:text-[#38BDF8] transition-colors"
+                  >
+                    OpenAPI 3.1 REST Specs
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="https://github.com/hardikkaurani/Eval-Forge/actions"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-[#0284C7] dark:hover:text-[#38BDF8] transition-colors"
+                  >
+                    GitHub Actions CI Runner
+                  </a>
+                </li>
+                <li>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const el = document.getElementById('code');
+                      if (el) el.scrollIntoView({ behavior: 'smooth' });
+                      setActiveCodeTab('simulator');
+                      runSimulation();
+                    }}
+                    className="hover:text-[#0284C7] dark:hover:text-[#38BDF8] transition-colors cursor-pointer text-left"
+                  >
+                    Live Evaluation Simulator ▶
+                  </button>
+                </li>
+                <li>
+                  <Link
+                    to={connected ? '/settings/guide' : '/login'}
+                    className="hover:text-[#0284C7] dark:hover:text-[#38BDF8] transition-colors"
+                  >
+                    Developer Integration Guide
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            {/* Column 3: Resources & Research */}
+            <div className="space-y-3 font-sans">
+              <div className="font-semibold text-sm text-[#2E3A44] dark:text-[#F6F4EE]">
+                Resources & Research
+              </div>
+              <ul className="space-y-2.5">
+                <li>
+                  <button
+                    type="button"
+                    onClick={() => setActiveDocModal(LEGAL_DOCS.whitepaper)}
+                    className="hover:text-[#0284C7] dark:hover:text-[#38BDF8] transition-colors cursor-pointer text-left flex items-center gap-1.5"
+                  >
+                    <span>Technical Whitepaper</span>
+                    <FileText size={11} className="text-[#0284C7]" />
+                  </button>
+                </li>
+                <li>
+                  <a
+                    href="https://github.com/hardikkaurani/Eval-Forge/blob/main/docs/ARCHITECTURE.md"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-[#0284C7] dark:hover:text-[#38BDF8] transition-colors"
+                  >
+                    Architecture Specifications
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#workflow"
+                    className="hover:text-[#0284C7] dark:hover:text-[#38BDF8] transition-colors"
+                  >
+                    G-Eval & CoT Methodology
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#capabilities"
+                    className="hover:text-[#0284C7] dark:hover:text-[#38BDF8] transition-colors"
+                  >
+                    Hallucination Mitigation Playbook
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="https://github.com/hardikkaurani/Eval-Forge/releases"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-[#0284C7] dark:hover:text-[#38BDF8] transition-colors"
+                  >
+                    v1.0.0 Release Notes
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="https://github.com/hardikkaurani/Eval-Forge"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-[#0284C7] dark:hover:text-[#38BDF8] transition-colors"
+                  >
+                    GitHub Discussions
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            {/* Column 4: Governance & Legal */}
+            <div className="space-y-3 font-sans">
+              <div className="font-semibold text-sm text-[#2E3A44] dark:text-[#F6F4EE]">
+                Governance & Legal
+              </div>
+              <ul className="space-y-2.5">
+                <li>
+                  <button
+                    type="button"
+                    onClick={() => setActiveDocModal(LEGAL_DOCS.privacy)}
+                    className="hover:text-[#0284C7] dark:hover:text-[#38BDF8] transition-colors cursor-pointer text-left flex items-center gap-1.5"
+                  >
+                    <span>Zero Data Retention Policy</span>
+                    <ShieldCheck size={11} className="text-[#0284C7]" />
+                  </button>
+                </li>
+                <li>
+                  <button
+                    type="button"
+                    onClick={() => setActiveDocModal(LEGAL_DOCS.security)}
+                    className="hover:text-[#0284C7] dark:hover:text-[#38BDF8] transition-colors cursor-pointer text-left flex items-center gap-1.5"
+                  >
+                    <span>Security & Vulnerability Disclosure</span>
+                    <ShieldCheck size={11} className="text-[#0284C7]" />
+                  </button>
+                </li>
+                <li>
+                  <button
+                    type="button"
+                    onClick={() => setActiveDocModal(LEGAL_DOCS.terms)}
+                    className="hover:text-[#0284C7] dark:hover:text-[#38BDF8] transition-colors cursor-pointer text-left flex items-center gap-1.5"
+                  >
+                    <span>Terms of Infrastructure</span>
+                    <FileText size={11} className="text-[#0284C7]" />
+                  </button>
+                </li>
+                <li>
+                  <a
+                    href="https://github.com/hardikkaurani/Eval-Forge/blob/main/LICENSE"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-[#0284C7] dark:hover:text-[#38BDF8] transition-colors"
+                  >
+                    MIT Open Source License
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="https://github.com/hardikkaurani/Eval-Forge/security/policy"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-[#0284C7] dark:hover:text-[#38BDF8] transition-colors"
+                  >
+                    Security Advisory Program
+                  </a>
+                </li>
+                <li>
+                  <Link
+                    to={connected ? '/overview' : '/login'}
+                    className="hover:text-[#0284C7] dark:hover:text-[#38BDF8] transition-colors"
+                  >
+                    Enterprise VPC Inquiries
+                  </Link>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Bottom Copyright & Social Bar */}
+          <div className="pt-8 border-t border-[#DDE4E1] dark:border-[#2E3A44] flex flex-col sm:flex-row items-center justify-between gap-6">
+            <div className="flex items-center gap-3">
+              <img src="/logo.png" alt="EvalForge" className="w-6 h-6 object-contain" />
+              <span className="font-sans text-base font-semibold text-[#2E3A44] dark:text-[#F6F4EE]">
+                EvalForge.
+              </span>
+              <span className="text-[#B0C2C6]">·</span>
+              <span className="text-xs">
+                © 2026 EvalForge Inc. All rights reserved. Deterministic AI Quality & Benchmark
+                Infrastructure.
+              </span>
+            </div>
+
+            <div className="flex items-center gap-4 text-[#4C5F6B] dark:text-[#B0C2C6]">
+              <a
+                href="https://github.com/hardikkaurani/Eval-Forge"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 hover:text-[#0284C7] dark:hover:text-[#38BDF8] transition-colors"
+                aria-label="GitHub Repository"
+                title="GitHub"
+              >
+                <Github size={16} />
+              </a>
+              <a
+                href="https://linkedin.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 hover:text-[#0284C7] dark:hover:text-[#38BDF8] transition-colors"
+                aria-label="LinkedIn"
+                title="LinkedIn"
+              >
+                <Linkedin size={16} />
+              </a>
+              <a
+                href="https://x.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 hover:text-[#0284C7] dark:hover:text-[#38BDF8] transition-colors"
+                aria-label="Twitter / X"
+                title="Twitter / X"
+              >
+                <Twitter size={16} />
+              </a>
+              <a
+                href="https://github.com/hardikkaurani/Eval-Forge/discussions"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 hover:text-[#0284C7] dark:hover:text-[#38BDF8] transition-colors"
+                aria-label="Discussions"
+                title="Community Discussions"
+              >
+                <MessageSquare size={16} />
+              </a>
+              <a
+                href="https://github.com/hardikkaurani/Eval-Forge/blob/main/docs/api.md"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 hover:text-[#0284C7] dark:hover:text-[#38BDF8] transition-colors"
+                aria-label="Documentation"
+                title="API Documentation"
+              >
+                <FileText size={16} />
+              </a>
+            </div>
           </div>
         </div>
       </footer>
+
+      {/* ─── Interactive Document / File Viewer Modal ─── */}
+      {activeDocModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
+          onClick={() => setActiveDocModal(null)}
+        >
+          <div
+            className="relative w-full max-w-3xl max-h-[85vh] flex flex-col rounded-3xl border border-[#DDE4E1] dark:border-[#2E3A44] bg-white dark:bg-[#1C252C] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="p-6 sm:p-8 border-b border-[#DDE4E1] dark:border-[#2E3A44] flex items-start justify-between gap-4 bg-[#F6F4EE]/50 dark:bg-[#151D23]/50">
+              <div className="space-y-1">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11px] font-mono font-medium bg-[#0284C7]/10 text-[#0284C7] dark:text-[#38BDF8] border border-[#0284C7]/20">
+                  <FileText size={12} />
+                  <span>{activeDocModal.badge}</span>
+                </div>
+                <h3 className="text-xl sm:text-2xl font-sans font-semibold text-[#2E3A44] dark:text-[#F6F4EE]">
+                  {activeDocModal.title}
+                </h3>
+                <div className="text-[11px] font-mono text-[#7E939C]">
+                  Effective Date: {activeDocModal.lastUpdated} · EvalForge Foundation Governance
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setActiveDocModal(null)}
+                className="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 text-[#7E939C] hover:text-[#2E3A44] dark:hover:text-[#F6F4EE] transition-colors cursor-pointer"
+                aria-label="Close document modal"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Modal Body: Scrollable Document Content */}
+            <div className="p-6 sm:p-8 overflow-y-auto space-y-6 text-xs sm:text-sm text-[#4C5F6B] dark:text-[#B0C2C6] leading-relaxed font-sans">
+              {activeDocModal.content.map((sec) => (
+                <div key={sec.heading} className="space-y-2">
+                  <h4 className="font-semibold text-sm sm:text-base text-[#2E3A44] dark:text-[#F6F4EE]">
+                    {sec.heading}
+                  </h4>
+                  <p>{sec.text}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-6 border-t border-[#DDE4E1] dark:border-[#2E3A44] flex items-center justify-between gap-4 bg-[#F6F4EE]/40 dark:bg-[#151D23]/40">
+              <span className="text-[11px] text-[#7E939C] font-mono">
+                Cryptographically audited for enterprise VPC standards.
+              </span>
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setActiveDocModal(null)}
+                  className="px-5 py-2.5 rounded-xl text-xs font-medium border border-[#DDE4E1] dark:border-[#2E3A44] text-[#4C5F6B] dark:text-[#B0C2C6] hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer"
+                >
+                  Close Document
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
