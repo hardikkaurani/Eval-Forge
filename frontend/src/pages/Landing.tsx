@@ -1,10 +1,12 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ArrowRight,
   ArrowUpRight,
   BarChart3,
+  Check,
   CheckCircle2,
+  Copy,
   Database,
   ExternalLink,
   FlaskConical,
@@ -12,6 +14,7 @@ import {
   Layers,
   Menu,
   ShieldCheck,
+  Sparkles,
   Terminal,
   X,
   Zap,
@@ -19,10 +22,268 @@ import {
 import { useConnection } from '../context/ConnectionContext';
 import { ThemeControl } from '../layouts/WorkspaceShell';
 
+interface CapabilityItem {
+  num: string;
+  title: string;
+  tagline: string;
+  desc: string;
+  icon: typeof Database;
+  highlights: string[];
+  specs: { label: string; value: string }[];
+  codeLanguage: string;
+  codeSnippet: string;
+  actionLabel: string;
+  actionRoute: string;
+}
+
+const CAPABILITIES: CapabilityItem[] = [
+  {
+    num: '01',
+    title: 'Versioned Datasets',
+    tagline: 'Deterministic ground-truth benchmarks and schema-validated dataset governance.',
+    desc: 'Upload CSV, JSON, and JSONL datasets with validated schemas, golden references, and schema mapping.',
+    icon: Database,
+    highlights: [
+      'Strict JSON Schema & Pydantic validation on ingest',
+      'SHA-256 cryptographic dataset hashing & snapshot immutability',
+      'Golden reference sets with paired expected ground-truth answers',
+      'Automated schema diff detection and migration tracking',
+    ],
+    specs: [
+      { label: 'Supported Formats', value: 'CSV, JSON, JSONL, Parquet' },
+      { label: 'Schema Enforcement', value: 'Pydantic v2 + JSON Schema Draft 7' },
+      { label: 'Versioning', value: 'SHA-256 Content-Addressed Hash' },
+      { label: 'Max Dataset Size', value: '500MB per batch (Multi-chunk streaming)' },
+    ],
+    codeLanguage: 'python',
+    codeSnippet: `from evalforge import EvalClient
+
+client = EvalClient(api_key="ef_live_...")
+
+# Register and validate a versioned golden benchmark dataset
+dataset = client.datasets.create(
+    name="golden-support-benchmarks-v2",
+    format="jsonl",
+    file_path="./data/golden_eval.jsonl",
+    schema_validation={
+        "query": str,
+        "expected_answer": str,
+        "context_documents": list[str]
+    },
+    golden_truth_enabled=True
+)
+
+print(f"Dataset registered: {dataset.id} (v{dataset.version})")`,
+    actionLabel: 'Manage Datasets in Workspace',
+    actionRoute: '/projects',
+  },
+  {
+    num: '02',
+    title: 'G-Eval & LLM Judges',
+    tagline: 'Multi-criteria rubric execution with chain-of-thought verification.',
+    desc: 'Run multi-criteria rubrics with chain-of-thought explanations. Quantify alignment, coherence, and accuracy.',
+    icon: FlaskConical,
+    highlights: [
+      'Multi-criteria weighted rubrics for semantic quality and alignment',
+      'Chain-of-thought (CoT) reasoning traces captured for every score',
+      'Inter-annotator agreement metrics (Cohen’s Kappa) against human labels',
+      'Support for GPT-4o, Claude 3.5 Sonnet, Gemini 1.5 Pro, and Llama 3',
+    ],
+    specs: [
+      { label: 'Scoring Scales', value: 'Continuous (0.0 - 1.0) or Discrete (1 - 5)' },
+      { label: 'Judge Architectures', value: 'OpenAI, Anthropic, Google Gemini, Ollama' },
+      { label: 'Reasoning Mode', value: 'Full CoT Explanations with Token Logs' },
+      { label: 'Calibration', value: 'Automatic prompt temperature dampening (0.0)' },
+    ],
+    codeLanguage: 'python',
+    codeSnippet: `# Execute G-Eval multi-criteria rubric evaluation
+evaluation = client.evaluations.create(
+    dataset_id="ds_customer_v2",
+    judge_model="gpt-4o",
+    temperature=0.0,
+    rubric={
+        "coherence": {"weight": 0.30, "criteria": "Logical flow and structural clarity"},
+        "factuality": {"weight": 0.40, "criteria": "Zero hallucinations against golden context"},
+        "safety": {"weight": 0.30, "criteria": "Strict compliance with safety guardrails"}
+    },
+    require_reasoning_trace=True
+)
+
+summary = evaluation.wait_for_completion()
+print(f"Overall Score: {summary.aggregate_score:.2f} / 1.0")`,
+    actionLabel: 'Launch LLM Evaluation',
+    actionRoute: '/projects',
+  },
+  {
+    num: '03',
+    title: 'RAG Faithfulness',
+    tagline: 'Rigorous triad evaluation for retrieval-augmented generation pipelines.',
+    desc: 'Measure retrieval precision, context recall, and output groundedness against your reference knowledge base.',
+    icon: Layers,
+    highlights: [
+      'RAG Triad metrics: Context Relevance, Groundedness, Answer Relevance',
+      'Sentence-level citation grounding with source context attribution',
+      'Vector retrieval precision and recall against indexed document chunks',
+      'Automated hallucination flags for ungrounded synthetic claims',
+    ],
+    specs: [
+      { label: 'Triad Formulation', value: 'Context Precision, Context Recall, Faithfulness' },
+      { label: 'Attribution Granularity', value: 'Sentence-level span highlighting' },
+      { label: 'Context Windows', value: 'Up to 128k token context chunks evaluated' },
+      { label: 'Scoring Engine', value: 'Token overlap + Semantic embedding similarity' },
+    ],
+    codeLanguage: 'python',
+    codeSnippet: `# Evaluate RAG Triad: Context Recall, Precision & Faithfulness
+rag_metrics = client.metrics.rag_triad(
+    query="What is the cluster failover SLA for Enterprise tier?",
+    retrieved_chunks=[
+        "Enterprise clusters provide automated multi-region failover under 90s."
+    ],
+    generated_response="Enterprise tier automated failover completes within 90 seconds.",
+    strict_citation=True
+)
+
+print(f"Faithfulness Score: {rag_metrics.faithfulness}")        # 1.00
+print(f"Context Recall:     {rag_metrics.context_recall}")      # 1.00
+print(f"Hallucination Risk: {rag_metrics.hallucination_score}") # 0.00`,
+    actionLabel: 'Run RAG Benchmark',
+    actionRoute: '/projects',
+  },
+  {
+    num: '04',
+    title: 'Deep Analytics & Drift',
+    tagline: 'Continuous score distributions, regression slicing, and drift telemetry.',
+    desc: 'Observe score distributions, monitor model regressions, detect failure slices, and export audit trails.',
+    icon: BarChart3,
+    highlights: [
+      'Continuous score distribution comparison (Wasserstein distance & KS-test)',
+      'Automated failure slicing to identify weak prompt patterns or topics',
+      'Exportable audit trails in signed PDF, CSV, and machine-readable JSON',
+      'Configurable CI/CD threshold gates to block regression pull requests',
+    ],
+    specs: [
+      { label: 'Statistical Tests', value: 'Two-Sample Kolmogorov-Smirnov, p < 0.05' },
+      { label: 'Regression Slicing', value: 'Automated clustering by prompt length & topic' },
+      { label: 'Telemetry Export', value: 'Prometheus metrics, Datadog, Signed JSON' },
+      { label: 'Alerting', value: 'Slack, Webhooks, PagerDuty, GitHub PR status' },
+    ],
+    codeLanguage: 'python',
+    codeSnippet: `# Statistical regression detection across model versions
+comparison = client.analytics.compare(
+    baseline_run_id="eval_run_gpt4_base",
+    candidate_run_id="eval_run_gpt4o_rc1",
+    p_value_threshold=0.05
+)
+
+if comparison.has_regression:
+    print(f"ALERT: Regression detected in slice '{comparison.regressed_slice}'")
+    print(f"Delta: {comparison.score_delta:.3f} (p={comparison.p_value})")
+else:
+    print("Zero statistically significant regression. Safe to deploy.")`,
+    actionLabel: 'Explore Analytics Dashboard',
+    actionRoute: '/overview',
+  },
+  {
+    num: '05',
+    title: 'Distributed Async Jobs',
+    tagline: 'High-throughput Celery and Redis queuing for massive evaluation suites.',
+    desc: 'Decoupled Celery and Redis queuing handles high-volume asynchronous batch evaluation workloads.',
+    icon: Zap,
+    highlights: [
+      'Decoupled Redis job broker with Celery distributed worker pools',
+      'Adaptive token-bucket rate limiting across multiple LLM providers',
+      'Fault-tolerant execution with checkpointing and automatic retry on 429/5xx',
+      'Server-Sent Events (SSE) live progress streams and webhook dispatch',
+    ],
+    specs: [
+      { label: 'Queue Engine', value: 'Redis 7.x + Celery Distributed Worker Fleet' },
+      { label: 'Concurrency', value: 'Scalable up to 256 concurrent evaluator threads' },
+      { label: 'Backoff Strategy', value: 'Exponential jittered retry on provider 429' },
+      { label: 'Streaming', value: 'Real-time SSE token stream & state updates' },
+    ],
+    codeLanguage: 'python',
+    codeSnippet: `# Dispatch high-throughput async evaluation job
+job = client.jobs.submit(
+    dataset_id="ds_100k_multilingual",
+    evaluation_suite="production_regression_gate",
+    concurrency=64,
+    webhook_url="https://api.internal.com/evals/complete",
+    retry_policy={"max_retries": 3, "backoff_multiplier": 1.5}
+)
+
+print(f"Dispatched Job ID: {job.id}")
+# Listen to live progress via Server-Sent Events (SSE)
+for event in client.jobs.stream_progress(job.id):
+    print(f"Progress: {event.completed_samples}/{event.total_samples} ({event.percent}%)")`,
+    actionLabel: 'Inspect Queue & System Health',
+    actionRoute: '/settings/system',
+  },
+  {
+    num: '06',
+    title: 'Developer Platform',
+    tagline: 'CLI, Model Context Protocol (MCP), webhooks, and multi-language SDKs.',
+    desc: 'Command-line CLI, Model Context Protocol (MCP), webhooks, and SDKs in Python, TypeScript, Java, and Go.',
+    icon: Terminal,
+    highlights: [
+      'Native Anthropic Model Context Protocol (MCP) server integration',
+      'Lightweight CLI for running evaluations directly in local terminal or CI/CD',
+      'Official SDKs in Python, TypeScript/Node.js, Go, and Java',
+      'Fully typed OpenAPI 3.1 REST API with scoped API keys and RBAC',
+    ],
+    specs: [
+      { label: 'Protocol Support', value: 'Anthropic Model Context Protocol (MCP) + REST' },
+      { label: 'CLI Tooling', value: 'evalforge CLI with terminal TUI & exit codes' },
+      { label: 'CI/CD Support', value: 'GitHub Actions, GitLab CI, CircleCI native actions' },
+      { label: 'API Specs', value: 'OpenAPI 3.1 / Swagger documentation' },
+    ],
+    codeLanguage: 'bash',
+    codeSnippet: `# Install EvalForge CLI
+pip install evalforge-cli
+
+# Run evaluation suite as a GitHub Actions CI test gate
+evalforge run \\
+  --project prj_live_alpha \\
+  --suite golden-coherence-v2 \\
+  --min-score 0.88 \\
+  --output ./eval-report.json
+
+# Exit code 0 if score >= 0.88, non-zero if regression detected!`,
+    actionLabel: 'View Developer SDK & CLI Guide',
+    actionRoute: '/developer',
+  },
+];
+
 export default function Landing() {
   const { connected } = useConnection();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeCodeTab, setActiveCodeTab] = useState<'python' | 'cli' | 'rest'>('python');
+  const [selectedCap, setSelectedCap] = useState<CapabilityItem | null>(null);
+  const [modalTab, setModalTab] = useState<'specs' | 'code'>('specs');
+  const [copiedCode, setCopiedCode] = useState(false);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setSelectedCap(null);
+      }
+    };
+    if (selectedCap) {
+      window.addEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = '';
+    };
+  }, [selectedCap]);
+
+  const handleCopyCode = (code: string) => {
+    navigator.clipboard.writeText(code);
+    setCopiedCode(true);
+    setTimeout(() => setCopiedCode(false), 2000);
+  };
 
   return (
     <div className="editorial-landing min-h-screen bg-[var(--bg)] text-[var(--text)] selection:bg-[#B0C2C6]/30 transition-colors duration-200">
@@ -395,6 +656,10 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto px-6">
           <div className="mb-16 flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-[#0284C7]/10 text-[#0284C7] dark:text-[#38BDF8] dark:bg-[#0284C7]/20 border border-[#0284C7]/20 mb-3">
+                <Sparkles size={12} />
+                <span>Interactive Pillars — Click any card to inspect architecture & specs</span>
+              </div>
               <div className="text-xs font-mono uppercase tracking-widest text-[#7E939C] mb-2">
                 01 — 06 Pillars
               </div>
@@ -403,70 +668,227 @@ export default function Landing() {
               </h2>
             </div>
             <p className="text-sm text-[#4C5F6B] dark:text-[#B0C2C6] max-w-md">
-              Every capability is built as a first-class citizen of the evaluation lifecycle.
+              Every capability is built as a first-class citizen of the evaluation lifecycle. Click
+              any pillar to explore technical specifications and integration code.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[
-              {
-                num: '01',
-                title: 'Versioned Datasets',
-                desc: 'Upload CSV, JSON, and JSONL datasets with validated schemas, golden references, and schema mapping.',
-                icon: Database,
-              },
-              {
-                num: '02',
-                title: 'G-Eval & LLM Judges',
-                desc: 'Run multi-criteria rubrics with chain-of-thought explanations. Quantify alignment, coherence, and accuracy.',
-                icon: FlaskConical,
-              },
-              {
-                num: '03',
-                title: 'RAG Faithfulness',
-                desc: 'Measure retrieval precision, context recall, and output groundedness against your reference knowledge base.',
-                icon: Layers,
-              },
-              {
-                num: '04',
-                title: 'Deep Analytics & Drift',
-                desc: 'Observe score distributions, monitor model regressions, detect failure slices, and export audit trails.',
-                icon: BarChart3,
-              },
-              {
-                num: '05',
-                title: 'Distributed Async Jobs',
-                desc: 'Decoupled Celery and Redis queuing handles high-volume asynchronous batch evaluation workloads.',
-                icon: Zap,
-              },
-              {
-                num: '06',
-                title: 'Developer Platform',
-                desc: 'Command-line CLI, Model Context Protocol (MCP), webhooks, and SDKs in Python, TypeScript, Java, and Go.',
-                icon: Terminal,
-              },
-            ].map((cap) => (
+            {CAPABILITIES.map((cap) => (
               <div
                 key={cap.num}
-                className="group relative p-8 rounded-2xl border border-[#DDE4E1] dark:border-[#2E3A44] bg-white dark:bg-[#202A32] hover:border-[#0284C7] dark:hover:border-[#38BDF8] transition-all duration-200"
+                role="button"
+                tabIndex={0}
+                aria-haspopup="dialog"
+                aria-expanded={selectedCap?.num === cap.num}
+                onClick={() => {
+                  setSelectedCap(cap);
+                  setModalTab('specs');
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    setSelectedCap(cap);
+                    setModalTab('specs');
+                  }
+                }}
+                className="group relative p-8 rounded-2xl border border-[#DDE4E1] dark:border-[#2E3A44] bg-white dark:bg-[#202A32] hover:border-[#0284C7] dark:hover:border-[#38BDF8] hover:shadow-xl hover:-translate-y-1.5 transition-all duration-200 cursor-pointer flex flex-col justify-between text-left focus:outline-none focus:ring-2 focus:ring-[#0284C7] focus:ring-offset-2 dark:focus:ring-offset-[#1C252C]"
               >
-                <div className="flex items-center justify-between mb-6">
-                  <span className="font-sans text-3xl font-semibold text-[#7E939C] group-hover:text-[#0369A1] transition-colors">
-                    {cap.num}
-                  </span>
-                  <div className="p-2.5 rounded-lg border border-[#DDE4E1] dark:border-[#2E3A44] text-[#4C5F6B] dark:text-[#B0C2C6]">
-                    <cap.icon size={18} />
+                <div>
+                  <div className="flex items-center justify-between mb-6">
+                    <span className="font-sans text-3xl font-semibold text-[#7E939C] group-hover:text-[#0284C7] dark:group-hover:text-[#38BDF8] transition-colors">
+                      {cap.num}
+                    </span>
+                    <div className="p-2.5 rounded-lg border border-[#DDE4E1] dark:border-[#2E3A44] text-[#4C5F6B] dark:text-[#B0C2C6] group-hover:border-[#0284C7] group-hover:text-[#0284C7] dark:group-hover:border-[#38BDF8] dark:group-hover:text-[#38BDF8] transition-colors">
+                      <cap.icon size={18} />
+                    </div>
                   </div>
+                  <h3 className="font-sans text-2xl font-semibold text-[#2E3A44] dark:text-[#F6F4EE] mb-3 group-hover:text-[#0284C7] dark:group-hover:text-[#38BDF8] transition-colors">
+                    {cap.title}
+                  </h3>
+                  <p className="text-sm text-[#4C5F6B] dark:text-[#B0C2C6] leading-relaxed">
+                    {cap.desc}
+                  </p>
                 </div>
-                <h3 className="font-sans text-2xl font-semibold text-[#2E3A44] dark:text-[#F6F4EE] mb-3">
-                  {cap.title}
-                </h3>
-                <p className="text-sm text-[#4C5F6B] dark:text-[#B0C2C6] leading-relaxed">
-                  {cap.desc}
-                </p>
+
+                <div className="mt-6 pt-4 border-t border-[#DDE4E1]/80 dark:border-[#2E3A44]/80 flex items-center justify-between text-xs font-medium text-[#0284C7] dark:text-[#38BDF8]">
+                  <span className="flex items-center gap-1.5 group-hover:underline">
+                    <span>Explore technical specs</span>
+                    <ArrowRight
+                      size={14}
+                      className="transform group-hover:translate-x-1 transition-transform"
+                    />
+                  </span>
+                  <span className="font-mono text-[11px] text-[#7E939C] uppercase tracking-wider">
+                    Inspect
+                  </span>
+                </div>
               </div>
             ))}
           </div>
+
+          {/* ─── Capability Detail Modal Dialog ─── */}
+          {selectedCap && (
+            <div
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="capability-modal-title"
+              className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-sm animate-fade-in"
+              onClick={() => setSelectedCap(null)}
+            >
+              <div
+                className="relative w-full max-w-2xl bg-white dark:bg-[#202A32] rounded-2xl border border-[#DDE4E1] dark:border-[#2E3A44] shadow-2xl p-6 sm:p-8 overflow-hidden max-h-[90vh] flex flex-col text-left text-[var(--text)]"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {/* Modal Header */}
+                <div className="flex items-start justify-between pb-5 border-b border-[#DDE4E1] dark:border-[#2E3A44]">
+                  <div className="flex items-start gap-4">
+                    <div className="p-3 rounded-xl bg-gradient-to-br from-[#0284C7] to-[#0369A1] text-white shadow-sm flex items-center justify-center shrink-0">
+                      <selectedCap.icon size={22} />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="font-mono text-xs font-semibold tracking-wider text-[#0284C7] dark:text-[#38BDF8] uppercase">
+                          Pillar {selectedCap.num} / Capability Architecture
+                        </span>
+                      </div>
+                      <h3
+                        id="capability-modal-title"
+                        className="text-2xl sm:text-3xl font-semibold tracking-tight text-[#2E3A44] dark:text-[#F6F4EE]"
+                      >
+                        {selectedCap.title}
+                      </h3>
+                      <p className="text-xs sm:text-sm text-[#4C5F6B] dark:text-[#B0C2C6] mt-1">
+                        {selectedCap.tagline}
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedCap(null)}
+                    className="p-2 rounded-lg text-[#7E939C] hover:text-[#2E3A44] dark:hover:text-[#F6F4EE] hover:bg-black/5 dark:hover:bg-white/5 transition-colors focus:outline-none focus:ring-2 focus:ring-[#0284C7]"
+                    aria-label="Close capability details"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+
+                {/* Sub Navigation Tabs */}
+                <div className="flex items-center gap-2 pt-4 pb-2 border-b border-[#DDE4E1] dark:border-[#2E3A44]">
+                  <button
+                    type="button"
+                    onClick={() => setModalTab('specs')}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                      modalTab === 'specs'
+                        ? 'bg-[#0284C7] text-white shadow-sm'
+                        : 'text-[#4C5F6B] dark:text-[#B0C2C6] hover:bg-black/5 dark:hover:bg-white/5'
+                    }`}
+                  >
+                    Architecture & Specs
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setModalTab('code')}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                      modalTab === 'code'
+                        ? 'bg-[#0284C7] text-white shadow-sm'
+                        : 'text-[#4C5F6B] dark:text-[#B0C2C6] hover:bg-black/5 dark:hover:bg-white/5'
+                    }`}
+                  >
+                    Integration Code ({selectedCap.codeLanguage})
+                  </button>
+                </div>
+
+                {/* Modal Body */}
+                <div className="overflow-y-auto flex-1 py-5 space-y-6">
+                  {modalTab === 'specs' ? (
+                    <>
+                      <div>
+                        <h4 className="text-xs font-mono uppercase tracking-wider text-[#7E939C] mb-3">
+                          Key Platform Capabilities
+                        </h4>
+                        <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                          {selectedCap.highlights.map((highlight, idx) => (
+                            <li
+                              key={idx}
+                              className="flex items-start gap-2 text-xs sm:text-sm text-[#2E3A44] dark:text-[#E2E8F0] p-2.5 rounded-lg bg-[#EFECE4]/40 dark:bg-[#1C252C]/60 border border-[#DDE4E1] dark:border-[#2E3A44]"
+                            >
+                              <CheckCircle2 size={16} className="text-[#0284C7] shrink-0 mt-0.5" />
+                              <span>{highlight}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+
+                      <div>
+                        <h4 className="text-xs font-mono uppercase tracking-wider text-[#7E939C] mb-3">
+                          Technical Specifications
+                        </h4>
+                        <div className="rounded-xl border border-[#DDE4E1] dark:border-[#2E3A44] overflow-hidden divide-y divide-[#DDE4E1] dark:divide-[#2E3A44] text-xs">
+                          {selectedCap.specs.map((spec, idx) => (
+                            <div
+                              key={idx}
+                              className="flex items-center justify-between p-3 bg-white dark:bg-[#202A32]"
+                            >
+                              <span className="font-mono text-[#7E939C]">{spec.label}</span>
+                              <span className="font-medium text-[#2E3A44] dark:text-[#F6F4EE] text-right">
+                                {spec.value}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-xs font-mono uppercase tracking-wider text-[#7E939C]">
+                          Snippet ({selectedCap.codeLanguage})
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => handleCopyCode(selectedCap.codeSnippet)}
+                          className="flex items-center gap-1.5 text-xs font-mono px-2.5 py-1 rounded border border-[#DDE4E1] dark:border-[#2E3A44] hover:bg-black/5 dark:hover:bg-white/5 transition-colors text-[#0284C7] dark:text-[#38BDF8]"
+                        >
+                          {copiedCode ? <Check size={12} /> : <Copy size={12} />}
+                          <span>{copiedCode ? 'Copied' : 'Copy snippet'}</span>
+                        </button>
+                      </div>
+                      <pre className="p-4 rounded-xl bg-[#1C252C] dark:bg-[#0F172A] border border-[#2E3A44] dark:border-[#334155] text-xs text-[#E2E8F0] font-mono overflow-x-auto leading-relaxed">
+                        <code>{selectedCap.codeSnippet}</code>
+                      </pre>
+                    </div>
+                  )}
+                </div>
+
+                {/* Modal Footer */}
+                <div className="pt-4 border-t border-[#DDE4E1] dark:border-[#2E3A44] flex flex-col sm:flex-row items-center justify-between gap-3">
+                  <span className="text-xs text-[#7E939C]">
+                    Pillar {selectedCap.num} is fully supported in SDK & API.
+                  </span>
+                  <div className="flex items-center gap-2.5 w-full sm:w-auto">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedCap(null)}
+                      className="w-full sm:w-auto px-4 py-2 rounded-xl text-xs font-medium border border-[#DDE4E1] dark:border-[#2E3A44] text-[#4C5F6B] dark:text-[#B0C2C6] hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                    >
+                      Close
+                    </button>
+                    <Link
+                      to={connected ? selectedCap.actionRoute : '/login'}
+                      onClick={() => setSelectedCap(null)}
+                      className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2 rounded-xl text-xs font-medium bg-[#0284C7] hover:bg-[#0369A1] text-white shadow-sm transition-colors"
+                    >
+                      <span>
+                        {connected ? selectedCap.actionLabel : 'Connect Workspace to Access'}
+                      </span>
+                      <ArrowRight size={13} />
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </section>
 
