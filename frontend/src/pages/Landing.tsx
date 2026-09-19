@@ -951,11 +951,11 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           {/* Brand Monogram & Wordmark */}
           <Link to="/" className="flex items-center gap-3 group">
-            <div className="relative w-10 h-10 rounded-xl overflow-hidden border border-[#0284C7]/20 dark:border-[#2E3A44] bg-gradient-to-br from-[#0284C7] to-[#0369A1] dark:from-[#1E293B] dark:to-[#0F172A] p-1.5 shadow-sm transition-transform duration-200 group-hover:scale-105">
+            <div className="relative w-10 h-10 flex items-center justify-center transition-transform duration-200 group-hover:scale-105">
               <img
                 src="/logo.png"
                 alt="EvalForge Emblem"
-                className="w-full h-full object-contain"
+                className="w-10 h-10 object-contain drop-shadow-sm"
               />
             </div>
             <div className="flex flex-col">
@@ -1212,11 +1212,11 @@ export default function Landing() {
                 {/* Header of Preview Box */}
                 <div className="flex items-center justify-between border-b border-[#DDE4E1] dark:border-[#2E3A44] pb-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-md bg-[#2E3A44] flex items-center justify-center p-1 border border-[#DDE4E1]">
+                    <div className="w-8 h-8 flex items-center justify-center">
                       <img
                         src="/logo.png"
                         alt="EvalForge"
-                        className="w-full h-full object-contain"
+                        className="w-8 h-8 object-contain drop-shadow-sm"
                       />
                     </div>
                     <div>
@@ -2756,8 +2756,12 @@ export default function Landing() {
       {/* ─── Final Editorial Call-To-Action ─── */}
       <section className="py-24 border-b border-[#DDE4E1] dark:border-[#2E3A44]">
         <div className="max-w-5xl mx-auto px-6 text-center space-y-8">
-          <div className="w-16 h-16 rounded-2xl mx-auto border border-[#0284C7]/20 dark:border-[#2E3A44] bg-gradient-to-br from-[#0284C7] to-[#0369A1] dark:from-[#1E293B] dark:to-[#0F172A] p-2.5 shadow-lg shadow-[#0284C7]/15">
-            <img src="/logo.png" alt="EvalForge Emblem" className="w-full h-full object-contain" />
+          <div className="w-16 h-16 mx-auto flex items-center justify-center transition-transform duration-300 hover:scale-110">
+            <img
+              src="/logo.png"
+              alt="EvalForge Emblem"
+              className="w-16 h-16 object-contain drop-shadow-md"
+            />
           </div>
 
           <h2 className="font-sans text-4xl sm:text-6xl font-semibold tracking-tight text-[#2E3A44] dark:text-[#F6F4EE]">
@@ -3136,7 +3140,7 @@ export default function Landing() {
           {/* Bottom Copyright & Social Bar */}
           <div className="pt-8 border-t border-[#DDE4E1] dark:border-[#2E3A44] flex flex-col sm:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-3">
-              <img src="/logo.png" alt="EvalForge" className="w-6 h-6 object-contain" />
+              <img src="/logo.png" alt="EvalForge" className="w-7 h-7 object-contain" />
               <span className="font-sans text-base font-semibold text-[#2E3A44] dark:text-[#F6F4EE]">
                 EvalForge.
               </span>
