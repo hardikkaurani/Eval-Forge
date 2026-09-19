@@ -647,6 +647,8 @@ export default function Landing() {
   const [techModalTab, setTechModalTab] = useState<'specs' | 'code'>('specs');
   const [copiedTechCode, setCopiedTechCode] = useState(false);
 
+  const [platformModalOpen, setPlatformModalOpen] = useState(false);
+
   const runSimulation = (suiteKey: 'rag' | 'rubric' | 'safety' = simSuite) => {
     setActiveCodeTab('simulator');
     setSimRunning(true);
@@ -697,9 +699,10 @@ export default function Landing() {
       if (e.key === 'Escape') {
         setSelectedCap(null);
         setSelectedTech(null);
+        setPlatformModalOpen(false);
       }
     };
-    if (selectedCap || selectedTech) {
+    if (selectedCap || selectedTech || platformModalOpen) {
       window.addEventListener('keydown', handleKeyDown);
       document.body.style.overflow = 'hidden';
     } else {
@@ -709,7 +712,19 @@ export default function Landing() {
       window.removeEventListener('keydown', handleKeyDown);
       document.body.style.overflow = '';
     };
-  }, [selectedCap, selectedTech]);
+  }, [selectedCap, selectedTech, platformModalOpen]);
+
+  useEffect(() => {
+    const handleHash = () => {
+      if (window.location.hash === '#platform') {
+        const el = document.getElementById('platform');
+        if (el) el.scrollIntoView({ behavior: 'smooth' });
+      }
+    };
+    handleHash();
+    window.addEventListener('hashchange', handleHash);
+    return () => window.removeEventListener('hashchange', handleHash);
+  }, []);
 
   const handleCopyCode = (code: string) => {
     navigator.clipboard.writeText(code);
@@ -774,12 +789,19 @@ export default function Landing() {
 
           {/* Desktop Minimal Nav */}
           <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-[#4C5F6B] dark:text-[#B0C2C6]">
-            <a
-              href="#platform"
-              className="hover:text-[#0284C7] dark:hover:text-[#38BDF8] transition-colors"
+            <button
+              type="button"
+              onClick={() => {
+                setPlatformModalOpen(true);
+                const el = document.getElementById('platform');
+                if (el) el.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className="hover:text-[#0284C7] dark:hover:text-[#38BDF8] transition-colors flex items-center gap-1.5 cursor-pointer font-medium text-sm text-[#4C5F6B] dark:text-[#B0C2C6]"
+              aria-label="Open Platform Overview"
             >
-              Platform
-            </a>
+              <span>Platform</span>
+              <Sparkles size={13} className="text-[#0284C7] dark:text-[#38BDF8]" />
+            </button>
             <a
               href="#capabilities"
               className="hover:text-[#0284C7] dark:hover:text-[#38BDF8] transition-colors"
@@ -860,13 +882,19 @@ export default function Landing() {
         {/* Mobile Dropdown */}
         {mobileMenuOpen && (
           <div className="md:hidden px-6 py-6 border-b border-[#DDE4E1] dark:border-[#2E3A44] bg-[#F6F4EE] dark:bg-[#182026] space-y-4">
-            <a
-              href="#platform"
-              onClick={() => setMobileMenuOpen(false)}
-              className="block text-base font-medium text-[#4C5F6B] dark:text-[#B0C2C6]"
+            <button
+              type="button"
+              onClick={() => {
+                setMobileMenuOpen(false);
+                setPlatformModalOpen(true);
+                const el = document.getElementById('platform');
+                if (el) el.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className="w-full text-left text-base font-medium text-[#4C5F6B] dark:text-[#B0C2C6] hover:text-[#0284C7] dark:hover:text-[#38BDF8] flex items-center justify-between"
             >
-              Platform
-            </a>
+              <span>Platform Overview</span>
+              <Sparkles size={14} className="text-[#0284C7] dark:text-[#38BDF8]" />
+            </button>
             <a
               href="#capabilities"
               onClick={() => setMobileMenuOpen(false)}
@@ -915,7 +943,10 @@ export default function Landing() {
       </header>
 
       {/* ─── Hero Section: Alpaca Editorial Composition ─── */}
-      <section className="relative overflow-hidden pt-12 pb-24 border-b border-[#DDE4E1] dark:border-[#2E3A44]">
+      <section
+        id="platform"
+        className="relative overflow-hidden pt-12 pb-24 border-b border-[#DDE4E1] dark:border-[#2E3A44]"
+      >
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
             {/* Left Column: Editorial Typography & Value */}
@@ -987,7 +1018,18 @@ export default function Landing() {
 
             {/* Right Column: Live Product Card Showcase */}
             <div className="lg:col-span-5 relative">
-              <div className="relative rounded-2xl border border-[#DDE4E1] dark:border-[#2E3A44] bg-white dark:bg-[#202A32] p-6 shadow-xl space-y-6">
+              <div
+                onClick={() => setPlatformModalOpen(true)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    setPlatformModalOpen(true);
+                  }
+                }}
+                className="relative rounded-2xl border border-[#DDE4E1] dark:border-[#2E3A44] bg-white dark:bg-[#202A32] p-6 shadow-xl space-y-6 cursor-pointer hover:border-[#0284C7] dark:hover:border-[#38BDF8] transition-all hover:shadow-2xl group"
+              >
                 {/* Header of Preview Box */}
                 <div className="flex items-center justify-between border-b border-[#DDE4E1] dark:border-[#2E3A44] pb-4">
                   <div className="flex items-center gap-3">
@@ -999,11 +1041,15 @@ export default function Landing() {
                       />
                     </div>
                     <div>
-                      <div className="text-xs font-semibold text-[#2E3A44] dark:text-[#F6F4EE]">
-                        Live Evaluation Dashboard
+                      <div className="text-xs font-semibold text-[#2E3A44] dark:text-[#F6F4EE] group-hover:text-[#0284C7] dark:group-hover:text-[#38BDF8] transition-colors flex items-center gap-1.5">
+                        <span>Live Evaluation Dashboard</span>
+                        <Sparkles
+                          size={12}
+                          className="text-[#0284C7] dark:text-[#38BDF8] opacity-80"
+                        />
                       </div>
                       <div className="text-[10px] font-mono text-[#7E939C]">
-                        Project: Chatbot Alignment
+                        Project: Chatbot Alignment · Click to Inspect Platform
                       </div>
                     </div>
                   </div>
@@ -2204,6 +2250,220 @@ export default function Landing() {
           )}
         </div>
       </section>
+
+      {/* ─── Interactive Platform Architecture Modal ─── */}
+      {platformModalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
+          onClick={() => setPlatformModalOpen(false)}
+        >
+          <div
+            className="relative w-full max-w-4xl max-h-[90vh] flex flex-col rounded-3xl border border-[#DDE4E1] dark:border-[#2E3A44] bg-white dark:bg-[#1C252C] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="p-6 sm:p-8 border-b border-[#DDE4E1] dark:border-[#2E3A44] flex items-start justify-between gap-4 bg-[#F6F4EE]/50 dark:bg-[#151D23]/50">
+              <div className="space-y-1.5">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-mono font-medium bg-[#0284C7]/10 text-[#0284C7] dark:text-[#38BDF8] border border-[#0284C7]/20">
+                  <ShieldCheck size={13} />
+                  <span>EVALFORGE PLATFORM OPERATING SYSTEM</span>
+                </div>
+                <h3 className="text-2xl sm:text-3xl font-sans font-semibold text-[#2E3A44] dark:text-[#F6F4EE]">
+                  Enterprise AI Evaluation Platform
+                </h3>
+                <p className="text-xs sm:text-sm text-[#4C5F6B] dark:text-[#B0C2C6] max-w-2xl font-normal">
+                  A high-throughput, deterministic evaluation runtime for AI engineers. Enforce
+                  statistical rigor, multi-model consensus, and automated quality gates across LLM
+                  pipelines.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setPlatformModalOpen(false)}
+                className="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 text-[#7E939C] hover:text-[#2E3A44] dark:hover:text-[#F6F4EE] transition-colors"
+                aria-label="Close modal"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Modal Body: Scrollable */}
+            <div className="p-6 sm:p-8 overflow-y-auto space-y-6">
+              {/* 4 Pillars Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="p-4 rounded-2xl border border-[#DDE4E1] dark:border-[#2E3A44] bg-[#F6F4EE]/40 dark:bg-[#202A32]/40 space-y-2">
+                  <div className="flex items-center gap-2.5 text-[#0284C7] dark:text-[#38BDF8]">
+                    <div className="w-8 h-8 rounded-lg bg-[#0284C7]/10 flex items-center justify-center">
+                      <Cpu size={16} />
+                    </div>
+                    <span className="font-semibold text-sm text-[#2E3A44] dark:text-[#F6F4EE]">
+                      Deterministic Evaluation Engine
+                    </span>
+                  </div>
+                  <p className="text-xs text-[#4C5F6B] dark:text-[#B0C2C6] leading-relaxed">
+                    Custom G-Eval rubrics, exact match, semantic embeddings, context recall, and
+                    deterministic assertion scripts for LLM and RAG verification.
+                  </p>
+                </div>
+
+                <div className="p-4 rounded-2xl border border-[#DDE4E1] dark:border-[#2E3A44] bg-[#F6F4EE]/40 dark:bg-[#202A32]/40 space-y-2">
+                  <div className="flex items-center gap-2.5 text-[#0284C7] dark:text-[#38BDF8]">
+                    <div className="w-8 h-8 rounded-lg bg-[#0284C7]/10 flex items-center justify-center">
+                      <Gauge size={16} />
+                    </div>
+                    <span className="font-semibold text-sm text-[#2E3A44] dark:text-[#F6F4EE]">
+                      Sovereign Judge Matrix
+                    </span>
+                  </div>
+                  <p className="text-xs text-[#4C5F6B] dark:text-[#B0C2C6] leading-relaxed">
+                    Unified routing across OpenAI (GPT-4o), Anthropic (Claude 3.5), Google (Gemini
+                    1.5), and private self-hosted models (DeepSeek, Llama).
+                  </p>
+                </div>
+
+                <div className="p-4 rounded-2xl border border-[#DDE4E1] dark:border-[#2E3A44] bg-[#F6F4EE]/40 dark:bg-[#202A32]/40 space-y-2">
+                  <div className="flex items-center gap-2.5 text-[#0284C7] dark:text-[#38BDF8]">
+                    <div className="w-8 h-8 rounded-lg bg-[#0284C7]/10 flex items-center justify-center">
+                      <Zap size={16} />
+                    </div>
+                    <span className="font-semibold text-sm text-[#2E3A44] dark:text-[#F6F4EE]">
+                      Distributed Worker Mesh
+                    </span>
+                  </div>
+                  <p className="text-xs text-[#4C5F6B] dark:text-[#B0C2C6] leading-relaxed">
+                    Asynchronous task execution capable of evaluating 100k+ samples concurrently
+                    with real-time SSE progress streaming and automated retries.
+                  </p>
+                </div>
+
+                <div className="p-4 rounded-2xl border border-[#DDE4E1] dark:border-[#2E3A44] bg-[#F6F4EE]/40 dark:bg-[#202A32]/40 space-y-2">
+                  <div className="flex items-center gap-2.5 text-[#0284C7] dark:text-[#38BDF8]">
+                    <div className="w-8 h-8 rounded-lg bg-[#0284C7]/10 flex items-center justify-center">
+                      <Terminal size={16} />
+                    </div>
+                    <span className="font-semibold text-sm text-[#2E3A44] dark:text-[#F6F4EE]">
+                      Developer SDK & MCP Server
+                    </span>
+                  </div>
+                  <p className="text-xs text-[#4C5F6B] dark:text-[#B0C2C6] leading-relaxed">
+                    Native Model Context Protocol (MCP) server, standalone terminal CLI,
+                    Python/TypeScript SDKs, and GitHub Actions regression gates.
+                  </p>
+                </div>
+              </div>
+
+              {/* Platform Metrics Bar */}
+              <div className="p-4 rounded-2xl border border-[#DDE4E1] dark:border-[#2E3A44] bg-[#F6F4EE] dark:bg-[#182026] grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
+                <div>
+                  <div className="text-lg sm:text-xl font-mono font-semibold text-[#0284C7] dark:text-[#38BDF8]">
+                    99.98%
+                  </div>
+                  <div className="text-[11px] text-[#7E939C] uppercase tracking-wider mt-0.5">
+                    Platform SLA
+                  </div>
+                </div>
+                <div>
+                  <div className="text-lg sm:text-xl font-mono font-semibold text-[#2E3A44] dark:text-[#F6F4EE]">
+                    &lt; 240ms
+                  </div>
+                  <div className="text-[11px] text-[#7E939C] uppercase tracking-wider mt-0.5">
+                    P95 Eval Latency
+                  </div>
+                </div>
+                <div>
+                  <div className="text-lg sm:text-xl font-mono font-semibold text-[#2E3A44] dark:text-[#F6F4EE]">
+                    100k+
+                  </div>
+                  <div className="text-[11px] text-[#7E939C] uppercase tracking-wider mt-0.5">
+                    Parallel Concurrency
+                  </div>
+                </div>
+                <div>
+                  <div className="text-lg sm:text-xl font-mono font-semibold text-[#2E3A44] dark:text-[#F6F4EE]">
+                    Zero Data
+                  </div>
+                  <div className="text-[11px] text-[#7E939C] uppercase tracking-wider mt-0.5">
+                    Retention Mode
+                  </div>
+                </div>
+              </div>
+
+              {/* Quick Action Navigation Links */}
+              <div className="space-y-2">
+                <div className="text-xs font-mono uppercase tracking-wider text-[#7E939C]">
+                  Explore In Depth
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPlatformModalOpen(false);
+                      const el = document.getElementById('capabilities');
+                      if (el) el.scrollIntoView({ behavior: 'smooth' });
+                    }}
+                    className="p-3 text-left rounded-xl border border-[#DDE4E1] dark:border-[#2E3A44] hover:border-[#0284C7] dark:hover:border-[#38BDF8] bg-white dark:bg-[#202A32] text-xs font-medium text-[#2E3A44] dark:text-[#F6F4EE] transition-colors flex items-center justify-between cursor-pointer"
+                  >
+                    <span>6 Core Capabilities</span>
+                    <ArrowRight size={13} className="text-[#0284C7]" />
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPlatformModalOpen(false);
+                      const el = document.getElementById('code');
+                      if (el) el.scrollIntoView({ behavior: 'smooth' });
+                      setActiveCodeTab('simulator');
+                      runSimulation();
+                    }}
+                    className="p-3 text-left rounded-xl border border-[#DDE4E1] dark:border-[#2E3A44] hover:border-[#0284C7] dark:hover:border-[#38BDF8] bg-white dark:bg-[#202A32] text-xs font-medium text-[#2E3A44] dark:text-[#F6F4EE] transition-colors flex items-center justify-between cursor-pointer"
+                  >
+                    <span>Launch Live Simulator ▶</span>
+                    <ArrowRight size={13} className="text-[#0284C7]" />
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPlatformModalOpen(false);
+                      const el = document.getElementById('benchmarks');
+                      if (el) el.scrollIntoView({ behavior: 'smooth' });
+                    }}
+                    className="p-3 text-left rounded-xl border border-[#DDE4E1] dark:border-[#2E3A44] hover:border-[#0284C7] dark:hover:border-[#38BDF8] bg-white dark:bg-[#202A32] text-xs font-medium text-[#2E3A44] dark:text-[#F6F4EE] transition-colors flex items-center justify-between cursor-pointer"
+                  >
+                    <span>Sovereign Judge Matrix</span>
+                    <ArrowRight size={13} className="text-[#0284C7]" />
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-6 border-t border-[#DDE4E1] dark:border-[#2E3A44] flex flex-col sm:flex-row items-center justify-between gap-4 bg-[#F6F4EE]/40 dark:bg-[#151D23]/40">
+              <span className="text-xs text-[#7E939C]">
+                Ready to benchmark and validate your production models?
+              </span>
+              <div className="flex items-center gap-3 w-full sm:w-auto">
+                <button
+                  type="button"
+                  onClick={() => setPlatformModalOpen(false)}
+                  className="w-full sm:w-auto px-4 py-2 rounded-xl text-xs font-medium border border-[#DDE4E1] dark:border-[#2E3A44] text-[#4C5F6B] dark:text-[#B0C2C6] hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer"
+                >
+                  Close
+                </button>
+                <Link
+                  to={connected ? '/overview' : '/login'}
+                  onClick={() => setPlatformModalOpen(false)}
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-xs font-semibold bg-[#0284C7] hover:bg-[#0369A1] text-white shadow-sm transition-colors uppercase tracking-wider"
+                >
+                  <span>{connected ? 'Enter Workspace' : 'Launch Workspace'}</span>
+                  <ArrowRight size={13} />
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ─── Final Editorial Call-To-Action ─── */}
       <section className="py-24">
