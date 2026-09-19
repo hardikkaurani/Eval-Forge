@@ -15,13 +15,18 @@ import {
   LogOut,
   Menu,
   Monitor,
+  Moon,
   Settings,
   ShieldCheck,
+  Sparkles,
+  Sun,
   X,
+  ChevronDown,
+  Compass,
 } from 'lucide-react';
 import { DEMO_MODE, getPage, type RecordData } from '../services/client';
 import { useConnection } from '../context/ConnectionContext';
-import { useTheme } from '../context/ThemeContext';
+import { useTheme, type Theme } from '../context/ThemeContext';
 import { Button, Empty, ErrorNotice, Loading } from '../components/ui';
 
 const Context = createContext<{ projectId: string; project?: RecordData; projects: RecordData[] }>({
@@ -31,32 +36,57 @@ const Context = createContext<{ projectId: string; project?: RecordData; project
 export const useProject = () => useContext(Context);
 export function Brand() {
   return (
-    <Link className="brand" to="/" aria-label="EvalForge home">
+    <Link className="brand" to="/overview" aria-label="EvalForge workspace">
       <span className="brand-mark">
-        <Layers size={19} strokeWidth={2} />
+        <img src="/logo.png" alt="EvalForge Emblem" className="w-full h-full object-contain" />
       </span>
-      EvalForge
+      <span>EvalForge</span>
     </Link>
   );
 }
 export function ThemeControl() {
   const { theme, setTheme } = useTheme();
+
+  const getThemeIcon = () => {
+    switch (theme) {
+      case 'light':
+        return <Sun size={14} className="text-[#0284C7] dark:text-[#38BDF8]" />;
+      case 'dark':
+        return <Moon size={14} className="text-[#38BDF8]" />;
+      case 'aura':
+        return <Sparkles size={14} className="text-[#A6633D]" />;
+      case 'nordic':
+        return <Compass size={14} className="text-[#0284C7]" />;
+      case 'onyx':
+        return <Sparkles size={14} className="text-[#E5B869]" />;
+      default:
+        return <Monitor size={14} className="text-[#7E939C]" />;
+    }
+  };
+
   return (
-    <label className="theme-control">
-      <Monitor size={16} className="muted" />
+    <div className="theme-selector-container relative inline-flex items-center">
       <span className="sr-only">Color theme</span>
+      <div className="theme-selector-icon-slot absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none flex items-center justify-center">
+        {getThemeIcon()}
+      </div>
       <select
-        className="control"
+        className="theme-select-input"
         aria-label="Color theme"
-        style={{ width: 110, fontSize: 12, minHeight: 34 }}
         value={theme}
-        onChange={(e) => setTheme(e.target.value as 'light' | 'dark' | 'system')}
+        onChange={(e) => setTheme(e.target.value as Theme)}
       >
         <option value="system">System</option>
-        <option value="light">Light</option>
-        <option value="dark">Dark</option>
+        <option value="light">Alpaca Silk</option>
+        <option value="dark">Midnight Slate</option>
+        <option value="aura">Aura Linen</option>
+        <option value="nordic">Nordic Frost</option>
+        <option value="onyx">Obsidian Onyx</option>
       </select>
-    </label>
+      <div className="theme-selector-arrow-slot absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none flex items-center justify-center text-[#7E939C]">
+        <ChevronDown size={13} strokeWidth={2.4} />
+      </div>
+    </div>
   );
 }
 export default function WorkspaceShell() {
@@ -193,31 +223,36 @@ export default function WorkspaceShell() {
             <X size={18} />
           </Button>
         </div>
-        <label className="sr-only" htmlFor="project-switcher">
-          Active project
-        </label>
-        <select
-          id="project-switcher"
-          className="workspace-select"
-          value={project?.id ?? ''}
-          onChange={(e) => {
-            const id = e.target.value;
-            setSelected(id);
-            const suffix = location.pathname.match(
-              /^\/projects\/[^/]+\/(datasets|evaluations|benchmarks|rag|safety|policy|reports|jobs|logs)/
-            )?.[1];
-            navigate(suffix ? `/projects/${id}/${suffix}` : '/');
-          }}
-        >
-          <option value="" disabled>
-            {query.isPending ? 'Loading projects…' : 'Select a project'}
-          </option>
-          {projects.map((p) => (
-            <option key={p.id} value={p.id}>
-              {p.name}
+        <div className="relative w-full">
+          <label className="sr-only" htmlFor="project-switcher">
+            Active project
+          </label>
+          <select
+            id="project-switcher"
+            className="workspace-select"
+            value={project?.id ?? ''}
+            onChange={(e) => {
+              const id = e.target.value;
+              setSelected(id);
+              const suffix = location.pathname.match(
+                /^\/projects\/[^/]+\/(datasets|evaluations|benchmarks|rag|safety|policy|reports|jobs|logs)/
+              )?.[1];
+              navigate(suffix ? `/projects/${id}/${suffix}` : '/');
+            }}
+          >
+            <option value="" disabled>
+              {query.isPending ? 'Loading projects…' : 'Select a project'}
             </option>
-          ))}
-        </select>
+            {projects.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.name || p.id}
+              </option>
+            ))}
+          </select>
+          <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[#7E939C] flex items-center">
+            <ChevronDown size={13} strokeWidth={2.2} />
+          </div>
+        </div>
         <nav className="nav-scroll">
           {groups.map(
             (g) =>
