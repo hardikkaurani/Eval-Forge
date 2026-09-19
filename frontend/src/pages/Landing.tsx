@@ -977,11 +977,10 @@ export default function Landing() {
                 const el = document.getElementById('platform');
                 if (el) el.scrollIntoView({ behavior: 'smooth' });
               }}
-              className="hover:text-[#0284C7] dark:hover:text-[#38BDF8] transition-colors flex items-center gap-1.5 cursor-pointer font-medium text-sm text-[#4C5F6B] dark:text-[#B0C2C6]"
+              className="hover:text-[#0284C7] dark:hover:text-[#38BDF8] transition-colors cursor-pointer font-medium text-sm text-[#4C5F6B] dark:text-[#B0C2C6]"
               aria-label="Open Platform Overview"
             >
               <span>Platform</span>
-              <Sparkles size={13} className="text-[#0284C7] dark:text-[#38BDF8]" />
             </button>
             <a
               href="#capabilities"
@@ -1071,10 +1070,9 @@ export default function Landing() {
                 const el = document.getElementById('platform');
                 if (el) el.scrollIntoView({ behavior: 'smooth' });
               }}
-              className="w-full text-left text-base font-medium text-[#4C5F6B] dark:text-[#B0C2C6] hover:text-[#0284C7] dark:hover:text-[#38BDF8] flex items-center justify-between"
+              className="w-full text-left text-base font-medium text-[#4C5F6B] dark:text-[#B0C2C6] hover:text-[#0284C7] dark:hover:text-[#38BDF8]"
             >
               <span>Platform Overview</span>
-              <Sparkles size={14} className="text-[#0284C7] dark:text-[#38BDF8]" />
             </button>
             <a
               href="#capabilities"
@@ -1222,12 +1220,8 @@ export default function Landing() {
                       />
                     </div>
                     <div>
-                      <div className="text-xs font-semibold text-[#2E3A44] dark:text-[#F6F4EE] group-hover:text-[#0284C7] dark:group-hover:text-[#38BDF8] transition-colors flex items-center gap-1.5">
-                        <span>Live Evaluation Dashboard</span>
-                        <Sparkles
-                          size={12}
-                          className="text-[#0284C7] dark:text-[#38BDF8] opacity-80"
-                        />
+                      <div className="text-xs font-semibold text-[#2E3A44] dark:text-[#F6F4EE] group-hover:text-[#0284C7] dark:group-hover:text-[#38BDF8] transition-colors">
+                        Live Evaluation Dashboard
                       </div>
                       <div className="text-[10px] font-mono text-[#7E939C]">
                         Project: Chatbot Alignment · Click to Inspect Platform
