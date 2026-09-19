@@ -39,7 +39,7 @@ export default function Connect() {
             <div className="w-8 h-8 rounded-lg overflow-hidden bg-[#2E3A44] p-1 border border-[#DDE4E1] dark:border-[#2E3A44]">
               <img src="/logo.png" alt="EvalForge" className="w-full h-full object-contain" />
             </div>
-            <span className="font-serif text-lg font-bold text-[#2E3A44] dark:text-[#F6F4EE]">
+            <span className="font-sans text-lg font-bold text-[#2E3A44] dark:text-[#F6F4EE]">
               EvalForge
             </span>
           </div>

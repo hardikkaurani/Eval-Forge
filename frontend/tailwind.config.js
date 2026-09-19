@@ -48,7 +48,7 @@ export default {
       },
       fontFamily: {
         sans: ['"Source Sans 3"', '"Source Sans Pro"', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'Helvetica', 'Arial', 'sans-serif'],
-        serif: ['"Source Serif 4"', '"Source Serif Pro"', 'Georgia', 'serif'],
+        serif: ['"Source Sans 3"', '"Source Sans Pro"', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'Helvetica', 'Arial', 'sans-serif'],
         mono: ['"Source Code Pro"', '"JetBrains Mono"', 'monospace'],
         display: ['"Source Sans 3"', '"Source Sans Pro"', '-apple-system', 'sans-serif'],
         brand: ['"Source Sans 3"', '"Source Sans Pro"', 'sans-serif'],
