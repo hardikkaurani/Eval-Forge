@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..900;1,6..96,400..900&family=Cinzel:wght@400..800&family=Italiana&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,600&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Source+Code+Pro:ital,wght@0,400;0,500;0,600;1,400&family=Source+Sans+3:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;0,8..60,600;0,8..60,700;1,8..60,400;1,8..60,600&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -13,7 +13,7 @@
   --muted: #4c5f6b;
   --border: #dde4e1;
   --border-strong: #b0c2c6;
-  --accent: #0284c7;
+  --accent: #0369a1;
   --accent-soft: #ebf5fa;
   --on-accent: #ffffff;
   --danger: #b91c1c;
@@ -49,7 +49,7 @@
   --muted: #736760;
   --border: #e5ddd5;
   --border-strong: #c9bfb4;
-  --accent: #a6633d;
+  --accent: #964f27;
   --accent-soft: #f9ede6;
   --on-accent: #ffffff;
   --danger: #b91c1c;
@@ -67,7 +67,7 @@
   --muted: #566b7e;
   --border: #d2dfeb;
   --border-strong: #abc1d3;
-  --accent: #0284c7;
+  --accent: #0369a1;
   --accent-soft: #e3eff8;
   --on-accent: #ffffff;
   --danger: #b91c1c;
@@ -100,7 +100,16 @@ body {
   margin: 0;
   background: var(--bg);
   color: var(--text);
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family:
+    'Source Sans 3',
+    'Source Sans Pro',
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    Helvetica,
+    Arial,
+    sans-serif;
   font-size: 14px;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
@@ -140,10 +149,17 @@ h1,
 h2,
 h3,
 h4 {
-  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-family:
+    'Source Sans 3',
+    'Source Sans Pro',
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
   letter-spacing: -0.015em;
   color: var(--text);
-  font-weight: 600;
+  font-weight: 700;
 }
 h1 {
   font-size: 34px;
@@ -166,7 +182,7 @@ svg {
 .mono,
 code,
 pre {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'Source Code Pro', 'JetBrains Mono', monospace;
 }
 .skip-link {
   position: fixed;
@@ -184,7 +200,7 @@ pre {
   gap: 12px;
   align-items: center;
   font-size: 20px;
-  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-family: 'Source Sans 3', 'Source Sans Pro', sans-serif;
   font-weight: 700;
   letter-spacing: -0.02em;
   color: var(--text);
