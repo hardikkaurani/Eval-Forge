@@ -6,7 +6,10 @@ import {
   BarChart3,
   Check,
   CheckCircle2,
+  Code2,
   Copy,
+  Cpu,
+  CreditCard,
   Database,
   ExternalLink,
   FlaskConical,
@@ -253,6 +256,252 @@ evalforge run \\
   },
 ];
 
+interface ArchitectureItem {
+  name: string;
+  role: string;
+  badge: string;
+  icon: typeof Database;
+  overview: string;
+  highlights: string[];
+  specs: { label: string; value: string }[];
+  codeLanguage: string;
+  codeSnippet: string;
+  actionLabel: string;
+  actionRoute: string;
+}
+
+const ARCHITECTURE_STACK: ArchitectureItem[] = [
+  {
+    name: 'FastAPI',
+    role: 'Backend Core',
+    badge: 'Python 3.12',
+    icon: Terminal,
+    overview:
+      'Asynchronous ASGI application server providing high-throughput REST endpoints, streaming Server-Sent Events (SSE), and Pydantic v2 data validation.',
+    highlights: [
+      'Pydantic v2 high-speed serialization and request schema validation',
+      'Asynchronous concurrency with uvloop and asyncpg connection pooling',
+      'Automated OpenAPI 3.1 interactive API documentation generation',
+      'Cryptographically signed JWT and API key authentication middleware',
+    ],
+    specs: [
+      { label: 'Runtime', value: 'Python 3.12 / ASGI uvloop' },
+      { label: 'Validation Engine', value: 'Pydantic v2.8+' },
+      { label: 'Protocols', value: 'REST, Server-Sent Events (SSE), Webhooks' },
+      { label: 'Documentation', value: '/docs (Swagger UI), /redoc' },
+    ],
+    codeLanguage: 'python',
+    codeSnippet: `from fastapi import FastAPI, Depends, Header, HTTPException
+from pydantic import BaseModel, Field
+
+app = FastAPI(title="EvalForge API", version="1.0.0")
+
+class EvaluationRequest(BaseModel):
+    dataset_id: str = Field(..., description="Target dataset identifier")
+    judge_model: str = Field("gpt-4o", description="Evaluation LLM judge")
+    temperature: float = Field(0.0, ge=0.0, le=1.0)
+
+@app.post("/api/v1/evaluations/run")
+async def run_evaluation(req: EvaluationRequest):
+    # Dispatches asynchronous task to distributed Celery worker queue
+    job = celery_app.send_task("tasks.evaluate", args=[req.model_dump()])
+    return {"job_id": job.id, "status": "queued"}`,
+    actionLabel: 'Inspect API & Developer Specs',
+    actionRoute: '/developer',
+  },
+  {
+    name: 'PostgreSQL',
+    role: 'State Store',
+    badge: 'SQLAlchemy',
+    icon: Database,
+    overview:
+      'ACID-compliant relational database storing evaluation datasets, rubrics, versioned runs, telemetry logs, and fine-grained access control policies.',
+    highlights: [
+      'SQLAlchemy 2.0 async ORM engine with robust connection pooling',
+      'Alembic declarative migration scripts for zero-downtime schema evolution',
+      'Native JSONB columns for flexible, indexed LLM rubric verdicts',
+      'Composite indexes optimized for sub-millisecond evaluation queries',
+    ],
+    specs: [
+      { label: 'Database Engine', value: 'PostgreSQL 16.x' },
+      { label: 'ORM Framework', value: 'SQLAlchemy 2.0 (Async Engine)' },
+      { label: 'Migration Engine', value: 'Alembic 1.13+' },
+      { label: 'Driver Layer', value: 'asyncpg (Native C-extensions)' },
+    ],
+    codeLanguage: 'python',
+    codeSnippet: `from sqlalchemy import Column, String, Float, JSON, DateTime, func
+from sqlalchemy.orm import declarative_base
+
+Base = declarative_base()
+
+class EvaluationRecord(Base):
+    __tablename__ = "evaluation_records"
+
+    id = Column(String(36), primary_key=True, index=True)
+    project_id = Column(String(36), nullable=False, index=True)
+    dataset_id = Column(String(36), nullable=False)
+    aggregate_score = Column(Float, nullable=False)
+    rubric_scores = Column(JSON, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())`,
+    actionLabel: 'Explore Project Datasets',
+    actionRoute: '/projects',
+  },
+  {
+    name: 'Redis',
+    role: 'Queue & Cache',
+    badge: 'In-Memory',
+    icon: Zap,
+    overview:
+      'Ultra low-latency in-memory data store acting as the Celery task broker, token-bucket rate limiter, and cache layer for benchmark evaluations.',
+    highlights: [
+      'Sub-millisecond latency message broker for asynchronous job queuing',
+      'Token-bucket sliding window rate limiting per LLM model provider',
+      'Real-time Pub/Sub channels broadcasting evaluation progress events',
+      'Transparent response caching for idempotent evaluation rubrics',
+    ],
+    specs: [
+      { label: 'Cache Engine', value: 'Redis 7.2 In-Memory Key-Value' },
+      { label: 'Broker Role', value: 'Celery Task Queue & Pub/Sub' },
+      { label: 'Persistence', value: 'AOF (Append Only File) + RDB Snapshots' },
+      { label: 'Rate Limiter', value: 'Sliding-window token bucket script' },
+    ],
+    codeLanguage: 'python',
+    codeSnippet: `import redis.asyncio as redis
+
+redis_pool = redis.ConnectionPool.from_url("redis://localhost:6379/0")
+client = redis.Redis(connection_pool=redis_pool)
+
+async def acquire_provider_slot(provider: str, max_tps: int = 50) -> bool:
+    """Atomic rate limit slot reservation using Redis sliding window."""
+    key = f"rate_limit:{provider}"
+    current_count = await client.incr(key)
+    if current_count == 1:
+        await client.expire(key, 1) # 1 second window
+    return current_count <= max_tps`,
+    actionLabel: 'Inspect System Health & Queues',
+    actionRoute: '/settings/system',
+  },
+  {
+    name: 'Celery',
+    role: 'Async Workers',
+    badge: 'Distributed',
+    icon: Cpu,
+    overview:
+      'Distributed task execution cluster that runs evaluation batches in parallel across worker nodes with auto-retry on LLM provider throttling.',
+    highlights: [
+      'Horizontally scalable containerized Celery worker fleet',
+      'Automatic exponential backoff on HTTP 429/503 provider errors',
+      'Dedicated task prioritization queues for golden benchmark runs',
+      'Granular checkpointing enabling instant resume on worker interruption',
+    ],
+    specs: [
+      { label: 'Worker Engine', value: 'Celery 5.4.x' },
+      { label: 'Execution Pool', value: 'Prefork / Gevent concurrency' },
+      { label: 'Result Backend', value: 'Redis 7.x + PostgreSQL' },
+      { label: 'Scheduler', value: 'Celery Beat for recurring regressions' },
+    ],
+    codeLanguage: 'python',
+    codeSnippet: `from celery import Celery
+
+celery_app = Celery("evalforge", broker="redis://localhost:6379/0")
+
+@celery_app.task(
+    bind=True,
+    max_retries=5,
+    default_retry_delay=2,
+    autoretry_for=(Exception,),
+    retry_backoff=True
+)
+def evaluate_sample_batch(self, sample_ids: list[str]):
+    results = [run_rubric_eval(sid) for sid in sample_ids]
+    self.update_state(state="PROGRESS", meta={"processed": len(results)})
+    return results`,
+    actionLabel: 'Manage Scheduled Benchmark Jobs',
+    actionRoute: '/scheduled-jobs',
+  },
+  {
+    name: 'React 18',
+    role: 'Web Interface',
+    badge: 'TypeScript',
+    icon: Code2,
+    overview:
+      'Modern, highly responsive enterprise frontend engineered with TypeScript, TanStack Query, TailwindCSS, and accessible design system components.',
+    highlights: [
+      'React 18 concurrent features with route-level lazy loading',
+      'TanStack Query v5 for intelligent server-state caching & sync',
+      'Strict WCAG AA accessibility with keyboard navigation & dialog focus',
+      'Editorial styling system with seamless light/dark theme transitions',
+    ],
+    specs: [
+      { label: 'Frontend Library', value: 'React 18.3' },
+      { label: 'Build Tool', value: 'Vite 6.x (Instant HMR & Optimized Bundles)' },
+      { label: 'Type Safety', value: 'TypeScript 5.x Strict Mode' },
+      { label: 'Routing & State', value: 'React Router v6 + TanStack Query v5' },
+    ],
+    codeLanguage: 'tsx',
+    codeSnippet: `import { useQuery } from '@tanstack/react-query';
+import { api } from '../services/client';
+
+export function LiveEvaluationMonitor({ jobId }: { jobId: string }) {
+  const { data, isLoading } = useQuery({
+    queryKey: ['job', jobId],
+    queryFn: () => api.getJobStatus(jobId),
+    refetchInterval: (query) => (query.state.data?.status === 'running' ? 2000 : false),
+  });
+
+  return (
+    <div className="p-4 rounded-xl border border-[var(--border)]">
+      <h3>Status: {data?.status ?? 'Initializing'}</h3>
+      <span>Processed: {data?.completed ?? 0} / {data?.total ?? 0}</span>
+    </div>
+  );
+}`,
+    actionLabel: 'Explore Workspace Dashboard',
+    actionRoute: '/overview',
+  },
+  {
+    name: 'Stripe',
+    role: 'Billing & RBAC',
+    badge: 'Enterprise',
+    icon: CreditCard,
+    overview:
+      'Enterprise payment and entitlement gateway managing subscription tiers, metered LLM token usage, team seats, and cryptographically verified webhooks.',
+    highlights: [
+      'Automated metered usage billing for high-volume batch evaluations',
+      'Self-serve Stripe Customer Portal for invoices and plan upgrades',
+      'Cryptographic HMAC SHA-256 webhook signature verification',
+      'Enterprise team seats with role-based access control (RBAC)',
+    ],
+    specs: [
+      { label: 'Payment Gateway', value: 'Stripe API 2024-06 (PCI DSS Level 1)' },
+      { label: 'Webhook Verification', value: 'HMAC SHA-256 Signature Auth' },
+      { label: 'Billing Tiers', value: 'Free, Pro, Team & Custom Enterprise' },
+      { label: 'Invoicing', value: 'Automated tax and multi-currency support' },
+    ],
+    codeLanguage: 'python',
+    codeSnippet: `import stripe
+from fastapi import Request, HTTPException, Header
+
+stripe.api_key = "sk_live_..."
+
+@app.post("/api/v1/billing/stripe-webhook")
+async def handle_stripe_event(request: Request, stripe_signature: str = Header(...)):
+    payload = await request.body()
+    try:
+        event = stripe.Webhook.construct_event(
+            payload, stripe_signature, webhook_secret
+        )
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid signature")
+
+    if event["type"] == "customer.subscription.updated":
+        await update_workspace_entitlements(event["data"]["object"])
+    return {"status": "success"}`,
+    actionLabel: 'Manage Billing & Subscriptions',
+    actionRoute: '/settings/billing',
+  },
+];
+
 export default function Landing() {
   const { connected } = useConnection();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -261,13 +510,18 @@ export default function Landing() {
   const [modalTab, setModalTab] = useState<'specs' | 'code'>('specs');
   const [copiedCode, setCopiedCode] = useState(false);
 
+  const [selectedTech, setSelectedTech] = useState<ArchitectureItem | null>(null);
+  const [techModalTab, setTechModalTab] = useState<'specs' | 'code'>('specs');
+  const [copiedTechCode, setCopiedTechCode] = useState(false);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         setSelectedCap(null);
+        setSelectedTech(null);
       }
     };
-    if (selectedCap) {
+    if (selectedCap || selectedTech) {
       window.addEventListener('keydown', handleKeyDown);
       document.body.style.overflow = 'hidden';
     } else {
@@ -277,12 +531,18 @@ export default function Landing() {
       window.removeEventListener('keydown', handleKeyDown);
       document.body.style.overflow = '';
     };
-  }, [selectedCap]);
+  }, [selectedCap, selectedTech]);
 
   const handleCopyCode = (code: string) => {
     navigator.clipboard.writeText(code);
     setCopiedCode(true);
     setTimeout(() => setCopiedCode(false), 2000);
+  };
+
+  const handleCopyTechCode = (code: string) => {
+    navigator.clipboard.writeText(code);
+    setCopiedTechCode(true);
+    setTimeout(() => setCopiedTechCode(false), 2000);
   };
 
   return (
@@ -1116,6 +1376,10 @@ export default function Landing() {
       >
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center max-w-2xl mx-auto mb-16 space-y-3">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-[#0284C7]/10 text-[#0284C7] dark:text-[#38BDF8] dark:bg-[#0284C7]/20 border border-[#0284C7]/20 mb-3">
+              <Sparkles size={12} />
+              <span>Interactive Topology — Click any technology to inspect specs & code</span>
+            </div>
             <div className="text-xs font-mono uppercase tracking-widest text-[#7E939C]">
               Infrastructure Topology
             </div>
@@ -1123,33 +1387,217 @@ export default function Landing() {
               Full-Stack Architecture
             </h2>
             <p className="text-sm text-[#4C5F6B] dark:text-[#B0C2C6]">
-              Modular, transparent, and battle-tested on standard production primitives.
+              Modular, transparent, and battle-tested on standard production primitives. Click any
+              primitive to explore configuration and architectural specs.
             </p>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 text-center font-mono text-xs">
-            {[
-              { name: 'FastAPI', role: 'Backend Core', badge: 'Python 3.12' },
-              { name: 'PostgreSQL', role: 'State Store', badge: 'SQLAlchemy' },
-              { name: 'Redis', role: 'Queue & Cache', badge: 'In-Memory' },
-              { name: 'Celery', role: 'Async Workers', badge: 'Distributed' },
-              { name: 'React 18', role: 'Web Interface', badge: 'TypeScript' },
-              { name: 'Stripe', role: 'Billing & RBAC', badge: 'Enterprise' },
-            ].map((tech) => (
+            {ARCHITECTURE_STACK.map((tech) => (
               <div
                 key={tech.name}
-                className="p-5 rounded-xl border border-[#DDE4E1] dark:border-[#2E3A44] bg-white dark:bg-[#202A32] space-y-2"
+                role="button"
+                tabIndex={0}
+                aria-haspopup="dialog"
+                aria-expanded={selectedTech?.name === tech.name}
+                onClick={() => {
+                  setSelectedTech(tech);
+                  setTechModalTab('specs');
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    setSelectedTech(tech);
+                    setTechModalTab('specs');
+                  }
+                }}
+                className="group relative p-5 rounded-xl border border-[#DDE4E1] dark:border-[#2E3A44] bg-white dark:bg-[#202A32] hover:border-[#0284C7] dark:hover:border-[#38BDF8] hover:shadow-lg hover:-translate-y-1 transition-all duration-200 cursor-pointer space-y-2 flex flex-col justify-between text-center focus:outline-none focus:ring-2 focus:ring-[#0284C7] focus:ring-offset-2 dark:focus:ring-offset-[#1C252C]"
               >
-                <div className="text-sm font-semibold text-[#2E3A44] dark:text-[#F6F4EE]">
-                  {tech.name}
+                <div className="space-y-1.5">
+                  <div className="text-sm font-semibold text-[#2E3A44] dark:text-[#F6F4EE] group-hover:text-[#0284C7] dark:group-hover:text-[#38BDF8] transition-colors">
+                    {tech.name}
+                  </div>
+                  <div className="text-[11px] text-[#4C5F6B] dark:text-[#B0C2C6] leading-tight">
+                    {tech.role}
+                  </div>
+                  <span className="inline-block px-2 py-0.5 rounded bg-[#DDE4E1]/80 dark:bg-[#2E3A44] text-[10px] text-[#7E939C] dark:text-[#B0C2C6]">
+                    {tech.badge}
+                  </span>
                 </div>
-                <div className="text-[11px] text-[#4C5F6B] dark:text-[#B0C2C6]">{tech.role}</div>
-                <span className="inline-block px-2 py-0.5 rounded bg-[#DDE4E1] dark:bg-[#2E3A44] text-[10px] text-[#7E939C] dark:text-[#B0C2C6]">
-                  {tech.badge}
-                </span>
+
+                <div className="pt-2 border-t border-[#DDE4E1]/60 dark:border-[#2E3A44]/60 text-[10px] text-[#0284C7] dark:text-[#38BDF8] flex items-center justify-center gap-1 group-hover:underline font-sans font-medium">
+                  <span>Inspect</span>
+                  <ArrowRight
+                    size={11}
+                    className="transform group-hover:translate-x-0.5 transition-transform"
+                  />
+                </div>
               </div>
             ))}
           </div>
+
+          {/* ─── Technology Stack Detail Modal Dialog ─── */}
+          {selectedTech && (
+            <div
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="tech-modal-title"
+              className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-sm animate-fade-in"
+              onClick={() => setSelectedTech(null)}
+            >
+              <div
+                className="relative w-full max-w-2xl bg-white dark:bg-[#202A32] rounded-2xl border border-[#DDE4E1] dark:border-[#2E3A44] shadow-2xl p-6 sm:p-8 overflow-hidden max-h-[90vh] flex flex-col text-left text-[var(--text)]"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {/* Modal Header */}
+                <div className="flex items-start justify-between pb-5 border-b border-[#DDE4E1] dark:border-[#2E3A44]">
+                  <div className="flex items-start gap-4">
+                    <div className="p-3 rounded-xl bg-gradient-to-br from-[#0284C7] to-[#0369A1] text-white shadow-sm flex items-center justify-center shrink-0">
+                      <selectedTech.icon size={22} />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="font-mono text-xs font-semibold tracking-wider text-[#0284C7] dark:text-[#38BDF8] uppercase">
+                          Stack Primitive / {selectedTech.badge}
+                        </span>
+                      </div>
+                      <h3
+                        id="tech-modal-title"
+                        className="text-2xl sm:text-3xl font-semibold tracking-tight text-[#2E3A44] dark:text-[#F6F4EE]"
+                      >
+                        {selectedTech.name}
+                      </h3>
+                      <p className="text-xs sm:text-sm text-[#4C5F6B] dark:text-[#B0C2C6] mt-1">
+                        {selectedTech.role} &middot; {selectedTech.overview}
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedTech(null)}
+                    className="p-2 rounded-lg text-[#7E939C] hover:text-[#2E3A44] dark:hover:text-[#F6F4EE] hover:bg-black/5 dark:hover:bg-white/5 transition-colors focus:outline-none focus:ring-2 focus:ring-[#0284C7]"
+                    aria-label="Close technology details"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+
+                {/* Sub Navigation Tabs */}
+                <div className="flex items-center gap-2 pt-4 pb-2 border-b border-[#DDE4E1] dark:border-[#2E3A44]">
+                  <button
+                    type="button"
+                    onClick={() => setTechModalTab('specs')}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                      techModalTab === 'specs'
+                        ? 'bg-[#0284C7] text-white shadow-sm'
+                        : 'text-[#4C5F6B] dark:text-[#B0C2C6] hover:bg-black/5 dark:hover:bg-white/5'
+                    }`}
+                  >
+                    Architecture & Specs
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setTechModalTab('code')}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                      techModalTab === 'code'
+                        ? 'bg-[#0284C7] text-white shadow-sm'
+                        : 'text-[#4C5F6B] dark:text-[#B0C2C6] hover:bg-black/5 dark:hover:bg-white/5'
+                    }`}
+                  >
+                    Configuration / Integration Code
+                  </button>
+                </div>
+
+                {/* Modal Body */}
+                <div className="overflow-y-auto flex-1 py-5 space-y-6">
+                  {techModalTab === 'specs' ? (
+                    <>
+                      <div>
+                        <h4 className="text-xs font-mono uppercase tracking-wider text-[#7E939C] mb-3">
+                          Key Architectural Responsibilities
+                        </h4>
+                        <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                          {selectedTech.highlights.map((highlight, idx) => (
+                            <li
+                              key={idx}
+                              className="flex items-start gap-2 text-xs sm:text-sm text-[#2E3A44] dark:text-[#E2E8F0] p-2.5 rounded-lg bg-[#EFECE4]/40 dark:bg-[#1C252C]/60 border border-[#DDE4E1] dark:border-[#2E3A44]"
+                            >
+                              <CheckCircle2 size={16} className="text-[#0284C7] shrink-0 mt-0.5" />
+                              <span>{highlight}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+
+                      <div>
+                        <h4 className="text-xs font-mono uppercase tracking-wider text-[#7E939C] mb-3">
+                          Runtime Specifications
+                        </h4>
+                        <div className="rounded-xl border border-[#DDE4E1] dark:border-[#2E3A44] overflow-hidden divide-y divide-[#DDE4E1] dark:divide-[#2E3A44] text-xs">
+                          {selectedTech.specs.map((spec, idx) => (
+                            <div
+                              key={idx}
+                              className="flex items-center justify-between p-3 bg-white dark:bg-[#202A32]"
+                            >
+                              <span className="font-mono text-[#7E939C]">{spec.label}</span>
+                              <span className="font-medium text-[#2E3A44] dark:text-[#F6F4EE] text-right">
+                                {spec.value}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-xs font-mono uppercase tracking-wider text-[#7E939C]">
+                          Implementation Snippet ({selectedTech.codeLanguage})
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => handleCopyTechCode(selectedTech.codeSnippet)}
+                          className="flex items-center gap-1.5 text-xs font-mono px-2.5 py-1 rounded border border-[#DDE4E1] dark:border-[#2E3A44] hover:bg-black/5 dark:hover:bg-white/5 transition-colors text-[#0284C7] dark:text-[#38BDF8]"
+                        >
+                          {copiedTechCode ? <Check size={12} /> : <Copy size={12} />}
+                          <span>{copiedTechCode ? 'Copied' : 'Copy snippet'}</span>
+                        </button>
+                      </div>
+                      <pre className="p-4 rounded-xl bg-[#1C252C] dark:bg-[#0F172A] border border-[#2E3A44] dark:border-[#334155] text-xs text-[#E2E8F0] font-mono overflow-x-auto leading-relaxed">
+                        <code>{selectedTech.codeSnippet}</code>
+                      </pre>
+                    </div>
+                  )}
+                </div>
+
+                {/* Modal Footer */}
+                <div className="pt-4 border-t border-[#DDE4E1] dark:border-[#2E3A44] flex flex-col sm:flex-row items-center justify-between gap-3">
+                  <span className="text-xs text-[#7E939C]">
+                    {selectedTech.name} is configured for high-availability enterprise clusters.
+                  </span>
+                  <div className="flex items-center gap-2.5 w-full sm:w-auto">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedTech(null)}
+                      className="w-full sm:w-auto px-4 py-2 rounded-xl text-xs font-medium border border-[#DDE4E1] dark:border-[#2E3A44] text-[#4C5F6B] dark:text-[#B0C2C6] hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                    >
+                      Close
+                    </button>
+                    <Link
+                      to={connected ? selectedTech.actionRoute : '/login'}
+                      onClick={() => setSelectedTech(null)}
+                      className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2 rounded-xl text-xs font-medium bg-[#0284C7] hover:bg-[#0369A1] text-white shadow-sm transition-colors"
+                    >
+                      <span>
+                        {connected ? selectedTech.actionLabel : 'Connect Workspace to Access'}
+                      </span>
+                      <ArrowRight size={13} />
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </section>
 
