@@ -11,12 +11,17 @@ import {
   Cpu,
   CreditCard,
   Database,
+  DollarSign,
   ExternalLink,
   FlaskConical,
+  Gauge,
   Github,
   Layers,
   Menu,
+  Play,
+  RotateCcw,
   ShieldCheck,
+  Sliders,
   Sparkles,
   Terminal,
   X,
@@ -502,10 +507,138 @@ async def handle_stripe_event(request: Request, stripe_signature: str = Header(.
   },
 ];
 
+interface JudgeModelBenchmark {
+  id: string;
+  name: string;
+  provider: string;
+  badge: string;
+  faithfulness: number;
+  cotReasoning: number;
+  hallucinationDetection: number;
+  latencyMs: number;
+  costPer10k: string;
+  contextWindow: string;
+  verdictSample: {
+    question: string;
+    verdict: string;
+    score: string;
+    reasoning: string;
+  };
+}
+
+const JUDGE_BENCHMARKS: JudgeModelBenchmark[] = [
+  {
+    id: 'gpt-4o',
+    name: 'GPT-4o',
+    provider: 'OpenAI',
+    badge: 'Industry Standard',
+    faithfulness: 98.4,
+    cotReasoning: 97.5,
+    hallucinationDetection: 99.0,
+    latencyMs: 240,
+    costPer10k: '$1.40',
+    contextWindow: '128k tokens',
+    verdictSample: {
+      question: 'What is the enterprise cluster failover SLA window?',
+      verdict: 'PASS — High Groundedness',
+      score: '1.00 / 1.00',
+      reasoning:
+        'The candidate output asserts a 90-second SLA, which directly matches the retrieved infrastructure telemetry document (Section 4.1). Zero unsupported assertions or hallucinations detected.',
+    },
+  },
+  {
+    id: 'claude-3-5-sonnet',
+    name: 'Claude 3.5 Sonnet',
+    provider: 'Anthropic',
+    badge: 'Top Reasoning & Code',
+    faithfulness: 98.8,
+    cotReasoning: 98.2,
+    hallucinationDetection: 99.3,
+    latencyMs: 280,
+    costPer10k: '$1.50',
+    contextWindow: '200k tokens',
+    verdictSample: {
+      question: 'Does the customer support response violate compliance policies?',
+      verdict: 'FLAGGED — Policy Adherence',
+      score: '0.98 / 1.00',
+      reasoning:
+        'The response correctly identifies that unencrypted credential logging violates SOC-2 Type II protocols and refrains from generating insecure configuration templates.',
+    },
+  },
+  {
+    id: 'gemini-1-5-pro',
+    name: 'Gemini 1.5 Pro',
+    provider: 'Google DeepMind',
+    badge: 'Massive Context Leader',
+    faithfulness: 97.6,
+    cotReasoning: 96.8,
+    hallucinationDetection: 98.4,
+    latencyMs: 310,
+    costPer10k: '$1.25',
+    contextWindow: '2,000,000 tokens',
+    verdictSample: {
+      question: 'Cross-reference user query across 50-page technical manual.',
+      verdict: 'PASS — Comprehensive Context Retrieval',
+      score: '0.97 / 1.00',
+      reasoning:
+        'Successfully retrieved and cross-correlated data points across multi-chapter specifications with perfect needle-in-a-haystack recall.',
+    },
+  },
+  {
+    id: 'llama-3-3-70b',
+    name: 'Llama 3.3 70B',
+    provider: 'Meta / Self-Hosted',
+    badge: 'Open Weights Sovereign',
+    faithfulness: 96.2,
+    cotReasoning: 95.1,
+    hallucinationDetection: 97.0,
+    latencyMs: 160,
+    costPer10k: '$0.35',
+    contextWindow: '128k tokens',
+    verdictSample: {
+      question: 'Perform local air-gapped rubric verification.',
+      verdict: 'PASS — Sovereign Execution',
+      score: '0.95 / 1.00',
+      reasoning:
+        'Completed local evaluation without egressing data outside the customer VPC. Strict adherence to numeric rubric scoring boundaries.',
+    },
+  },
+  {
+    id: 'deepseek-r1',
+    name: 'DeepSeek-R1',
+    provider: 'DeepSeek',
+    badge: 'Deep Reasoning Engine',
+    faithfulness: 98.1,
+    cotReasoning: 98.9,
+    hallucinationDetection: 98.6,
+    latencyMs: 420,
+    costPer10k: '$0.85',
+    contextWindow: '64k tokens',
+    verdictSample: {
+      question: 'Evaluate logical consistency of complex mathematical deduction.',
+      verdict: 'PASS — Formal Verification',
+      score: '1.00 / 1.00',
+      reasoning:
+        'Traced mathematical transformations through 7 sequential deduction steps, validating each algebraic derivation with formal chain-of-thought logic.',
+    },
+  },
+];
+
 export default function Landing() {
   const { connected } = useConnection();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [activeCodeTab, setActiveCodeTab] = useState<'python' | 'cli' | 'rest'>('python');
+  const [activeCodeTab, setActiveCodeTab] = useState<'python' | 'cli' | 'rest' | 'simulator'>(
+    'python'
+  );
+  const [simSuite, setSimSuite] = useState<'rag' | 'rubric' | 'safety'>('rag');
+  const [simRunning, setSimRunning] = useState(false);
+  const [simCompleted, setSimCompleted] = useState(false);
+  const [simLogs, setSimLogs] = useState<string[]>([
+    'Click "Run Live Simulation" to execute evaluation against sovereign judge.',
+  ]);
+  const [terminalCodeCopied, setTerminalCodeCopied] = useState(false);
+  const [selectedJudge, setSelectedJudge] = useState<string>('gpt-4o');
+
   const [selectedCap, setSelectedCap] = useState<CapabilityItem | null>(null);
   const [modalTab, setModalTab] = useState<'specs' | 'code'>('specs');
   const [copiedCode, setCopiedCode] = useState(false);
@@ -513,6 +646,51 @@ export default function Landing() {
   const [selectedTech, setSelectedTech] = useState<ArchitectureItem | null>(null);
   const [techModalTab, setTechModalTab] = useState<'specs' | 'code'>('specs');
   const [copiedTechCode, setCopiedTechCode] = useState(false);
+
+  const runSimulation = (suiteKey: 'rag' | 'rubric' | 'safety' = simSuite) => {
+    setActiveCodeTab('simulator');
+    setSimRunning(true);
+    setSimCompleted(false);
+    setSimLogs(['[0.00s] Initializing sovereign evaluation runner session...']);
+
+    setTimeout(() => {
+      setSimLogs((prev) => [
+        ...prev,
+        `[0.12s] Pulling '${suiteKey.toUpperCase()}' test suite (10 golden benchmark samples)... OK`,
+      ]);
+    }, 280);
+
+    setTimeout(() => {
+      setSimLogs((prev) => [
+        ...prev,
+        `[0.26s] Connecting to judge model 'gpt-4o' (temperature=0.0, seed=42)... CONNECTED`,
+      ]);
+    }, 550);
+
+    setTimeout(() => {
+      setSimLogs((prev) => [
+        ...prev,
+        `[0.42s] Evaluating context precision, ground-truth alignment, and hallucination flags...`,
+        `[0.55s] Sample 1..5: PASS (Score: 1.00) | Sample 6..10: PASS (Score: 0.96)`,
+      ]);
+    }, 850);
+
+    setTimeout(() => {
+      setSimLogs((prev) => [
+        ...prev,
+        `[0.68s] Generating chain-of-thought verification traces & score distribution... DONE`,
+        `[0.82s] Evaluation run completed in 820ms. Overall pass rate: 100% | Status: GATE_PASSED`,
+      ]);
+      setSimRunning(false);
+      setSimCompleted(true);
+    }, 1150);
+  };
+
+  const handleCopyTerminalCode = (code: string) => {
+    navigator.clipboard.writeText(code);
+    setTerminalCodeCopied(true);
+    setTimeout(() => setTerminalCodeCopied(false), 2000);
+  };
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -621,6 +799,15 @@ export default function Landing() {
               Developer SDK
             </a>
             <a
+              href="#benchmarks"
+              className="hover:text-[#0284C7] dark:hover:text-[#38BDF8] transition-colors flex items-center gap-1.5"
+            >
+              <span>Benchmarks</span>
+              <span className="px-1.5 py-0.5 rounded-full text-[10px] font-mono bg-[#0284C7]/15 text-[#0284C7] dark:text-[#38BDF8]">
+                Matrix
+              </span>
+            </a>
+            <a
               href="#architecture"
               className="hover:text-[#0284C7] dark:hover:text-[#38BDF8] transition-colors"
             >
@@ -700,6 +887,13 @@ export default function Landing() {
               className="block text-base font-medium text-[#4C5F6B] dark:text-[#B0C2C6]"
             >
               Developer SDK
+            </a>
+            <a
+              href="#benchmarks"
+              onClick={() => setMobileMenuOpen(false)}
+              className="block text-base font-medium text-[#4C5F6B] dark:text-[#B0C2C6]"
+            >
+              Benchmarks Matrix
             </a>
             <a
               href="#architecture"
@@ -1249,123 +1443,533 @@ export default function Landing() {
                         onClick={() => setActiveCodeTab(tab)}
                         className={`px-3 py-1 rounded text-xs font-mono uppercase tracking-wider transition-colors ${
                           activeCodeTab === tab
-                            ? 'bg-[#0284C7] text-white'
+                            ? 'bg-[#0284C7] text-white shadow-sm'
                             : 'text-[#B0C2C6] hover:text-white'
                         }`}
                       >
                         {tab}
                       </button>
                     ))}
+                    <button
+                      onClick={() => {
+                        setActiveCodeTab('simulator');
+                        if (!simCompleted && !simRunning) runSimulation();
+                      }}
+                      className={`px-3 py-1 rounded text-xs font-mono uppercase tracking-wider transition-colors flex items-center gap-1.5 ${
+                        activeCodeTab === 'simulator'
+                          ? 'bg-emerald-600 text-white shadow-sm'
+                          : 'text-emerald-400 hover:text-emerald-300 bg-emerald-500/10 border border-emerald-500/30'
+                      }`}
+                    >
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                      <span>Simulator ▶</span>
+                    </button>
                   </div>
+
+                  {activeCodeTab !== 'simulator' && (
+                    <button
+                      onClick={() => {
+                        const snippets: Record<string, string> = {
+                          python: `from evalforge import EvalForgeClient\nclient = EvalForgeClient(api_key="ef_live_...")\njob = client.evaluations.create(project_id="proj_chatbot_v1", dataset_id="ds_qa_golden", metrics=["g_eval_faithfulness", "context_precision"], judge_model="gpt-4o")\nresults = job.wait_for_completion()\nprint(f"Pass rate: {results.pass_rate}%")`,
+                          cli: `$ pip install evalforge-cli\n$ evalforge login --api-key ef_live_...\n$ evalforge run --project "proj_chatbot_v1" --dataset "./tests/benchmarks.jsonl" --metric g-eval --threshold 0.85`,
+                          rest: `curl -X POST https://evalforge-backend.onrender.com/api/v1/evaluations/run -H "Authorization: Bearer ef_live_..." -H "Content-Type: application/json" -d '{"project_id":"proj_chatbot_v1","dataset_id":"ds_qa_golden","judge_model":"claude-3-5-sonnet"}'`,
+                        };
+                        handleCopyTerminalCode(snippets[activeCodeTab] || '');
+                      }}
+                      className="hidden sm:flex items-center gap-1.5 text-xs font-mono px-2.5 py-1 rounded border border-[#4C5F6B] hover:bg-white/5 transition-colors text-[#B0C2C6] hover:text-white"
+                      title="Copy snippet"
+                    >
+                      {terminalCodeCopied ? (
+                        <Check size={12} className="text-emerald-400" />
+                      ) : (
+                        <Copy size={12} />
+                      )}
+                      <span>{terminalCodeCopied ? 'Copied' : 'Copy'}</span>
+                    </button>
+                  )}
                 </div>
 
-                {/* Code Block */}
+                {/* Code Block / Simulator View */}
                 <div className="p-6 font-mono text-xs sm:text-sm leading-relaxed overflow-x-auto">
                   {activeCodeTab === 'python' && (
-                    <pre className="text-[#DDE4E1]">
-                      <span className="text-[#7E939C]"># pip install evalforge-sdk</span>
-                      <br />
-                      <span className="text-[#38BDF8]">from</span> evalforge{' '}
-                      <span className="text-[#38BDF8]">import</span> EvalForgeClient
-                      <br />
-                      <br />
-                      client = EvalForgeClient(api_key=
-                      <span className="text-emerald-400">&quot;ef_live_...&quot;</span>)
-                      <br />
-                      <br />
-                      <span className="text-[#7E939C]"># Trigger asynchronous G-Eval run</span>
-                      <br />
-                      job = client.evaluations.create(
-                      <br />
-                      &nbsp;&nbsp;project_id=
-                      <span className="text-emerald-400">&quot;proj_chatbot_v1&quot;</span>,<br />
-                      &nbsp;&nbsp;dataset_id=
-                      <span className="text-emerald-400">&quot;ds_qa_golden&quot;</span>,<br />
-                      &nbsp;&nbsp;metrics=[
-                      <span className="text-emerald-400">
-                        &quot;g_eval_faithfulness&quot;
-                      </span>,{' '}
-                      <span className="text-emerald-400">&quot;context_precision&quot;</span>],
-                      <br />
-                      &nbsp;&nbsp;judge_model=
-                      <span className="text-emerald-400">&quot;gpt-4o&quot;</span>
-                      <br />
-                      )
-                      <br />
-                      <br />
-                      results = job.wait_for_completion()
-                      <br />
-                      <span className="text-[#38BDF8]">print</span>(f
-                      <span className="text-emerald-400">
-                        &quot;Pass rate: &#123;results.pass_rate&#125;%&quot;
-                      </span>
-                      )
-                    </pre>
+                    <div className="space-y-4">
+                      <pre className="text-[#DDE4E1]">
+                        <span className="text-[#7E939C]"># pip install evalforge-sdk</span>
+                        <br />
+                        <span className="text-[#38BDF8]">from</span> evalforge{' '}
+                        <span className="text-[#38BDF8]">import</span> EvalForgeClient
+                        <br />
+                        <br />
+                        client = EvalForgeClient(api_key=
+                        <span className="text-emerald-400">&quot;ef_live_...&quot;</span>)
+                        <br />
+                        <br />
+                        <span className="text-[#7E939C]"># Trigger asynchronous G-Eval run</span>
+                        <br />
+                        job = client.evaluations.create(
+                        <br />
+                        &nbsp;&nbsp;project_id=
+                        <span className="text-emerald-400">&quot;proj_chatbot_v1&quot;</span>,<br />
+                        &nbsp;&nbsp;dataset_id=
+                        <span className="text-emerald-400">&quot;ds_qa_golden&quot;</span>,<br />
+                        &nbsp;&nbsp;metrics=[
+                        <span className="text-emerald-400">
+                          &quot;g_eval_faithfulness&quot;
+                        </span>,{' '}
+                        <span className="text-emerald-400">&quot;context_precision&quot;</span>],
+                        <br />
+                        &nbsp;&nbsp;judge_model=
+                        <span className="text-emerald-400">&quot;gpt-4o&quot;</span>
+                        <br />
+                        )
+                        <br />
+                        <br />
+                        results = job.wait_for_completion()
+                        <br />
+                        <span className="text-[#38BDF8]">print</span>(f
+                        <span className="text-emerald-400">
+                          &quot;Pass rate: &#123;results.pass_rate&#125;%&quot;
+                        </span>
+                        )
+                      </pre>
+                      <div className="pt-3 border-t border-[#4C5F6B]/40 flex items-center justify-between text-xs">
+                        <span className="text-[#7E939C]">Ready to test this snippet live?</span>
+                        <button
+                          type="button"
+                          onClick={() => runSimulation()}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#0284C7] hover:bg-[#0369A1] text-white text-xs font-semibold uppercase tracking-wider transition-colors shadow-sm"
+                        >
+                          <Play size={12} />
+                          <span>Simulate Run</span>
+                        </button>
+                      </div>
+                    </div>
                   )}
 
                   {activeCodeTab === 'cli' && (
-                    <pre className="text-[#DDE4E1]">
-                      <span className="text-[#7E939C]"># Install EvalForge CLI</span>
-                      <br />
-                      $ pip install evalforge-cli
-                      <br />
-                      <br />
-                      <span className="text-[#7E939C]"># Authenticate workspace</span>
-                      <br />
-                      $ evalforge login --api-key ef_live_...
-                      <br />
-                      <br />
-                      <span className="text-[#7E939C]"># Run evaluation against dataset</span>
-                      <br />
-                      $ evalforge run \
-                      <br />
-                      &nbsp;&nbsp;--project &quot;proj_chatbot_v1&quot; \
-                      <br />
-                      &nbsp;&nbsp;--dataset &quot;./tests/benchmarks.jsonl&quot; \
-                      <br />
-                      &nbsp;&nbsp;--metric g-eval \
-                      <br />
-                      &nbsp;&nbsp;--threshold 0.85
-                    </pre>
+                    <div className="space-y-4">
+                      <pre className="text-[#DDE4E1]">
+                        <span className="text-[#7E939C]"># Install EvalForge CLI</span>
+                        <br />
+                        $ pip install evalforge-cli
+                        <br />
+                        <br />
+                        <span className="text-[#7E939C]"># Authenticate workspace</span>
+                        <br />
+                        $ evalforge login --api-key ef_live_...
+                        <br />
+                        <br />
+                        <span className="text-[#7E939C]"># Run evaluation against dataset</span>
+                        <br />
+                        $ evalforge run \
+                        <br />
+                        &nbsp;&nbsp;--project &quot;proj_chatbot_v1&quot; \
+                        <br />
+                        &nbsp;&nbsp;--dataset &quot;./tests/benchmarks.jsonl&quot; \
+                        <br />
+                        &nbsp;&nbsp;--metric g-eval \
+                        <br />
+                        &nbsp;&nbsp;--threshold 0.85
+                      </pre>
+                      <div className="pt-3 border-t border-[#4C5F6B]/40 flex items-center justify-between text-xs">
+                        <span className="text-[#7E939C]">Test CLI terminal execution:</span>
+                        <button
+                          type="button"
+                          onClick={() => runSimulation('rubric')}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#0284C7] hover:bg-[#0369A1] text-white text-xs font-semibold uppercase tracking-wider transition-colors shadow-sm"
+                        >
+                          <Play size={12} />
+                          <span>Simulate Run</span>
+                        </button>
+                      </div>
+                    </div>
                   )}
 
                   {activeCodeTab === 'rest' && (
-                    <pre className="text-[#DDE4E1]">
-                      curl -X POST https://evalforge-backend.onrender.com/api/v1/evaluations/run \
-                      <br />
-                      &nbsp;&nbsp;-H{' '}
-                      <span className="text-emerald-400">
-                        &quot;Authorization: Bearer ef_live_...&quot;
-                      </span>{' '}
-                      \
-                      <br />
-                      &nbsp;&nbsp;-H{' '}
-                      <span className="text-emerald-400">
-                        &quot;Content-Type: application/json&quot;
-                      </span>{' '}
-                      \
-                      <br />
-                      &nbsp;&nbsp;-d &apos;&#123;
-                      <br />
-                      &nbsp;&nbsp;&nbsp;&nbsp;
-                      <span className="text-[#38BDF8]">&quot;project_id&quot;</span>:{' '}
-                      <span className="text-emerald-400">&quot;proj_chatbot_v1&quot;</span>,
-                      <br />
-                      &nbsp;&nbsp;&nbsp;&nbsp;
-                      <span className="text-[#38BDF8]">&quot;dataset_id&quot;</span>:{' '}
-                      <span className="text-emerald-400">&quot;ds_qa_golden&quot;</span>,
-                      <br />
-                      &nbsp;&nbsp;&nbsp;&nbsp;
-                      <span className="text-[#38BDF8]">&quot;judge_model&quot;</span>:{' '}
-                      <span className="text-emerald-400">&quot;claude-3-5-sonnet&quot;</span>
-                      <br />
-                      &nbsp;&nbsp;&#125;&apos;
-                    </pre>
+                    <div className="space-y-4">
+                      <pre className="text-[#DDE4E1]">
+                        curl -X POST https://evalforge-backend.onrender.com/api/v1/evaluations/run \
+                        <br />
+                        &nbsp;&nbsp;-H{' '}
+                        <span className="text-emerald-400">
+                          &quot;Authorization: Bearer ef_live_...&quot;
+                        </span>{' '}
+                        \
+                        <br />
+                        &nbsp;&nbsp;-H{' '}
+                        <span className="text-emerald-400">
+                          &quot;Content-Type: application/json&quot;
+                        </span>{' '}
+                        \
+                        <br />
+                        &nbsp;&nbsp;-d &apos;&#123;
+                        <br />
+                        &nbsp;&nbsp;&nbsp;&nbsp;
+                        <span className="text-[#38BDF8]">&quot;project_id&quot;</span>:{' '}
+                        <span className="text-emerald-400">&quot;proj_chatbot_v1&quot;</span>,
+                        <br />
+                        &nbsp;&nbsp;&nbsp;&nbsp;
+                        <span className="text-[#38BDF8]">&quot;dataset_id&quot;</span>:{' '}
+                        <span className="text-emerald-400">&quot;ds_qa_golden&quot;</span>,
+                        <br />
+                        &nbsp;&nbsp;&nbsp;&nbsp;
+                        <span className="text-[#38BDF8]">&quot;judge_model&quot;</span>:{' '}
+                        <span className="text-emerald-400">&quot;claude-3-5-sonnet&quot;</span>
+                        <br />
+                        &nbsp;&nbsp;&#125;&apos;
+                      </pre>
+                      <div className="pt-3 border-t border-[#4C5F6B]/40 flex items-center justify-between text-xs">
+                        <span className="text-[#7E939C]">Trigger evaluation over REST API:</span>
+                        <button
+                          type="button"
+                          onClick={() => runSimulation('safety')}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#0284C7] hover:bg-[#0369A1] text-white text-xs font-semibold uppercase tracking-wider transition-colors shadow-sm"
+                        >
+                          <Play size={12} />
+                          <span>Simulate Run</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {activeCodeTab === 'simulator' && (
+                    <div className="space-y-4">
+                      {/* Suite Selector */}
+                      <div className="flex flex-wrap items-center justify-between gap-3 p-3 rounded-xl bg-[#232E37] border border-[#4C5F6B]/40">
+                        <div className="flex items-center gap-1.5 text-xs font-mono">
+                          <span className="text-[#7E939C] hidden sm:inline">Suite:</span>
+                          {(['rag', 'rubric', 'safety'] as const).map((s) => (
+                            <button
+                              key={s}
+                              type="button"
+                              onClick={() => {
+                                setSimSuite(s);
+                                runSimulation(s);
+                              }}
+                              disabled={simRunning}
+                              className={`px-2.5 py-1 rounded text-[11px] font-mono uppercase tracking-wider transition-colors ${
+                                simSuite === s
+                                  ? 'bg-[#0284C7] text-white'
+                                  : 'text-[#B0C2C6] hover:text-white bg-black/20'
+                              }`}
+                            >
+                              {s === 'rag'
+                                ? 'RAG Triad'
+                                : s === 'rubric'
+                                  ? 'CoT Rubric'
+                                  : 'Safety Gate'}
+                            </button>
+                          ))}
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => runSimulation()}
+                          disabled={simRunning}
+                          className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-medium text-xs transition-colors"
+                        >
+                          {simRunning ? (
+                            <RotateCcw size={12} className="animate-spin" />
+                          ) : (
+                            <Play size={12} />
+                          )}
+                          <span>{simRunning ? 'Evaluating...' : 'Run Suite'}</span>
+                        </button>
+                      </div>
+
+                      {/* Log Console */}
+                      <div className="p-4 rounded-xl bg-[#141D24] border border-[#334155] font-mono text-xs space-y-1.5 max-h-48 overflow-y-auto">
+                        {simLogs.map((log, index) => (
+                          <div key={index} className="flex items-start gap-2 leading-relaxed">
+                            <span className="text-[#38BDF8] select-none">&gt;</span>
+                            <span
+                              className={
+                                log.includes('PASSED') ||
+                                log.includes('OK') ||
+                                log.includes('CONNECTED') ||
+                                log.includes('DONE')
+                                  ? 'text-emerald-300'
+                                  : 'text-[#DDE4E1]'
+                              }
+                            >
+                              {log}
+                            </span>
+                          </div>
+                        ))}
+                        {simRunning && (
+                          <div className="flex items-center gap-2 text-[#38BDF8] text-xs pt-1">
+                            <span className="inline-block w-2 h-2 rounded-full bg-[#38BDF8] animate-ping" />
+                            <span>Computing rubric distributions & regression slices...</span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Live Score Verdict Card */}
+                      {simCompleted && (
+                        <div className="p-4 rounded-xl bg-[#232E37] border border-emerald-500/40 space-y-3 animate-fade-in">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <CheckCircle2 size={16} className="text-emerald-400" />
+                              <span className="text-xs font-mono font-semibold text-emerald-300 uppercase tracking-wider">
+                                Evaluation Verdict: PASSED (Threshold &ge; 0.85)
+                              </span>
+                            </div>
+                            <span className="text-[10px] font-mono text-[#7E939C]">Lat: 184ms</span>
+                          </div>
+
+                          <div className="grid grid-cols-3 gap-2 text-center font-mono">
+                            <div className="p-2 rounded-lg bg-[#182026] border border-[#4C5F6B]/30">
+                              <div className="text-[10px] text-[#7E939C]">AGGREGATE SCORE</div>
+                              <div className="text-base font-semibold text-emerald-400">
+                                0.96 / 1.0
+                              </div>
+                            </div>
+                            <div className="p-2 rounded-lg bg-[#182026] border border-[#4C5F6B]/30">
+                              <div className="text-[10px] text-[#7E939C]">FAITHFULNESS</div>
+                              <div className="text-base font-semibold text-[#38BDF8]">98.4%</div>
+                            </div>
+                            <div className="p-2 rounded-lg bg-[#182026] border border-[#4C5F6B]/30">
+                              <div className="text-[10px] text-[#7E939C]">HALLUCINATIONS</div>
+                              <div className="text-base font-semibold text-emerald-400">0 / 10</div>
+                            </div>
+                          </div>
+
+                          <div className="pt-2 flex items-center justify-between text-xs">
+                            <button
+                              type="button"
+                              onClick={() => runSimulation()}
+                              className="text-[#B0C2C6] hover:text-white font-mono flex items-center gap-1"
+                            >
+                              <RotateCcw size={12} />
+                              <span>Re-run test</span>
+                            </button>
+                            <Link
+                              to={connected ? '/projects' : '/login'}
+                              className="text-[#38BDF8] hover:underline font-mono flex items-center gap-1"
+                            >
+                              <span>Run against production datasets</span>
+                              <ArrowRight size={12} />
+                            </Link>
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   )}
                 </div>
               </div>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* ─── Sovereign Judge Matrix & Model Benchmarks ─── */}
+      <section
+        id="benchmarks"
+        className="py-24 border-b border-[#DDE4E1] dark:border-[#2E3A44] bg-[#EFECE4]/20 dark:bg-[#1C252C]/30"
+      >
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="mb-14 flex flex-col md:flex-row md:items-end justify-between gap-6">
+            <div>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-[#0284C7]/10 text-[#0284C7] dark:text-[#38BDF8] dark:bg-[#0284C7]/20 border border-[#0284C7]/20 mb-3">
+                <Gauge size={12} />
+                <span>Frontier Evaluation Telemetry & Sovereign Benchmarks</span>
+              </div>
+              <div className="text-xs font-mono uppercase tracking-widest text-[#7E939C] mb-2">
+                Judge Performance Matrix
+              </div>
+              <h2 className="font-sans text-4xl sm:text-5xl font-semibold tracking-tight text-[#2E3A44] dark:text-[#F6F4EE]">
+                Sovereign Judge Matrix
+              </h2>
+            </div>
+            <p className="text-sm text-[#4C5F6B] dark:text-[#B0C2C6] max-w-md">
+              Benchmark factual precision, chain-of-thought latency, and token economics across
+              foundation models deployed as automated evaluators.
+            </p>
+          </div>
+
+          {/* Model Selector Tabs */}
+          <div className="flex flex-wrap items-center gap-2 mb-8">
+            {JUDGE_BENCHMARKS.map((model) => (
+              <button
+                key={model.id}
+                type="button"
+                onClick={() => setSelectedJudge(model.id)}
+                className={`px-4 py-2 rounded-xl text-xs font-mono font-medium transition-all ${
+                  selectedJudge === model.id
+                    ? 'bg-[#0284C7] text-white shadow-md shadow-[#0284C7]/20 scale-105'
+                    : 'bg-white dark:bg-[#202A32] text-[#4C5F6B] dark:text-[#B0C2C6] border border-[#DDE4E1] dark:border-[#2E3A44] hover:border-[#0284C7]'
+                }`}
+              >
+                <span>{model.name}</span>
+                <span className="ml-2 text-[10px] opacity-80 font-sans">({model.provider})</span>
+              </button>
+            ))}
+          </div>
+
+          {/* Active Model Dashboard */}
+          {(() => {
+            const currentModel =
+              JUDGE_BENCHMARKS.find((m) => m.id === selectedJudge) ?? JUDGE_BENCHMARKS[0];
+            return (
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                {/* Left: Metrics & Gauges */}
+                <div className="lg:col-span-6 p-6 sm:p-8 rounded-2xl border border-[#DDE4E1] dark:border-[#2E3A44] bg-white dark:bg-[#202A32] shadow-sm space-y-6">
+                  <div className="flex items-center justify-between pb-4 border-b border-[#DDE4E1] dark:border-[#2E3A44]">
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-xl font-semibold text-[#2E3A44] dark:text-[#F6F4EE]">
+                          {currentModel.name}
+                        </span>
+                        <span className="text-xs font-mono text-[#7E939C]">
+                          &middot; {currentModel.provider}
+                        </span>
+                      </div>
+                      <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-medium bg-[#0284C7]/10 text-[#0284C7] dark:text-[#38BDF8] border border-[#0284C7]/20">
+                        {currentModel.badge}
+                      </span>
+                    </div>
+
+                    <div className="text-right">
+                      <div className="text-xs text-[#7E939C]">P95 Latency</div>
+                      <div className="font-mono text-base font-semibold text-[#2E3A44] dark:text-[#F6F4EE]">
+                        {currentModel.latencyMs}ms
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Progress Bars */}
+                  <div className="space-y-4">
+                    <div>
+                      <div className="flex justify-between text-xs mb-1.5 font-mono">
+                        <span className="text-[#4C5F6B] dark:text-[#B0C2C6]">
+                          Factual Faithfulness
+                        </span>
+                        <span className="font-semibold text-[#0284C7] dark:text-[#38BDF8]">
+                          {currentModel.faithfulness}%
+                        </span>
+                      </div>
+                      <div className="h-2 w-full rounded-full bg-[#EFECE4] dark:bg-[#1C252C] overflow-hidden">
+                        <div
+                          className="h-full bg-gradient-to-r from-[#0284C7] to-[#38BDF8] rounded-full transition-all duration-500"
+                          style={{ width: `${currentModel.faithfulness}%` }}
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <div className="flex justify-between text-xs mb-1.5 font-mono">
+                        <span className="text-[#4C5F6B] dark:text-[#B0C2C6]">
+                          Chain-of-Thought Consistency
+                        </span>
+                        <span className="font-semibold text-[#0284C7] dark:text-[#38BDF8]">
+                          {currentModel.cotReasoning}%
+                        </span>
+                      </div>
+                      <div className="h-2 w-full rounded-full bg-[#EFECE4] dark:bg-[#1C252C] overflow-hidden">
+                        <div
+                          className="h-full bg-gradient-to-r from-[#0284C7] to-[#38BDF8] rounded-full transition-all duration-500"
+                          style={{ width: `${currentModel.cotReasoning}%` }}
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <div className="flex justify-between text-xs mb-1.5 font-mono">
+                        <span className="text-[#4C5F6B] dark:text-[#B0C2C6]">
+                          Hallucination Detection Precision
+                        </span>
+                        <span className="font-semibold text-[#0284C7] dark:text-[#38BDF8]">
+                          {currentModel.hallucinationDetection}%
+                        </span>
+                      </div>
+                      <div className="h-2 w-full rounded-full bg-[#EFECE4] dark:bg-[#1C252C] overflow-hidden">
+                        <div
+                          className="h-full bg-gradient-to-r from-[#0284C7] to-[#38BDF8] rounded-full transition-all duration-500"
+                          style={{ width: `${currentModel.hallucinationDetection}%` }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Metadata Chips */}
+                  <div className="grid grid-cols-2 gap-3 pt-3 border-t border-[#DDE4E1] dark:border-[#2E3A44] text-xs font-mono">
+                    <div className="p-3 rounded-xl bg-[#EFECE4]/50 dark:bg-[#1C252C]/60 border border-[#DDE4E1] dark:border-[#2E3A44]">
+                      <div className="text-[10px] text-[#7E939C] mb-1">EVAL COST (10K SAMPLES)</div>
+                      <div className="font-semibold text-[#2E3A44] dark:text-[#F6F4EE] flex items-center gap-1">
+                        <DollarSign size={13} className="text-[#0284C7]" />
+                        <span>{currentModel.costPer10k}</span>
+                      </div>
+                    </div>
+
+                    <div className="p-3 rounded-xl bg-[#EFECE4]/50 dark:bg-[#1C252C]/60 border border-[#DDE4E1] dark:border-[#2E3A44]">
+                      <div className="text-[10px] text-[#7E939C] mb-1">MAX CONTEXT WINDOW</div>
+                      <div className="font-semibold text-[#2E3A44] dark:text-[#F6F4EE] flex items-center gap-1">
+                        <Layers size={13} className="text-[#0284C7]" />
+                        <span>{currentModel.contextWindow}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right: Chain-of-Thought Reasoning Sample */}
+                <div className="lg:col-span-6 p-6 sm:p-8 rounded-2xl border border-[#DDE4E1] dark:border-[#2E3A44] bg-[#2E3A44] text-[#F6F4EE] shadow-sm flex flex-col justify-between space-y-6">
+                  <div>
+                    <div className="flex items-center justify-between pb-3 border-b border-[#4C5F6B]/40 mb-4">
+                      <div className="flex items-center gap-2">
+                        <Sliders size={14} className="text-[#38BDF8]" />
+                        <span className="text-xs font-mono uppercase tracking-wider text-[#B0C2C6]">
+                          Chain-of-Thought Verification Trace
+                        </span>
+                      </div>
+                      <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px] font-mono">
+                        {currentModel.verdictSample.verdict}
+                      </span>
+                    </div>
+
+                    <div className="space-y-3 font-mono text-xs">
+                      <div>
+                        <div className="text-[#7E939C] uppercase text-[10px] mb-1">
+                          Question / Prompt:
+                        </div>
+                        <div className="p-3 rounded-lg bg-[#232E37] text-[#DDE4E1]">
+                          &quot;{currentModel.verdictSample.question}&quot;
+                        </div>
+                      </div>
+
+                      <div>
+                        <div className="text-[#7E939C] uppercase text-[10px] mb-1">
+                          Judge Chain-of-Thought Reasoning:
+                        </div>
+                        <div className="p-3 rounded-lg bg-[#232E37] text-emerald-300/90 leading-relaxed font-sans text-xs">
+                          {currentModel.verdictSample.reasoning}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between pt-2">
+                        <span className="text-[#7E939C]">Computed Rubric Score:</span>
+                        <span className="font-semibold text-[#38BDF8] text-sm">
+                          {currentModel.verdictSample.score}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="pt-4 border-t border-[#4C5F6B]/40 flex flex-col sm:flex-row items-center justify-between gap-3">
+                    <span className="text-[11px] text-[#B0C2C6]">
+                      Ready to calibrate with your custom evaluation dataset?
+                    </span>
+                    <Link
+                      to={connected ? '/projects' : '/login'}
+                      className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-[#0284C7] hover:bg-[#0369A1] text-white text-xs font-semibold uppercase tracking-wider transition-colors shadow-sm"
+                    >
+                      <span>Configure {currentModel.name}</span>
+                      <ArrowRight size={13} />
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
         </div>
       </section>
 
