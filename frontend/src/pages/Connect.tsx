@@ -36,10 +36,10 @@ export default function Connect() {
             <span>← Back to Overview</span>
           </Link>
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg overflow-hidden bg-[#2E3A44] p-1 border border-[#DDE4E1] dark:border-[#2E3A44]">
+            <div className="w-8 h-8 rounded-lg overflow-hidden bg-gradient-to-br from-[#0284C7] to-[#0369A1] dark:from-[#1E293B] dark:to-[#0F172A] p-1 border border-[#0284C7]/30 dark:border-[#2E3A44] shadow-sm">
               <img src="/logo.png" alt="EvalForge" className="w-full h-full object-contain" />
             </div>
-            <span className="font-serif text-lg font-bold text-[#2E3A44] dark:text-[#F6F4EE]">
+            <span className="font-sans text-lg font-semibold text-[#2E3A44] dark:text-[#F6F4EE]">
               EvalForge
             </span>
           </div>
