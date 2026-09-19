@@ -56,7 +56,7 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           {/* Brand Monogram & Wordmark */}
           <Link to="/" className="flex items-center gap-3 group">
-            <div className="relative w-10 h-10 rounded-lg overflow-hidden border border-[#DDE4E1] dark:border-[#2E3A44] bg-[#2E3A44] p-1 shadow-sm transition-transform duration-200 group-hover:scale-105">
+            <div className="relative w-10 h-10 rounded-xl overflow-hidden border border-[#0284C7]/20 dark:border-[#2E3A44] bg-gradient-to-br from-[#0284C7] to-[#0369A1] dark:from-[#1E293B] dark:to-[#0F172A] p-1.5 shadow-sm transition-transform duration-200 group-hover:scale-105">
               <img
                 src="/logo.png"
                 alt="EvalForge Emblem"
@@ -64,7 +64,7 @@ export default function Landing() {
               />
             </div>
             <div className="flex flex-col">
-              <span className="font-sans text-2xl font-bold tracking-tight text-[#2E3A44] dark:text-[#F6F4EE] leading-none">
+              <span className="font-sans text-2xl font-semibold tracking-tight text-[#2E3A44] dark:text-[#F6F4EE] leading-none">
                 EvalForge
               </span>
               <span className="text-[10px] font-mono tracking-widest uppercase text-[#7E939C] mt-1">
@@ -210,7 +210,7 @@ export default function Landing() {
                 <span>Deterministic AI Quality & Benchmark Suite</span>
               </div>
 
-              <h1 className="font-sans text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-[#2E3A44] dark:text-[#F6F4EE] leading-[1.08]">
+              <h1 className="font-sans text-5xl sm:text-6xl lg:text-7xl font-semibold tracking-tight text-[#2E3A44] dark:text-[#F6F4EE] leading-[1.08]">
                 Evaluate AI <br />
                 <span className="text-[#0369A1] dark:text-[#38BDF8]">with unyielding rigor.</span>
               </h1>
@@ -248,19 +248,19 @@ export default function Landing() {
               {/* Technical Credibility Strip */}
               <div className="pt-6 border-t border-[#DDE4E1] dark:border-[#2E3A44] grid grid-cols-3 gap-6 font-mono text-xs text-[#7E939C] dark:text-[#B0C2C6]">
                 <div>
-                  <div className="text-xl sm:text-2xl font-sans font-bold text-[#2E3A44] dark:text-[#F6F4EE]">
+                  <div className="text-xl sm:text-2xl font-sans font-semibold text-[#2E3A44] dark:text-[#F6F4EE]">
                     180+
                   </div>
                   <div className="text-[11px] uppercase tracking-wider mt-0.5">Automated Tests</div>
                 </div>
                 <div>
-                  <div className="text-xl sm:text-2xl font-sans font-bold text-[#2E3A44] dark:text-[#F6F4EE]">
+                  <div className="text-xl sm:text-2xl font-sans font-semibold text-[#2E3A44] dark:text-[#F6F4EE]">
                     114
                   </div>
                   <div className="text-[11px] uppercase tracking-wider mt-0.5">REST Endpoints</div>
                 </div>
                 <div>
-                  <div className="text-xl sm:text-2xl font-sans font-bold text-[#2E3A44] dark:text-[#F6F4EE]">
+                  <div className="text-xl sm:text-2xl font-sans font-semibold text-[#2E3A44] dark:text-[#F6F4EE]">
                     v1.0.0
                   </div>
                   <div className="text-[11px] uppercase tracking-wider mt-0.5">
@@ -302,7 +302,7 @@ export default function Landing() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="p-4 rounded-xl border border-[#DDE4E1] dark:border-[#2E3A44] bg-[#F6F4EE] dark:bg-[#182026]">
                     <div className="text-[11px] font-mono uppercase text-[#7E939C]">Pass Rate</div>
-                    <div className="text-3xl font-sans font-bold text-[#0369A1] dark:text-[#38BDF8] mt-1">
+                    <div className="text-3xl font-sans font-semibold text-[#0369A1] dark:text-[#38BDF8] mt-1">
                       94.2%
                     </div>
                     <div className="text-[10px] text-[#4C5F6B] dark:text-[#B0C2C6] mt-1">
@@ -313,7 +313,7 @@ export default function Landing() {
                     <div className="text-[11px] font-mono uppercase text-[#7E939C]">
                       Mean Latency
                     </div>
-                    <div className="text-3xl font-sans font-bold text-[#2E3A44] dark:text-[#F6F4EE] mt-1">
+                    <div className="text-3xl font-sans font-semibold text-[#2E3A44] dark:text-[#F6F4EE] mt-1">
                       342ms
                     </div>
                     <div className="text-[10px] text-[#4C5F6B] dark:text-[#B0C2C6] mt-1">
@@ -377,7 +377,7 @@ export default function Landing() {
           <div className="text-xs font-mono uppercase tracking-widest text-[#7E939C]">
             The Engineering Dilemma
           </div>
-          <h2 className="font-sans text-3xl sm:text-5xl font-bold tracking-tight text-[#2E3A44] dark:text-[#F6F4EE] leading-snug">
+          <h2 className="font-sans text-3xl sm:text-5xl font-semibold tracking-tight text-[#2E3A44] dark:text-[#F6F4EE] leading-snug">
             “AI systems look impressive in isolation. <br />
             <span>Production systems demand empirical evidence.”</span>
           </h2>
@@ -398,7 +398,7 @@ export default function Landing() {
               <div className="text-xs font-mono uppercase tracking-widest text-[#7E939C] mb-2">
                 01 — 06 Pillars
               </div>
-              <h2 className="font-sans text-4xl sm:text-5xl font-bold tracking-tight text-[#2E3A44] dark:text-[#F6F4EE]">
+              <h2 className="font-sans text-4xl sm:text-5xl font-semibold tracking-tight text-[#2E3A44] dark:text-[#F6F4EE]">
                 Architected for precision.
               </h2>
             </div>
@@ -451,14 +451,14 @@ export default function Landing() {
                 className="group relative p-8 rounded-2xl border border-[#DDE4E1] dark:border-[#2E3A44] bg-white dark:bg-[#202A32] hover:border-[#0284C7] dark:hover:border-[#38BDF8] transition-all duration-200"
               >
                 <div className="flex items-center justify-between mb-6">
-                  <span className="font-sans text-3xl font-bold text-[#7E939C] group-hover:text-[#0369A1] transition-colors">
+                  <span className="font-sans text-3xl font-semibold text-[#7E939C] group-hover:text-[#0369A1] transition-colors">
                     {cap.num}
                   </span>
                   <div className="p-2.5 rounded-lg border border-[#DDE4E1] dark:border-[#2E3A44] text-[#4C5F6B] dark:text-[#B0C2C6]">
                     <cap.icon size={18} />
                   </div>
                 </div>
-                <h3 className="font-sans text-2xl font-bold text-[#2E3A44] dark:text-[#F6F4EE] mb-3">
+                <h3 className="font-sans text-2xl font-semibold text-[#2E3A44] dark:text-[#F6F4EE] mb-3">
                   {cap.title}
                 </h3>
                 <p className="text-sm text-[#4C5F6B] dark:text-[#B0C2C6] leading-relaxed">
@@ -480,7 +480,7 @@ export default function Landing() {
             <div className="text-xs font-mono uppercase tracking-widest text-[#7E939C]">
               Execution Pipeline
             </div>
-            <h2 className="font-sans text-4xl sm:text-5xl font-bold tracking-tight text-[#2E3A44] dark:text-[#F6F4EE]">
+            <h2 className="font-sans text-4xl sm:text-5xl font-semibold tracking-tight text-[#2E3A44] dark:text-[#F6F4EE]">
               The Evaluation Lifecycle
             </h2>
             <p className="text-sm text-[#4C5F6B] dark:text-[#B0C2C6]">
@@ -504,7 +504,7 @@ export default function Landing() {
                   <div className="font-mono text-xs text-[#0284C7] dark:text-[#38BDF8] font-bold">
                     STEP {st.step}
                   </div>
-                  <h4 className="font-sans text-xl font-bold text-[#2E3A44] dark:text-[#F6F4EE] mt-2">
+                  <h4 className="font-sans text-xl font-semibold text-[#2E3A44] dark:text-[#F6F4EE] mt-2">
                     {st.title}
                   </h4>
                 </div>
@@ -525,7 +525,7 @@ export default function Landing() {
               <div className="text-xs font-mono uppercase tracking-widest text-[#7E939C]">
                 First-Party Tooling
               </div>
-              <h2 className="font-sans text-4xl sm:text-5xl font-bold tracking-tight text-[#2E3A44] dark:text-[#F6F4EE]">
+              <h2 className="font-sans text-4xl sm:text-5xl font-semibold tracking-tight text-[#2E3A44] dark:text-[#F6F4EE]">
                 Designed for engineers, <br />
                 <span className="text-[#0369A1] dark:text-[#38BDF8]">native to your stack.</span>
               </h2>
@@ -697,7 +697,7 @@ export default function Landing() {
             <div className="text-xs font-mono uppercase tracking-widest text-[#7E939C]">
               Infrastructure Topology
             </div>
-            <h2 className="font-sans text-4xl sm:text-5xl font-bold tracking-tight text-[#2E3A44] dark:text-[#F6F4EE]">
+            <h2 className="font-sans text-4xl sm:text-5xl font-semibold tracking-tight text-[#2E3A44] dark:text-[#F6F4EE]">
               Full-Stack Architecture
             </h2>
             <p className="text-sm text-[#4C5F6B] dark:text-[#B0C2C6]">
@@ -734,11 +734,11 @@ export default function Landing() {
       {/* ─── Final Editorial Call-To-Action ─── */}
       <section className="py-24">
         <div className="max-w-5xl mx-auto px-6 text-center space-y-8">
-          <div className="w-16 h-16 rounded-2xl mx-auto border border-[#DDE4E1] dark:border-[#2E3A44] bg-[#2E3A44] p-2 shadow-lg">
+          <div className="w-16 h-16 rounded-2xl mx-auto border border-[#0284C7]/20 dark:border-[#2E3A44] bg-gradient-to-br from-[#0284C7] to-[#0369A1] dark:from-[#1E293B] dark:to-[#0F172A] p-2.5 shadow-lg shadow-[#0284C7]/15">
             <img src="/logo.png" alt="EvalForge Emblem" className="w-full h-full object-contain" />
           </div>
 
-          <h2 className="font-sans text-4xl sm:text-6xl font-bold tracking-tight text-[#2E3A44] dark:text-[#F6F4EE]">
+          <h2 className="font-sans text-4xl sm:text-6xl font-semibold tracking-tight text-[#2E3A44] dark:text-[#F6F4EE]">
             Ready to evaluate <br />
             <span className="text-[#0369A1] dark:text-[#38BDF8]">with complete confidence?</span>
           </h2>
@@ -771,7 +771,7 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-3">
             <img src="/logo.png" alt="EvalForge" className="w-6 h-6 object-contain" />
-            <span className="font-sans text-base font-bold text-[#2E3A44] dark:text-[#F6F4EE]">
+            <span className="font-sans text-base font-semibold text-[#2E3A44] dark:text-[#F6F4EE]">
               EvalForge.
             </span>
             <span className="text-[#B0C2C6]">·</span>

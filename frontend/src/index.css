@@ -159,7 +159,7 @@ h4 {
     sans-serif;
   letter-spacing: -0.015em;
   color: var(--text);
-  font-weight: 700;
+  font-weight: 600;
 }
 h1 {
   font-size: 34px;
@@ -211,7 +211,7 @@ pre {
   width: 32px;
   height: 32px;
   border-radius: 8px;
-  background: #2e3a44;
+  background: var(--accent);
   border: 1px solid var(--border);
   overflow: hidden;
   padding: 2px;
