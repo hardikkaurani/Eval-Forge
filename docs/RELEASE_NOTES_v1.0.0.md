@@ -46,8 +46,8 @@ EvalForge v1.0.0 is the inaugural public release of the enterprise-grade, produc
 
 ## 🚀 Deployment Instructions
 
-- **Deployment Guide**: [docs/deployment_guide.md](file:///docs/deployment_guide.md)
-- **Environment Template**: [.env.example](file:///.env.example)
+- **Deployment Guide**: [docs/deployment_guide.md](deployment_guide.md)
+- **Environment Template**: [.env.example](../.env.example)
 
 ---
 
