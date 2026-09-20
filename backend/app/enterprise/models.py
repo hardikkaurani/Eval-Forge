@@ -349,3 +349,23 @@ class StripeWebhookEvent(Base):
     event_type = Column(String(100), nullable=False)
     payload = Column(JSON, nullable=False)
     processed_at = Column(DateTime, default=datetime.utcnow)
+
+
+class OAuthIdentity(Base):
+    __tablename__ = "oauth_identities"
+    __table_args__ = (
+        UniqueConstraint(
+            "provider", "provider_user_id", name="uq_oauth_identities_provider_user"
+        ),
+    )
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id = Column(UUID(as_uuid=True), nullable=False, index=True)
+    provider = Column(String(50), nullable=False, default="google")
+    provider_user_id = Column(String(255), nullable=False, index=True)
+    email = Column(String(255), nullable=False, index=True)
+    email_verified = Column(Boolean, default=False, nullable=False)
+    display_name = Column(String(255), nullable=True)
+    avatar_url = Column(String(1024), nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

@@ -123,6 +123,12 @@ class Settings(BaseSettings):
     STRIPE_PUBLISHABLE_KEY: str | None = None
     STRIPE_WEBHOOK_SECRET: SecretStr | None = None
 
+    # Google OAuth 2.0 Configuration
+    GOOGLE_CLIENT_ID: str | None = None
+    GOOGLE_CLIENT_SECRET: SecretStr | None = None
+    GOOGLE_REDIRECT_URI: str = "http://localhost:8000/api/v1/auth/google/callback"
+    FRONTEND_URL: str = "http://localhost:5173"
+
     # Evaluation Engine Defaults
     DEFAULT_EVALUATION_PROVIDER: str = "openai"
     DEFAULT_EVALUATION_JUDGE: str = "rubric"

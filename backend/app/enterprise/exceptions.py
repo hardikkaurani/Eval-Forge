@@ -32,3 +32,33 @@ class CustomDomainCollisionException(EnterpriseBaseException):
     """Raised when attempting to configure a custom domain that is already registered to another tenant."""
 
     pass
+
+
+class OAuthException(EnterpriseBaseException):
+    """Base exception for OAuth authentication errors."""
+
+    pass
+
+
+class OAuthConfigurationException(OAuthException):
+    """Raised when OAuth provider credentials or settings are not configured."""
+
+    pass
+
+
+class OAuthStateInvalidException(OAuthException):
+    """Raised when OAuth state is missing, forged, expired, or reused."""
+
+    pass
+
+
+class OAuthVerificationException(OAuthException):
+    """Raised when Google ID token validation fails."""
+
+    pass
+
+
+class OAuthConflictException(OAuthException):
+    """Raised when identity linking conflict occurs."""
+
+    pass

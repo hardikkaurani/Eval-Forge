@@ -18,6 +18,7 @@ from app.analytics.routes import (
     trends_router,
 )
 from app.api.v1.endpoints import (
+    auth,
     connection,
     evaluation,
     health,
@@ -59,6 +60,7 @@ public_router.include_router(
     playground_router, tags=["Developer Platform - Playground"]
 )
 public_router.include_router(stripe_webhook_router, tags=["Enterprise SaaS - Webhooks"])
+public_router.include_router(auth.router)
 
 # Private router (requires API key authentication)
 private_router = APIRouter(dependencies=[Depends(get_current_api_key)])
