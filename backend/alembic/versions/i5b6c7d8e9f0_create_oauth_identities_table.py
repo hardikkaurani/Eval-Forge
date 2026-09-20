@@ -54,8 +54,6 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     op.drop_index("ix_oauth_identities_email", table_name="oauth_identities")
-    op.drop_index(
-        "ix_oauth_identities_provider_user_id", table_name="oauth_identities"
-    )
+    op.drop_index("ix_oauth_identities_provider_user_id", table_name="oauth_identities")
     op.drop_index("ix_oauth_identities_user_id", table_name="oauth_identities")
     op.drop_table("oauth_identities")

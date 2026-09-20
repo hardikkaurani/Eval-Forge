@@ -23,7 +23,8 @@ export default function OAuthCallback() {
         const searchParams = new URLSearchParams(window.location.search);
 
         const apiKey = hashParams.get('api_key') || searchParams.get('api_key');
-        const returnTo = hashParams.get('return_to') || searchParams.get('return_to') || '/overview';
+        const returnTo =
+          hashParams.get('return_to') || searchParams.get('return_to') || '/overview';
         const errParam = hashParams.get('error') || searchParams.get('error');
 
         if (errParam) {
@@ -57,7 +58,8 @@ export default function OAuthCallback() {
 
         if (!active) return;
         // Verify return destination is safe relative path
-        const safeDestination = returnTo.startsWith('/') && !returnTo.startsWith('//') ? returnTo : '/overview';
+        const safeDestination =
+          returnTo.startsWith('/') && !returnTo.startsWith('//') ? returnTo : '/overview';
         navigate(safeDestination, { replace: true });
       } catch (err: unknown) {
         if (!active) return;

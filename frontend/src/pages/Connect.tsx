@@ -129,7 +129,12 @@ export default function Connect() {
             className="w-full flex items-center justify-center gap-3 px-4 py-2.5 rounded-lg border border-[#DDE4E1] dark:border-[#3E4C59] bg-white dark:bg-[#202A32] text-[#2E3A44] dark:text-[#F6F4EE] font-medium text-sm hover:bg-[#F6F4EE] dark:hover:bg-[#2A3742] transition-colors shadow-sm mb-4 cursor-pointer"
             id="google-login-btn"
           >
-            <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
+            <svg
+              className="w-4 h-4 shrink-0"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+              focusable="false"
+            >
               <path
                 fill="#4285F4"
                 d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -151,7 +156,7 @@ export default function Connect() {
           </button>
           <div className="relative flex items-center justify-center my-4">
             <div className="border-t border-[#DDE4E1] dark:border-[#2E3A44] w-full" />
-            <span className="bg-white dark:bg-[#202A32] px-3 text-xs text-[#8295A0] dark:text-[#8295A0] uppercase tracking-wider font-mono shrink-0">
+            <span className="bg-white dark:bg-[#202A32] px-3 text-xs text-[#4c5f6b] dark:text-[#b0c2c6] uppercase tracking-wider font-mono shrink-0">
               or continue with API key
             </span>
           </div>
