@@ -36,6 +36,17 @@ async def lifespan(app: FastAPI):
         if settings.APP_ENV != "testing":
             async with engine.begin() as conn:
                 await conn.exec_driver_sql("SELECT 1")
+                if settings.get_database_url.startswith("sqlite"):
+                    import app.enterprise.models  # noqa: F401
+                    import app.models.advanced_ai  # noqa: F401
+                    import app.models.analytics  # noqa: F401
+                    import app.models.dataset  # noqa: F401
+                    import app.models.evaluation  # noqa: F401
+                    import app.models.project  # noqa: F401
+                    import app.platform.models  # noqa: F401
+                    from app.database.session import Base
+
+                    await conn.run_sync(Base.metadata.create_all)
             logger.info("Database connectivity verified successfully.")
     except Exception as e:
         logger.error("Database connection check failed during startup.", error=str(e))
@@ -47,11 +58,15 @@ async def lifespan(app: FastAPI):
         if redis_alive:
             logger.info("Redis connectivity verified successfully.")
         else:
-            logger.warning("Redis is unreachable or degraded.")
+            logger.warning(
+                "Redis is unreachable or degraded. Disabling Redis client for fast in-memory fallback."
+            )
+            redis_manager.client = None
     except Exception as e:
         logger.error(
             "Redis connection initialization failed during startup.", error=str(e)
         )
+        redis_manager.client = None
 
     # 3. Initialize and start Cron Scheduler
     try:
@@ -79,9 +94,9 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="EvalForge Core API",
+    title="Evalium API",
     description=(
-        "🚀 **EvalForge** is a production-grade open-source LLM evaluation platform.\n\n"
+        "🚀 **Evalium** — Production-grade AI Evaluation Infrastructure.\n\n"
         "This API establishes the scalable core backend foundation supporting "
         "high-throughput project and evaluation lifecycle management.\n\n"
         "**Key Features:**\n"
@@ -151,7 +166,7 @@ if __name__ == "__main__":
 
     uvicorn.run(
         "app.main:app",
-        host="0.0.0.0",
+        host="0.0.0.0",  # nosec B104  # trunk-ignore(bandit/B104)
         port=settings.PORT,
         reload=settings.APP_ENV == "development",
     )

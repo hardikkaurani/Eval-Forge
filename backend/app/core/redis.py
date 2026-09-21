@@ -27,6 +27,8 @@ class RedisManager:
             encoding="utf-8",
             decode_responses=True,
             max_connections=50,
+            socket_timeout=1.0,
+            socket_connect_timeout=1.0,
         )
         self.client = Redis(connection_pool=self.pool)
 
