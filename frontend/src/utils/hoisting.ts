@@ -1,11 +1,11 @@
 /**
- * EvalForge — JavaScript Hoisting Utility & Demonstration Module
+ * Evalium — JavaScript Hoisting Utility & Demonstration Module
  * Kalvium Mandatory Concept Compliance (#18: JavaScript Hoisting)
  *
  * Hoisting is JavaScript's default behavior of moving declarations to the top
  * of their execution context during the compilation phase before code execution.
  *
- * In EvalForge:
+ * In Evalium:
  * 1. Function declarations are hoisted completely with their definitions, allowing
  *    them to be invoked anywhere within their scope prior to textual definition.
  * 2. `var` declarations hoist the variable name initialized to `undefined`.
