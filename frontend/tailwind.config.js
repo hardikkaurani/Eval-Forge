@@ -47,11 +47,11 @@ export default {
         },
       },
       fontFamily: {
-        serif: ['"Bodoni Moda"', 'Italiana', 'Cinzel', '"Cormorant Garamond"', 'Playfair Display', 'Georgia', 'serif'],
-        sans: ['Inter', 'Geist', 'system-ui', 'sans-serif'],
-        mono: ['"JetBrains Mono"', 'monospace'],
-        display: ['"Bodoni Moda"', 'Italiana', 'Cinzel', 'serif'],
-        brand: ['"Cinzel"', '"Bodoni Moda"', 'serif'],
+        sans: ['"Source Sans 3"', '"Source Sans Pro"', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'Helvetica', 'Arial', 'sans-serif'],
+        serif: ['"Source Sans 3"', '"Source Sans Pro"', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'Helvetica', 'Arial', 'sans-serif'],
+        mono: ['"Source Code Pro"', '"JetBrains Mono"', 'monospace'],
+        display: ['"Source Sans 3"', '"Source Sans Pro"', '-apple-system', 'sans-serif'],
+        brand: ['"Source Sans 3"', '"Source Sans Pro"', 'sans-serif'],
       },
       borderRadius: {
         DEFAULT: '0.375rem',
