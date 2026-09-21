@@ -31,13 +31,13 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="inline-block w-2 h-2 rounded-full bg-[#0284C7] animate-pulse" />
-            <span className="font-mono font-medium">EvalForge v1.0.0 Released</span>
+            <span className="font-mono font-medium">Evalium v1.0.0 Released</span>
             <span className="hidden sm:inline text-[#7E939C]">|</span>
-            <span className="hidden sm:inline">Production-grade LLM evaluation infrastructure</span>
+            <span className="hidden sm:inline">Production-grade AI Evaluation Infrastructure</span>
           </div>
           <div className="flex items-center gap-4">
             <a
-              href="https://github.com/hardikkaurani/Eval-Forge"
+              href="https://github.com/hardikkaurani/Evalium"
               target="_blank"
               rel="noopener noreferrer"
               className="hover:text-[#0284C7] transition-colors flex items-center gap-1 font-mono"
@@ -57,15 +57,11 @@ export default function Landing() {
           {/* Brand Monogram & Wordmark */}
           <Link to="/" className="flex items-center gap-3 group">
             <div className="relative w-10 h-10 rounded-lg overflow-hidden border border-[#DDE4E1] dark:border-[#2E3A44] bg-[#2E3A44] p-1 shadow-sm transition-transform duration-200 group-hover:scale-105">
-              <img
-                src="/logo.png"
-                alt="EvalForge Emblem"
-                className="w-full h-full object-contain"
-              />
+              <img src="/logo.png" alt="Evalium Emblem" className="w-full h-full object-contain" />
             </div>
             <div className="flex flex-col">
               <span className="font-serif text-2xl font-semibold tracking-tight text-[#2E3A44] dark:text-[#F6F4EE] leading-none">
-                EvalForge
+                Evalium
               </span>
               <span className="text-[10px] font-mono tracking-widest uppercase text-[#7E939C] mt-1">
                 AI Infrastructure
@@ -236,7 +232,7 @@ export default function Landing() {
                 </Link>
 
                 <a
-                  href="https://github.com/hardikkaurani/Eval-Forge"
+                  href="https://github.com/hardikkaurani/Evalium"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 px-7 py-4 rounded-full border border-[#B0C2C6] dark:border-[#4C5F6B] hover:border-[#2E3A44] dark:hover:border-[#F6F4EE] text-sm font-medium text-[#2E3A44] dark:text-[#F6F4EE] bg-transparent transition-all duration-200"
@@ -279,11 +275,7 @@ export default function Landing() {
                 <div className="flex items-center justify-between border-b border-[#DDE4E1] dark:border-[#2E3A44] pb-4">
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-md bg-[#2E3A44] flex items-center justify-center p-1 border border-[#DDE4E1]">
-                      <img
-                        src="/logo.png"
-                        alt="EvalForge"
-                        className="w-full h-full object-contain"
-                      />
+                      <img src="/logo.png" alt="Evalium" className="w-full h-full object-contain" />
                     </div>
                     <div>
                       <div className="text-xs font-semibold text-[#2E3A44] dark:text-[#F6F4EE]">
@@ -388,7 +380,7 @@ export default function Landing() {
           <div className="w-16 h-[1px] bg-[#0284C7] mx-auto" />
           <p className="text-base sm:text-lg text-[#4C5F6B] dark:text-[#B0C2C6] leading-relaxed max-w-3xl mx-auto font-normal">
             Without structured benchmarks and automated evaluation pipelines, teams deploy updates
-            into the dark. EvalForge introduces continuous statistical verification across reasoning
+            into the dark. Evalium introduces continuous statistical verification across reasoning
             quality, retrieval faithfulness, hallucination detection, and safety policies.
           </p>
         </div>
@@ -552,7 +544,7 @@ export default function Landing() {
                 </div>
                 <div className="flex items-center gap-3 text-xs font-medium text-[#2E3A44] dark:text-[#F6F4EE]">
                   <CheckCircle2 size={16} className="text-[#0284C7]" />
-                  <span>Standalone terminal CLI (`evalforge run ...`)</span>
+                  <span>Standalone terminal CLI (`evalium run ...`)</span>
                 </div>
               </div>
             </div>
@@ -587,13 +579,13 @@ export default function Landing() {
                 <div className="p-6 font-mono text-xs sm:text-sm leading-relaxed overflow-x-auto">
                   {activeCodeTab === 'python' && (
                     <pre className="text-[#DDE4E1]">
-                      <span className="text-[#7E939C]"># pip install evalforge-sdk</span>
+                      <span className="text-[#7E939C]"># pip install evalforge</span>
                       <br />
                       <span className="text-[#38BDF8]">from</span> evalforge{' '}
-                      <span className="text-[#38BDF8]">import</span> EvalForgeClient
+                      <span className="text-[#38BDF8]">import</span> Evalium
                       <br />
                       <br />
-                      client = EvalForgeClient(api_key=
+                      client = Evalium(api_key=
                       <span className="text-emerald-400">&quot;ef_live_...&quot;</span>)
                       <br />
                       <br />
@@ -629,19 +621,19 @@ export default function Landing() {
 
                   {activeCodeTab === 'cli' && (
                     <pre className="text-[#DDE4E1]">
-                      <span className="text-[#7E939C]"># Install EvalForge CLI</span>
+                      <span className="text-[#7E939C]"># Install Evalium CLI</span>
                       <br />
                       $ pip install evalforge-cli
                       <br />
                       <br />
                       <span className="text-[#7E939C]"># Authenticate workspace</span>
                       <br />
-                      $ evalforge login --api-key ef_live_...
+                      $ evalium login --api-key ef_live_...
                       <br />
                       <br />
                       <span className="text-[#7E939C]"># Run evaluation against dataset</span>
                       <br />
-                      $ evalforge run \
+                      $ evalium run \
                       <br />
                       &nbsp;&nbsp;--project &quot;proj_chatbot_v1&quot; \
                       <br />
@@ -741,7 +733,7 @@ export default function Landing() {
       <section className="py-24">
         <div className="max-w-5xl mx-auto px-6 text-center space-y-8">
           <div className="w-16 h-16 rounded-2xl mx-auto border border-[#DDE4E1] dark:border-[#2E3A44] bg-[#2E3A44] p-2 shadow-lg">
-            <img src="/logo.png" alt="EvalForge Emblem" className="w-full h-full object-contain" />
+            <img src="/logo.png" alt="Evalium Emblem" className="w-full h-full object-contain" />
           </div>
 
           <h2 className="font-serif text-4xl sm:text-6xl font-light text-[#2E3A44] dark:text-[#F6F4EE]">
@@ -763,7 +755,7 @@ export default function Landing() {
               {connected ? 'Enter Workspace Now →' : 'Launch Workspace →'}
             </Link>
             <a
-              href="https://github.com/hardikkaurani/Eval-Forge/blob/main/docs/api.md"
+              href="https://github.com/hardikkaurani/Evalium/blob/main/docs/api.md"
               target="_blank"
               rel="noopener noreferrer"
               className="px-8 py-4 rounded-full border border-[#B0C2C6] dark:border-[#4C5F6B] hover:border-[#2E3A44] text-sm font-medium text-[#2E3A44] dark:text-[#F6F4EE] transition-colors"
@@ -778,17 +770,17 @@ export default function Landing() {
       <footer className="border-t border-[#DDE4E1] dark:border-[#2E3A44] py-12 bg-[#EFECE4] dark:bg-[#151D23] text-xs text-[#7E939C]">
         <div className="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-3">
-            <img src="/logo.png" alt="EvalForge" className="w-6 h-6 object-contain" />
+            <img src="/logo.png" alt="Evalium" className="w-6 h-6 object-contain" />
             <span className="font-serif text-base font-semibold text-[#2E3A44] dark:text-[#F6F4EE]">
-              EvalForge.
+              Evalium.
             </span>
             <span className="text-[#B0C2C6]">·</span>
-            <span>Production AI Infrastructure</span>
+            <span>Production-grade AI Evaluation Infrastructure</span>
           </div>
 
           <div className="flex items-center gap-6">
             <a
-              href="https://github.com/hardikkaurani/Eval-Forge"
+              href="https://github.com/hardikkaurani/Evalium"
               target="_blank"
               rel="noopener noreferrer"
               className="hover:text-[#0284C7] transition-colors"
@@ -796,7 +788,7 @@ export default function Landing() {
               GitHub
             </a>
             <a
-              href="https://github.com/hardikkaurani/Eval-Forge/blob/main/docs/ARCHITECTURE.md"
+              href="https://github.com/hardikkaurani/Evalium/blob/main/docs/ARCHITECTURE.md"
               target="_blank"
               rel="noopener noreferrer"
               className="hover:text-[#0284C7] transition-colors"
@@ -804,7 +796,7 @@ export default function Landing() {
               Architecture
             </a>
             <a
-              href="https://github.com/hardikkaurani/Eval-Forge/blob/main/LICENSE"
+              href="https://github.com/hardikkaurani/Evalium/blob/main/LICENSE"
               target="_blank"
               rel="noopener noreferrer"
               className="hover:text-[#0284C7] transition-colors"

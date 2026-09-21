@@ -67,10 +67,10 @@ export default function Connect() {
           </Link>
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg overflow-hidden bg-[#2E3A44] p-1 border border-[#DDE4E1] dark:border-[#2E3A44]">
-              <img src="/logo.png" alt="EvalForge" className="w-full h-full object-contain" />
+              <img src="/logo.png" alt="Evalium" className="w-full h-full object-contain" />
             </div>
             <span className="font-serif text-lg font-bold text-[#2E3A44] dark:text-[#F6F4EE]">
-              EvalForge
+              Evalium
             </span>
           </div>
         </div>
@@ -111,7 +111,7 @@ export default function Connect() {
             <ThemeControl />
           </div>
           <h1>Connect your workspace</h1>
-          <p>Enter an EvalForge API key to access your projects.</p>
+          <p>Enter an Evalium API key to access your projects.</p>
           {pathname !== '/login' && (
             <div className="notice info" style={{ marginBottom: 20 }}>
               This installation uses API keys. Account registration and password recovery are not
@@ -189,7 +189,7 @@ export default function Connect() {
           <details className="setup-help">
             <summary>Need an API key?</summary>
             <p>
-              Ask your EvalForge administrator for a workspace-scoped API key. Server administrators
+              Ask your Evalium administrator for a workspace-scoped API key. Server administrators
               can use the bootstrap command in the setup guide.
             </p>
             <p>
@@ -197,7 +197,7 @@ export default function Connect() {
               cannot be used here.
             </p>
             <a
-              href="https://github.com/hardikkaurani/Eval-Forge/blob/main/docs/ui-setup.md"
+              href="https://github.com/hardikkaurani/Evalium/blob/main/docs/ui-setup.md"
               target="_blank"
               rel="noreferrer"
             >
