@@ -9,7 +9,15 @@ from evalforge.exceptions import (
     RateLimitError,
 )
 
+# Primary brand aliases
+Evalium = EvalForge
+AsyncEvalium = AsyncEvalForge
+EvaliumError = EvalForgeError
+
 __all__ = [
+    "Evalium",
+    "AsyncEvalium",
+    "EvaliumError",
     "EvalForge",
     "AsyncEvalForge",
     "EvalForgeError",

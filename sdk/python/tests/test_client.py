@@ -50,7 +50,9 @@ class TestEvalForgeSDK(unittest.TestCase):
 
 class TestAsyncEvalForgeSDK(unittest.IsolatedAsyncioTestCase):
     async def test_async_python_sdk_operations(self):
-        client = AsyncEvalForge(api_key="ef_test_key_123", base_url="http://localhost:8000")
+        client = AsyncEvalForge(
+            api_key="ef_test_key_123", base_url="http://localhost:8000"
+        )
 
         mock_resp = MagicMock()
         mock_resp.status_code = 200

@@ -1,6 +1,9 @@
-# Eval-Forge Python SDK (`evalforge`)
+# Evalium Python SDK (`evalforge`)
 
-Official Python client SDK for the [Eval-Forge](https://github.com/hardikkaurani/Eval-Forge) AI evaluation and LLM observability platform.
+Official Python client SDK for [Evalium](https://github.com/hardikkaurani/Evalium) — Production-grade AI Evaluation Infrastructure.
+
+> [!NOTE]
+> The Python package namespace remains `evalforge` for seamless runtime backwards compatibility, offering the modern `Evalium` class alongside `EvalForge`.
 
 ---
 
@@ -30,9 +33,9 @@ export EVALFORGE_BASE_URL="http://localhost:8000"  # Optional, defaults to http:
 Or provide it directly to the client constructor:
 
 ```python
-from evalforge import EvalForge
+from evalforge import Evalium
 
-client = EvalForge(api_key="ef_live_your_api_key_here")
+client = Evalium(api_key="ef_live_your_api_key_here")
 ```
 
 ---
@@ -42,9 +45,9 @@ client = EvalForge(api_key="ef_live_your_api_key_here")
 ### Synchronous Usage
 
 ```python
-from evalforge import EvalForge
+from evalforge import Evalium
 
-client = EvalForge()
+client = Evalium()
 
 # 1. List Projects
 projects = client.projects.list()
