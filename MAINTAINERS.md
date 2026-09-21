@@ -1,6 +1,6 @@
-# EvalForge Project Maintainers
+# Evalium Project Maintainers
 
-This document lists the core maintainers, triage leads, and security contacts for the **EvalForge** repository.
+This document lists the core maintainers, triage leads, and security contacts for the **Evalium** repository.
 
 ---
 
@@ -27,8 +27,8 @@ This document lists the core maintainers, triage leads, and security contacts fo
 
 For confidential security disclosures, contact:
 
-- **Email:** `security@evalforge.dev`
-- **Private Advisory:** [GitHub Security Advisories](https://github.com/hardikkaurani/Eval-Forge/security/advisories/new)
+- **Email:** `security@evalium.dev`
+- **Private Advisory:** [GitHub Security Advisories](https://github.com/hardikkaurani/Evalium/security/advisories/new)
 
 ---
 

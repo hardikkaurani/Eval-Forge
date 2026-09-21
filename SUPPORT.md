@@ -1,6 +1,6 @@
-# EvalForge Community & Support Guide
+# Evalium Community & Support Guide
 
-Welcome to the **EvalForge** community! Whether you need help setting up your local environment, configuring custom LLM judge rubrics, or integrating EvalForge into your CI/CD pipeline, we are here to support you.
+Welcome to the **Evalium** community! Whether you need help setting up your local environment, configuring custom LLM judge rubrics, or integrating Evalium into your CI/CD pipeline, we are here to support you.
 
 ---
 
@@ -10,11 +10,11 @@ Please use the appropriate channel based on your inquiry:
 
 | Need Help With...              | Recommended Channel                                                                                                    | Response Expectation            |
 | ------------------------------ | ---------------------------------------------------------------------------------------------------------------------- | ------------------------------- |
-| **General Questions & How-To** | [GitHub Discussions](https://github.com/hardikkaurani/Eval-Forge/discussions)                                          | 24–48 hours                     |
-| **Bug Reports & Errors**       | [GitHub Issues (Bug Report)](https://github.com/hardikkaurani/Eval-Forge/issues/new?template=bug_report.yml)           | 24–48 hours                     |
-| **Feature Proposals**          | [GitHub Issues (Feature Request)](https://github.com/hardikkaurani/Eval-Forge/issues/new?template=feature_request.yml) | Reviewed during Sprint Planning |
-| **Security Vulnerabilities**   | [Private Security Advisory](https://github.com/hardikkaurani/Eval-Forge/security/advisories/new)                       | < 24 hours                      |
-| **Stack Overflow Questions**   | Tag `eval-forge` on [Stack Overflow](https://stackoverflow.com/questions/tagged/eval-forge)                            | Community driven                |
+| **General Questions & How-To** | [GitHub Discussions](https://github.com/hardikkaurani/Evalium/discussions)                                          | 24–48 hours                     |
+| **Bug Reports & Errors**       | [GitHub Issues (Bug Report)](https://github.com/hardikkaurani/Evalium/issues/new?template=bug_report.yml)           | 24–48 hours                     |
+| **Feature Proposals**          | [GitHub Issues (Feature Request)](https://github.com/hardikkaurani/Evalium/issues/new?template=feature_request.yml) | Reviewed during Sprint Planning |
+| **Security Vulnerabilities**   | [Private Security Advisory](https://github.com/hardikkaurani/Evalium/security/advisories/new)                       | < 24 hours                      |
+| **Stack Overflow Questions**   | Tag `evalium` on [Stack Overflow](https://stackoverflow.com/questions/tagged/evalium)                            | Community driven                |
 
 ---
 
@@ -34,7 +34,7 @@ Before asking for help, check our self-service documentation:
 
 To get the fastest and most accurate help:
 
-- Search existing [GitHub Issues](https://github.com/hardikkaurani/Eval-Forge/issues) and [GitHub Discussions](https://github.com/hardikkaurani/Eval-Forge/discussions) first.
+- Search existing [GitHub Issues](https://github.com/hardikkaurani/Evalium/issues) and [GitHub Discussions](https://github.com/hardikkaurani/Evalium/discussions) first.
 - Provide a minimal reproducible example or step-by-step reproduction.
 - Include environment details (OS, Python version, Node.js version, Docker status).
 - Scrub sensitive API keys (`sk-****`) from any logs or screenshots prior to posting.

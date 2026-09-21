@@ -1,6 +1,6 @@
-# EvalForge Master Contributor Issues Catalog (30 Real Issues)
+# Evalium Master Contributor Issues Catalog (30 Real Issues)
 
-This catalog contains **30 real, repository-specific engineering tasks** derived directly from the EvalForge codebase. These issues are categorized by difficulty and component area to provide an exceptional first-time and ongoing contributor experience.
+This catalog contains **30 real, repository-specific engineering tasks** derived directly from the Evalium codebase. These issues are categorized by difficulty and component area to provide an exceptional first-time and ongoing contributor experience.
 
 ---
 

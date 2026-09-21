@@ -1,8 +1,8 @@
 <div align="center">
 
-<h1>Eval-Forge.</h1>
+<h1>Evalium.</h1>
 
-<p><strong>Production-grade open-source LLM evaluation platform — G-Eval, LLM-as-a-Judge, RAG evaluation,<br/>and fully customisable AI evaluation pipelines. Built in public. Designed for production.</strong></p>
+<p><strong>Evalium — Production-grade AI Evaluation Infrastructure.<br/>G-Eval, LLM-as-a-Judge, RAG evaluation, and fully customisable AI evaluation pipelines. Built in public. Designed for production.</strong></p>
 
 <br/>
 
@@ -10,11 +10,11 @@
 &nbsp;
 <a href="#getting-started"><img src="https://img.shields.io/badge/Quick%20Start-Docker-2496ED?logo=docker&logoColor=white" height="28" /></a>
 &nbsp;
-<a href="https://github.com/hardikkaurani/Eval-Forge/blob/main/docs/api.md"><img src="https://img.shields.io/badge/API%20Docs-OpenAPI-85EA2D?logo=swagger&logoColor=black" height="28" /></a>
+<a href="https://github.com/hardikkaurani/Evalium/blob/main/docs/api.md"><img src="https://img.shields.io/badge/API%20Docs-OpenAPI-85EA2D?logo=swagger&logoColor=black" height="28" /></a>
 &nbsp;
 <a href="ROADMAP.md"><img src="https://img.shields.io/badge/Roadmap-12%20Phases-FF6B6B" height="28" /></a>
 
-<img src="docs/assets/demo.gif" alt="EvalForge" width="700" style="border-radius: 14px;" />
+<img src="docs/assets/demo.gif" alt="Evalium" width="700" style="border-radius: 14px;" />
 
 ---
 
@@ -28,7 +28,7 @@
 <img src="https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white" />
 <img src="https://img.shields.io/badge/License-MIT-blue.svg" />
 <img src="https://img.shields.io/badge/Status-v1.0.0%20Released-22c55e" />
-<img src="https://img.shields.io/github/stars/hardikkaurani/Eval-Forge?style=social" />
+<img src="https://img.shields.io/github/stars/hardikkaurani/Evalium?style=social" />
 
 <br/><br/>
 
@@ -39,7 +39,7 @@
 ## Table of Contents
 
 - [Overview](#overview)
-- [Why EvalForge](#why-evalforge)
+- [Why Evalium](#why-evalium)
 - [System Architecture](#system-architecture)
 - [Database Schema](#database-schema)
 - [Evaluation Engine Design](#evaluation-engine-design)
@@ -66,9 +66,9 @@
 
 ## Overview
 
-EvalForge is a self-hosted, developer-first LLM evaluation platform built for AI engineers, product teams, and researchers who need rigorous, reproducible benchmarking of language model outputs. It replaces ad-hoc evaluation scripts and spreadsheets with a structured platform featuring automated pipelines, a real-time dashboard, a public API, and a judge abstraction layer that unifies G-Eval, DeepEval, AlpacaEval, and custom LLM-as-a-Judge configurations under a single interface.
+Evalium is a self-hosted, developer-first LLM evaluation platform built for AI engineers, product teams, and researchers who need rigorous, reproducible benchmarking of language model outputs. It replaces ad-hoc evaluation scripts and spreadsheets with a structured platform featuring automated pipelines, a real-time dashboard, a public API, and a judge abstraction layer that unifies G-Eval, DeepEval, AlpacaEval, and custom LLM-as-a-Judge configurations under a single interface.
 
-The core insight behind EvalForge is that LLM evaluation has the same requirements as software testing — it needs to be automated, versioned, reproducible, and integrated into the development workflow. Most teams evaluate LLMs manually before a release, if at all. EvalForge makes evaluation a first-class, continuous process triggered on every model change, prompt change, or data change — the same way unit tests run on every commit.
+The core insight behind Evalium is that LLM evaluation has the same requirements as software testing — it needs to be automated, versioned, reproducible, and integrated into the development workflow. Most teams evaluate LLMs manually before a release, if at all. Evalium makes evaluation a first-class, continuous process triggered on every model change, prompt change, or data change — the same way unit tests run on every commit.
 
 Key design decisions:
 
@@ -81,9 +81,9 @@ Key design decisions:
 
 ---
 
-## Why EvalForge
+## Why Evalium
 
-| Comparison        | Ad-hoc scripts      | Commercial eval platforms | EvalForge                                               |
+| Comparison        | Ad-hoc scripts      | Commercial eval platforms | Evalium                                                 |
 | ----------------- | ------------------- | ------------------------- | ------------------------------------------------------- |
 | Reproducibility   | No versioning       | Vendor-controlled         | Immutable dataset versions, run snapshots               |
 | Judge flexibility | Single method       | Fixed metric sets         | G-Eval, DeepEval, AlpacaEval, custom — same interface   |
@@ -97,7 +97,7 @@ Key design decisions:
 
 ## System Architecture
 
-The complete component topology of EvalForge — from browser and CI clients through the API, evaluation engine, background workers, and data layer.
+The complete component topology of Evalium — from browser and CI clients through the API, evaluation engine, background workers, and data layer.
 
 ```mermaid
 graph TB
@@ -194,7 +194,7 @@ graph TB
 
 ## Database Schema
 
-The core relational model behind EvalForge. All tables use UUID primary keys. Evaluation runs are immutably linked to a specific dataset version, ensuring past results remain reproducible.
+The core relational model behind Evalium. All tables use UUID primary keys. Evaluation runs are immutably linked to a specific dataset version, ensuring past results remain reproducible.
 
 ```mermaid
 erDiagram
@@ -296,7 +296,7 @@ erDiagram
 
 ## Evaluation Engine Design
 
-The judge abstraction layer is the architectural core of EvalForge. Every metric — regardless of which framework computes it — flows through the same `JudgeBase` interface. This means evaluation pipelines are stable even as the underlying judge implementation changes or new frameworks are added.
+The judge abstraction layer is the architectural core of Evalium. Every metric — regardless of which framework computes it — flows through the same `JudgeBase` interface. This means evaluation pipelines are stable even as the underlying judge implementation changes or new frameworks are added.
 
 ```mermaid
 flowchart TD
@@ -395,7 +395,7 @@ sequenceDiagram
 
 ## G-Eval Scoring Pipeline
 
-A deep look at how G-Eval specifically works inside EvalForge — the chain-of-thought generation step, the step-level scoring, and how the final metric score is derived.
+A deep look at how G-Eval specifically works inside Evalium — the chain-of-thought generation step, the step-level scoring, and how the final metric score is derived.
 
 ```mermaid
 flowchart TD
@@ -419,7 +419,7 @@ flowchart TD
 
 ## RAG Evaluation Pipeline
 
-How EvalForge evaluates Retrieval-Augmented Generation systems — covering retrieval quality and generation quality as separate, independently scored dimensions.
+How Evalium evaluates Retrieval-Augmented Generation systems — covering retrieval quality and generation quality as separate, independently scored dimensions.
 
 ```mermaid
 flowchart TD
@@ -457,7 +457,7 @@ flowchart TD
 
 ## CI/CD Integration Flow
 
-How EvalForge fits into a standard model deployment pipeline — evaluation as a gate between training and production.
+How Evalium fits into a standard model deployment pipeline — evaluation as a gate between training and production.
 
 ```mermaid
 flowchart LR
@@ -467,7 +467,7 @@ flowchart LR
 
     subgraph CI [GitHub Actions or GitLab CI]
         TRIGGER[Workflow triggered\non push to main]
-        EVAL_STEP[Run EvalForge step\nPOST to /api/v1/runs]
+        EVAL_STEP[Run Evalium step\nPOST to /api/v1/runs]
         POLL[Poll GET /api/v1/runs/id\nuntil COMPLETED or FAILED]
         THRESHOLD{Score above\nconfigured threshold?}
         PASS[Pipeline passes\nProceed to deployment]
@@ -477,7 +477,7 @@ flowchart LR
         THRESHOLD -->|No| FAIL
     end
 
-    subgraph EvalForge [EvalForge Platform]
+    subgraph Evalium [Evalium Platform]
         API_RECV[Receive run request]
         ASYNC_EXEC[Execute async evaluation job]
         RESULT[Return scored results]
@@ -528,7 +528,7 @@ stateDiagram-v2
 
 ## SaaS and Multi-Tenancy Architecture
 
-How EvalForge isolates data between organisations and enforces per-plan limits — relevant from Phase 11 onwards but designed into the data model from Phase 1.
+How Evalium isolates data between organisations and enforces per-plan limits — relevant from Phase 11 onwards but designed into the data model from Phase 1.
 
 ```mermaid
 flowchart TD
@@ -561,7 +561,7 @@ flowchart TD
 
 ## Security Model
 
-EvalForge applies defence-in-depth at every layer. The following table maps each threat to its mitigation.
+Evalium applies defence-in-depth at every layer. The following table maps each threat to its mitigation.
 
 | Threat                     | Mitigation                                                                                              |
 | -------------------------- | ------------------------------------------------------------------------------------------------------- |
@@ -580,11 +580,11 @@ EvalForge applies defence-in-depth at every layer. The following table maps each
 
 ## 12-Phase Build Roadmap
 
-EvalForge is being built across 12 structured phases. The Gantt chart shows estimated timelines; the tables below document the exact scope of each phase.
+Evalium is being built across 12 structured phases. The Gantt chart shows estimated timelines; the tables below document the exact scope of each phase.
 
 ```mermaid
 gantt
-    title EvalForge 12-Phase Build Plan
+    title Evalium 12-Phase Build Plan
     dateFormat YYYY-MM-DD
     section Foundation
     Phase 1 Foundation           :done,    p1, 2025-01-01, 3d
@@ -773,7 +773,7 @@ gantt
 | Demo video            | Screencast walkthrough covering run submission, live progress, results, and leaderboard |
 | Product Hunt          | Launch page, tagline, assets, community coordination, scheduled launch day              |
 | Hacker News           | Show HN post with technical depth and architecture rationale                            |
-| Portfolio update      | Resume and portfolio updated with EvalForge as a featured production project            |
+| Portfolio update      | Resume and portfolio updated with Evalium as a featured production project            |
 
 ---
 
@@ -830,7 +830,7 @@ gantt
 ## Project Structure
 
 ```
-Eval-Forge/
+Evalium/
 |
 +-- .github/
 |   +-- workflows/
@@ -1013,8 +1013,8 @@ LOG_FORMAT=json
 ### Option A — Full Stack with Docker (Recommended)
 
 ```bash
-git clone https://github.com/hardikkaurani/Eval-Forge.git
-cd Eval-Forge
+git clone https://github.com/hardikkaurani/Evalium.git
+cd Evalium
 cp backend/.env.example backend/.env
 # Add your JUDGE_LLM_MODEL and API key to backend/.env
 docker compose up --build -d
@@ -1156,7 +1156,7 @@ All errors follow a consistent JSON envelope:
 
 ## Observability
 
-EvalForge exposes a Prometheus-compatible `/metrics` endpoint from the API. The following metrics are tracked:
+Evalium exposes a Prometheus-compatible `/metrics` endpoint from the API. The following metrics are tracked:
 
 | Metric                                    | Type      | Description                                           |
 | ----------------------------------------- | --------- | ----------------------------------------------------- |
@@ -1175,7 +1175,7 @@ The Grafana dashboard is auto-provisioned at `http://localhost:3001` when runnin
 
 ## Phase 3: Evaluation Engine
 
-EvalForge now includes a modular evaluation engine with:
+Evalium now includes a modular evaluation engine with:
 
 - provider abstraction for OpenAI, Gemini, Claude, Ollama, OpenRouter, and DeepSeek
 - judge abstraction for G-Eval, pairwise, reference-based, and rubric-based evaluation
@@ -1244,15 +1244,15 @@ See our full guides:
 
 ## 👥 Community & Contributor Recognition
 
-We love and appreciate our open-source contributors! EvalForge is built by developers worldwide.
+We love and appreciate our open-source contributors! Evalium is built by developers worldwide.
 
-<a href="https://github.com/hardikkaurani/Eval-Forge/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=hardikkaurani/Eval-Forge" alt="EvalForge Contributors" />
+<a href="https://github.com/hardikkaurani/Evalium/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=hardikkaurani/Evalium" alt="Evalium Contributors" />
 </a>
 
 ### How to Join the Contributor Hall of Fame:
 
-1. Pick an unassigned issue from our [`good first issue`](https://github.com/hardikkaurani/Eval-Forge/issues?q=is%3Aissue+is%3Aopen+label%3A"good+first+issue") list.
+1. Pick an unassigned issue from our [`good first issue`](https://github.com/hardikkaurani/Evalium/issues?q=is%3Aissue+is%3Aopen+label%3A"good+first+issue") list.
 2. Run `./scripts/setup-dev-env.sh` (or `.\scripts\setup-dev-env.ps1`) to initialize your local stack.
 3. Submit your PR — once merged, your avatar will appear above automatically!
 
@@ -1261,21 +1261,21 @@ We love and appreciate our open-source contributors! EvalForge is built by devel
 ## ❓ Frequently Asked Questions (FAQ)
 
 <details>
-<summary><b>1. Can I run EvalForge 100% locally without an internet connection?</b></summary>
+<summary><b>1. Can I run Evalium 100% locally without an internet connection?</b></summary>
 <br/>
-Yes! EvalForge can be hosted entirely offline via Docker Compose using local database instances and Ollama or vLLM local judge inference models. Zero outbound telemetry is collected.
+Yes! Evalium can be hosted entirely offline via Docker Compose using local database instances and Ollama or vLLM local judge inference models. Zero outbound telemetry is collected.
 </details>
 
 <details>
-<summary><b>2. How does EvalForge ensure evaluation reproducibility?</b></summary>
+<summary><b>2. How does Evalium ensure evaluation reproducibility?</b></summary>
 <br/>
 Every dataset import creates an immutable version snapshot (`v1`, `v2`). Evaluation experiments are snapshot-pinned to a specific version, ensuring identical benchmark scoring results over time.
 </details>
 
 <details>
-<summary><b>3. Is EvalForge suitable for production enterprise workloads?</b></summary>
+<summary><b>3. Is Evalium suitable for production enterprise workloads?</b></summary>
 <br/>
-Yes. EvalForge features Celery worker queues backed by Redis for horizontal scaling, PostgreSQL async connection pooling, API key SHA-256 hashing, rate limiting, and multi-tenant organization boundaries.
+Yes. Evalium features Celery worker queues backed by Redis for horizontal scaling, PostgreSQL async connection pooling, API key SHA-256 hashing, rate limiting, and multi-tenant organization boundaries.
 </details>
 
 ---
@@ -1288,11 +1288,11 @@ Distributed under the **MIT License**. See [LICENSE](LICENSE) for details.
 
 <div align="center">
 
-_EvalForge — built for AI engineers who refuse to ship LLMs they cannot measure!_
+_Evalium — built for AI engineers who refuse to ship LLMs they cannot measure!_
 
 <br/>
 
-**[hardikkaurani](https://github.com/hardikkaurani)** &nbsp;·&nbsp; [Issues](https://github.com/hardikkaurani/Eval-Forge/issues) &nbsp;·&nbsp; [Discussions](https://github.com/hardikkaurani/Eval-Forge/discussions) &nbsp;·&nbsp; [ROADMAP.md](ROADMAP.md) &nbsp;·&nbsp; [CONTRIBUTING.md](CONTRIBUTING.md)
+**[hardikkaurani](https://github.com/hardikkaurani)** &nbsp;·&nbsp; [Issues](https://github.com/hardikkaurani/Evalium/issues) &nbsp;·&nbsp; [Discussions](https://github.com/hardikkaurani/Evalium/discussions) &nbsp;·&nbsp; [ROADMAP.md](ROADMAP.md) &nbsp;·&nbsp; [CONTRIBUTING.md](CONTRIBUTING.md)
 
 </div>
 

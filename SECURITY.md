@@ -1,12 +1,12 @@
 # Security Policy & Vulnerability Management
 
-At **EvalForge**, security is a top priority. As an open-source evaluation platform processing sensitive enterprise prompts, model outputs, and API credentials, we are committed to upholding strict security practices and maintaining transparency.
+At **Evalium**, security is a top priority. As an open-source evaluation platform processing sensitive enterprise prompts, model outputs, and API credentials, we are committed to upholding strict security practices and maintaining transparency.
 
 ---
 
 ## Supported Versions
 
-We release security patches for the following versions of EvalForge:
+We release security patches for the following versions of Evalium:
 
 | Version                | Supported        | Security Patch Status                         |
 | ---------------------- | ---------------- | --------------------------------------------- |
@@ -20,10 +20,10 @@ We release security patches for the following versions of EvalForge:
 
 **Please do NOT report security vulnerabilities through public GitHub issues.**
 
-If you discover a security vulnerability, credential leak, authentication flaw, or remote code execution vector in EvalForge, please report it privately:
+If you discover a security vulnerability, credential leak, authentication flaw, or remote code execution vector in Evalium, please report it privately:
 
-1. **GitHub Private Advisory:** Submit a private vulnerability report via [GitHub Security Advisories](https://github.com/hardikkaurani/Eval-Forge/security/advisories/new).
-2. **Security Team Email:** Contact our security response team directly at `security@evalforge.dev`.
+1. **GitHub Private Advisory:** Submit a private vulnerability report via [GitHub Security Advisories](https://github.com/hardikkaurani/Evalium/security/advisories/new).
+2. **Security Team Email:** Contact our security response team directly at `security@evalium.dev`.
 
 ### What to Include in Your Report
 
@@ -49,7 +49,7 @@ Our security team adheres to the following response timeline:
 
 ## Security Hardening Best Practices
 
-EvalForge incorporates built-in security features:
+Evalium incorporates built-in security features:
 
 - **API Key Hashing:** API keys are stored in PostgreSQL using salted SHA-256 hashes (`app/core/security.py`).
 - **Secret Masking:** Logger filters automatically mask API tokens (`sk-****`) in logs and response bodies.
