@@ -1,6 +1,6 @@
-# Eval-Forge CLI (`evalforge-cli`)
+# Evalium CLI (`evalforge-cli`)
 
-Official Command-Line Interface for the [Eval-Forge](https://github.com/hardikkaurani/Eval-Forge) AI Evaluation Platform.
+Official Command-Line Interface for [Evalium](https://github.com/hardikkaurani/Eval-Forge) — Production-grade AI Evaluation Infrastructure.
 
 ---
 
@@ -16,27 +16,29 @@ Or install in editable development mode:
 pip install -e cli
 ```
 
+Once installed, the CLI can be invoked using either `evalium` or the legacy alias `evalforge`.
+
 ---
 
 ## Authentication & Configuration
 
-Log in with your Eval-Forge API key:
+Log in with your Evalium API key:
 
 ```bash
-evalforge auth login --key "ef_live_your_api_key_here"
+evalium auth login --key "ef_live_your_api_key_here"
 ```
 
 Check current authentication status:
 
 ```bash
-evalforge auth status
+evalium auth status
 ```
 
 Configure custom API base URL:
 
 ```bash
-evalforge config set --base-url "https://api.evalforge.com"
-evalforge config get
+evalium config set --base-url "https://api.evalforge.com"
+evalium config get
 ```
 
 ---

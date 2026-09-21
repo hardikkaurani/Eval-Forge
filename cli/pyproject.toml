@@ -5,12 +5,11 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "evalforge-cli"
 version = "1.0.0"
-description = "Official CLI for the Eval-Forge AI Evaluation Platform"
+description = "Official CLI for Evalium — Production-grade AI Evaluation Infrastructure"
 readme = "README.md"
 requires-python = ">=3.9"
-dependencies = [
-    "httpx>=0.24.0",
-]
+dependencies = ["httpx>=0.24.0"]
 
 [project.scripts]
+evalium = "evalforge_cli.main:main"
 evalforge = "evalforge_cli.main:main"
