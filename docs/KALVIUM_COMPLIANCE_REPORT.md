@@ -17,24 +17,24 @@ This report documents the exhaustive concept compliance audit conducted on **Eva
 
 | #   | Mandatory Concept              | Compliance Status           | Primary Target File / Directory                                                                                            |
 | --- | ------------------------------ | --------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| 1   | **LLM API Integration**        | ✅ Already Implemented      | [`backend/app/evaluation/providers/`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/backend/app/evaluation/providers) |
-| 2   | **Prompt Engineering**         | ✅ Already Implemented      | [`backend/app/evaluation/prompts/`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/backend/app/evaluation/prompts)     |
-| 3   | **Structured Outputs**         | ✅ Already Implemented      | [`backend/app/schemas/`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/backend/app/schemas)                           |
-| 4   | **HTTP Status Codes**          | ✅ Already Implemented      | [`backend/app/api/v1/endpoints/`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/backend/app/api/v1/endpoints)         |
-| 5   | **Middleware**                 | ✅ Already Implemented      | [`backend/app/main.py`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/backend/app/main.py)                            |
-| 6   | **Problem Modeling**           | ✅ Already Implemented      | [`backend/app/models/`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/backend/app/models)                             |
-| 7   | **RESTful Endpoint Design**    | ✅ Already Implemented      | [`backend/app/api/v1/router.py`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/backend/app/api/v1/router.py)          |
-| 8   | **Server-side Error Handling** | ✅ Already Implemented      | [`backend/app/core/exceptions.py`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/backend/app/core/exceptions.py)      |
-| 9   | **System Design**              | ✅ Already Implemented      | [`ARCHITECTURE.md`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/ARCHITECTURE.md)                                    |
-| 10  | **Environment Variables**      | ✅ Already Implemented      | [`backend/app/config/config.py`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/backend/app/config/config.py)          |
-| 11  | **Secrets Management**         | ✅ Already Implemented      | [`backend/app/core/security.py`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/backend/app/core/security.py)          |
-| 12  | **Git Workflow**               | ✅ Already Implemented      | [`CONTRIBUTING.md`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/CONTRIBUTING.md)                                    |
-| 13  | **Async Data Fetching**        | ✅ Already Implemented      | [`frontend/src/services/api.ts`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/frontend/src/services/api.ts)          |
-| 14  | **Client-side Routing**        | ✅ Already Implemented      | [`frontend/src/App.tsx`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/frontend/src/App.tsx)                          |
-| 15  | **JavaScript async/await**     | ✅ Already Implemented      | [`frontend/src/services/api.ts`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/frontend/src/services/api.ts)          |
-| 16  | **JavaScript Closures**        | ✅ Implemented & Refactored | [`frontend/src/utils/closures.ts`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/frontend/src/utils/closures.ts)      |
-| 17  | **JavaScript Event Loop**      | ✅ Implemented & Refactored | [`frontend/src/utils/eventLoop.ts`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/frontend/src/utils/eventLoop.ts)    |
-| 18  | **JavaScript Hoisting**        | ✅ Implemented & Refactored | [`frontend/src/utils/hoisting.ts`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/frontend/src/utils/hoisting.ts)      |
+| 1   | **LLM API Integration**        | ✅ Already Implemented      | [`backend/app/evaluation/providers/`](..\backend\app\evaluation\providers) |
+| 2   | **Prompt Engineering**         | ✅ Already Implemented      | [`backend/app/evaluation/prompts/`](..\backend\app\evaluation\prompts)     |
+| 3   | **Structured Outputs**         | ✅ Already Implemented      | [`backend/app/schemas/`](..\backend\app\schemas)                           |
+| 4   | **HTTP Status Codes**          | ✅ Already Implemented      | [`backend/app/api/v1/endpoints/`](..\backend\app\api\v1\endpoints)         |
+| 5   | **Middleware**                 | ✅ Already Implemented      | [`backend/app/main.py`](..\backend\app\main.py)                            |
+| 6   | **Problem Modeling**           | ✅ Already Implemented      | [`backend/app/models/`](..\backend\app\models)                             |
+| 7   | **RESTful Endpoint Design**    | ✅ Already Implemented      | [`backend/app/api/v1/router.py`](..\backend\app\api\v1\router.py)          |
+| 8   | **Server-side Error Handling** | ✅ Already Implemented      | [`backend/app/core/exceptions.py`](..\backend\app\core\exceptions.py)      |
+| 9   | **System Design**              | ✅ Already Implemented      | `ARCHITECTURE.md`                                    |
+| 10  | **Environment Variables**      | ✅ Already Implemented      | [`backend/app/config/config.py`](..\backend\app\config\config.py)          |
+| 11  | **Secrets Management**         | ✅ Already Implemented      | `backend/app/core/security.py`          |
+| 12  | **Git Workflow**               | ✅ Already Implemented      | [`CONTRIBUTING.md`](..\CONTRIBUTING.md)                                    |
+| 13  | **Async Data Fetching**        | ✅ Already Implemented      | `frontend/src/services/api.ts`          |
+| 14  | **Client-side Routing**        | ✅ Already Implemented      | [`frontend/src/App.tsx`](..\frontend\src\App.tsx)                          |
+| 15  | **JavaScript async/await**     | ✅ Already Implemented      | `frontend/src/services/api.ts`          |
+| 16  | **JavaScript Closures**        | ✅ Implemented & Refactored | [`frontend/src/utils/closures.ts`](..\frontend\src\utils\closures.ts)      |
+| 17  | **JavaScript Event Loop**      | ✅ Implemented & Refactored | [`frontend/src/utils/eventLoop.ts`](..\frontend\src\utils\eventLoop.ts)    |
+| 18  | **JavaScript Hoisting**        | ✅ Implemented & Refactored | [`frontend/src/utils/hoisting.ts`](..\frontend\src\utils\hoisting.ts)      |
 
 ---
 
@@ -44,10 +44,10 @@ This report documents the exhaustive concept compliance audit conducted on **Eva
 
 - **Status:** Already Implemented
 - **Files:**
-  - [`backend/app/evaluation/providers/base.py`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/backend/app/evaluation/providers/base.py)
-  - [`backend/app/evaluation/providers/openai_provider.py`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/backend/app/evaluation/providers/openai_provider.py)
-  - [`backend/app/evaluation/providers/anthropic_provider.py`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/backend/app/evaluation/providers/anthropic_provider.py)
-  - [`backend/app/evaluation/providers/gemini_provider.py`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/backend/app/evaluation/providers/gemini_provider.py)
+  - [`backend/app/evaluation/providers/base.py`](..\backend\app\evaluation\providers\base.py)
+  - `backend/app/evaluation/providers/openai_provider.py`
+  - `backend/app/evaluation/providers/anthropic_provider.py`
+  - `backend/app/evaluation/providers/gemini_provider.py`
 - **Explanation:** Abstract Provider interface (`BaseLLMProvider`) supporting unified asynchronous inference calls across OpenAI, Anthropic Claude, Google Gemini, DeepSeek, and local Ollama instances. Includes retry mechanisms, fallback routing, and latency tracking.
 - **Evidence:** Clean inheritance tree implementing `async def generate_response(self, prompt: str, **kwargs) -> LLMResponse`.
 - **Viva Demonstration:** Show `openai_provider.py` making async calls to OpenAI client SDK and returning normalized response metrics.
@@ -60,8 +60,8 @@ This report documents the exhaustive concept compliance audit conducted on **Eva
 
 - **Status:** Already Implemented
 - **Files:**
-  - [`backend/app/evaluation/prompts/geval.py`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/backend/app/evaluation/prompts/geval.py)
-  - [`backend/app/evaluation/prompts/templates.py`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/backend/app/evaluation/prompts/templates.py)
+  - `backend/app/evaluation/prompts/geval.py`
+  - `backend/app/evaluation/prompts/templates.py`
 - **Explanation:** Production-grade system prompts, G-Eval Chain-of-Thought (CoT) step generators, pairwise comparison prompts, and custom Jinja2 prompt template rendering.
 - **Evidence:** Jinja2 environment rendering dynamic variables into strict XML/Markdown formatted judge system instructions.
 - **Viva Demonstration:** Open `geval.py` and point out the 4-stage evaluation step generation prompt.
@@ -74,8 +74,8 @@ This report documents the exhaustive concept compliance audit conducted on **Eva
 
 - **Status:** Already Implemented
 - **Files:**
-  - [`backend/app/schemas/evaluation.py`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/backend/app/schemas/evaluation.py)
-  - [`backend/app/schemas/dataset.py`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/backend/app/schemas/dataset.py)
+  - `backend/app/schemas/evaluation.py`
+  - `backend/app/schemas/dataset.py`
 - **Explanation:** Pydantic v2 schemas enforcing strict field validation, type safety, JSON schema generation, and structured response parsing from raw LLM outputs.
 - **Evidence:** `EvaluationScoreResult` schema enforcing `score: float = Field(ge=0.0, le=1.0)` and `passed: bool`.
 - **Viva Demonstration:** Show Pydantic schemas in `schemas/evaluation.py` validating nested JSON payloads from judge runs.
@@ -88,9 +88,9 @@ This report documents the exhaustive concept compliance audit conducted on **Eva
 
 - **Status:** Already Implemented
 - **Files:**
-  - [`backend/app/api/v1/endpoints/projects.py`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/backend/app/api/v1/endpoints/projects.py)
-  - [`backend/app/api/v1/endpoints/datasets.py`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/backend/app/api/v1/endpoints/datasets.py)
-  - [`backend/app/api/v1/endpoints/evaluations.py`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/backend/app/api/v1/endpoints/evaluations.py)
+  - `backend/app/api/v1/endpoints/projects.py`
+  - `backend/app/api/v1/endpoints/datasets.py`
+  - `backend/app/api/v1/endpoints/evaluations.py`
 - **Explanation:** Every endpoint uses appropriate RFC-compliant status codes: `200 OK` (reads/updates), `201 Created` (resource creation), `204 No Content` (deletion), `400 Bad Request`, `401 Unauthorized`, `403 Forbidden`, `404 Not Found`, `409 Conflict` (duplicate keys), `422 Unprocessable Entity`, `429 Too Many Requests` (rate limits), `500 Internal Server Error`.
 - **Evidence:** `@router.post("/", status_code=status.HTTP_201_CREATED)` and `@router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)`.
 - **Viva Demonstration:** Run `pytest tests/test_datasets.py` to show assertions checking for exact 201, 200, 404, and 422 status codes.
@@ -103,9 +103,9 @@ This report documents the exhaustive concept compliance audit conducted on **Eva
 
 - **Status:** Already Implemented
 - **Files:**
-  - [`backend/app/main.py`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/backend/app/main.py)
-  - [`backend/app/core/middleware.py`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/backend/app/core/middleware.py)
-  - [`backend/app/core/production_security.py`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/backend/app/core/production_security.py)
+  - [`backend/app/main.py`](..\backend\app\main.py)
+  - [`backend/app/core/middleware.py`](..\backend\app\core\middleware.py)
+  - [`backend/app/core/production_security.py`](..\backend\app\core\production_security.py)
 - **Explanation:** FastAPI middleware pipeline handling Security Headers (HSTS, CSP, X-Frame-Options), Rate Limiting (`RateLimitingMiddleware`), Idempotency (`IdempotencyMiddleware`), CORS, GZip Compression, and Request ID correlation tracking.
 - **Evidence:** `app.add_middleware(RequestLoggingMiddleware)` and `app.add_middleware(SecurityHeadersMiddleware)` in `main.py`.
 - **Viva Demonstration:** Send an HTTP request and inspect headers showing `X-Request-ID`, `X-Content-Type-Options: nosniff`, and `Strict-Transport-Security`.
@@ -118,10 +118,10 @@ This report documents the exhaustive concept compliance audit conducted on **Eva
 
 - **Status:** Already Implemented
 - **Files:**
-  - [`backend/app/models/project.py`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/backend/app/models/project.py)
-  - [`backend/app/models/dataset.py`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/backend/app/models/dataset.py)
-  - [`backend/app/models/evaluation.py`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/backend/app/models/evaluation.py)
-  - [`backend/app/models/benchmark.py`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/backend/app/models/benchmark.py)
+  - [`backend/app/models/project.py`](..\backend\app\models\project.py)
+  - [`backend/app/models/dataset.py`](..\backend\app\models\dataset.py)
+  - [`backend/app/models/evaluation.py`](..\backend\app\models\evaluation.py)
+  - `backend/app/models/benchmark.py`
 - **Explanation:** Comprehensive domain modeling mapping real-world LLM evaluation entities: Projects, Immutable Dataset Versions, Benchmark Test Suites, Evaluation Experiments, Custom Prompts, LLM Providers, Cron Scheduler Jobs, and Multi-Tenant Workspaces.
 - **Evidence:** SQLAlchemy 2.0 ORM classes with foreign key cascades, indexed relationships, and JSONB columns for dynamic configuration storage.
 - **Viva Demonstration:** Show ER relationships in `backend/app/models/` between `Project` -> `Dataset` -> `DatasetVersion` -> `Experiment`.
@@ -134,8 +134,8 @@ This report documents the exhaustive concept compliance audit conducted on **Eva
 
 - **Status:** Already Implemented
 - **Files:**
-  - [`backend/app/api/v1/router.py`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/backend/app/api/v1/router.py)
-  - [`backend/app/api/v1/endpoints/`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/backend/app/api/v1/endpoints)
+  - [`backend/app/api/v1/router.py`](..\backend\app\api\v1\router.py)
+  - [`backend/app/api/v1/endpoints/`](..\backend\app\api\v1\endpoints)
 - **Explanation:** Pure RESTful URI hierarchy using plural nouns (`/api/v1/projects`, `/api/v1/datasets`, `/api/v1/evaluations`, `/api/v1/jobs`), proper HTTP verb semantics (`GET`, `POST`, `PUT`, `DELETE`), path parameters for resource identification, and query parameters for filtering/pagination.
 - **Evidence:** Clean routing definitions mounted under `/api/v1` prefix in `router.py`.
 - **Viva Demonstration:** Open FastAPI OpenAPI documentation at `/docs` to show standardized REST endpoints.
@@ -148,7 +148,7 @@ This report documents the exhaustive concept compliance audit conducted on **Eva
 
 - **Status:** Already Implemented
 - **Files:**
-  - [`backend/app/core/exceptions.py`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/backend/app/core/exceptions.py)
+  - [`backend/app/core/exceptions.py`](..\backend\app\core\exceptions.py)
 - **Explanation:** Global FastAPI exception handling translating custom exceptions (`AppException`, `NotFoundError`, `UnauthorizedError`, `RateLimitExceededError`, `ValidationError`) into standardized RFC 7807 problem details JSON responses.
 - **Evidence:** `register_exception_handlers(app)` capturing uncaught exceptions and returning structured JSON with error code, message, and details.
 - **Viva Demonstration:** Trigger a 404 resource lookup and show formatted JSON error response.
@@ -161,9 +161,9 @@ This report documents the exhaustive concept compliance audit conducted on **Eva
 
 - **Status:** Already Implemented
 - **Files:**
-  - [`ARCHITECTURE.md`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/ARCHITECTURE.md)
-  - [`HLD.md`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/HLD.md)
-  - [`LLD.md`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/LLD.md)
+  - `ARCHITECTURE.md`
+  - `HLD.md`
+  - `LLD.md`
 - **Explanation:** End-to-end full-stack system architecture integrating React 18 SPA + FastAPI Gateway + PostgreSQL Relational Storage + Redis Queue/Cache + Celery Async Workers + Multi-Provider LLM API Gateways.
 - **Evidence:** High-Level Design (HLD) architecture diagrams detailing component interactions and data flow.
 - **Viva Demonstration:** Walk through `ARCHITECTURE.md` mermaid flow diagrams showing how a dataset evaluation request flows from React UI -> FastAPI -> Celery Worker -> LLM Provider -> PostgreSQL.
@@ -176,8 +176,8 @@ This report documents the exhaustive concept compliance audit conducted on **Eva
 
 - **Status:** Already Implemented
 - **Files:**
-  - [`backend/app/config/config.py`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/backend/app/config/config.py)
-  - [`.env.example`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/.env.example)
+  - [`backend/app/config/config.py`](..\backend\app\config\config.py)
+  - [`.env.example`](..\.env.example)
 - **Explanation:** Strict environment variable validation using Pydantic Settings (`BaseSettings`), loading configuration from `.env` files with type parsing and sensible production defaults.
 - **Evidence:** `Settings` class loading `DATABASE_URL`, `REDIS_URL`, `OPENAI_API_KEY`, `JWT_SECRET_KEY`, and `CORS_ORIGINS`.
 - **Viva Demonstration:** Show `config.py` validating required environment variables on startup.
@@ -190,8 +190,8 @@ This report documents the exhaustive concept compliance audit conducted on **Eva
 
 - **Status:** Already Implemented
 - **Files:**
-  - [`backend/app/core/security.py`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/backend/app/core/security.py)
-  - [`.gitignore`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/.gitignore)
+  - `backend/app/core/security.py`
+  - [`.gitignore`](..\.gitignore)
 - **Explanation:** Strict security practices preventing credential leaks: `.gitignore` blocks `.env` files, API keys are hashed in PostgreSQL using SHA-256/bcrypt, and LLM API keys are masked (`sk-****`) in loggers and outgoing JSON responses.
 - **Evidence:** Secret hashing functions in `security.py` and logger filters scrubbing sensitive tokens.
 - **Viva Demonstration:** Show `.gitignore` excluding secret files and inspect database tables storing hashed API keys.
@@ -204,8 +204,8 @@ This report documents the exhaustive concept compliance audit conducted on **Eva
 
 - **Status:** Already Implemented
 - **Files:**
-  - [`CONTRIBUTING.md`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/CONTRIBUTING.md)
-  - [`.github/PULL_REQUEST_TEMPLATE.md`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/.github/PULL_REQUEST_TEMPLATE.md)
+  - [`CONTRIBUTING.md`](..\CONTRIBUTING.md)
+  - [`.github/PULL_REQUEST_TEMPLATE.md`](..\.github\PULL_REQUEST_TEMPLATE.md)
 - **Explanation:** Formal Git governance specifying feature branch naming conventions (`feat/`, `fix/`, `docs/`), Conventional Commit standards, and structured Pull Request templates.
 - **Evidence:** Detailed contribution workflow in `CONTRIBUTING.md` and automated PR verification checks.
 - **Viva Demonstration:** Open `CONTRIBUTING.md` and `.github/PULL_REQUEST_TEMPLATE.md`.
@@ -218,8 +218,8 @@ This report documents the exhaustive concept compliance audit conducted on **Eva
 
 - **Status:** Already Implemented
 - **Files:**
-  - [`frontend/src/services/api.ts`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/frontend/src/services/api.ts)
-  - [`frontend/src/pages/Datasets.tsx`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/frontend/src/pages/Datasets.tsx)
+  - `frontend/src/services/api.ts`
+  - `frontend/src/pages/Datasets.tsx`
 - **Explanation:** Async data fetching architecture in React using Axios API client, React Query (`useQuery`, `useMutation`), loading state spinners, error boundaries, and WebSockets.
 - **Evidence:** `apiClient.get()` and `apiClient.post()` invocations handling loading and error states cleanly.
 - **Viva Demonstration:** Open `Datasets.tsx` showing asynchronous data fetching with state spinners and fallback handling.
@@ -232,7 +232,7 @@ This report documents the exhaustive concept compliance audit conducted on **Eva
 
 - **Status:** Already Implemented
 - **Files:**
-  - [`frontend/src/App.tsx`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/frontend/src/App.tsx)
+  - [`frontend/src/App.tsx`](..\frontend\src\App.tsx)
 - **Explanation:** Single Page Application (SPA) client-side routing using `react-router-dom` v6, featuring lazy-loaded page modules via `React.lazy()` & `Suspense`, nested dashboard layouts, and catch-all 404 fallback routing.
 - **Evidence:** `<Routes>` tree declaring paths for `/`, `/login`, `/projects/:projectId/datasets`, `/projects/:projectId/evaluations`, and `<Navigate to="/" replace />`.
 - **Viva Demonstration:** Navigate between routes in the browser without full page reloads, showing instant SPA navigation.
@@ -245,8 +245,8 @@ This report documents the exhaustive concept compliance audit conducted on **Eva
 
 - **Status:** Already Implemented
 - **Files:**
-  - [`frontend/src/services/api.ts`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/frontend/src/services/api.ts)
-  - [`frontend/src/hooks/useJobWebSocket.ts`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/frontend/src/hooks/useJobWebSocket.ts)
+  - `frontend/src/services/api.ts`
+  - `frontend/src/hooks/useJobWebSocket.ts`
 - **Explanation:** Modern ES2017+ `async/await` syntax utilized throughout frontend services, hooks, and component event handlers, replacing nested promise chains with clean synchronous-looking asynchronous code.
 - **Evidence:** `const execute = async (id: string) => { const res = await apiClient.post(...); return res.data; }`.
 - **Viva Demonstration:** Point to async methods in `api.ts` handling API responses with clean `try/catch` error blocks.
@@ -259,8 +259,8 @@ This report documents the exhaustive concept compliance audit conducted on **Eva
 
 - **Status:** Implemented & Refactored
 - **Files:**
-  - [`frontend/src/utils/closures.ts`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/frontend/src/utils/closures.ts)
-  - [`frontend/src/hooks/useJobWebSocket.ts`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/frontend/src/hooks/useJobWebSocket.ts)
+  - [`frontend/src/utils/closures.ts`](..\frontend\src\utils\closures.ts)
+  - `frontend/src/hooks/useJobWebSocket.ts`
 - **Explanation:** Reusable closure implementations including `createMemoizedFetcher` (stateful request cache factory), `createRateLimiter` (sliding window rate limiter retaining private timestamp state), and `createTokenManager` (encapsulated private variable scope).
 - **Evidence:** `cache` Map and `secretToken` variables contained inside outer function lexical scope, accessible only to returned inner closure methods.
 - **Viva Demonstration:** Open `frontend/src/utils/closures.ts` and demonstrate how `createRateLimiter` retains private state across calls without polluting global scope.
@@ -273,8 +273,8 @@ This report documents the exhaustive concept compliance audit conducted on **Eva
 
 - **Status:** Implemented & Refactored
 - **Files:**
-  - [`frontend/src/utils/eventLoop.ts`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/frontend/src/utils/eventLoop.ts)
-  - [`frontend/src/hooks/useJobWebSocket.ts`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/frontend/src/hooks/useJobWebSocket.ts)
+  - [`frontend/src/utils/eventLoop.ts`](..\frontend\src\utils\eventLoop.ts)
+  - `frontend/src/hooks/useJobWebSocket.ts`
 - **Explanation:** Event loop management utilities controlling Microtask Queue execution (`queueMicrotask` / `Promise.resolve()`), Macrotask Queue scheduling (`setTimeout`), and non-blocking dataset batch chunking (`processInNonBlockingChunks`) to maintain 60fps UI responsiveness.
 - **Evidence:** `scheduleMicrotask()` and `processInNonBlockingChunks()` yielding control back to the event loop macrotask queue via zero-delay timers.
 - **Viva Demonstration:** Walk through `processInNonBlockingChunks` in `eventLoop.ts` explaining how yielding control prevents blocking the browser main thread during large data processing.
@@ -287,7 +287,7 @@ This report documents the exhaustive concept compliance audit conducted on **Eva
 
 - **Status:** Implemented & Refactored
 - **Files:**
-  - [`frontend/src/utils/hoisting.ts`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/frontend/src/utils/hoisting.ts)
+  - [`frontend/src/utils/hoisting.ts`](..\frontend\src\utils\hoisting.ts)
 - **Explanation:** Practical demonstration and implementation of function declaration hoisting vs. variable TDZ (Temporal Dead Zone) behavior. Function declarations are fully hoisted during the compilation phase, allowing invocation prior to textual declaration.
 - **Evidence:** `formatEvaluationScore` calling `calculatePercentageBadge` defined textual lines below it, contrasted with lexically scoped arrow functions.
 - **Viva Demonstration:** Show `hoisting.ts` where `formatEvaluationScore()` calls a function declared lower in the file, proving function declaration hoisting works during JS parsing.
