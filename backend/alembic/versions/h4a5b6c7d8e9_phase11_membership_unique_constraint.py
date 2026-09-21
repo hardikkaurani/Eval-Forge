@@ -18,16 +18,16 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    op.create_unique_constraint(
-        "uq_memberships_org_user",
-        "memberships",
-        ["organization_id", "user_id"],
-    )
+    with op.batch_alter_table("memberships") as batch_op:
+        batch_op.create_unique_constraint(
+            "uq_memberships_org_user",
+            ["organization_id", "user_id"],
+        )
 
 
 def downgrade() -> None:
-    op.drop_constraint(
-        "uq_memberships_org_user",
-        "memberships",
-        type_="unique",
-    )
+    with op.batch_alter_table("memberships") as batch_op:
+        batch_op.drop_constraint(
+            "uq_memberships_org_user",
+            type_="unique",
+        )
