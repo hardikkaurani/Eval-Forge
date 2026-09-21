@@ -10,7 +10,7 @@
 &nbsp;
 <a href="#getting-started"><img src="https://img.shields.io/badge/Quick%20Start-Docker-2496ED?logo=docker&logoColor=white" height="28" /></a>
 &nbsp;
-<a href="https://github.com/hardikkaurani/Evalium/blob/main/docs/api.md"><img src="https://img.shields.io/badge/API%20Docs-OpenAPI-85EA2D?logo=swagger&logoColor=black" height="28" /></a>
+<a href="docs/api.md"><img src="https://img.shields.io/badge/API%20Docs-OpenAPI-85EA2D?logo=swagger&logoColor=black" height="28" /></a>
 &nbsp;
 <a href="ROADMAP.md"><img src="https://img.shields.io/badge/Roadmap-12%20Phases-FF6B6B" height="28" /></a>
 
@@ -1016,44 +1016,43 @@ LOG_FORMAT=json
 git clone https://github.com/hardikkaurani/Evalium.git
 cd Evalium
 cp backend/.env.example backend/.env
-# Add your JUDGE_LLM_MODEL and API key to backend/.env
 docker compose up --build -d
 ```
 
-| Service            | URL                         |
-| ------------------ | --------------------------- |
-| Frontend           | http://localhost            |
-| Backend API        | http://localhost:8000       |
-| API Docs - Swagger | http://localhost:8000/docs  |
-| API Docs - ReDoc   | http://localhost:8000/redoc |
-| Grafana            | http://localhost:3001       |
-| Prometheus         | http://localhost:9090       |
+| Service            | URL                         | Notes |
+| ------------------ | --------------------------- | ----- |
+| Frontend           | http://localhost            | React 19 SPA |
+| Backend API        | http://localhost:8000       | FastAPI REST Gateway |
+| API Docs - Swagger | http://localhost:8000/docs  | Interactive OpenAPI explorer |
+| API Docs - ReDoc   | http://localhost:8000/redoc | ReDoc reference |
+| Grafana (Prod profile) | http://localhost:3000   | `docker compose -f docker-compose.prod.yml up` |
+| Prometheus (Prod profile) | http://localhost:9090 | Metrics telemetry |
 
 ### Option B — Manual Development Setup
 
 ```bash
-# Step 1 — Start infrastructure only
+# Step 1 — Start infrastructure (PostgreSQL & Redis)
 docker compose up postgres redis -d
 
-# Step 2 — Backend
+# Step 2 — Backend setup & migrations
 cd backend
 python -m venv .venv
 source .venv/bin/activate      # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 cp .env.example .env
-alembic upgrade head            # Apply all migrations
+alembic upgrade head            # Apply database migrations
 uvicorn app.main:app --reload --port 8000
 
-# Step 3 — Start Celery worker (new terminal)
+# Step 3 — Start Celery background worker (in a new terminal)
 cd backend
-celery -A app.workers.celery_app worker --loglevel=info --concurrency=4
+source .venv/bin/activate      # Windows: .venv\Scripts\activate
+celery -A app.jobs.queue.celery_app worker --loglevel=info --concurrency=4
 
-# Step 4 — Frontend
+# Step 4 — Frontend setup
 cd frontend
 npm install
 cp .env.example .env
-# Set VITE_API_URL=http://localhost:8000
-npm run dev
+npm run dev                    # Serves on http://localhost:5173
 ```
 
 ---
@@ -1288,7 +1287,7 @@ Distributed under the **MIT License**. See [LICENSE](LICENSE) for details.
 
 <div align="center">
 
-_Evalium — built for AI engineers who refuse to ship LLMs they cannot measure!_
+_EvalForge — built for AI engineers who refuse to ship LLMs they cannot measure._
 
 <br/>
 

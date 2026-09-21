@@ -176,23 +176,23 @@ To become the standard open-source evaluation platform for AI application teams,
 
 The following table maps every mandatory Kalvium concept to its specification and implementation within EvalForge:
 
-| #  | Mandatory Concept              | Architectural Scope           | Primary Implementation Location                                               | Compliance Status |
-| -- | ------------------------------ | ----------------------------- | ----------------------------------------------------------------------------- | ----------------- |
-| 1  | **LLM API Integration**        | Backend Multi-Provider Engine | [`../backend/app/evaluation/providers/`](../backend/app/evaluation/providers) | ✅ Implemented     |
-| 2  | **Prompt Engineering**         | System Prompts & Rubrics      | [`../backend/app/evaluation/prompts/`](../backend/app/evaluation/prompts)     | ✅ Implemented     |
-| 3  | **Structured Outputs**         | Pydantic JSON Schemas         | [`../backend/app/schemas/`](../backend/app/schemas)                           | ✅ Implemented     |
-| 4  | **HTTP Status Codes**          | REST API Endpoints            | [`../backend/app/api/v1/endpoints/`](../backend/app/api/v1/endpoints)         | ✅ Implemented     |
-| 5  | **Middleware**                 | Gateway Pipelines             | [`../backend/app/main.py`](../backend/app/main.py)                            | ✅ Implemented     |
-| 6  | **Problem Modeling**           | DB Domain Entities            | [`../backend/app/models/`](../backend/app/models)                             | ✅ Implemented     |
-| 7  | **RESTful Endpoint Design**    | Gateway Routing               | [`../backend/app/api/v1/router.py`](../backend/app/api/v1/router.py)          | ✅ Implemented     |
-| 8  | **Server-side Error Handling** | Global Handlers               | [`../backend/app/core/exceptions.py`](../backend/app/core/exceptions.py)      | ✅ Implemented     |
-| 9  | **System Design**              | Full-stack Architecture       | [`ARCHITECTURE.md`](ARCHITECTURE.md), [`HLD.md`](HLD.md)                      | ✅ Implemented     |
-| 10 | **Environment Variables**      | Configuration Engine          | [`../backend/app/config/config.py`](../backend/app/config/config.py)          | ✅ Implemented     |
-| 11 | **Secrets Management**         | Security Layer                | [`../backend/app/core/security.py`](../backend/app/core/security.py)          | ✅ Implemented     |
-| 12 | **Git Workflow**               | Repo Governance               | [`../CONTRIBUTING.md`](../CONTRIBUTING.md)                                    | ✅ Implemented     |
-| 13 | **Async Data Fetching**        | React Query SPA               | [`../frontend/src/services/api.ts`](../frontend/src/services/api.ts)          | ✅ Implemented     |
-| 14 | **Client-side Routing**        | React Router v6               | [`../frontend/src/App.tsx`](../frontend/src/App.tsx)                          | ✅ Implemented     |
-| 15 | **JavaScript async/await**     | Frontend Async Layer          | [`../frontend/src/services/api.ts`](../frontend/src/services/api.ts)          | ✅ Implemented     |
-| 16 | **JavaScript Closures**        | Stateful Factories            | [`../frontend/src/utils/closures.ts`](../frontend/src/utils/closures.ts)      | ✅ Implemented     |
-| 17 | **JavaScript Event Loop**      | Micro/Macrotask Queue         | [`../frontend/src/utils/eventLoop.ts`](../frontend/src/utils/eventLoop.ts)    | ✅ Implemented     |
-| 18 | **JavaScript Hoisting**        | Compilation Scoping           | [`../frontend/src/utils/hoisting.ts`](../frontend/src/utils/hoisting.ts)      | ✅ Implemented     |
+| #   | Mandatory Concept              | Architectural Scope           | Primary Implementation Location                                                                                                                                | Compliance Status |
+| --- | ------------------------------ | ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------- |
+| 1   | **LLM API Integration**        | Backend Multi-Provider Engine | [`../backend/app/evaluation/providers/`](../backend/app/evaluation/providers)                                     | ✅ Implemented    |
+| 2   | **Prompt Engineering**         | System Prompts & Rubrics      | [`../backend/app/evaluation/prompts/`](../backend/app/evaluation/prompts)                                         | ✅ Implemented    |
+| 3   | **Structured Outputs**         | Pydantic JSON Schemas         | [`../backend/app/schemas/`](../backend/app/schemas)                                                               | ✅ Implemented    |
+| 4   | **HTTP Status Codes**          | REST API Endpoints            | [`../backend/app/api/v1/endpoints/`](../backend/app/api/v1/endpoints)                                             | ✅ Implemented    |
+| 5   | **Middleware**                 | Gateway Pipelines             | [`../backend/app/main.py`](../backend/app/main.py)                                                                | ✅ Implemented    |
+| 6   | **Problem Modeling**           | DB Domain Entities            | [`../backend/app/models/`](../backend/app/models)                                                                 | ✅ Implemented    |
+| 7   | **RESTful Endpoint Design**    | Gateway Routing               | [`../backend/app/api/v1/router.py`](../backend/app/api/v1/router.py)                                              | ✅ Implemented    |
+| 8   | **Server-side Error Handling** | Global Handlers               | [`../backend/app/core/exceptions.py`](../backend/app/core/exceptions.py)                                          | ✅ Implemented    |
+| 9   | **System Design**              | Full-stack Architecture       | [`ARCHITECTURE.md`](ARCHITECTURE.md), [`HLD.md`](HLD.md)                                                          | ✅ Implemented    |
+| 10  | **Environment Variables**      | Configuration Engine          | [`../backend/app/config/config.py`](../backend/app/config/config.py)                                              | ✅ Implemented    |
+| 11  | **Secrets Management**         | Security Layer                | [`../backend/app/core/production_security.py`](../backend/app/core/production_security.py)                      | ✅ Implemented    |
+| 12  | **Git Workflow**               | Repo Governance               | [`../CONTRIBUTING.md`](../CONTRIBUTING.md)                                                                        | ✅ Implemented    |
+| 13  | **Async Data Fetching**        | React Query SPA               | [`../frontend/src/services/client.ts`](../frontend/src/services/client.ts)                                        | ✅ Implemented    |
+| 14  | **Client-side Routing**        | React Router v6               | [`../frontend/src/App.tsx`](../frontend/src/App.tsx)                                                              | ✅ Implemented    |
+| 15  | **JavaScript async/await**     | Frontend Async Layer          | [`../frontend/src/services/client.ts`](../frontend/src/services/client.ts)                                        | ✅ Implemented    |
+| 16  | **JavaScript Closures**        | Stateful Factories            | [`../frontend/src/utils/closures.ts`](../frontend/src/utils/closures.ts)                                          | ✅ Implemented    |
+| 17  | **JavaScript Event Loop**      | Micro/Macrotask Queue         | [`../frontend/src/utils/eventLoop.ts`](../frontend/src/utils/eventLoop.ts)                                        | ✅ Implemented    |
+| 18  | **JavaScript Hoisting**        | Compilation Scoping           | [`../frontend/src/utils/hoisting.ts`](../frontend/src/utils/hoisting.ts)                                          | ✅ Implemented    |

@@ -66,7 +66,7 @@ Evalium/
 │   │   ├── jobs/            # Celery async worker tasks & Cron scheduler
 │   │   └── models/          # SQLAlchemy 2.0 async database models
 │   └── tests/               # Pytest suite (40+ unit & integration tests)
-├── frontend/                 # React 18 + Vite + TypeScript + Tailwind CSS SPA
+├── frontend/                 # React 19 + Vite + TypeScript + Vanilla CSS Design System SPA
 │   ├── src/
 │   │   ├── components/      # UI components & status badges
 │   │   ├── hooks/           # Custom React hooks (useJobWebSocket, etc.)
@@ -330,7 +330,7 @@ Format: `<type>(<scope>): <description>`
 - **TypeScript / React (Frontend):**
   - Use functional components with hooks (`useState`, `useEffect`, `useCallback`, `useMemo`).
   - Do NOT use `any`. Always define explicit TypeScript interfaces/types.
-  - Follow modular Tailwind CSS styling patterns; avoid inline static style hacks.
+  - Follow modular CSS design tokens and variables (`index.css`); avoid inline static style hacks.
   - Ensure zero console errors or unhandled promise rejections.
 
 ---

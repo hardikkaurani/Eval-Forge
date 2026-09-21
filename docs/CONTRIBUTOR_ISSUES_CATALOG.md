@@ -21,14 +21,14 @@ This catalog contains **30 real, repository-specific engineering tasks** derived
 - **Component:** `backend/app/datasets/routers/`
 - **Labels:** `good first issue`, `backend`, `api`
 - **Summary:** Define an explicit Pydantic v2 response schema (`DatasetImportResponse`) for `/api/v1/datasets/import` instead of returning raw dict objects.
-- **Suggested Files:** [`backend/app/schemas/dataset.py`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/backend/app/schemas/dataset.py), `backend/app/datasets/routers/`
+- **Suggested Files:** `backend/app/schemas/dataset.py`, `backend/app/datasets/routers/`
 
 ### ISSUE-02: Add Request Cancellation (AbortController) to React Query Hooks
 
 - **Component:** `frontend/src/services/api.ts`
 - **Labels:** `good first issue`, `frontend`, `ux`
 - **Summary:** Pass Axios `signal` to `apiClient.get()` calls so that navigating away from Datasets or Evaluations pages cancels pending HTTP requests cleanly.
-- **Suggested Files:** [`frontend/src/services/api.ts`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/frontend/src/services/api.ts)
+- **Suggested Files:** `frontend/src/services/api.ts`
 
 ### ISSUE-03: Standardize Python Datetime UTC Usage across Enterprise Services
 
@@ -42,14 +42,14 @@ This catalog contains **30 real, repository-specific engineering tasks** derived
 - **Component:** `backend/tests/`
 - **Labels:** `good first issue`, `testing`, `backend`
 - **Summary:** Create a reusable `@pytest.fixture` in `conftest.py` that mocks Redis ping and set/get operations when Redis is not running locally.
-- **Suggested Files:** [`backend/tests/conftest.py`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/backend/tests/conftest.py)
+- **Suggested Files:** [`backend/tests/conftest.py`](..\backend\tests\conftest.py)
 
 ### ISSUE-05: Add Structured JSON Error Schema Validation to Exception Handler
 
 - **Component:** `backend/app/core/exceptions.py`
 - **Labels:** `good first issue`, `api`, `backend`
 - **Summary:** Ensure global exception handler returns RFC 7807 problem details JSON schema (`type`, `title`, `status`, `detail`, `instance`).
-- **Suggested Files:** [`backend/app/core/exceptions.py`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/backend/app/core/exceptions.py)
+- **Suggested Files:** [`backend/app/core/exceptions.py`](..\backend\app\core\exceptions.py)
 
 ### ISSUE-06: Implement Automated Pre-Commit Configuration
 
@@ -70,21 +70,21 @@ This catalog contains **30 real, repository-specific engineering tasks** derived
 - **Component:** `frontend/src/pages/ScheduledJobs.tsx`
 - **Labels:** `good first issue`, `frontend`, `ui`
 - **Summary:** Update tailwind border and opacity classes on cron history cards to ensure AAA contrast ratio compliance.
-- **Suggested Files:** [`frontend/src/pages/ScheduledJobs.tsx`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/frontend/src/pages/ScheduledJobs.tsx)
+- **Suggested Files:** `frontend/src/pages/ScheduledJobs.tsx`
 
 ### ISSUE-09: Add Strict TypeScript Discriminator Types for WebSocket Progress Events
 
 - **Component:** `frontend/src/hooks/useJobWebSocket.ts`
 - **Labels:** `good first issue`, `frontend`, `typing`
 - **Summary:** Use discriminated union types for `WebSocketProgressEvent` based on `event` field (`started`, `progress`, `completed`, `failed`).
-- **Suggested Files:** [`frontend/src/hooks/useJobWebSocket.ts`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/frontend/src/hooks/useJobWebSocket.ts)
+- **Suggested Files:** `frontend/src/hooks/useJobWebSocket.ts`
 
 ### ISSUE-10: Add Docker Image Vulnerability Scanning Step to GitHub Actions CI
 
 - **Component:** `.github/workflows/ci.yml`
 - **Labels:** `good first issue`, `devops`, `security`
 - **Summary:** Add Trivy / Grype vulnerability scanner step to `.github/workflows/ci.yml` docker build job.
-- **Suggested Files:** [`.github/workflows/ci.yml`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/.github/workflows/ci.yml)
+- **Suggested Files:** [`.github/workflows/ci.yml`](..\.github\workflows\ci.yml)
 
 ---
 
@@ -95,42 +95,42 @@ This catalog contains **30 real, repository-specific engineering tasks** derived
 - **Component:** `backend/app/core/production_security.py`
 - **Labels:** `intermediate`, `backend`, `api`
 - **Summary:** Update `RateLimitingMiddleware` to calculate and attach `X-RateLimit-Limit`, `X-RateLimit-Remaining`, and `X-RateLimit-Reset` headers to responses.
-- **Suggested Files:** [`backend/app/core/production_security.py`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/backend/app/core/production_security.py)
+- **Suggested Files:** [`backend/app/core/production_security.py`](..\backend\app\core\production_security.py)
 
 ### ISSUE-12: Implement RAG Context Precision Metric Calculator in G-Eval Engine
 
 - **Component:** `backend/app/evaluation/`
 - **Labels:** `intermediate`, `backend`, `evaluation`
 - **Summary:** Add `ContextPrecisionCalculator` evaluating whether retrieved context chunks are relevant to the user query prompt.
-- **Suggested Files:** [`backend/app/evaluation/prompts/geval.py`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/backend/app/evaluation/prompts/geval.py)
+- **Suggested Files:** `backend/app/evaluation/prompts/geval.py`
 
 ### ISSUE-13: Add Virtualized Table Rendering for Dataset Records List
 
 - **Component:** `frontend/src/pages/Datasets.tsx`
 - **Labels:** `intermediate`, `frontend`, `performance`
 - **Summary:** Integrate `react-window` or `@tanstack/react-virtual` to render dataset record lists with 10,000+ rows smoothly without DOM lagging.
-- **Suggested Files:** [`frontend/src/pages/Datasets.tsx`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/frontend/src/pages/Datasets.tsx)
+- **Suggested Files:** `frontend/src/pages/Datasets.tsx`
 
 ### ISSUE-14: Add Prometheus Metrics Exporter Endpoint (`/metrics`) for Worker Queues
 
 - **Component:** `backend/app/main.py`
 - **Labels:** `intermediate`, `devops`, `infra`
 - **Summary:** Integrate `prometheus-fastapi-instrumentator` exposing API request counts, latencies, and active Celery task counts at `/metrics`.
-- **Suggested Files:** [`backend/app/main.py`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/backend/app/main.py), `pyproject.toml`
+- **Suggested Files:** [`backend/app/main.py`](..\backend\app\main.py), `pyproject.toml`
 
 ### ISSUE-15: Implement DeepSeek-V3 LLM Provider Driver
 
 - **Component:** `backend/app/evaluation/providers/`
 - **Labels:** `intermediate`, `backend`, `evaluation`
 - **Summary:** Create `DeepSeekLLMProvider` inheriting from `BaseLLMProvider` to support DeepSeek-V3 and DeepSeek-R1 API inferencing.
-- **Suggested Files:** [`backend/app/evaluation/providers/base.py`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/backend/app/evaluation/providers/base.py), `deepseek_provider.py`
+- **Suggested Files:** [`backend/app/evaluation/providers/base.py`](..\backend\app\evaluation\providers\base.py), `deepseek_provider.py`
 
 ### ISSUE-16: Implement Automatic Exponential Backoff Retry for WebSocket Hook
 
 - **Component:** `frontend/src/hooks/useJobWebSocket.ts`
 - **Labels:** `intermediate`, `frontend`, `web-sockets`
 - **Summary:** Add configurable reconnection attempts with exponential backoff (1s, 2s, 4s, 8s max 30s) when WebSocket connection drops.
-- **Suggested Files:** [`frontend/src/hooks/useJobWebSocket.ts`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/frontend/src/hooks/useJobWebSocket.ts)
+- **Suggested Files:** `frontend/src/hooks/useJobWebSocket.ts`
 
 ### ISSUE-17: Add JSON Schema Validation Check to Dataset Bulk Import Router
 
@@ -151,14 +151,14 @@ This catalog contains **30 real, repository-specific engineering tasks** derived
 - **Component:** `backend/app/models/`
 - **Labels:** `intermediate`, `performance`, `database`
 - **Summary:** Add composite SQLAlchemy indexes on `(project_id, status, created_at)` for `evaluations` and `experiments` tables.
-- **Suggested Files:** [`backend/app/models/evaluation.py`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/backend/app/models/evaluation.py)
+- **Suggested Files:** [`backend/app/models/evaluation.py`](..\backend\app\models\evaluation.py)
 
 ### ISSUE-20: Implement Side-by-Side Pairwise LLM Response Diff Viewer Component
 
 - **Component:** `frontend/src/pages/Evaluations.tsx`
 - **Labels:** `intermediate`, `frontend`, `ui`
 - **Summary:** Create a side-by-side diff viewer component highlighting textual token differences between Candidate Output and Reference Ground Truth.
-- **Suggested Files:** [`frontend/src/pages/Evaluations.tsx`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/frontend/src/pages/Evaluations.tsx)
+- **Suggested Files:** `frontend/src/pages/Evaluations.tsx`
 
 ### ISSUE-21: Implement Local CSV / JSONL Dataset Exporter Utility
 
@@ -211,7 +211,7 @@ This catalog contains **30 real, repository-specific engineering tasks** derived
 - **Component:** `backend/app/core/redis.py`
 - **Labels:** `advanced`, `infra`, `redis`
 - **Summary:** Upgrade `RedisManager` to support Redis Sentinel failover clusters and automatic reconnection retry strategies.
-- **Suggested Files:** [`backend/app/core/redis.py`](file:///c:/Users/hardi/OneDrive/Desktop/Eval-Forge/backend/app/core/redis.py)
+- **Suggested Files:** [`backend/app/core/redis.py`](..\backend\app\core\redis.py)
 
 ### ISSUE-28: Create Standalone Python SDK Client Wrapper (`evalforge-python`)
 

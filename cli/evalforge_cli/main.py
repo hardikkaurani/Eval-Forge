@@ -152,7 +152,7 @@ def main(argv: Optional[List[str]] = None) -> None:
     p_login = sub_auth.add_parser(
         "login", help="Log in with an API key", parents=[common_parser]
     )
-    p_login.add_argument("--key", required=True, help="Evalium API Key")
+    p_login.add_argument("--key", required=True, help="Eval-Forge API Key")
     sub_auth.add_parser(
         "status", help="Check authentication status", parents=[common_parser]
     )

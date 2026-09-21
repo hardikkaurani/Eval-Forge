@@ -32,7 +32,7 @@ This document provides step-by-step instructions for deploying Evalium to produc
 
 ## 2. Environment Variables Specification
 
-Before deploying, configure your production environment variables. Refer to [.env.example](file:///.env.example) at the project root.
+Before deploying, configure your production environment variables. Refer to [.env.example](../.env.example) at the project root.
 
 | Variable Name   | Required | Default Value     | Description                                                                                              |
 | --------------- | -------- | ----------------- | -------------------------------------------------------------------------------------------------------- |

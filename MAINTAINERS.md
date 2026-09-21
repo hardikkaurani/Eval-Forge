@@ -17,7 +17,7 @@ This document lists the core maintainers, triage leads, and security contacts fo
 | Name / GitHub Handle      | Focus Area                | Responsibility                              |
 | ------------------------- | ------------------------- | ------------------------------------------- |
 | **Backend & Engine Lead** | `backend/app/evaluation/` | LLM Judge Engine, G-Eval, Provider Drivers  |
-| **Frontend & UI Lead**    | `frontend/src/`           | React 18 SPA, WebSockets, Tailwind Styling  |
+| **Frontend & UI Lead**    | `frontend/src/`           | React 19 SPA, WebSockets, Design System Styling  |
 | **Infra & DevOps Lead**   | `docker/`, `.github/`     | Docker Compose, Nginx, CI/CD Workflows      |
 | **Security Lead**         | `app/core/security.py`    | API Key Hashing, RBAC, Vulnerability Triage |
 
