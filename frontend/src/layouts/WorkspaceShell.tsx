@@ -36,11 +36,11 @@ const Context = createContext<{ projectId: string; project?: RecordData; project
 export const useProject = () => useContext(Context);
 export function Brand() {
   return (
-    <Link className="brand" to="/overview" aria-label="EvalForge workspace">
+    <Link className="brand" to="/overview" aria-label="Evalium workspace">
       <span className="brand-mark">
-        <img src="/logo.png" alt="EvalForge Emblem" className="w-full h-full object-contain" />
+        <img src="/logo.png" alt="Evalium Emblem" className="w-full h-full object-contain" />
       </span>
-      <span>EvalForge</span>
+      <span>Evalium</span>
     </Link>
   );
 }
@@ -123,7 +123,7 @@ export default function WorkspaceShell() {
   }, [project?.id]);
   useEffect(() => {
     setOpen(false);
-    document.title = `${routeId ? 'Workspace' : 'Overview'} · EvalForge`;
+    document.title = `${routeId ? 'Workspace' : 'Overview'} · Evalium`;
   }, [location.pathname, routeId]);
   useEffect(() => {
     if (!open) return;
@@ -344,8 +344,8 @@ export default function WorkspaceShell() {
             justifyContent: 'space-between',
           }}
         >
-          <span>EvalForge · Evaluation workspace</span>
-          <a href="https://github.com/hardikkaurani/Eval-Forge" target="_blank" rel="noreferrer">
+          <span>Evalium · Evaluation workspace</span>
+          <a href="https://github.com/hardikkaurani/Evalium" target="_blank" rel="noreferrer">
             Documentation <ArrowUpRight size={12} style={{ display: 'inline' }} />
           </a>
         </footer>

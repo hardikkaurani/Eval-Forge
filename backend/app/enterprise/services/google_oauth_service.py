@@ -62,11 +62,16 @@ def is_safe_redirect_url(
     return False
 
 
+_UNSET: Any = object()
+
+
 class GoogleOAuthService:
     """Production-grade service handling Google OAuth 2.0 / OpenID Connect authentication."""
 
     GOOGLE_AUTH_ENDPOINT = "https://accounts.google.com/o/oauth2/v2/auth"
-    GOOGLE_TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token"
+    GOOGLE_TOKEN_ENDPOINT = (
+        "https://oauth2.googleapis.com/token"  # nosec B105  # trunk-ignore(bandit/B105)
+    )
     GOOGLE_JWKS_ENDPOINT = "https://www.googleapis.com/oauth2/v3/certs"
     STATE_EXPIRATION_SECONDS = 600  # 10 minutes
 
@@ -77,22 +82,37 @@ class GoogleOAuthService:
 
     def __init__(
         self,
-        client_id: Optional[str] = None,
-        client_secret: Optional[str] = None,
-        redirect_uri: Optional[str] = None,
-        frontend_url: Optional[str] = None,
+        client_id: Any = _UNSET,
+        client_secret: Any = _UNSET,
+        redirect_uri: Any = _UNSET,
+        frontend_url: Any = _UNSET,
     ):
-        self.client_id = client_id or settings.GOOGLE_CLIENT_ID
-        secret_val = None
-        if client_secret:
+        if client_id is _UNSET:
+            self.client_id = settings.GOOGLE_CLIENT_ID
+        else:
+            self.client_id = client_id
+
+        if client_secret is _UNSET:
+            secret_val = (
+                settings.GOOGLE_CLIENT_SECRET.get_secret_value()
+                if settings.GOOGLE_CLIENT_SECRET
+                else None
+            )
+        else:
             secret_val = client_secret
-        elif settings.GOOGLE_CLIENT_SECRET:
-            secret_val = settings.GOOGLE_CLIENT_SECRET.get_secret_value()
         self.client_secret = secret_val
-        self.redirect_uri = redirect_uri or settings.GOOGLE_REDIRECT_URI
-        self.frontend_url = (
-            frontend_url or settings.FRONTEND_URL or "http://localhost:5173"
-        ).rstrip("/")
+
+        if redirect_uri is _UNSET:
+            self.redirect_uri = settings.GOOGLE_REDIRECT_URI
+        else:
+            self.redirect_uri = redirect_uri
+
+        if frontend_url is _UNSET:
+            self.frontend_url = (
+                settings.FRONTEND_URL or "http://localhost:5173"
+            ).rstrip("/")
+        else:
+            self.frontend_url = (frontend_url or "http://localhost:5173").rstrip("/")
 
         secret_key_val = (
             settings.SECRET_KEY.get_secret_value()

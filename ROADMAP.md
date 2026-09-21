@@ -1,4 +1,4 @@
-# EvalForge Product & Community Roadmap (v1.x – v2.0)
+# Evalium Product & Community Roadmap (v1.x – v2.0)
 
 **Document Version:** 1.1.0  
 **Status:** Active Roadmap  
@@ -8,15 +8,15 @@
 
 ## 🗺️ Strategic Product Vision
 
-EvalForge is building the definitive open-source platform for continuous LLM evaluation, prompt benchmarking, and AI application QA. Our roadmap balances feature velocity with open-source community growth.
+Evalium is building the definitive open-source platform for continuous LLM evaluation, prompt benchmarking, and AI application QA. Our roadmap balances feature velocity with open-source community growth.
 
-```
+```text
        Phase 1 (v1.0)                 Phase 2 (v1.5)                 Phase 3 (v2.0)
 ┌──────────────────────────┐   ┌──────────────────────────┐   ┌──────────────────────────┐
 │   Core Monorepo & SPA    │   │  Extended Drivers & CLI  │   │ Enterprise Scale & Edge  │
 │                          │   │                          │   │                          │
 │ • FastAPI Backend        │──►│ • DeepSeek-V3 Driver     │──►│ • Distributed Workers    │
-│ • React 18 UI Console    │   │ • EvalForge PyPI CLI     │   │ • Multi-Region Scaling   │
+│ • React 18 UI Console    │   │ • Evalium PyPI CLI       │   │ • Multi-Region Scaling   │
 │ • PostgreSQL + Redis     │   │ • GitHub Actions Action  │   │ • Native Ollama Edge     │
 │ • G-Eval & Custom Rubric │   │ • RAG Faithfulness Suite │   │ • Real-time Streaming    │
 └──────────────────────────┘   └──────────────────────────┘   └──────────────────────────┘
@@ -40,8 +40,8 @@ EvalForge is building the definitive open-source platform for continuous LLM eva
 
 ### Q3 2026 — Release 1.2: Community & Developer Experience
 
-- [ ] **EvalForge PyPI CLI Package (`evalforge-cli`):** Standalone Python CLI for triggering benchmark runs from local terminals.
-- [ ] **GitHub Actions Custom Action (`evalforge/eval-action@v1`):** Drop-in GitHub Action for automated CI/CD PR regression checks.
+- [ ] **Evalium PyPI CLI Package (`evalium-cli`):** Standalone Python CLI for triggering benchmark runs from local terminals.
+- [ ] **GitHub Actions Custom Action (`evalium/eval-action@v1`):** Drop-in GitHub Action for automated CI/CD PR regression checks.
 - [ ] **DeepSeek-V3 & DeepSeek-R1 Driver:** First-class provider integration for DeepSeek models.
 - [ ] **RAG Metric Suite Expansion:** Context Precision, Context Recall, and Faithfulness scoring engines.
 - [ ] **OpenTelemetry Export:** Exporting evaluation metrics and judge traces to Jaeger, Zipkin, and Datadog.
@@ -66,5 +66,5 @@ EvalForge is building the definitive open-source platform for continuous LLM eva
 Want to help us reach these milestones?
 
 - Check out open tasks in [`docs/CONTRIBUTOR_ISSUES_CATALOG.md`](docs/CONTRIBUTOR_ISSUES_CATALOG.md).
-- Search issues labeled [`good first issue`](https://github.com/hardikkaurani/Eval-Forge/issues?q=is%3Aissue+is%3Aopen+label%3A"good+first+issue").
-- Submit an RFC in [GitHub Discussions](https://github.com/hardikkaurani/Eval-Forge/discussions) to propose a new feature on the roadmap!
+- Search issues labeled [`good first issue`](https://github.com/hardikkaurani/Evalium/issues?q=is%3Aissue+is%3Aopen+label%3A"good+first+issue").
+- Submit an RFC in [GitHub Discussions](https://github.com/hardikkaurani/Evalium/discussions) to propose a new feature on the roadmap!

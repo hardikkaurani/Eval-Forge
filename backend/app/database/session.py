@@ -5,17 +5,24 @@ from sqlalchemy.orm import DeclarativeBase
 
 from app.config.config import settings
 
+db_url = settings.get_database_url
+engine_kwargs = {
+    "echo": settings.DEBUG,
+    "future": True,
+}
+if not db_url.startswith("sqlite"):
+    engine_kwargs.update(
+        {
+            "pool_size": 20,  # Maintain up to 20 connection slots in pool
+            "max_overflow": 10,  # Allow up to 10 additional temporary connections
+            "pool_timeout": 30,  # Seconds to wait before erroring on connection request
+            "pool_recycle": 1800,  # Recycle connections after 30 minutes to avoid stale sockets
+            "pool_pre_ping": True,  # Test connection health before delivering from pool
+        }
+    )
+
 # Create asynchronous engine with production-grade connection pooling
-engine = create_async_engine(
-    settings.get_database_url,
-    echo=settings.DEBUG,
-    future=True,
-    pool_size=20,  # Maintain up to 20 connection slots in pool
-    max_overflow=10,  # Allow up to 10 additional temporary connections
-    pool_timeout=30,  # Seconds to wait before erroring on connection request
-    pool_recycle=1800,  # Recycle connections after 30 minutes to avoid stale sockets
-    pool_pre_ping=True,  # Test connection health before delivering from pool
-)
+engine = create_async_engine(db_url, **engine_kwargs)
 
 # Session factory
 SessionLocal = async_sessionmaker(

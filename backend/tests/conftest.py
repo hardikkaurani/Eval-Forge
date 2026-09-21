@@ -1,8 +1,11 @@
 import asyncio
+import os
 import sys
 from collections.abc import Generator
 from pathlib import Path
 from unittest.mock import AsyncMock, patch
+
+os.environ.setdefault("APP_ENV", "testing")
 
 # Ensure root, cli, and sdk/python are in sys.path
 ROOT_DIR = Path(__file__).resolve().parents[2]

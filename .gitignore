@@ -218,12 +218,19 @@ __marimo__/
 .streamlit/secrets.toml
 
 # EvalForge Test Artifacts
-backend/artifacts/
-backend/datasets/
-artifacts/
-datasets/
+/backend/artifacts/
+/backend/datasets/
+/artifacts/
+/datasets/
 
 # Local environments and browser validation artifacts
 .venv/
 frontend/test-results/
 frontend/playwright-report/
+.env
+.env.*
+!.env.example
+!**/.env.example
+*.db
+*.sqlite
+*.sqlite3

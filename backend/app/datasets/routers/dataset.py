@@ -652,7 +652,7 @@ async def download_file(
                     job.file_path == target_path
                     or job.file_path == relative_path
                     or job.file_path == clean_fn
-                    or os.path.basename(job.file_path) == clean_fn
+                    or (job.file_path and os.path.basename(job.file_path) == clean_fn)
                 ):
                     export_res = [job]
 
@@ -682,7 +682,7 @@ async def download_file(
                     job.file_path == target_path
                     or job.file_path == relative_path
                     or job.file_path == clean_fn
-                    or os.path.basename(job.file_path) == clean_fn
+                    or (job.file_path and os.path.basename(job.file_path) == clean_fn)
                 ):
                     import_res = [job]
 

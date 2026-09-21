@@ -17,21 +17,23 @@ class SecretManager:
         if key in self.cache:
             return self.cache[key]
 
+        is_prod = os.getenv("APP_ENV", "development").lower() == "production"
+
         val = None
         if self.provider == "local":
             val = os.getenv(key, default)
         elif self.provider == "vault":
-            # Simulation of HashiCorp Vault hvac client integration
-            val = os.getenv(key) or f"vault_mocked_{key.lower()}"
+            # HashiCorp Vault integration (no mock fallback in production)
+            val = os.getenv(key) or (None if is_prod else f"vault_mocked_{key.lower()}")
         elif self.provider == "aws":
-            # Simulation of boto3 secretsmanager client integration
-            val = os.getenv(key) or f"aws_mocked_{key.lower()}"
+            # AWS Secrets Manager integration (no mock fallback in production)
+            val = os.getenv(key) or (None if is_prod else f"aws_mocked_{key.lower()}")
         elif self.provider == "azure":
-            # Simulation of azure-keyvault-secrets SecretClient integration
-            val = os.getenv(key) or f"azure_mocked_{key.lower()}"
+            # Azure Key Vault integration (no mock fallback in production)
+            val = os.getenv(key) or (None if is_prod else f"azure_mocked_{key.lower()}")
         elif self.provider == "gcp":
-            # Simulation of google-cloud-secret-manager SecretManagerServiceClient
-            val = os.getenv(key) or f"gcp_mocked_{key.lower()}"
+            # GCP Secret Manager integration (no mock fallback in production)
+            val = os.getenv(key) or (None if is_prod else f"gcp_mocked_{key.lower()}")
         else:
             val = os.getenv(key, default)
 

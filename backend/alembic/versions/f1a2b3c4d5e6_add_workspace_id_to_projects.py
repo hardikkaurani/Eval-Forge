@@ -20,26 +20,27 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     """Upgrade schema by adding nullable workspace_id column, index, and foreign key constraint to projects table."""
-    op.add_column(
-        "projects", sa.Column("workspace_id", sa.String(length=36), nullable=True)
-    )
-    op.create_index(
-        op.f("ix_projects_workspace_id"), "projects", ["workspace_id"], unique=False
-    )
-    op.create_foreign_key(
-        "fk_projects_workspace_id_workspaces",
-        "projects",
-        "workspaces",
-        ["workspace_id"],
-        ["id"],
-        ondelete="CASCADE",
-    )
+    with op.batch_alter_table("projects") as batch_op:
+        batch_op.add_column(
+            sa.Column("workspace_id", sa.String(length=36), nullable=True)
+        )
+        batch_op.create_index(
+            op.f("ix_projects_workspace_id"), ["workspace_id"], unique=False
+        )
+        batch_op.create_foreign_key(
+            "fk_projects_workspace_id_workspaces",
+            "workspaces",
+            ["workspace_id"],
+            ["id"],
+            ondelete="CASCADE",
+        )
 
 
 def downgrade() -> None:
     """Downgrade schema by removing workspace_id foreign key, index, and column from projects table."""
-    op.drop_constraint(
-        "fk_projects_workspace_id_workspaces", "projects", type_="foreignkey"
-    )
-    op.drop_index(op.f("ix_projects_workspace_id"), table_name="projects")
-    op.drop_column("projects", "workspace_id")
+    with op.batch_alter_table("projects") as batch_op:
+        batch_op.drop_constraint(
+            "fk_projects_workspace_id_workspaces", type_="foreignkey"
+        )
+        batch_op.drop_index(op.f("ix_projects_workspace_id"))
+        batch_op.drop_column("workspace_id")

@@ -1,6 +1,6 @@
-# Contributing to EvalForge 🚀
+# Contributing to Evalium 🚀
 
-Welcome to the **EvalForge** contributor community! We are thrilled to have you here. EvalForge is an open-source, production-grade evaluation platform designed to automate LLM testing, benchmarking, and quality assurance for AI engineering teams worldwide.
+Welcome to the **Evalium** contributor community! We are thrilled to have you here. Evalium is an open-source, production-grade evaluation platform designed to automate LLM testing, benchmarking, and quality assurance for AI engineering teams worldwide.
 
 Whether you are fixing a typo, adding a new LLM judge metric, writing tests, or improving UI components, your contributions are invaluable to shaping the future of AI engineering tools.
 
@@ -36,7 +36,7 @@ Whether you are fixing a typo, adding a new LLM judge metric, writing tests, or 
 
 ## 1. Welcome Message
 
-EvalForge is maintained by developers, for developers. We foster an inclusive, welcoming, and collaborative environment. No contribution is too small! If this is your first time contributing to open source, we are here to support you step-by-step.
+Evalium is maintained by developers, for developers. We foster an inclusive, welcoming, and collaborative environment. No contribution is too small! If this is your first time contributing to open source, we are here to support you step-by-step.
 
 ---
 
@@ -53,10 +53,10 @@ Our vision is to build the definitive open-source infrastructure for LLM quality
 
 ## 3. Repository Architecture
 
-EvalForge is structured as a high-performance monorepo:
+Evalium is structured as a high-performance monorepo:
 
-```
-Eval-Forge/
+```text
+Evalium/
 ├── backend/                  # FastAPI 0.115+ Python backend gateway & services
 │   ├── app/
 │   │   ├── api/v1/          # RESTful routing endpoints & controllers
@@ -106,7 +106,7 @@ chmod +x scripts/setup-dev-env.sh
 
 ## 5. Environment Variables
 
-EvalForge uses strict environment variable validation via Pydantic (`BaseSettings`) and Vite `import.meta.env`.
+Evalium uses strict environment variable validation via Pydantic (`BaseSettings`) and Vite `import.meta.env`.
 
 Copy the sample environment files:
 
@@ -175,6 +175,7 @@ docker compose up --build
    ```
 
 2. **Start React Frontend:**
+
    ```bash
    cd frontend
    npm run dev
@@ -270,7 +271,7 @@ We use descriptive, prefix-based branch names:
 - `refactor/<short-description>`: Code refactoring
 - `test/<short-description>`: Adding or modifying test suites
 
-### Real Examples:
+### Real Examples
 
 - `feature/api-auth`
 - `feature/g-eval-engine`
@@ -286,7 +287,7 @@ Commits must follow the [Conventional Commits](https://www.conventionalcommits.o
 
 Format: `<type>(<scope>): <description>`
 
-### Standard Types:
+### Standard Types
 
 - `feat`: A new feature for the user or system
 - `fix`: A bug fix
@@ -297,7 +298,7 @@ Format: `<type>(<scope>): <description>`
 - `test`: Adding missing tests or correcting existing tests
 - `chore`: Updating build tasks, package manager configs, or dependencies
 
-### Examples:
+### Examples
 
 - `feat(eval): add DeepSeek-V3 LLM judge provider`
 - `fix(ws): resolve WebSocket reconnection exponential backoff memory leak`
@@ -336,7 +337,7 @@ Format: `<type>(<scope>): <description>`
 
 ## 15. Folder Organization
 
-```
+```text
 backend/app/
 ├── api/v1/endpoints/   # Single-responsibility route handlers
 ├── config/             # Environment & app configurations
@@ -384,11 +385,11 @@ backend/app/
 
 ## 20. Communication Channels
 
-Stay connected with the EvalForge core team and community:
+Stay connected with the Evalium core team and community:
 
-- **GitHub Discussions:** Ask questions, share ideas, and present RFC proposals in [GitHub Discussions](https://github.com/hardikkaurani/Eval-Forge/discussions).
-- **Issue Tracker:** Report verified bugs or suggest features via [GitHub Issues](https://github.com/hardikkaurani/Eval-Forge/issues).
-- **Security Inquiries:** Contact security maintainers privately via `security@evalforge.dev`.
+- **GitHub Discussions:** Ask questions, share ideas, and present RFC proposals in [GitHub Discussions](https://github.com/hardikkaurani/Evalium/discussions).
+- **Issue Tracker:** Report verified bugs or suggest features via [GitHub Issues](https://github.com/hardikkaurani/Evalium/issues).
+- **Security Inquiries:** Contact security maintainers privately via `security@evalium.dev`.
 
 ---
 
@@ -396,7 +397,7 @@ Stay connected with the EvalForge core team and community:
 
 Looking for a place to start? Follow these steps:
 
-1. Browse issues tagged [`good first issue`](https://github.com/hardikkaurani/Eval-Forge/issues?q=is%3Aissue+is%3Aopen+label%3A"good+first+issue").
+1. Browse issues tagged [`good first issue`](https://github.com/hardikkaurani/Evalium/issues?q=is%3Aissue+is%3Aopen+label%3A"good+first+issue").
 2. Check out our catalog of 30 curated contributor tasks in [`docs/CONTRIBUTOR_ISSUES_CATALOG.md`](docs/CONTRIBUTOR_ISSUES_CATALOG.md).
 3. Comment on the issue to request assignment.
 4. Clone the repository and run `./scripts/setup-dev-env.sh` (or `.\scripts\setup-dev-env.ps1`).
@@ -442,7 +443,7 @@ git push origin fix/websocket-reconnect-badge
 
 We believe in celebrating our community! All contributors are recognized in:
 
-- The **EvalForge Leaderboard & README** section.
+- The **Evalium Leaderboard & README** section.
 - GitHub's native contributor graph.
 - Our quarterly **Release Notes** (`docs/RELEASE_NOTES_v1.0.0.md`).
 

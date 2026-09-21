@@ -4,19 +4,27 @@
       "docker/grafana/provisioning/datasources/*.yml"
     ]
   },
-  "python.defaultInterpreterPath": "C:\\Users\\hardi\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+  "python.defaultInterpreterPath": "${workspaceFolder}\\.venv\\Scripts\\python.exe",
   "python.analysis.extraPaths": [
-    "${workspaceFolder}/backend"
+    "${workspaceFolder}/backend",
+    "${workspaceFolder}/sdk/python",
+    "${workspaceFolder}/cli",
+    "${workspaceFolder}/.venv/Lib/site-packages"
   ],
   "python.autoComplete.extraPaths": [
-    "${workspaceFolder}/backend"
+    "${workspaceFolder}/backend",
+    "${workspaceFolder}/sdk/python",
+    "${workspaceFolder}/cli",
+    "${workspaceFolder}/.venv/Lib/site-packages"
   ],
   "pyrefly.extraSearchPaths": [
-    "${workspaceFolder}/backend"
+    "${workspaceFolder}/backend",
+    "${workspaceFolder}/sdk/python",
+    "${workspaceFolder}/cli",
+    "${workspaceFolder}/.venv/Lib/site-packages"
   ],
-  "python.analysis.include": [
-    "backend"
-  ],
+  "java.configuration.updateBuildConfiguration": "automatic",
+  "python.analysis.include": ["backend"],
   "python.analysis.exclude": [
     "**/__pyrefly_virtual__/**",
     "C:/__pyrefly_virtual__/**",
@@ -36,5 +44,6 @@
     "**/__pyrefly_virtual__/**": true,
     "C:/__pyrefly_virtual__/**": true,
     "c:/__pyrefly_virtual__/**": true
-  }
+  },
+  "css.lint.unknownAtRules": "ignore"
 }

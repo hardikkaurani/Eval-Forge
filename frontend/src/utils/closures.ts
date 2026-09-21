@@ -1,10 +1,10 @@
 /**
- * EvalForge — JavaScript Closures Utility Module
+ * Evalium — JavaScript Closures Utility Module
  * Kalvium Mandatory Concept Compliance (#16: JavaScript Closures)
  *
  * A closure is the combination of a function bundled together (enclosed)
  * with references to its surrounding state (the lexical environment).
- * In EvalForge, closures are leveraged for:
+ * In Evalium, closures are leveraged for:
  * 1. Private state encapsulation (API token storage & rate limit counters).
  * 2. Memoized request caching factories.
  * 3. Event handler currying and state persistence.

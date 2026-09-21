@@ -207,7 +207,7 @@ async def test_phase12_production_settings_validation():
 async def test_phase12_openapi_contract_generation():
     """Verify OpenAPI schema can be generated and contains essential metadata."""
     schema = app.openapi()
-    assert schema["info"]["title"] == "EvalForge Core API"
+    assert schema["info"]["title"] == "Evalium API"
     assert schema["info"]["version"] == "1.0.0"
     assert "/api/v1/projects" in schema["paths"]
     assert "/api/v1/evaluations" in schema["paths"]

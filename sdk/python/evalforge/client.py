@@ -27,7 +27,7 @@ DEFAULT_BASE_URL = "http://localhost:8000"
 
 
 class EvalForge:
-    """Official synchronous Eval-Forge API Client."""
+    """Official synchronous Evalium API Client."""
 
     def __init__(
         self,
@@ -39,7 +39,7 @@ class EvalForge:
         self.api_key = api_key or os.environ.get("EVALFORGE_API_KEY")
         if not self.api_key:
             raise AuthenticationError(
-                "Eval-Forge API key must be provided or set via EVALFORGE_API_KEY environment variable."
+                "Evalium API key must be provided or set via EVALFORGE_API_KEY environment variable."
             )
 
         self.base_url = (
@@ -126,7 +126,7 @@ class EvalForge:
 
 
 class AsyncEvalForge:
-    """Official asynchronous Eval-Forge API Client."""
+    """Official asynchronous Evalium API Client."""
 
     def __init__(
         self,
@@ -138,7 +138,7 @@ class AsyncEvalForge:
         self.api_key = api_key or os.environ.get("EVALFORGE_API_KEY")
         if not self.api_key:
             raise AuthenticationError(
-                "Eval-Forge API key must be provided or set via EVALFORGE_API_KEY environment variable."
+                "Evalium API key must be provided or set via EVALFORGE_API_KEY environment variable."
             )
         self.base_url = (
             base_url or os.environ.get("EVALFORGE_BASE_URL") or DEFAULT_BASE_URL

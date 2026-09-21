@@ -6,18 +6,18 @@ services:
     ports:
       - "${PORT:-8000}:8000"
     environment:
-      - APP_NAME=EvalForge API
+      - APP_NAME=Evalium API
       - APP_ENV=production
       - DEBUG=False
       - POSTGRES_SERVER=postgres
       - POSTGRES_PORT=5432
       - POSTGRES_USER=${POSTGRES_USER:-postgres}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres_password}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required in production}
       - POSTGRES_DB=${POSTGRES_DB:-evalforge}
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - REDIS_DB=0
-      - SECRET_KEY=${SECRET_KEY:-dev-secret-key-evalforge-placeholder}
+      - SECRET_KEY=${SECRET_KEY:?SECRET_KEY is required in production}
       - CORS_ORIGINS=${CORS_ORIGINS:-["*"]}
       - ALLOWED_HOSTS=${ALLOWED_HOSTS:-["*"]}
     deploy:
@@ -80,20 +80,20 @@ services:
     build:
       context: .
       dockerfile: docker/backend.Dockerfile
-    command: celery -A app.jobs.celery_app worker -l info -Q high_priority,default,low_priority
+    command: celery -A app.jobs.queue.celery_app worker -l info -Q high_priority,default,low_priority
     environment:
-      - APP_NAME=EvalForge Worker
+      - APP_NAME=Evalium Worker
       - APP_ENV=production
       - DEBUG=False
       - POSTGRES_SERVER=postgres
       - POSTGRES_PORT=5432
       - POSTGRES_USER=${POSTGRES_USER:-postgres}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres_password}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required in production}
       - POSTGRES_DB=${POSTGRES_DB:-evalforge}
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - REDIS_DB=0
-      - SECRET_KEY=${SECRET_KEY:-dev-secret-key-evalforge-placeholder}
+      - SECRET_KEY=${SECRET_KEY:?SECRET_KEY is required in production}
     deploy:
       resources:
         limits:
@@ -107,7 +107,7 @@ services:
         - CMD
         - celery
         - -A
-        - app.jobs.celery_app
+        - app.jobs.queue.celery_app
         - inspect
         - ping
       interval: 15s

@@ -926,13 +926,13 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="inline-block w-2 h-2 rounded-full bg-[#0284C7] animate-pulse" />
-            <span className="font-mono font-medium">EvalForge v1.0.0 Released</span>
+            <span className="font-mono font-medium">Evalium v1.0.0 Released</span>
             <span className="hidden sm:inline text-[#7E939C]">|</span>
-            <span className="hidden sm:inline">Production-grade LLM evaluation infrastructure</span>
+            <span className="hidden sm:inline">Production-grade AI Evaluation Infrastructure</span>
           </div>
           <div className="flex items-center gap-4">
             <a
-              href="https://github.com/hardikkaurani/Eval-Forge"
+              href="https://github.com/hardikkaurani/Evalium"
               target="_blank"
               rel="noopener noreferrer"
               className="hover:text-[#0284C7] transition-colors flex items-center gap-1 font-mono"
@@ -1159,7 +1159,7 @@ export default function Landing() {
                 </Link>
 
                 <a
-                  href="https://github.com/hardikkaurani/Eval-Forge"
+                  href="https://github.com/hardikkaurani/Evalium"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 px-7 py-4 rounded-full border border-[#B0C2C6] dark:border-[#4C5F6B] hover:border-[#2E3A44] dark:hover:border-[#F6F4EE] text-sm font-medium text-[#2E3A44] dark:text-[#F6F4EE] bg-transparent transition-all duration-200"
@@ -1320,7 +1320,7 @@ export default function Landing() {
           <div className="w-16 h-[1px] bg-[#0284C7] mx-auto" />
           <p className="text-base sm:text-lg text-[#4C5F6B] dark:text-[#B0C2C6] leading-relaxed max-w-3xl mx-auto font-normal">
             Without structured benchmarks and automated evaluation pipelines, teams deploy updates
-            into the dark. EvalForge introduces continuous statistical verification across reasoning
+            into the dark. Evalium introduces continuous statistical verification across reasoning
             quality, retrieval faithfulness, hallucination detection, and safety policies.
           </p>
         </div>
@@ -1643,7 +1643,7 @@ export default function Landing() {
                 </div>
                 <div className="flex items-center gap-3 text-xs font-medium text-[#2E3A44] dark:text-[#F6F4EE]">
                   <CheckCircle2 size={16} className="text-[#0284C7]" />
-                  <span>Standalone terminal CLI (`evalforge run ...`)</span>
+                  <span>Standalone terminal CLI (`evalium run ...`)</span>
                 </div>
               </div>
             </div>
@@ -2781,7 +2781,7 @@ export default function Landing() {
               {connected ? 'Enter Workspace Now →' : 'Launch Workspace →'}
             </Link>
             <a
-              href="https://github.com/hardikkaurani/Eval-Forge/blob/main/docs/api.md"
+              href="https://github.com/hardikkaurani/Evalium/blob/main/docs/api.md"
               target="_blank"
               rel="noopener noreferrer"
               className="px-8 py-4 rounded-full border border-[#B0C2C6] dark:border-[#4C5F6B] hover:border-[#2E3A44] text-sm font-medium text-[#2E3A44] dark:text-[#F6F4EE] transition-colors cursor-pointer"

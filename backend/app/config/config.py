@@ -10,10 +10,11 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 APP_ENV = os.getenv("APP_ENV", "development").lower()
 
 env_files: list[str] = []
-if os.path.exists(".env"):
-    env_files.append(".env")
-if os.path.exists(f".env.{APP_ENV}"):
-    env_files.append(f".env.{APP_ENV}")
+if APP_ENV != "testing":
+    if os.path.exists(".env"):
+        env_files.append(".env")
+    if os.path.exists(f".env.{APP_ENV}"):
+        env_files.append(f".env.{APP_ENV}")
 
 INSECURE_CREDENTIALS: frozenset[str] = frozenset(
     {
@@ -69,7 +70,7 @@ class Settings(BaseSettings):
     )
 
     # Core Application Settings
-    APP_NAME: str = "EvalForge API"
+    APP_NAME: str = "Evalium API"
     APP_ENV: Literal["development", "testing", "production"] = "development"
     DEBUG: bool = True
     PORT: int = Field(8000, ge=1, le=65535)
@@ -159,7 +160,8 @@ class Settings(BaseSettings):
             if (
                 not secret_val
                 or _is_insecure_credential(secret_val)
-                or secret_val == "dev-secret-key-evalforge-placeholder"
+                or secret_val
+                == "dev-secret-key-evalforge-placeholder"  # nosec B105  # trunk-ignore(bandit/B105)
                 or len(secret_val) < 16
             ):
                 raise ValueError(
@@ -175,7 +177,7 @@ class Settings(BaseSettings):
                 )
 
             # 4. Database configuration validation
-            if self.DATABASE_URL:
+            if self.DATABASE_URL and not self.DATABASE_URL.startswith("sqlite"):
                 # If DATABASE_URL contains template variables, validate discrete credentials
                 if "${" in self.DATABASE_URL:
                     pg_pass = self.POSTGRES_PASSWORD.get_secret_value()
@@ -203,12 +205,39 @@ class Settings(BaseSettings):
                             "DATABASE_URL must include a secure password in production environment."
                         )
             else:
-                # DATABASE_URL is not provided, validate discrete POSTGRES_PASSWORD
+                # DATABASE_URL is not provided or is sqlite test DB, validate discrete host and password
                 pg_pass = self.POSTGRES_PASSWORD.get_secret_value()
                 if _is_insecure_credential(pg_pass):
                     raise ValueError(
                         "POSTGRES_PASSWORD must be set to a secure value in production environment. "
                         "The default value is insecure."
+                    )
+
+            # 6. Google OAuth configuration validation
+            if self.GOOGLE_CLIENT_ID:
+                if not self.GOOGLE_CLIENT_SECRET or _is_insecure_credential(
+                    self.GOOGLE_CLIENT_SECRET.get_secret_value()
+                ):
+                    raise ValueError(
+                        "GOOGLE_CLIENT_SECRET must be configured securely when GOOGLE_CLIENT_ID is enabled in production."
+                    )
+                if (
+                    not self.GOOGLE_REDIRECT_URI.startswith("https://")
+                    and "localhost" not in self.GOOGLE_REDIRECT_URI
+                    and "127.0.0.1" not in self.GOOGLE_REDIRECT_URI
+                ):
+                    raise ValueError(
+                        "GOOGLE_REDIRECT_URI must use HTTPS in production environment."
+                    )
+
+            # 7. Stripe Billing configuration validation
+            if self.STRIPE_SECRET_KEY:
+                stripe_val = self.STRIPE_SECRET_KEY.get_secret_value()
+                if _is_insecure_credential(stripe_val) or not stripe_val.startswith(
+                    "sk_"
+                ):
+                    raise ValueError(
+                        "STRIPE_SECRET_KEY must be a valid secret key (sk_...) when Stripe billing is enabled."
                     )
 
         return self

@@ -24,7 +24,7 @@ export default function Overview() {
     return (
       <div className="page">
         <PageHeader
-          title="Welcome to EvalForge"
+          title="Welcome to Evalium"
           description="Your evaluation workspace starts with a project."
         />
         <Panel>

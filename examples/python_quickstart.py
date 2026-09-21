@@ -1,7 +1,7 @@
-"""Eval-Forge Python SDK Quickstart Example.
+"""Evalium Python SDK Quickstart Example.
 
 Demonstrates the complete evaluation lifecycle:
-1. Initialize the official EvalForge SDK client.
+1. Initialize the official Evalium SDK client.
 2. Create or retrieve an evaluation project.
 3. Upload a dataset with structured test cases.
 4. Launch an asynchronous evaluation run.
@@ -13,9 +13,9 @@ import sys
 import time
 
 try:
-    from evalforge import EvalForge
+    from evalforge import Evalium
 except ImportError:
-    print("Please install the evalforge SDK: pip install evalforge")
+    print("Please install the SDK: pip install -e sdk/python")
     sys.exit(1)
 
 
@@ -24,12 +24,12 @@ def main():
     base_url = os.environ.get("EVALFORGE_BASE_URL", "http://localhost:8000")
 
     print("=" * 60)
-    print("🚀 Eval-Forge Python SDK — End-to-End Evaluation")
+    print("🚀 Evalium Python SDK — End-to-End Evaluation")
     print(f"Target Base URL: {base_url}")
     print("=" * 60)
 
     # 1. Initialize Client
-    client = EvalForge(api_key=api_key, base_url=base_url)
+    client = Evalium(api_key=api_key, base_url=base_url)
 
     # 2. Create Project
     print("\n[1/4] Creating Evaluation Project...")

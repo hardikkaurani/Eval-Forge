@@ -6,7 +6,7 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - APP_NAME=EvalForge API
+      - APP_NAME=Evalium API
       - APP_ENV=development
       - DEBUG=true
       - POSTGRES_SERVER=postgres
@@ -41,7 +41,7 @@ services:
       dockerfile: docker/backend.Dockerfile
     command: celery -A app.jobs.queue.celery_app worker --loglevel=info
     environment:
-      - APP_NAME=EvalForge Worker
+      - APP_NAME=Evalium Worker
       - APP_ENV=development
       - POSTGRES_SERVER=postgres
       - POSTGRES_PORT=5432

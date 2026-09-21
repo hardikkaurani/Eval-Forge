@@ -8,12 +8,13 @@
     <version>1.0.0</version>
     <packaging>jar</packaging>
 
-    <name>EvalForge Java SDK</name>
-    <description>Official Java 17+ client SDK for Eval-Forge AI Evaluation Platform</description>
+    <name>Evalium Java SDK</name>
+    <description>Official Java 21+ client SDK for Evalium — Production-grade AI Evaluation Infrastructure</description>
 
     <properties>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <maven.compiler.release>21</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <jackson.version>2.22.2</jackson.version>
     </properties>
