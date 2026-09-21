@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ================================================================
-# Eval-Forge REST API cURL Walkthrough
+# Evalium REST API cURL Walkthrough
 # Demonstrates authentication, health check, project creation,
 # and evaluation run submission via standard HTTP requests.
 # ================================================================
@@ -10,7 +10,7 @@ API_KEY="${EVALFORGE_API_KEY:-ef_live_example_key}"
 BASE_URL="${EVALFORGE_BASE_URL:-http://localhost:8000}"
 
 echo "=========================================================="
-echo "🚀 Eval-Forge REST API cURL Walkthrough"
+echo "🚀 Evalium REST API cURL Walkthrough"
 echo "Target Base URL: ${BASE_URL}"
 echo "=========================================================="
 
@@ -49,9 +49,9 @@ curl -s -X POST "${BASE_URL}/api/v1/evaluations" \
     \"metrics\": [\"accuracy\", \"semantic_similarity\"],
     \"test_cases\": [
       {
-        \"input\": \"What is EvalForge?\",
-        \"actual_output\": \"EvalForge is an enterprise-grade LLM evaluation platform.\",
-        \"expected_output\": \"EvalForge is an open-source evaluation framework for AI models.\"
+        \"input\": \"What is Evalium?\",
+        \"actual_output\": \"Evalium is an enterprise-grade LLM evaluation platform.\",
+        \"expected_output\": \"Evalium is an open-source evaluation framework for AI models.\"
       }
     ]
   }" | jq . || true

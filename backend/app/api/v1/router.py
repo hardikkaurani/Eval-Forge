@@ -1,3 +1,4 @@
+# trunk-ignore-all(isort)
 from fastapi import APIRouter, Depends
 
 from app.advanced_ai.routes.agents import router as agents_router
@@ -18,6 +19,7 @@ from app.analytics.routes import (
     trends_router,
 )
 from app.api.v1.endpoints import (
+    auth,
     connection,
     evaluation,
     health,
@@ -32,12 +34,8 @@ from app.datasets.routers import benchmark_router, dataset_router, experiment_ro
 from app.enterprise.routes.admin import router as ent_admin_router
 from app.enterprise.routes.api_keys import router as ent_keys_router
 from app.enterprise.routes.audit import router as ent_audit_router
-from app.enterprise.routes.billing import (
-    public_webhook_router as stripe_webhook_router,
-)
-from app.enterprise.routes.billing import (
-    router as ent_billing_router,
-)
+from app.enterprise.routes.billing import public_webhook_router as stripe_webhook_router
+from app.enterprise.routes.billing import router as ent_billing_router
 from app.enterprise.routes.organizations import router as ent_org_router
 from app.enterprise.routes.workspaces import router as ent_ws_router
 from app.jobs.routes.job import router as jobs_router
@@ -59,6 +57,7 @@ public_router.include_router(
     playground_router, tags=["Developer Platform - Playground"]
 )
 public_router.include_router(stripe_webhook_router, tags=["Enterprise SaaS - Webhooks"])
+public_router.include_router(auth.router)
 
 # Private router (requires API key authentication)
 private_router = APIRouter(dependencies=[Depends(get_current_api_key)])

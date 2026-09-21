@@ -249,3 +249,32 @@ class EnterpriseAPIKeyResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+# OAuth Identity & Session Schemas
+class OAuthIdentityResponse(BaseModel):
+    id: uuid.UUID
+    user_id: uuid.UUID
+    provider: str
+    provider_user_id: str
+    email: str
+    email_verified: bool
+    display_name: Optional[str] = None
+    avatar_url: Optional[str] = None
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class OAuthSessionResponse(BaseModel):
+    api_key: str
+    user_id: str
+    email: str
+    display_name: Optional[str] = None
+    avatar_url: Optional[str] = None
+    organization_id: Optional[str] = None
+    workspace_id: Optional[str] = None
+    expires_at: Optional[datetime] = None
+    return_to: str = "/overview"

@@ -1,4 +1,4 @@
-# Eval-Forge Examples & Quickstarts
+# Evalium Examples & Quickstarts
 
 Welcome to the **Eval-Forge** examples directory. This folder provides complete, verified, end-to-end examples demonstrating how to evaluate LLM applications using our Python SDK, TypeScript SDK, Go SDK, Java SDK, CLI, and REST API.
 
@@ -13,7 +13,7 @@ Welcome to the **Eval-Forge** examples directory. This folder provides complete,
 | [`go_quickstart.go`](./go_quickstart.go) | Minimal project listing and client initialization in Go | Go 1.21+ |
 | [`JavaQuickstart.java`](./JavaQuickstart.java) | Minimal project retrieval and builder pattern in Java | Java 17+ |
 | [`cli_evaluation_example.json`](./cli_evaluation_example.json) | Sample dataset and configuration for the CLI evaluation runner | JSON |
-| [`run_cli_eval.sh`](./run_cli_eval.sh) | Automated evaluation pipeline executed via the `evalforge` CLI | Bash / Shell |
+| [`run_cli_eval.sh`](./run_cli_eval.sh) | Automated evaluation pipeline executed via the `evalium` CLI | Bash / Shell |
 | [`curl_api_walkthrough.sh`](./curl_api_walkthrough.sh) | Direct HTTP API requests demonstrating core endpoints | cURL / REST |
 
 ---
@@ -89,18 +89,16 @@ java -cp ".:examples:sdk/java/target/evalforge-sdk-1.0.0.jar:sdk/java/target/dep
 
 ### Prerequisites
 ```bash
-pip install evalforge-cli
-# or from source repository:
 pip install -e cli
 ```
 
 ### Run
 ```bash
 # 1. Authenticate
-evalforge auth login --key "ef_live_your_api_key_here"
+evalium auth login --key "ef_live_your_api_key_here"
 
 # 2. Run Evaluation
-evalforge evaluations run \
+evalium evaluations run \
   --project-id "00000000-0000-0000-0000-000000000001" \
   --config examples/cli_evaluation_example.json
 ```

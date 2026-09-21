@@ -1,15 +1,15 @@
-# EvalForge Project Governance
+# Evalium Project Governance
 
-This document describes the governance structure, decision-making processes, and maintainer responsibilities for the **EvalForge** open-source project.
+This document describes the governance structure, decision-making processes, and maintainer responsibilities for the **Evalium** open-source project.
 
 ---
 
 ## 1. Governance Model
 
-EvalForge operates under a **Benevolent Meritocracy** model:
+Evalium operates under a **Benevolent Meritocracy** model:
 
 - **Merit-based Progression:** Anyone who contributes consistently to code, documentation, triage, or community support can progress to maintainer roles.
-- **Open Consensus:** Strategic architectural decisions, RFCs, and breaking API changes are discussed publicly in [GitHub Discussions](https://github.com/hardikkaurani/Eval-Forge/discussions) and issue threads.
+- **Open Consensus:** Strategic architectural decisions, RFCs, and breaking API changes are discussed publicly in [GitHub Discussions](https://github.com/hardikkaurani/Evalium/discussions) and issue threads.
 
 ---
 

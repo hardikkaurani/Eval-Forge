@@ -1,6 +1,6 @@
 # Product Requirements Document (PRD)
 
-## Project Name: EvalForge
+## Project Name: Evalium
 
 **Document Version:** 1.0.0  
 **Status:** Released / Active  
@@ -25,7 +25,7 @@ The rapid adoption of Large Language Models (LLMs) in production applications ha
 
 ### 1.3 Solution Statement
 
-**EvalForge** is a self-hostable, developer-first, production-grade LLM evaluation platform. It treats LLM evaluation like modern software testing: automated, versioned, reproducible, multi-tenant, and seamlessly integrated into developer CI/CD workflows.
+**Evalium** is a self-hostable, developer-first, production-grade LLM evaluation platform. It treats LLM evaluation like modern software testing: automated, versioned, reproducible, multi-tenant, and seamlessly integrated into developer CI/CD workflows.
 
 ---
 

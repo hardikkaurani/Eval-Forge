@@ -48,7 +48,7 @@ def cmd_auth(args: argparse.Namespace) -> None:
             masked = f"{key[:6]}...{key[-4:]}" if len(key) > 10 else "***"
             print(f"Authenticated with API key: {masked}")
         else:
-            print("Not authenticated. Run 'evalforge auth login --key <API_KEY>'")
+            print("Not authenticated. Run 'evalium auth login --key <API_KEY>'")
 
 
 def cmd_projects(args: argparse.Namespace) -> None:
@@ -134,9 +134,12 @@ def main(argv: Optional[List[str]] = None) -> None:
         "--json", action="store_true", help="Format output as JSON"
     )
 
+    prog_name = (
+        "evalforge" if (sys.argv and "evalforge" in sys.argv[0].lower()) else "evalium"
+    )
     parser = argparse.ArgumentParser(
-        prog="evalforge",
-        description="Official CLI for the Eval-Forge AI Evaluation Platform",
+        prog=prog_name,
+        description="Official CLI for Evalium — Production-grade AI Evaluation Infrastructure",
         parents=[common_parser],
     )
     subparsers = parser.add_subparsers(dest="command", required=True)

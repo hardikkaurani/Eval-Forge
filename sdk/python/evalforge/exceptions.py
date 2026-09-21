@@ -2,7 +2,7 @@ from typing import Any, Dict, Optional
 
 
 class EvalForgeError(Exception):
-    """Base exception for all Eval-Forge SDK errors."""
+    """Base exception for all Evalium SDK errors."""
 
     def __init__(self, message: str, request_id: Optional[str] = None):
         super().__init__(message)

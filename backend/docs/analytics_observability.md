@@ -1,4 +1,4 @@
-# EvalForge Enterprise Analytics, Reporting & Observability
+# Evalium Enterprise Analytics, Reporting & Observability
 
 This guide details the design, architecture, schemas, and endpoints of the Analytics, Reporting, and Observability platform implemented in Phase 7.
 

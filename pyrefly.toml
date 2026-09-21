@@ -1,17 +1,19 @@
-project-includes = [
-    "backend",
-    "sdk/python",
-    "cli",
-]
+project-includes = ["backend", "sdk/python", "cli"]
 project-excludes = [
-    "**/node_modules",
-    "**/__pycache__",
-    "**/.venv",
-    "**/__pyrefly_virtual__/**",
-    "**/inmemory/**",
+  "**/node_modules",
+  "**/__pycache__",
+  "**/__pyrefly_virtual__/**",
+  "**/inmemory/**",
 ]
 search-path = [
-    "backend",
-    "sdk/python",
-    "cli",
+  "backend",
+  "sdk/python",
+  "cli",
+  ".venv/Lib/site-packages",
+  "C:/Users/hardi/AppData/Local/Programs/Python/Python313/Lib/site-packages",
 ]
+site-package-path = [
+  ".venv/Lib/site-packages",
+  "C:/Users/hardi/AppData/Local/Programs/Python/Python313/Lib/site-packages",
+]
+python-interpreter-path = ".venv/Scripts/python.exe"

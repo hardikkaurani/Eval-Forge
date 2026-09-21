@@ -117,6 +117,7 @@ __all__ = [
     "AuditLog",
     "EnterpriseNotification",
     "EnterpriseAPIKey",
+    "OAuthIdentity",
 ]
 
 from app.enterprise.models import (
@@ -126,6 +127,7 @@ from app.enterprise.models import (
     Invitation,
     Invoice,
     Membership,
+    OAuthIdentity,
     Organization,
     Plan,
     Quota,

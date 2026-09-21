@@ -230,7 +230,12 @@ class ExperimentService:
 
             # Update Experiment metrics and state
             completed_time = get_utc_now()
-            duration = (completed_time - experiment.started_at).total_seconds()
+            started_at = experiment.started_at
+            duration = (
+                (completed_time - started_at).total_seconds()
+                if started_at is not None
+                else 0.0
+            )
 
             experiment.status = "COMPLETED"
             experiment.completed_at = completed_time

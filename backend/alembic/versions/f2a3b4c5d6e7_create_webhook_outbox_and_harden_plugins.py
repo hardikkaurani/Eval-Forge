@@ -49,47 +49,42 @@ def upgrade() -> None:
     )
 
     # 2. Add capabilities, workspace_id, is_global to plugin_descriptors
-    op.add_column(
-        "plugin_descriptors",
-        sa.Column("capabilities", sa.JSON(), nullable=False, server_default="[]"),
-    )
-    op.add_column(
-        "plugin_descriptors",
-        sa.Column("workspace_id", sa.String(length=36), nullable=True),
-    )
-    op.add_column(
-        "plugin_descriptors",
-        sa.Column("is_global", sa.Boolean(), nullable=False, server_default="false"),
-    )
-    op.create_index(
-        op.f("ix_plugin_descriptors_workspace_id"),
-        "plugin_descriptors",
-        ["workspace_id"],
-        unique=False,
-    )
-    op.create_foreign_key(
-        "fk_plugin_descriptors_workspace_id_workspaces",
-        "plugin_descriptors",
-        "workspaces",
-        ["workspace_id"],
-        ["id"],
-        ondelete="CASCADE",
-    )
+    with op.batch_alter_table("plugin_descriptors") as batch_op:
+        batch_op.add_column(
+            sa.Column("capabilities", sa.JSON(), nullable=False, server_default="[]")
+        )
+        batch_op.add_column(
+            sa.Column("workspace_id", sa.String(length=36), nullable=True)
+        )
+        batch_op.add_column(
+            sa.Column("is_global", sa.Boolean(), nullable=False, server_default="false")
+        )
+        batch_op.create_index(
+            op.f("ix_plugin_descriptors_workspace_id"),
+            ["workspace_id"],
+            unique=False,
+        )
+        batch_op.create_foreign_key(
+            "fk_plugin_descriptors_workspace_id_workspaces",
+            "workspaces",
+            ["workspace_id"],
+            ["id"],
+            ondelete="CASCADE",
+        )
 
 
 def downgrade() -> None:
-    op.drop_constraint(
-        "fk_plugin_descriptors_workspace_id_workspaces",
-        "plugin_descriptors",
-        type_="foreignkey",
-    )
-    op.drop_index(
-        op.f("ix_plugin_descriptors_workspace_id"),
-        table_name="plugin_descriptors",
-    )
-    op.drop_column("plugin_descriptors", "is_global")
-    op.drop_column("plugin_descriptors", "workspace_id")
-    op.drop_column("plugin_descriptors", "capabilities")
+    with op.batch_alter_table("plugin_descriptors") as batch_op:
+        batch_op.drop_constraint(
+            "fk_plugin_descriptors_workspace_id_workspaces",
+            type_="foreignkey",
+        )
+        batch_op.drop_index(
+            op.f("ix_plugin_descriptors_workspace_id"),
+        )
+        batch_op.drop_column("is_global")
+        batch_op.drop_column("workspace_id")
+        batch_op.drop_column("capabilities")
 
     op.drop_index(
         op.f("ix_webhook_outbox_events_project_id"),

@@ -1,16 +1,16 @@
-# EvalForge v1.0.0 Production Deployment Guide
+# Evalium v1.0.0 Production Deployment Guide
 
-This document provides step-by-step instructions for deploying EvalForge to production infrastructure, targeting **Vercel** (Frontend), **Render** (Backend, PostgreSQL, and Redis), or **Docker Compose** (Self-Hosted).
+This document provides step-by-step instructions for deploying Evalium to production infrastructure, targeting **Vercel** (Frontend), **Render** (Backend, PostgreSQL, and Redis), or **Docker Compose** (Self-Hosted).
 
 ---
 
 ## 1. Cloud Architecture Overview
 
-```
+```text
 +---------------------------------------+
 |            Vercel (CDN)               |
 |      React / Vite Frontend App        |
-|     (https://evalforge.vercel.app)    |
+|  (https://eval-forge-sandy.vercel.app)|
 +-------------------+-------------------+
                     |
                     | API Requests (HTTPS)
@@ -134,11 +134,14 @@ After deploying EvalForge, run through this verification checklist:
 If a deployment fails:
 
 1. Revert to the previous git release tag:
+
    ```bash
    git checkout tags/v0.9.0
    ```
+
 2. Re-trigger Vercel deployment or Railway build.
 3. For Docker deployments, execute:
+
    ```bash
    docker compose -f docker-compose.prod.yml down
    docker compose -f docker-compose.prod.yml up -d --build

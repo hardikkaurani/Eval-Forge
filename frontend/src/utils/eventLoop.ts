@@ -1,11 +1,11 @@
 /**
- * EvalForge — JavaScript Event Loop Scheduler Utility
+ * Evalium — JavaScript Event Loop Scheduler Utility
  * Kalvium Mandatory Concept Compliance (#17: JavaScript Event Loop)
  *
  * The Event Loop monitors the Call Stack, Microtask Queue (Promises, queueMicrotask),
  * and Macrotask Queue (setTimeout, setInterval, I/O, WebSockets).
  *
- * In EvalForge:
+ * In Evalium:
  * 1. High-priority tasks (state mutations, cache updates) are scheduled on the Microtask Queue.
  * 2. Deferred render passes and UI background tasks are scheduled on the Macrotask Queue.
  * 3. Heavy dataset processing is chunked across animation frames to prevent blocking the main thread.

@@ -351,7 +351,7 @@ async def test_mcp_adversarial_tenant_isolation(db_session) -> None:
             total_cases=1,
         )
         await db_session.commit()
-        run_a_id = str(run_a.id)
+        run_a_id = run_a.id
 
         with TestClient(app) as client_a:
             # Tenant A positive MCP tool checks

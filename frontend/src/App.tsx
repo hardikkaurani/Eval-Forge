@@ -6,6 +6,7 @@ import { ThemeProvider } from './context/ThemeContext';
 import { Button, Empty, Loading } from './components/ui';
 const Shell = lazy(() => import('./layouts/WorkspaceShell'));
 const Connect = lazy(() => import('./pages/Connect'));
+const OAuthCallback = lazy(() => import('./pages/OAuthCallback'));
 const Overview = lazy(() => import('./pages/Overview'));
 const Landing = lazy(() => import('./pages/Landing'));
 const ResourcePage = lazy(() => import('./pages/ResourcePage'));
@@ -80,6 +81,7 @@ export default function App() {
                   {['/login', '/register', '/forgot-password'].map((path) => (
                     <Route key={path} path={path} element={<Connect />} />
                   ))}
+                  <Route path="/auth/callback" element={<OAuthCallback />} />
                   <Route element={<RootLayout />}>
                     <Route index element={<Overview />} />
                     <Route path="overview" element={<Overview />} />

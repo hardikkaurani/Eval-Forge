@@ -1,16 +1,46 @@
 import { useState, type FormEvent } from 'react';
-import { Link, Navigate, useLocation } from 'react-router-dom';
+import { Link, Navigate, useLocation, useSearchParams } from 'react-router-dom';
 import { Database, FlaskConical, KeyRound, ArrowRight } from 'lucide-react';
 import { useConnection } from '../context/ConnectionContext';
 import { ThemeControl } from '../layouts/WorkspaceShell';
 import { Button, ErrorNotice, Field } from '../components/ui';
+
 export default function Connect() {
   const { connected, connect } = useConnection();
   const { pathname } = useLocation();
+  const [searchParams] = useSearchParams();
   const [key, setKey] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<unknown>(null);
+
+  const oauthError = searchParams.get('error');
+  const getOAuthErrorMessage = (err: string | null): string | null => {
+    if (!err) return null;
+    switch (err) {
+      case 'oauth_cancelled':
+        return 'Google sign-in was cancelled.';
+      case 'account_conflict':
+        return 'Identity conflict: this email is already registered to a different Google account.';
+      case 'invalid_state':
+        return 'Authentication session expired or invalid state. Please try again.';
+      case 'missing_parameters':
+        return 'OAuth callback missing required parameters.';
+      case 'exchange_failed':
+        return 'Failed to exchange authorization code with Google.';
+      case 'verification_failed':
+        return 'Google identity verification failed.';
+      default:
+        return 'Google authentication failed. Please try again.';
+    }
+  };
+
   if (connected) return <Navigate to="/overview" replace />;
+
+  const startGoogleLogin = () => {
+    const backendUrl = (import.meta.env.VITE_API_URL || '/api/v1').replace(/\/$/, '');
+    window.location.href = `${backendUrl}/auth/google/start`;
+  };
+
   const submit = async (event: FormEvent) => {
     event.preventDefault();
     if (busy) return;
@@ -85,13 +115,55 @@ export default function Connect() {
             <ThemeControl />
           </div>
           <h1>Connect your workspace</h1>
-          <p>Enter an EvalForge API key to access your projects.</p>
+          <p>Enter an Evalium API key to access your projects.</p>
           {pathname !== '/login' && (
             <div className="notice info" style={{ marginBottom: 20 }}>
               This installation uses API keys. Account registration and password recovery are not
               available. Ask your administrator for a key.
             </div>
           )}
+          {oauthError && (
+            <div style={{ marginBottom: 16 }}>
+              <ErrorNotice error={getOAuthErrorMessage(oauthError)} />
+            </div>
+          )}
+          <button
+            type="button"
+            onClick={startGoogleLogin}
+            className="w-full flex items-center justify-center gap-3 px-4 py-2.5 rounded-lg border border-[#DDE4E1] dark:border-[#3E4C59] bg-white dark:bg-[#202A32] text-[#2E3A44] dark:text-[#F6F4EE] font-medium text-sm hover:bg-[#F6F4EE] dark:hover:bg-[#2A3742] transition-colors shadow-sm mb-4 cursor-pointer"
+            id="google-login-btn"
+          >
+            <svg
+              className="w-4 h-4 shrink-0"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <path
+                fill="#4285F4"
+                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+              />
+              <path
+                fill="#34A853"
+                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+              />
+              <path
+                fill="#FBBC05"
+                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+              />
+              <path
+                fill="#EA4335"
+                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+              />
+            </svg>
+            <span>Continue with Google</span>
+          </button>
+          <div className="relative flex items-center justify-center my-4">
+            <div className="border-t border-[#DDE4E1] dark:border-[#2E3A44] w-full" />
+            <span className="bg-white dark:bg-[#202A32] px-3 text-xs text-[#4c5f6b] dark:text-[#b0c2c6] uppercase tracking-wider font-mono shrink-0">
+              or continue with API key
+            </span>
+          </div>
           <form className="form-stack" onSubmit={submit}>
             {error !== null && <ErrorNotice error={error} />}
             <Field
@@ -121,7 +193,7 @@ export default function Connect() {
           <details className="setup-help">
             <summary>Need an API key?</summary>
             <p>
-              Ask your EvalForge administrator for a workspace-scoped API key. Server administrators
+              Ask your Evalium administrator for a workspace-scoped API key. Server administrators
               can use the bootstrap command in the setup guide.
             </p>
             <p>
@@ -129,7 +201,7 @@ export default function Connect() {
               cannot be used here.
             </p>
             <a
-              href="https://github.com/hardikkaurani/Eval-Forge/blob/main/docs/ui-setup.md"
+              href="https://github.com/hardikkaurani/Evalium/blob/main/docs/ui-setup.md"
               target="_blank"
               rel="noreferrer"
             >

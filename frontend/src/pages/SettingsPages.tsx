@@ -191,7 +191,7 @@ export function DeveloperGuide() {
     <div className="page form-width">
       <PageHeader
         title="Developer guide"
-        description="Connect your existing evaluation pipeline to EvalForge."
+        description="Connect your existing evaluation pipeline to Evalium."
       />
       <Panel title="A repeatable evaluation workflow">
         <div className="panel-body form-stack">
@@ -231,7 +231,7 @@ export function DeveloperGuide() {
           </p>
           <a
             className="table-link"
-            href="https://github.com/hardikkaurani/Eval-Forge"
+            href="https://github.com/hardikkaurani/Evalium"
             target="_blank"
             rel="noreferrer"
           >

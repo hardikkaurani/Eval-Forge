@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Tuple
 
 from sqlalchemy import and_, func, select
@@ -8,6 +8,8 @@ from app.core.exceptions import NotFoundException
 from app.database.repository import ProjectRepository
 from app.jobs.models.job import ExecutionHistory, Job, Queue, Worker
 from app.jobs.queue.tasks import run_background_job
+
+celery_task: Any = run_background_job
 from app.jobs.repositories.job import JobRepository
 from app.jobs.schemas.job import (
     JobCreate,
@@ -67,20 +69,23 @@ class JobService:
         # Dispatch task to Celery
         if request.scheduled_at:
             # Delayed execution
+            sched = request.scheduled_at
+            if sched.tzinfo is None:
+                sched = sched.replace(tzinfo=timezone.utc)
             delay_seconds = int(
-                (request.scheduled_at - datetime.utcnow()).total_seconds()
+                (sched - datetime.now(timezone.utc)).total_seconds()
             )
             if delay_seconds > 0:
-                run_background_job.apply_async(
+                celery_task.apply_async(
                     args=[job.id],
                     countdown=delay_seconds,
                     queue=request.queue_name,
                 )
             else:
-                run_background_job.apply_async(args=[job.id], queue=request.queue_name)
+                celery_task.apply_async(args=[job.id], queue=request.queue_name)
         else:
             # Immediate dispatch
-            run_background_job.apply_async(args=[job.id], queue=request.queue_name)
+            celery_task.apply_async(args=[job.id], queue=request.queue_name)
 
         return job
 
@@ -152,7 +157,7 @@ class JobService:
         )
 
         # Dispatch task to Celery
-        run_background_job.apply_async(
+        celery_task.apply_async(
             args=[job_id], queue=updated_job.queue_name or "default"
         )
         return updated_job

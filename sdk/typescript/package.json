@@ -1,15 +1,23 @@
 {
   "name": "@evalforge/sdk",
   "version": "1.0.0",
-  "description": "Official TypeScript SDK for the Eval-Forge AI Evaluation Platform",
+  "description": "Official TypeScript SDK for Evalium — Production-grade AI Evaluation Infrastructure",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
     "test": "echo \"SDK typing test passed\""
   },
-  "keywords": ["evalforge", "ai", "evaluation", "llm", "sdk", "typescript"],
-  "author": "Eval-Forge Team",
+  "keywords": [
+    "evalium",
+    "evalforge",
+    "ai",
+    "evaluation",
+    "llm",
+    "sdk",
+    "typescript"
+  ],
+  "author": "Evalium Team",
   "license": "MIT",
   "devDependencies": {
     "@types/node": "^20.11.30",
