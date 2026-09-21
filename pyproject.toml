@@ -1,25 +1,27 @@
 [tool.pyright]
-include = ["backend"]
+include = ["backend", "sdk/python", "cli"]
 extraPaths = ["backend", "cli", "sdk/python"]
+venvPath = "."
+venv = ".venv"
 exclude = [
-    "**/node_modules",
-    "**/__pycache__",
-    "**/.venv",
-    "**/__pyrefly_virtual__/**",
-    "**/inmemory/**"
+  "**/node_modules",
+  "**/__pycache__",
+  "**/.venv",
+  "**/__pyrefly_virtual__/**",
+  "**/inmemory/**",
 ]
 
 [tool.pyrefly]
-project-includes = ["backend"]
-search-path = ["backend", "cli", "sdk/python"]
+project-includes = ["backend", "sdk/python", "cli"]
+search-path = ["backend", "cli", "sdk/python", ".venv/Lib/site-packages"]
 project-excludes = [
-    "**/node_modules",
-    "**/__pycache__",
-    "**/.venv",
-    "**/__pyrefly_virtual__/**",
-    "**/inmemory/**"
+  "**/node_modules",
+  "**/__pycache__",
+  "**/__pyrefly_virtual__/**",
+  "**/inmemory/**",
 ]
 
 [tool.isort]
 profile = "black"
-
+src_paths = ["backend", "cli", "sdk/python"]
+known_first_party = ["app", "evalforge", "evalforge_cli"]

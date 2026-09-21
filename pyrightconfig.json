@@ -1,14 +1,8 @@
 {
-  "include": [
-    "backend",
-    "sdk/python",
-    "cli"
-  ],
-  "extraPaths": [
-    "backend",
-    "sdk/python",
-    "cli"
-  ],
+  "include": ["backend", "sdk/python", "cli"],
+  "extraPaths": ["backend", "sdk/python", "cli"],
+  "venvPath": ".",
+  "venv": ".venv",
   "exclude": [
     "**/node_modules",
     "**/__pycache__",
@@ -16,8 +10,5 @@
     "**/__pyrefly_virtual__/**",
     "**/inmemory/**"
   ],
-  "ignore": [
-    "**/__pyrefly_virtual__/**",
-    "**/inmemory/**"
-  ]
+  "ignore": ["**/__pyrefly_virtual__/**", "**/inmemory/**"]
 }
