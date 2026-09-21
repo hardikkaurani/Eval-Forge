@@ -166,7 +166,7 @@ class BenchmarkService:
             .where(Experiment.project_id == project_id)
             .group_by(Experiment.status)
         )
-        status_distribution = dict(exp_status_result.all())
+        status_distribution = {row[0]: row[1] for row in exp_status_result.all()}
 
         # 4. Total record count in all dataset versions
         record_count_result = await self.db.execute(

@@ -104,6 +104,28 @@ class Worker(Base):
         DateTime(timezone=True), default=get_utc_now, nullable=False
     )
 
+    @property
+    def hostname(self) -> str:
+        return self.name
+
+    @property
+    def active_tasks_count(self) -> int:
+        if isinstance(self.system_load, dict) and "active_tasks_count" in self.system_load:
+            return int(self.system_load["active_tasks_count"])
+        return 1 if self.current_job_id else 0
+
+    @property
+    def completed_tasks_count(self) -> int:
+        if isinstance(self.system_load, dict) and "completed_tasks_count" in self.system_load:
+            return int(self.system_load["completed_tasks_count"])
+        return 0
+
+    @property
+    def failed_tasks_count(self) -> int:
+        if isinstance(self.system_load, dict) and "failed_tasks_count" in self.system_load:
+            return int(self.system_load["failed_tasks_count"])
+        return 0
+
 
 class Queue(Base):
     """SQLAlchemy model representing virtual or configured jobs queues."""
